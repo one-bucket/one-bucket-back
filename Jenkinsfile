@@ -51,4 +51,5 @@ pipeline {
         failure {
             echo 'Build or archive failed'
         }
+   }
 }
