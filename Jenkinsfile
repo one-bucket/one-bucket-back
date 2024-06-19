@@ -46,23 +46,31 @@ pipeline {
 
         stage('Transfer and Deploy Docker Image') {
             steps {
-                sh "scp ${DOCKER_IMAGE_FILE} ${SERVER_USER}@${SERVER_IP}:/tmp/"
+                script {
+                    // Start SSH agent and add the key
+                    sh """
+                    eval \$(ssh-agent -s)
+                    ssh-add /var/jenkins_home/.ssh/id_rsa
+                    """
 
-                //Deploy the new docker image on server2
-                sh """
-                ssh ${SERVER_USER}@${SERVER_IP} << EOF
-                    docker load -i /tmp/${DOCKER_IMAGE_FILE}
-                    docker stop one-bucket-container || true
-                    docker rm one-bucket-container || true
-                    docker run -d --name one-bucket-container -p 8080:8080 one-bucket:latest
-                    docker system prune -f
-                EOF
-                """
+                    // Transfer Docker image to server2
+                    sh "scp -i /var/jenkins_home/.ssh/id_rsa ${DOCKER_IMAGE_FILE} ${SERVER_USER}@${SERVER_IP}:/tmp/"
+
+                    // Deploy the new Docker image on server2
+                    sh """
+                    ssh -i /var/jenkins_home/.ssh/id_rsa ${SERVER_USER}@${SERVER_IP} << 'EOF'
+                        docker load -i /tmp/${DOCKER_IMAGE_FILE}
+                        docker stop one-bucket-container || true
+                        docker rm one-bucket-container || true
+                        docker run -d --name one-bucket-container -p 8080:8080 one-bucket:latest
+                        docker system prune -f
+                    EOF
+                    """
+                }
             }
         }
+    }
 
-
-   }
    post {
         always {
             cleanWs()
