@@ -55,7 +55,6 @@ pipeline {
 
                     // Transfer Docker image to server2
                     sh "scp -i /var/jenkins_home/.ssh/id_rsa ${DOCKER_IMAGE_FILE} ${SERVER_USER}@${SERVER_IP}:/tmp/"
-
                     // Deploy the new Docker image on server2
                     sh """
                     ssh -i /var/jenkins_home/.ssh/id_rsa ${SERVER_USER}@${SERVER_IP} << 'EOF'
@@ -64,7 +63,7 @@ pipeline {
                         docker rm one-bucket-container || true
                         docker run -d --name one-bucket-container -p 8080:8080 one-bucket:latest
                         docker system prune -f
-                    EOF
+                    << EOF
                     """
                 }
             }
