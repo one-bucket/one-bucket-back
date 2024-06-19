@@ -2,10 +2,9 @@ pipeline {
     agent any
     environment {
         DOCKER_IMAGE = "one-bucket:latest"
-        MINIO_SERVER = "http://192.168.219.144:9001"
-        MINIO_ACCESS_KEY = "jack8226"
-        MINIO_SECRET_KEY = "m7128226"
-        BUCKET_NAME = "one-bucket"
+        SERVER_IP = "192.168.219.135"
+        SERVER_USER = "sang"
+        DOCKER_IMAGE_FILE = "one-bucket.tar.gz"
    }
 
    stages {
@@ -31,7 +30,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    sh 'docker build -t one-bucket:latest .'
+                    sh 'docker build -t ${DOCKER_IMAGE} .'
                 }
             }
         }
@@ -39,33 +38,30 @@ pipeline {
         stage('Save Docker Image') {
             steps {
                 script {
-                    sh "docker save ${DOCKER_IMAGE} | gzip > ${DOCKER_IMAGE}.tar.gz"
-                    archiveArtifacts artifacts: "${DOCKER_IMAGE}.tar.gz", allowEmptyArchive: false
+                    sh "docker save ${DOCKER_IMAGE} | gzip > ${DOCKER_IMAGE_FILE}"
+                    archiveArtifacts artifacts: "${DOCKER_IMAGE_FILE}", allowEmptyArchive: false
                 }
             }
         }
 
-        stage('Upload to Minio') {
+        stage('Transfer and Deploy Docker Image') {
             steps {
-                //minio client install
-                sh '''
-                curl -O https://dl.min.io/client/mc/release/linux-amd64/mc
-                chmod +x mc
-                mv mc /usr/local/bin/
-                '''
+                sh "scp ${DOCKER_IMAGE_FILE} ${SERVER_USER}@${SERVER_IP}:/tmp/"
 
-                //minio server connect config
-                sh '''
-                mc alias myminio ${MINIO_SERVER} ${MINIO_ACCESS_KEY} ${MINIO_SECRET_KEY}
-                '''
-
-                //docker image upload
-                sh '''
-                mc cp ${DOCKER_IMAGE}.tar.gz myminio/%{BUCKET_NAME}
-                '''
+                //Deploy the new docker image on server2
+                sh """
+                ssh ${SERVER_USER}@${SERVER_IP} << EOF
+                    docker load -i /tmp/${DOCKER_IMAGE_FILE}
+                    docker stop one-bucket-container || true
+                    docker rm one-bucket-container || true
+                    docker run -d --name one-bucket-container -p 8080:8080 one-bucket:latest
+                    docker system prune -f
+                EOF
+                """
             }
-
         }
+
+
    }
    post {
         always {
