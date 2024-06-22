@@ -5,11 +5,11 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
@@ -80,10 +80,11 @@ public class JwtProvider {
      */
     public JwtToken generateToken(Authentication authentication) {
 
-        if(authentication == null
+        if (authentication == null
                 || authentication.getPrincipal() == null
                 || !(authentication.getPrincipal() instanceof User)) {
-            throw new IllegalArgumentException("Ivalid authentication object");
+
+            throw new IllegalArgumentException("Invalid authentication object");
         }
         long nowDate = (new Date()).getTime();
         String accessToken = generateAccessToken(authentication, nowDate);

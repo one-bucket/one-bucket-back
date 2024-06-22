@@ -8,13 +8,17 @@ import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import java.security.Key;
+import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -47,11 +51,12 @@ class JwtProviderTest {
 
     @BeforeEach
     void setUp() {
-        String secretKey = "mysecretkeymysecretkeymysecretkeymysecretkey";
+        String secretKey = "bXlzZWNyZXRrZXlteXNlY3JldGtleW15c2VjcmV0a2V5bXlzZWNyZXRrZXk=";
         long expireDateAccessToken = 3600000L;
         long expireDateRefreshToken = 86400000L;
 
         jwtProvider = new JwtProvider(secretKey, expireDateAccessToken, expireDateRefreshToken);
+
     }
 
     @Test
@@ -71,7 +76,7 @@ class JwtProviderTest {
         assertNotNull(jwtToken.getRefreshToken());
 
         //decoding token to validate.
-        Key key = Keys.hmacShaKeyFor(Decoders.BASE64.decode("mysecretkeymysecretkeymysecretkeymysecretkey"));
+        Key key = Keys.hmacShaKeyFor(Decoders.BASE64.decode("bXlzZWNyZXRrZXlteXNlY3JldGtleW15c2VjcmV0a2V5bXlzZWNyZXRrZXk="));
 
         Claims claims = Jwts.parserBuilder().
                 setSigningKey(key).build().parseClaimsJws(jwtToken.getAccessToken()).getBody();
