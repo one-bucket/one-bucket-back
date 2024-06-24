@@ -41,7 +41,7 @@ public class JwtValidator {
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public boolean isValidToken(String token) {
+    public boolean isTokenValid(String token) {
         Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
