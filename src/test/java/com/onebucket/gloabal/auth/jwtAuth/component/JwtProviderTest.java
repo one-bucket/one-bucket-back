@@ -81,6 +81,8 @@ class JwtProviderTest {
         Claims claims = Jwts.parserBuilder().
                 setSigningKey(key).build().parseClaimsJws(jwtToken.getAccessToken()).getBody();
         assertEquals("testuser", claims.getSubject());
+
+
     }
 
     @Test

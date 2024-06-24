@@ -13,6 +13,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.stream.Collectors;
 
@@ -114,6 +115,7 @@ public class JwtProvider {
 
         return Jwts.builder()
                 .setSubject(authentication.getName())
+                .setIssuedAt(Calendar.getInstance().getTime())
                 .setExpiration(tokenExpiration)
                 .claim("auth", authorities)
                 .signWith(key, SignatureAlgorithm.HS256).compact();
@@ -130,6 +132,7 @@ public class JwtProvider {
         Date tokenExpiration = new Date(date + expireDateRefreshToken);
 
         return Jwts.builder()
+                .setIssuedAt(Calendar.getInstance().getTime())
                 .setExpiration(tokenExpiration)
                 .signWith(key, SignatureAlgorithm.HS256).compact();
     }
