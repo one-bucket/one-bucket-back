@@ -1,4 +1,4 @@
-package com.onebucket.gloabal.auth.jwtAuth.domain;
+package com.onebucket.global.auth.jwtAuth.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

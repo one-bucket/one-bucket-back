@@ -1,6 +1,6 @@
-package com.onebucket.gloabal.auth.jwtAuth.component;
+package com.onebucket.global.auth.jwtAuth.component;
 
-import com.onebucket.gloabal.auth.jwtAuth.domain.JwtToken;
+import com.onebucket.global.auth.jwtAuth.domain.JwtToken;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;

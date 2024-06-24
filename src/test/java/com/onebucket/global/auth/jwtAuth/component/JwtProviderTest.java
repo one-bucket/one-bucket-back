@@ -1,6 +1,6 @@
-package com.onebucket.gloabal.auth.jwtAuth.component;
+package com.onebucket.global.auth.jwtAuth.component;
 
-import com.onebucket.gloabal.auth.jwtAuth.domain.JwtToken;
+import com.onebucket.global.auth.jwtAuth.domain.JwtToken;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -8,17 +8,13 @@ import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import java.security.Key;
-import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
 
