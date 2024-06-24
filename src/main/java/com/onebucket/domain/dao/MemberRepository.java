@@ -1,6 +1,6 @@
-package com.onebucket.domain.member.repository;
+package com.onebucket.domain.dao;
 
-import com.onebucket.domain.member.Member;
+import com.onebucket.domain.domain.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,7 +1,7 @@
-package com.onebucket.domain.member;
+package com.onebucket.domain.domain;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 /**
@@ -37,15 +37,15 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
+    @NotBlank
     @Column(nullable=false)
     private String username;
 
-    @NotNull
+    @NotBlank
     @Column(nullable=false)
     private String password;
 
-    @NotNull
+    @NotBlank
     @Column(nullable=false)
     private String nickname;
 }
