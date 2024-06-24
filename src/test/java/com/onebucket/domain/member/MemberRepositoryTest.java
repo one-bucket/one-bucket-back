@@ -1,8 +1,7 @@
-package com.onebucket.member;
+package com.onebucket.domain.member;
 
-import com.onebucket.member.Member;
-import com.onebucket.member.repository.MemberRepository;
-import org.assertj.core.api.Assertions;
+import com.onebucket.domain.member.Member;
+import com.onebucket.domain.member.repository.MemberRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

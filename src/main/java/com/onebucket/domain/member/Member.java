@@ -1,9 +1,6 @@
-package com.onebucket.member;
+package com.onebucket.domain.member;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
@@ -41,11 +38,14 @@ public class Member {
     private Long id;
 
     @NotNull
+    @Column(nullable=false)
     private String username;
 
     @NotNull
+    @Column(nullable=false)
     private String password;
 
     @NotNull
+    @Column(nullable=false)
     private String nickname;
 }
