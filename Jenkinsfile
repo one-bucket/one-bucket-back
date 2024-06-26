@@ -8,11 +8,15 @@ pipeline {
 
         //jenkins env
         JENKINS_MYSQL_HOST = "172.20.0.5"
+        JENKINS_MYSQL_USER = "root"
+        JENKINS_MYSQL_PASSWORD = "m7128226"
         JENKINS_REDIS_HOST = "172.20.0.4"
 
         //main server env
         SERVER_MYSQL_HOST = "192.168.219.101"
         SERVER_REDIS_HOST = "192.168.219.101"
+        SERVER_MYSQL_USER = "root"
+        SERVER_MYSQL_PASSWORD = "m7128226"
    }
 
    stages {
@@ -27,7 +31,9 @@ pipeline {
             steps {
                 withEnv([
                     "MYSQL_HOST=${JENKINS_MYSQL_HOST}",
-                    "REDIS_HOST=${JENKINS_REDIS_HOST}"
+                    "REDIS_HOST=${JENKINS_REDIS_HOST}",
+                    "MYSQL_USER=${JENKINS_MYSQL_USER}",
+                    "MYSQL_PASSWORD=${JENKINS_MYSQL_PASSWORD}"
                 ]) {
                     sh './gradlew test'
                 }
@@ -77,6 +83,8 @@ pipeline {
                         docker rm one-bucket-container || true
                         docker run -d --name one-bucket-container -p 8080:8080 \\
                             -e MYSQL_HOST=${SERVER_MYSQL_HOST} \\
+                            -e MYSQL_USER=${SERVER_MYSQL_USER} \\
+                            -e MYSQL_PASSWORD=${SERVER_MYSQL_PASSWORD} \\
                             -e REDIS_HOST=${SERVER_REDIS_HOST} \\
                             ${DOCKER_IMAGE}
                         docker system prune -f
