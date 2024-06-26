@@ -20,25 +20,31 @@ import java.util.Arrays;
 import java.util.Collection;
 
 /**
- * packageName : <span style="color: orange;">com.onebucket.gloabal.auth.jwtAuth.component</span> <br>
- * name : <span style="color: orange;">JwtValidator</span> <br>
- * <p>
- * <span style="color: white;">[description]</span>
- * </p>
- * see Also: <br>
- *
+ * <br>package name   : com.onebucket.gloabal.auth.jwtAuth.component
+ * <br>file name      : JwtValidator
+ * <br>date           : 2024-06-20
  * <pre>
- * code usage:
+ * <span style="color: white;">[description]</span>
+ * Validator of JWT, also use when get authentication from jwt implementation by
+ * getAuthentication method.
+ * </pre>
+ * <pre>
+ * <span style="color: white;">usage:</span>
  * {@code
- *
+ * private final JwtValidator jwtValidator;
+ * try {
+ *     jwtValidator.isTokenValid(token);
+ * } catch(JwtException e) {
+ *     system.out.println(e.getMessage());
  * }
- * modified log:
- * ==========================================================
- * DATE          Author           Note
- * ----------------------------------------------------------
- * 6/21/24        isanghyeog         first create
- * 6/25/24        sang               add getAuthentication
- *
+ * } </pre>
+ * <pre>
+ * modified log :
+ * =======================================================
+ * DATE           AUTHOR               NOTE
+ * -------------------------------------------------------
+ * 2024-06-24        jack8              init create
+ * 2024-06-26        jack8              add getAuthentication
  * </pre>
  */
 
@@ -48,11 +54,20 @@ public class JwtValidator {
     private final Key key;
     private static final String AUTHORITIES_KEY = "auth";
 
+    /**
+     * Get secret Key by parameter, and change to Key type with hmacshakeyfor(keybyte);
+     * @param secretKey - which in application.properties
+     */
     public JwtValidator(@Value("${jwt.secret}") String secretKey) {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
+    /**
+     * @param token to validate
+     * @return always true, when token is invalid, throw exception.
+     * @throws io.jsonwebtoken.JwtException jwtException
+     */
     public boolean isTokenValid(String token) {
         Jwts.parserBuilder()
                 .setSigningKey(key)
@@ -61,6 +76,13 @@ public class JwtValidator {
         return true;
     }
 
+    /**
+     * Get authentication from jwt. Use private method called {@link JwtValidator parseCalims} method.
+     * @param accessToken extract from this token
+     * @return Authentication
+     * @throws NullPointerException when claims are empty.
+     * @throws io.jsonwebtoken.JwtException when token is invalid.
+     */
     public Authentication getAuthentication(String accessToken) {
         Claims claims = parseClaims(accessToken);
         if(claims.get(AUTHORITIES_KEY) == null) {
