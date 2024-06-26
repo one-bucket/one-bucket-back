@@ -1,8 +1,9 @@
 package com.onebucket.global.auth.jwtAuth.domain;
 
 
-import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 
 /**
@@ -29,6 +30,7 @@ import org.springframework.data.redis.core.RedisHash;
 
 @RedisHash("refreshToken")
 @AllArgsConstructor
+@NoArgsConstructor
 public class RefreshToken {
     @Id
     private String username;
