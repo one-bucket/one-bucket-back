@@ -10,11 +10,15 @@ import io.jsonwebtoken.security.SignatureException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
+
 
 import java.security.Key;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -78,9 +82,7 @@ class JwtValidatorTest {
         String token = createToken(0, Arrays.asList("ROLE_USER", "ROLE_ADMIN"),secretKey);
 
         //then
-        assertThrows(ExpiredJwtException.class, ()-> {
-            jwtValidator.isTokenValid(token);
-        });
+        assertThrows(ExpiredJwtException.class, ()-> jwtValidator.isTokenValid(token));
     }
 
     @Test
@@ -91,9 +93,7 @@ class JwtValidatorTest {
         String token = createToken(10000, Arrays.asList("ROLE_USER", "ROLE_ADMIN"), wrongKey);
 
         //then
-        assertThrows(SignatureException.class, ()-> {
-            jwtValidator.isTokenValid(token);
-        });
+        assertThrows(SignatureException.class, ()-> jwtValidator.isTokenValid(token));
     }
 
     @Test
@@ -102,9 +102,33 @@ class JwtValidatorTest {
         //when
         String token = createToken(10000, Arrays.asList("ROLE_USER", "ROLE_ADMIN"), secretKey).replace(".", "|");
         //then
-        assertThrows(MalformedJwtException.class, ()-> {
-            jwtValidator.isTokenValid(token);
-        });
+        assertThrows(MalformedJwtException.class, ()-> jwtValidator.isTokenValid(token));
+    }
+
+    @Test
+    @DisplayName("정상적인 권한 정보 접근")
+    void testGetAuthentication() {
+        String token = createToken(10000, Arrays.asList("ROLE_USER", "ROLE_ADMIN"), secretKey);
+        UsernamePasswordAuthenticationToken authentication =
+                (UsernamePasswordAuthenticationToken) jwtValidator.getAuthentication(token);
+
+
+        assertNotNull(authentication);
+        assertEquals("testuser",((UserDetails) authentication.getPrincipal()).getUsername());
+        assertEquals(2, authentication.getAuthorities().size());
+    }
+
+    @Test
+    @DisplayName("비정상적인 권한 정보 접근")
+    void testGetAuthenticationWithNoAuthorities() {
+        String token =  Jwts.builder()
+                .setSubject("testuser")
+                .setExpiration(new Date(System.currentTimeMillis() + 10000))
+                .signWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey)), SignatureAlgorithm.HS256)
+                .compact();
+
+        //when & then
+        assertThrows(NullPointerException.class, () -> jwtValidator.getAuthentication(token));
     }
 
 

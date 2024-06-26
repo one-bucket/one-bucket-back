@@ -1,6 +1,7 @@
 package com.onebucket.global.auth.config;
 
 import com.onebucket.global.auth.jwtAuth.component.JwtValidator;
+import com.onebucket.global.auth.jwtAuth.exception.NullJwtException;
 import io.jsonwebtoken.ClaimJwtException;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -13,6 +14,7 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
@@ -45,6 +47,7 @@ import java.util.List;
  */
 
 @RequiredArgsConstructor
+@Slf4j
 public class JwtAuthenticationFilter extends GenericFilterBean {
 
     private final JwtValidator jwtValidator;
@@ -76,6 +79,8 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
             if(token != null && jwtValidator.isTokenValid(token)) {
                 Authentication authentication = jwtValidator.getAuthentication(token);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+            } else {
+                throw new NullJwtException("no token");
             }
             filterChain.doFilter(servletRequest, servletResponse);
         }  catch(JwtException e) {
@@ -98,7 +103,7 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
         return EXCLUDE_URL_PREFIXES.stream().anyMatch(url::startsWith);
     }
 
-    private void handleException(HttpServletResponse response, JwtException e) throws IOException {
+    private void handleException(HttpServletResponse response, JwtException e) {
         //need to implement more....
         if (e instanceof ExpiredJwtException) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -108,6 +113,8 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         } else if (e instanceof ClaimJwtException) {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+        } else if(e instanceof NullJwtException) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         } else {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         }
