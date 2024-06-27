@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * <br>date           : 2024-06-26
  * <pre>
  * <span style="color: white;">[description]</span>
- *
+ * Test to Redis connect.
  * </pre>
  * <pre>
  * <span style="color: white;">usage:</span>

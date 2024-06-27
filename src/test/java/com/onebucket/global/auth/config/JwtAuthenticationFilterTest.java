@@ -6,10 +6,10 @@ import io.jsonwebtoken.Header;
 import io.jsonwebtoken.impl.DefaultClaims;
 import io.jsonwebtoken.impl.DefaultHeader;
 import io.jsonwebtoken.security.SignatureException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockitoAnnotations;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -50,6 +50,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * </pre>
  */
 @WebMvcTest
+@ExtendWith(MockitoExtension.class)
 @Import({SecurityConfig.class, JwtAuthenticationFilter.class})
 class JwtAuthenticationFilterTest {
     @Autowired
@@ -58,10 +59,6 @@ class JwtAuthenticationFilterTest {
     @MockBean
     private JwtValidator jwtValidator;
 
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
 
     @Test
     @DisplayName("필터 내 토큰 검증")

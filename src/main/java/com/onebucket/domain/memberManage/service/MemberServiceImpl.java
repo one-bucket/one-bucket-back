@@ -52,5 +52,8 @@ public class MemberServiceImpl implements MemberService {
     public void updateMember(String username, UpdateNickNameRequestDTO updateNickNameRequestDTO) {
         Member member = memberRepository.findByUsername(username)
                 .orElseThrow(()-> new EntityNotFoundException("Member not found"));
+
+        member.setNickname(updateNickNameRequestDTO.getNickname());
+        memberRepository.save(member);
     }
 }
