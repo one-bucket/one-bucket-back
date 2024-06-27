@@ -3,6 +3,11 @@ package com.onebucket.domain.memberManage.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onebucket.domain.memberManage.dto.CreateMemberRequestDto;
 import com.onebucket.domain.memberManage.service.MemberService;
+import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.RegisterException;
+import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
+import com.onebucket.global.exceptionManage.errorCode.ValidateErrorCode;
+import com.onebucket.global.exceptionManage.exceptionHandler.AuthenticationExceptionHandler;
+import com.onebucket.global.exceptionManage.exceptionHandler.DataExceptionHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,18 +15,17 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * <br>package name   : com.onebucket.domain.memberManage.api
@@ -58,7 +62,10 @@ class RegisterControllerTest {
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(registerController).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(registerController)
+                .setControllerAdvice(new AuthenticationExceptionHandler())
+                .setControllerAdvice(new DataExceptionHandler())
+                .build();
     }
 
     @Test
@@ -83,49 +90,32 @@ class RegisterControllerTest {
 
     @Test
     @DisplayName("회원 등록 실패 - 유효성 검사 실패")
-    void testRegister_fail_invalidValue() throws Exception {
-        //given
+    void testRegister_fail_validation() throws Exception {
+        // given
         CreateMemberRequestDto dto = CreateMemberRequestDto.builder()
-                .username("")
-                .password("password")
-                .nickname("nickname")
+                .username("")  // invalid username
+                .password("")  // invalid password
+                .nickname("")  // invalid nickname
                 .build();
 
-        //when & then
+        // when & then
         mockMvc.perform(post("/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(dto)))
-                        .andExpect(status().isBadRequest());
-
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value(ValidateErrorCode.INVALID_DATA.getCode()))
+                .andExpect(jsonPath("$.type").value(ValidateErrorCode.INVALID_DATA.getType()))
+                .andExpect(jsonPath("$.message").value(ValidateErrorCode.INVALID_DATA.getMessage()))
+                .andExpect(content().string(containsString("username: username must not be empty")))
+                .andExpect(content().string(containsString("password: password must not be empty")))
+                .andExpect(content().string(containsString("nickname: nickname must not be empty")));
         verify(memberService, never()).createMember(any(CreateMemberRequestDto.class));
     }
 
-    @Test
-    @DisplayName("회원 등록 실패 - 이미 존재하는 회원")
-    void testRegister_fail_duplicateMember() throws Exception {
-        //given
-        CreateMemberRequestDto dto = CreateMemberRequestDto.builder()
-                .username("testuser")
-                .password("password")
-                .nickname("nickname")
-                .build();
-
-        doThrow(new DataIntegrityViolationException("username already exists"))
-                .when(memberService).createMember(any(CreateMemberRequestDto.class));
-
-        //when & then
-        mockMvc.perform(post("/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(new ObjectMapper().writeValueAsString(dto)))
-                .andExpect(status().isConflict())
-                .andExpect(content().string("username already exists"));
-
-        verify(memberService, times(1)).createMember(any(CreateMemberRequestDto.class));
-    }
 
     @Test
-    @DisplayName("회원 등록 실패 - 중복된 닉네임")
-    void testRegister_fail_duplicateNickname() throws Exception {
+    @DisplayName("회원 등록 실패 - 중복된 값")
+    void testRegister_fail_duplicateValue() throws Exception {
         // given
         CreateMemberRequestDto dto = CreateMemberRequestDto.builder()
                 .username("testuser")
@@ -133,7 +123,7 @@ class RegisterControllerTest {
                 .nickname("duplicatenickname")
                 .build();
 
-        doThrow(new DataIntegrityViolationException("Nickname already exists"))
+        doThrow(new RegisterException(AuthenticationErrorCode.DUPLICATE_USER, "username or nickname already exist."))
                 .when(memberService).createMember(any(CreateMemberRequestDto.class));
 
         // when & then
@@ -141,7 +131,9 @@ class RegisterControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(dto)))
                 .andExpect(status().isConflict())
-                .andExpect(content().string("Nickname already exists"));
+                .andExpect(jsonPath("$.code").value("1001"))
+                .andExpect(jsonPath("$.type").value("AUTH"))
+                .andExpect(jsonPath("$.message").value("Already Exist value"));
 
         verify(memberService, times(1)).createMember(any(CreateMemberRequestDto.class));
     }
