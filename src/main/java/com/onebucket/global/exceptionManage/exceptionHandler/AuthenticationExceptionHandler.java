@@ -7,6 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+
+
 /**
  * <br>package name   : com.onebucket.global.exceptionManage.exceptionHandler
  * <br>file name      : AuthenticationExceptionHandler
@@ -36,7 +38,8 @@ public class AuthenticationExceptionHandler {
     @ExceptionHandler(BaseCustomException.class)
     public ResponseEntity<ErrorResponse> handleBaseCustomException(BaseCustomException ex) {
         ErrorResponse errorResponse = new ErrorResponse(ex.getErrorCode(), ex.getMessage());
-        System.out.println("error response is " + errorResponse.getCode() + " " +  ex.getErrorCode().getHttpStatus());
         return new ResponseEntity<>(errorResponse, ex.getErrorCode().getHttpStatus());
     }
+
+
 }
