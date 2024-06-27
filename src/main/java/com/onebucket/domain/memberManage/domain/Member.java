@@ -37,15 +37,12 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
-    @Column(nullable=false)
+    @Column(nullable=false, unique = true, updatable = false)
     private String username;
 
-    @NotBlank
     @Column(nullable=false)
     private String password;
 
-    @NotBlank
-    @Column(nullable=false)
+    @Column(nullable=false, unique = true)
     private String nickname;
 }

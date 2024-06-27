@@ -1,4 +1,4 @@
-package com.onebucket.domain.service;
+package com.onebucket.domain.memberManage.service;
 
 import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
