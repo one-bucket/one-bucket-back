@@ -1,8 +1,10 @@
 package com.onebucket.domain.memberManage.domain;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <br>package name   : com.onebucket.member
@@ -45,4 +47,20 @@ public class Member {
 
     @Column(nullable=false, unique = true)
     private String nickname;
+
+    @ElementCollection(fetch=FetchType.EAGER)
+    @Builder.Default
+    private List<String> roles = new ArrayList<>(List.of("GUEST"));
+
+    @Column(nullable = false)
+    private boolean isAccountNonExpired = true;
+
+    @Column(nullable = false)
+    private boolean isAccountNonLocked = true;
+
+    @Column(nullable = false)
+    private boolean isCredentialNonExpired = true;
+
+    @Column(nullable = false)
+    private boolean isEnable = true;
 }

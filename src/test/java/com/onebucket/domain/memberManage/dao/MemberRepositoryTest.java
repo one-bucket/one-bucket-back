@@ -1,12 +1,13 @@
 package com.onebucket.domain.memberManage.dao;
 
-import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.util.Optional;
 
@@ -61,13 +62,25 @@ public class MemberRepositoryTest {
     }
 
     @Test
+    @DisplayName("유저 검색 실패")
+    void findByUsernameTestFail() {
+        //when & then
+        assertThat(memberRepository.findByUsername("invalid name")).isEqualTo(Optional.empty());
+    }
+
+    @Test
     @DisplayName("existsByUsername 테스트 성공")
     void existsByUsernameTestSuccess() {
+        //given
         memberRepository.save(member1);
 
-        boolean exists = memberRepository.existsByUsername("hongik");
+        //when
+        boolean isExists = memberRepository.existsByUsername("hongik");
+        boolean isNotExists = memberRepository.existsByUsername("invalid name");
 
-        assertThat(exists).isTrue();
+        //then
+        assertThat(isExists).isTrue();
+        assertThat(isNotExists).isFalse();
     }
 
     @Test
@@ -79,5 +92,33 @@ public class MemberRepositoryTest {
 
         boolean exists = memberRepository.existsByUsername("hongik");
         assertThat(exists).isFalse();
+    }
+
+    @Test
+    @DisplayName("save 테스트 실패 - 중복된 id")
+    void testSave_fail_duplicateId() {
+        Member member2 = Member.builder()
+                .username("hongik")
+                .password("1111")
+                .nickname("nicknick")
+                .build();
+
+        memberRepository.save(member1);
+        Assertions.assertThrows(DataIntegrityViolationException.class,
+                () -> memberRepository.save(member2));
+    }
+
+    @Test
+    @DisplayName("save 테스트 실패 - 중복된 nickname")
+    void testSave_fail_duplicateNickname() {
+        Member member2 = Member.builder()
+                .username("test")
+                .password("1111")
+                .nickname("Han")
+                .build();
+
+        memberRepository.save(member1);
+        Assertions.assertThrows(DataIntegrityViolationException.class,
+                () -> memberRepository.save(member2));
     }
 }
