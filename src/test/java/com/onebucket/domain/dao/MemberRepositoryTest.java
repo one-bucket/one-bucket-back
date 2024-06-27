@@ -1,6 +1,7 @@
 package com.onebucket.domain.dao;
 
-import com.onebucket.domain.domain.Member;
+import com.onebucket.domain.memberManage.dao.MemberRepository;
+import com.onebucket.domain.memberManage.domain.Member;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

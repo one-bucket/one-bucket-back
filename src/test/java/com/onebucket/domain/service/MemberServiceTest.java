@@ -1,8 +1,9 @@
 package com.onebucket.domain.service;
 
-import com.onebucket.domain.dao.MemberRepository;
-import com.onebucket.domain.domain.Member;
-import com.onebucket.domain.dto.CreateMemberRequestDTO;
+import com.onebucket.domain.memberManage.dao.MemberRepository;
+import com.onebucket.domain.memberManage.domain.Member;
+import com.onebucket.domain.memberManage.dto.CreateMemberRequestDTO;
+import com.onebucket.domain.memberManage.service.MemberServiceImpl;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,7 +28,7 @@ public class MemberServiceTest {
                 .password("123456")
                 .nickname("hahaha")
                 .build();
-    };
+    }
 
     @Test
     @DisplayName("멤버 생성 성공")

@@ -1,8 +1,7 @@
-package com.onebucket.domain.service;
+package com.onebucket.domain.memberManage.service;
 
-import com.onebucket.domain.domain.Member;
-import com.onebucket.domain.dto.CreateMemberRequestDTO;
-import com.onebucket.domain.dto.UpdateNickNameRequestDTO;
+import com.onebucket.domain.memberManage.dto.CreateMemberRequestDTO;
+import com.onebucket.domain.memberManage.dto.UpdateNickNameRequestDTO;
 
 /**
  * <br>package name   : com.onebucket.domain.service

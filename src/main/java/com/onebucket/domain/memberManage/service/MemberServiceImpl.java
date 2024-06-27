@@ -1,9 +1,9 @@
-package com.onebucket.domain.service;
+package com.onebucket.domain.memberManage.service;
 
-import com.onebucket.domain.dao.MemberRepository;
-import com.onebucket.domain.domain.Member;
-import com.onebucket.domain.dto.CreateMemberRequestDTO;
-import com.onebucket.domain.dto.UpdateNickNameRequestDTO;
+import com.onebucket.domain.memberManage.dao.MemberRepository;
+import com.onebucket.domain.memberManage.domain.Member;
+import com.onebucket.domain.memberManage.dto.CreateMemberRequestDTO;
+import com.onebucket.domain.memberManage.dto.UpdateNickNameRequestDTO;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

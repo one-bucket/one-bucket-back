@@ -1,4 +1,4 @@
-package com.onebucket.domain.domain;
+package com.onebucket.domain.memberManage.domain;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
