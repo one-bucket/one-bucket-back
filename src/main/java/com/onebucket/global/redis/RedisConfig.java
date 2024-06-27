@@ -1,0 +1,70 @@
+package com.onebucket.global.redis;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
+
+/**
+ * <br>package name   : com.onebucket.gloabal.config
+ * <br>file name      : RedisConfig
+ * <br>date           : 2024-06-24
+ * <pre>
+ * <span style="color: white;">[description]</span>
+ * Configuration class of REDIS, to setting template of redis.
+ * Use String,String template, but just use StringRedisTemplate.
+ * </pre>
+ * <pre>
+ * <span style="color: white;">usage:</span>
+ * {@code
+ * //First way to save one
+ * private final RedisTemplate<String, String> redisTemplate;
+ * ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+ * valueOperations.set(id.toString(), token);
+ *
+ * //Second way to save list
+ * private final RedisTemplate<String, String> redisTemplate;
+ * ListOperations<String, String> listOperations = redisTemplate.opsForList();
+ * listOperations.leftPush(id.toString(), token);
+ *
+ * //Third way to save simple without directly inject redisTemplate
+ * @Resources(name="redisTemplate")
+ * private ValueOperations<String, String> valueOperations;
+ * //and so on....
+ * } </pre>
+ * <pre>
+ * modified log :
+ * =======================================================
+ * DATE           AUTHOR               NOTE
+ * -------------------------------------------------------
+ * 2024-06-24        jack8              init create
+ * </pre>
+ */
+@Configuration
+@EnableRedisRepositories
+public class RedisConfig {
+    @Value("${spring.data.redis.host}")
+    private String host;
+
+    @Value("${spring.data.redis.port}")
+    private int port;
+
+    @Bean
+    public RedisConnectionFactory redisConnectionFactory() {
+        return new LettuceConnectionFactory(
+                new RedisStandaloneConfiguration(host, port)
+        );
+    }
+
+    @Bean
+    public RedisTemplate<String, String> redisTemplate() {
+        StringRedisTemplate redisTemplate = new StringRedisTemplate();
+        redisTemplate.setConnectionFactory(redisConnectionFactory());
+        return redisTemplate;
+    }
+}
