@@ -53,12 +53,13 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
     private final JwtValidator jwtValidator;
 
     private static final List<String> EXCLUDE_URLS = List.of(
-            "/test/url"
+            "/test/url",
+            "/sign-in",
+            "/register"
     );
 
     private static final List<String> EXCLUDE_URL_PREFIXES = List.of(
-            "/test/",
-            "/register"
+            "/test/"
     );
 
     @Override

@@ -29,7 +29,7 @@ import lombok.Setter;
 @Builder
 @Getter
 @Setter
-public class CreateMemberRequestDTO {
+public class CreateMemberRequestDto {
     @NotBlank(message = "username must not be empty")
     private String username;
 
