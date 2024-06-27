@@ -3,7 +3,6 @@ package com.onebucket.domain.service;
 import com.onebucket.domain.dao.MemberRepository;
 import com.onebucket.domain.domain.Member;
 import com.onebucket.domain.dto.CreateMemberRequestDTO;
-import com.onebucket.domain.dto.UpdateMemberRequestDTO;
 import com.onebucket.domain.dto.UpdateNickNameRequestDTO;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -53,6 +52,5 @@ public class MemberServiceImpl implements MemberService {
     public void updateMember(String username, UpdateNickNameRequestDTO updateNickNameRequestDTO) {
         Member member = memberRepository.findByUsername(username)
                 .orElseThrow(()-> new EntityNotFoundException("Member not found"));
-
     }
 }
