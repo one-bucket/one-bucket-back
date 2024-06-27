@@ -4,9 +4,12 @@ import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.domain.memberManage.dto.CreateMemberRequestDto;
 import com.onebucket.domain.memberManage.dto.UpdateNicknameRequestDto;
+import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.RegisterException;
+import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 /**
@@ -46,7 +49,12 @@ public class MemberServiceImpl implements MemberService {
                 .password(createMemberRequestDTO.getPassword())
                 .nickname(createMemberRequestDTO.getNickname())
                 .build();
-        memberRepository.save(member);
+        try {
+            memberRepository.save(member);
+        } catch(DataIntegrityViolationException e) {
+            throw new RegisterException(AuthenticationErrorCode.DUPLICATE_USER,
+                    "username or nickname already exist.");
+        }
     }
 
     @Override
