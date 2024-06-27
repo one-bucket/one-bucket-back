@@ -1,6 +1,5 @@
 package com.onebucket.global.exceptionManage.exceptionHandler;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onebucket.global.exceptionManage.ErrorResponse;
 import com.onebucket.global.exceptionManage.errorCode.ValidateErrorCode;
 import org.springframework.core.annotation.Order;
@@ -9,8 +8,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.HashMap;
-import java.util.Map;
 
 
 /**
@@ -39,20 +36,20 @@ import java.util.Map;
 @RestControllerAdvice
 public class DataExceptionHandler {
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getFieldErrors().forEach(error ->
-                errors.put(error.getField(), error.getDefaultMessage()));
-        String errorMessage;
-        try {
-            errorMessage = objectMapper.writeValueAsString(errors);
-        } catch (Exception e) {
-            errorMessage = "Failed to parse error messages";
+        StringBuilder errorMessage = new StringBuilder();
+        ex.getBindingResult().getFieldErrors().forEach(error -> {
+            errorMessage.append(error.getField())
+                    .append(": ")
+                    .append(error.getDefaultMessage())
+                    .append(" / ");
+        });
+        if (!errorMessage.isEmpty()) {
+            errorMessage.setLength(errorMessage.length() - 3);
         }
-        ErrorResponse errorResponse = new ErrorResponse(ValidateErrorCode.INVALID_DATA, errorMessage);
+        ErrorResponse errorResponse = new ErrorResponse(ValidateErrorCode.INVALID_DATA, errorMessage.toString());
         return new ResponseEntity<>(errorResponse, ValidateErrorCode.INVALID_DATA.getHttpStatus());
     }
 }
