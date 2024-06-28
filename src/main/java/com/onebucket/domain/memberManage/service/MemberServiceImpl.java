@@ -43,11 +43,11 @@ public class MemberServiceImpl implements MemberService {
 
 
     @Override
-    public void createMember(CreateMemberRequestDto createMemberRequestDTO) {
+    public void createMember(CreateMemberRequestDto createMemberRequestDto) {
         Member member = Member.builder()
-                .username(createMemberRequestDTO.getUsername())
-                .password(createMemberRequestDTO.getPassword())
-                .nickname(createMemberRequestDTO.getNickname())
+                .username(createMemberRequestDto.getUsername())
+                .password(createMemberRequestDto.getPassword())
+                .nickname(createMemberRequestDto.getNickname())
                 .build();
         try {
             memberRepository.save(member);

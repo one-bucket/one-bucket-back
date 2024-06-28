@@ -15,13 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
  * <br>date           : 2024-06-27
  * <pre>
  * <span style="color: white;">[description]</span>
- *
+ * 1. post - "/register" by {@link CreateMemberRequestDto} / Return "success create"
  * </pre>
- * <pre>
- * <span style="color: white;">usage:</span>
- * {@code
- *
- * } </pre>
  * <pre>
  * modified log :
  * ====================================================

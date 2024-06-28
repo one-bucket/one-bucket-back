@@ -11,13 +11,12 @@ import lombok.Setter;
  * <br>date           : 2024-06-24
  * <pre>
  * <span style="color: white;">[description]</span>
- *
+ * Endpoint : "/register", {@link com.onebucket.domain.memberManage.service.MemberService MemberService}
+ * contain {@code
+ * String username;
+ * String password;
+ * String nickname;}
  * </pre>
- * <pre>
- * <span style="color: white;">usage:</span>
- * {@code
- *
- * } </pre>
  * <pre>
  * modified log :
  * =======================================================

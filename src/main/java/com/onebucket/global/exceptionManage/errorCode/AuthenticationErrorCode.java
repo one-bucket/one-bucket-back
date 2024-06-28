@@ -10,12 +10,12 @@ import org.springframework.http.HttpStatus;
  * <br>date           : 2024-06-27
  * <pre>
  * <span style="color: white;">[description]</span>
- *
+ * Enum class when occur exception while Authentication logic, for example, sign-in, register, authorities or else.
  * </pre>
  * <pre>
- * <span style="color: white;">usage:</span>
+ * <span style="color: white;">contain:</span>
  * {@code
- *
+ * DUPLICATE_USER("1001", HttpStatus.CONFLICT, "Already Exist value")
  * } </pre>
  * <pre>
  * modified log :

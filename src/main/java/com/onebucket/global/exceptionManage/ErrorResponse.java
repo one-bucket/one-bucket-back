@@ -9,12 +9,12 @@ import lombok.Getter;
  * <br>date           : 2024-06-27
  * <pre>
  * <span style="color: white;">[description]</span>
- *
+ * To write http message body.
  * </pre>
  * <pre>
  * <span style="color: white;">usage:</span>
  * {@code
- *
+ * ErrorResponse errorResponse(ValidateErrorCode.INVALID_DATA, "data is not correct...");
  * } </pre>
  * <pre>
  * modified log :

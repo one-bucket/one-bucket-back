@@ -9,7 +9,7 @@ import com.onebucket.global.exceptionManage.errorCode.ErrorCode;
  * <br>date           : 2024-06-27
  * <pre>
  * <span style="color: white;">[description]</span>
- *
+ * Exception use when occur exception while register, for example duplicated or else.
  * </pre>
  * <pre>
  * <span style="color: white;">usage:</span>

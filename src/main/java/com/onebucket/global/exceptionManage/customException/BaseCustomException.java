@@ -9,13 +9,9 @@ import lombok.Getter;
  * <br>date           : 2024-06-27
  * <pre>
  * <span style="color: white;">[description]</span>
- *
+ * Base of all custom Exception, which must include {@link ErrorCode}. Delete stack trace,
+ * and cannot construct this class cause its protected.
  * </pre>
- * <pre>
- * <span style="color: white;">usage:</span>
- * {@code
- *
- * } </pre>
  * <pre>
  * modified log :
  * ====================================================

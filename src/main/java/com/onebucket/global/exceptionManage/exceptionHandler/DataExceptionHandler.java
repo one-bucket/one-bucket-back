@@ -16,13 +16,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
  * <br>date           : 2024-06-27
  * <pre>
  * <span style="color: white;">[description]</span>
- *
+ * Exception handler about data validate exception.
  * </pre>
- * <pre>
- * <span style="color: white;">usage:</span>
- * {@code
- *
- * } </pre>
  * <pre>
  * modified log :
  * ====================================================
@@ -30,6 +25,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
  * ----------------------------------------------------
  * 2024-06-27        jack8              init create
  * </pre>
+ * @see MethodArgumentNotValidException
  */
 
 @Order(1)
