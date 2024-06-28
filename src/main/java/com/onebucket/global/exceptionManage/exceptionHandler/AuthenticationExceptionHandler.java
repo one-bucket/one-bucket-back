@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
  * <br>package name   : com.onebucket.global.exceptionManage.exceptionHandler
  * <br>file name      : AuthenticationExceptionHandler
  * <br>date           : 2024-06-27
+ * <br>TODO: when new exception handler add, must add test code..
  * <pre>
  * <span style="color: white;">[description]</span>
  * Exception Handler about Authentication Exception.
@@ -36,6 +37,4 @@ public class AuthenticationExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(ex.getErrorCode(), ex.getMessage());
         return new ResponseEntity<>(errorResponse, ex.getErrorCode().getHttpStatus());
     }
-
-
 }
