@@ -1,12 +1,13 @@
 package com.onebucket.global.auth.jwtAuth.service;
 
-import com.onebucket.global.auth.jwtAuth.dao.RefreshTokenRepository;
 import com.onebucket.global.auth.jwtAuth.domain.RefreshToken;
+import com.onebucket.global.redis.RedisRepository;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.NoSuchElementException;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -35,7 +36,11 @@ import java.util.NoSuchElementException;
 @RequiredArgsConstructor
 public class RefreshTokenServiceImpl implements RefreshTokenService {
 
-    private final RefreshTokenRepository refreshTokenRepository;
+    private final RedisRepository redisRepository;
+
+    @Value("${jwt.expireDate.refreshToken}")
+    private long timeOutMillis;
+
 
     /**
      * @param username key of redis
@@ -43,26 +48,21 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
      */
     @Override
     public void saveRefreshToken(String username, String refreshToken) {
-        RefreshToken token = new RefreshToken(username, refreshToken);
-        refreshTokenRepository.save(token);
+        redisRepository.save()
+                .key(username)
+                .value(refreshToken)
+                .timeout(timeOutMillis)
+                .timeUnit(TimeUnit.MILLISECONDS)
+                .save();
     }
 
-    /**
-     * @param username key of redis, id of what to search
-     * @return RefreshToken
-     * @throws NoSuchElementException when cannot find
-     */
     @Override
     public RefreshToken getRefreshToken(String username) {
-        return refreshTokenRepository.findById(username)
-                .orElseThrow(() -> new NoSuchElementException("Refresh token not found"));
+        return null;
     }
 
-    /**
-     * @param username key of redis, id of what to delete.
-     */
     @Override
     public void deleteRefreshToken(String username) {
-        refreshTokenRepository.deleteById(username);
+
     }
 }

@@ -11,11 +11,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -46,7 +48,7 @@ import static org.mockito.Mockito.*;
  */
 
 @ExtendWith(MockitoExtension.class)
-class SignInServiceImplTest {
+class SignInServiceTest {
     @Mock
     private AuthenticationManagerBuilder authenticationManagerBuilder;
 
@@ -61,7 +63,8 @@ class SignInServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        Mockito.when(authenticationManagerBuilder.getObject()).thenReturn(authenticationManager);
+
+        when(authenticationManagerBuilder.getObject()).thenReturn(authenticationManager);
     }
 
     @Test

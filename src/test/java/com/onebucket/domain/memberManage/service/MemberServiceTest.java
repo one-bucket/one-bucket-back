@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import com.onebucket.domain.memberManage.dto.UpdateNicknameRequestDto;
+import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.RegisterException;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -58,7 +59,7 @@ public class MemberServiceTest {
 
         doThrow(DataIntegrityViolationException.class).when(memberRepository).save(any(Member.class));
 
-        assertThrows(DataIntegrityViolationException.class, () ->
+        assertThrows(RegisterException.class ,() ->
             memberService.createMember(dto)
         );
     }
