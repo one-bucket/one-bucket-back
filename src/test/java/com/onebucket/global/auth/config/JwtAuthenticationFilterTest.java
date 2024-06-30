@@ -1,6 +1,7 @@
 package com.onebucket.global.auth.config;
 
 import com.onebucket.global.auth.jwtAuth.component.JwtValidator;
+import com.onebucket.testController.AuthTestController;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.impl.DefaultClaims;
@@ -49,7 +50,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * 2024-06-26        jack8              init create
  * </pre>
  */
-@WebMvcTest
+@WebMvcTest(controllers = AuthTestController.class)
 @ExtendWith(MockitoExtension.class)
 @Import({SecurityConfig.class, JwtAuthenticationFilter.class})
 class JwtAuthenticationFilterTest {
