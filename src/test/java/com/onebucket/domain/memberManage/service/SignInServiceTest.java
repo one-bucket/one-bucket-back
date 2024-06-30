@@ -61,11 +61,6 @@ class SignInServiceTest {
     @InjectMocks
     private SignInServiceImpl signInService;
 
-    @BeforeEach
-    void setUp() {
-
-        when(authenticationManagerBuilder.getObject()).thenReturn(authenticationManager);
-    }
 
     @Test
     @DisplayName("로그인 성공")
@@ -101,7 +96,7 @@ class SignInServiceTest {
         String password = "password";
 
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
-                .thenThrow(AuthenticationException.class);
+                .thenThrow(new AuthenticationException("invalid credentials") {});
 
         //when & then
         assertThrows(AuthenticationException.class, () ->
