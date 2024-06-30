@@ -59,7 +59,7 @@ class RedisRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        when(stringRedisTemplate.opsForValue()).thenReturn(valueOperations);
+        lenient().when(stringRedisTemplate.opsForValue()).thenReturn(valueOperations);
     }
 
     @Test
@@ -87,7 +87,7 @@ class RedisRepositoryTest {
 
     @Test
     @DisplayName("save 메서드 성공 - object에 대해")
-    void testSave_success_object() throws JsonProcessingException {
+    void testSave_success_object() {
         String key = "test Key:";
         String json = "{\"name\":\"test value\"}";
         TestObject testObject = new TestObject("test value");
@@ -156,9 +156,26 @@ class RedisRepositoryTest {
                 redisRepository.get(key, TestObject.class));
     }
 
+    @Test
+    @DisplayName("delete 메서드 성공")
+    void testDelete_success() {
+        String key = "test key";
+        redisRepository.delete(key);
+        verify(stringRedisTemplate, times(1)).delete(key);
+    }
+
+    @Test
+    @DisplayName("delete 메서드 테스트")
+    void testDelete() {
+        String key = "testKey";
+
+        redisRepository.delete(key);
+
+        verify(stringRedisTemplate, times(1)).delete(key);
+    }
+
     static class TestObject {
         private String name;
-        private TestObject() {}
         private TestObject(String name) {
             this.name = name;
         }
@@ -183,6 +200,6 @@ class RedisRepositoryTest {
         public int hashCode() {
             return Objects.hash(name);
         }
-
     }
+
 }

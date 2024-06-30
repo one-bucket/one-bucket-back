@@ -11,6 +11,7 @@ import static org.mockito.Mockito.*;
 import com.onebucket.domain.memberManage.dto.UpdateNicknameRequestDto;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.RegisterException;
 import jakarta.persistence.EntityNotFoundException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,6 +19,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
@@ -25,6 +27,9 @@ import java.util.Optional;
 public class MemberServiceTest {
     @Mock
     private MemberRepository memberRepository;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
     @InjectMocks
     private MemberServiceImpl memberService;
 
@@ -38,6 +43,10 @@ public class MemberServiceTest {
                 .build();
     }
 
+    @BeforeEach
+    void setUp() {
+        lenient().when(passwordEncoder.encode(anyString())).thenReturn("password");
+    }
     @Test
     @DisplayName("멤버 생성 성공")
     void testCreateMember_success() {

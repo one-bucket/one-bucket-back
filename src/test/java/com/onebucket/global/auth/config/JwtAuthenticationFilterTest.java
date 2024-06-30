@@ -1,7 +1,7 @@
 package com.onebucket.global.auth.config;
 
 import com.onebucket.global.auth.jwtAuth.component.JwtValidator;
-import com.onebucket.testController.AuthTestController;
+import com.onebucket.testComponent.AuthTestController;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.impl.DefaultClaims;

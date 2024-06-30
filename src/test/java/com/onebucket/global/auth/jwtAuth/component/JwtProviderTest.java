@@ -1,6 +1,7 @@
 package com.onebucket.global.auth.jwtAuth.component;
 
 import com.onebucket.global.auth.jwtAuth.domain.JwtToken;
+import com.onebucket.testComponent.mockmember.MockMember;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -11,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithAnonymousUser;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import java.security.Key;
@@ -57,7 +57,7 @@ class JwtProviderTest {
 
     @Test
     @DisplayName("정상적인 토큰 생성")
-    @WithMockUser(username = "testuser")
+    @MockMember
     void testGenerateToken() {
         //given
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -76,7 +76,7 @@ class JwtProviderTest {
 
         Claims claims = Jwts.parserBuilder().
                 setSigningKey(key).build().parseClaimsJws(jwtToken.getAccessToken()).getBody();
-        assertEquals("testuser", claims.getSubject());
+        assertEquals("test user", claims.getSubject());
 
 
     }
