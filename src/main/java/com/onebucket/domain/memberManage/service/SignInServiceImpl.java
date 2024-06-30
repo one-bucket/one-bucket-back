@@ -5,7 +5,6 @@ import com.onebucket.global.auth.jwtAuth.domain.JwtToken;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
@@ -58,11 +57,12 @@ public class SignInServiceImpl implements SignInService{
     @Override
     public JwtToken signInByUsernameAndPassword(String username, String password)
             throws AuthenticationException {
+
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(username, password);
 
         Authentication authentication = authenticationManager.authenticate(authenticationToken);
-
         return jwtProvider.generateToken(authentication);
+
     }
 }

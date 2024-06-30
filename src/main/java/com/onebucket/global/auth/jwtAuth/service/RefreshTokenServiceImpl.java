@@ -1,11 +1,14 @@
 package com.onebucket.global.auth.jwtAuth.service;
 
 import com.onebucket.global.auth.jwtAuth.domain.RefreshToken;
+import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.RegisterException;
+import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import com.onebucket.global.redis.RedisRepository;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.concurrent.TimeUnit;
 
@@ -41,16 +44,16 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     @Value("${jwt.expireDate.refreshToken}")
     private long timeOutMillis;
 
+    private final String HEADEDLY = "refreshToken:";
 
-    /**
-     * @param username key of redis
-     * @param refreshToken value of redis
-     */
     @Override
-    public void saveRefreshToken(String username, String refreshToken) {
+    public void saveRefreshToken(RefreshToken token) {
+        if(!StringUtils.hasText(token.getUsername()) || !StringUtils.hasText(token.getRefreshToken())) {
+            throw new RegisterException(AuthenticationErrorCode.INVALID_SUBMIT, "username or refresh token is null");
+        }
         redisRepository.save()
-                .key(username)
-                .value(refreshToken)
+                .key(HEADEDLY + token.getUsername())
+                .value(token.getRefreshToken())
                 .timeout(timeOutMillis)
                 .timeUnit(TimeUnit.MILLISECONDS)
                 .save();
@@ -58,11 +61,17 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     @Override
     public RefreshToken getRefreshToken(String username) {
-        return null;
+        String token = redisRepository.get(HEADEDLY + username);
+        if(token != null) {
+            return new RefreshToken(username, token);
+        } else {
+            throw new RegisterException(AuthenticationErrorCode.NON_EXIST_TOKEN);
+        }
+
     }
 
     @Override
     public void deleteRefreshToken(String username) {
-
+        redisRepository.delete(username);
     }
 }

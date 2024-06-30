@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
@@ -83,7 +83,7 @@ public class JwtProvider {
 
         if (authentication == null
                 || authentication.getPrincipal() == null
-                || !(authentication.getPrincipal() instanceof User)) {
+                || !(authentication.getPrincipal() instanceof UserDetails)) {
 
             throw new IllegalArgumentException("Invalid authentication object");
         }

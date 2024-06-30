@@ -1,8 +1,8 @@
 package com.onebucket.domain.memberManage.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
 
 /**
  * <br>package name   : com.onebucket.domain.memberManage.dto
@@ -25,7 +25,7 @@ import lombok.Setter;
  */
 
 @Getter
-@Setter
+@AllArgsConstructor
 public class SignInRequestDto {
     @NotBlank(message = "username must not be empty.")
     private String username;

@@ -57,4 +57,9 @@ public class RedisRepository {
         }
         return null;
     }
+    public void delete(String key) {
+        stringRedisTemplate.delete(key);
+    }
+
+
 }

@@ -39,6 +39,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         Member member = memberRepository.findByUsername(username).orElseThrow(() ->
                 new UsernameNotFoundException("invalid username"));
 
+        System.out.println("In detailService: pwd->" + member.getPassword());
         return new CustomUserDetails(member);
     }
 }

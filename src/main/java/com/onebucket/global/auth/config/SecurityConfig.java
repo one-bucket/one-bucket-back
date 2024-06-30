@@ -1,7 +1,6 @@
 package com.onebucket.global.auth.config;
 
 import com.onebucket.global.auth.jwtAuth.component.JwtValidator;
-import com.onebucket.global.exceptionManage.exceptionHandler.AuthenticationExceptionHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -70,7 +69,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+    public AuthenticationManager authenticationManagerBean(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
 

@@ -59,14 +59,18 @@ public class Member {
     private List<String> roles = new ArrayList<>(List.of("GUEST"));
 
     @Column(nullable = false)
+    @Builder.Default
     private boolean isAccountNonExpired = true;
 
     @Column(nullable = false)
+    @Builder.Default
     private boolean isAccountNonLocked = true;
 
     @Column(nullable = false)
+    @Builder.Default
     private boolean isCredentialNonExpired = true;
 
     @Column(nullable = false)
+    @Builder.Default
     private boolean isEnable = true;
 }

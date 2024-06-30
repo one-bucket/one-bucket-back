@@ -6,6 +6,7 @@ import io.jsonwebtoken.JwtException;
  * <br>package name   : com.onebucket.global.auth.jwtAuth.exception
  * <br>file name      : NullJwtException
  * <br>date           : 2024-06-26
+ * <br>TODO: change this to other custom exception. {@link com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode AuthenticationErrorcode}
  * <pre>
  * <span style="color: white;">[description]</span>
  *

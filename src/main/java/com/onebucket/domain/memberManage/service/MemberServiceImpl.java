@@ -10,6 +10,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 /**
@@ -40,13 +41,14 @@ import org.springframework.stereotype.Service;
 @Transactional
 public class MemberServiceImpl implements MemberService {
     private final MemberRepository memberRepository;
+    private final PasswordEncoder passwordEncoder;
 
 
     @Override
     public void createMember(CreateMemberRequestDto createMemberRequestDto) {
         Member member = Member.builder()
                 .username(createMemberRequestDto.getUsername())
-                .password(createMemberRequestDto.getPassword())
+                .password(passwordEncoder.encode(createMemberRequestDto.getPassword()))
                 .nickname(createMemberRequestDto.getNickname())
                 .build();
         try {
