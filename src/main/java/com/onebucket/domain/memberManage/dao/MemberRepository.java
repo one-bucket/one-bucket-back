@@ -12,7 +12,9 @@ import java.util.Optional;
  * <br>date           : 2024-06-22
  * <pre>
  * <span style="color: white;">[description]</span>
- *
+ * MemberRepository to manage data access of {@link Member} entity. Provide basic CRUD algorithm,
+ * also include {@code findByUsername(username), existsByUsername(username), deleteByUsername(username)}
+ * Exception should be change to domain custom exception at service.
  * </pre>
  * <pre>
  * <span style="color: white;">usage:</span>

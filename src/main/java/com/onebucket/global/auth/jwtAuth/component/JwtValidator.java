@@ -1,5 +1,7 @@
 package com.onebucket.global.auth.jwtAuth.component;
 
+import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.RegisterException;
+import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -86,7 +88,7 @@ public class JwtValidator {
     public Authentication getAuthentication(String accessToken) {
         Claims claims = parseClaims(accessToken);
         if(claims.get(AUTHORITIES_KEY) == null) {
-            throw new NullPointerException();
+            throw new RegisterException(AuthenticationErrorCode.NOT_EXIST_AUTHENTICATION_IN_TOKEN, "can't validate");
         }
 
         Collection<? extends GrantedAuthority> authorities = Arrays.stream(

@@ -1,4 +1,4 @@
-package com.onebucket.testController;
+package com.onebucket.testComponent;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;

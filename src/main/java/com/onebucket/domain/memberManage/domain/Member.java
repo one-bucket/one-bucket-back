@@ -12,18 +12,24 @@ import java.util.List;
  * <br>date           : 2024-06-22
  * <pre>
  * <span style="color: white;">[description]</span>
- * 게시글을 이용하는 사용자 모델이다. DB에 직접적으로 저장되는 객체이다.
+ * Basic Member entity, include id(generate automatically), username, password, nickname, and also
+ * UserDetails params. Default value of all boolean variable is true, and "roles" is "GUEST".
+ * All column is nullable.
  * </pre>
  * <pre>
  * <span style="color: white;">usage:</span>
  * {@code
- *
+ * Member member = Member.builder()
+ *                  .username(username)
+ *                  .password(password)
+ *                  .nickname(nickname)
+ *                  .build();
  * } </pre>
  * <pre>
  * modified log :
- * =======================================================
+ * ====================================================
  * DATE           AUTHOR               NOTE
- * -------------------------------------------------------
+ * ----------------------------------------------------
  * 2024-06-22     SeungHoon            init create
  * </pre>
  */
@@ -53,14 +59,18 @@ public class Member {
     private List<String> roles = new ArrayList<>(List.of("GUEST"));
 
     @Column(nullable = false)
+    @Builder.Default
     private boolean isAccountNonExpired = true;
 
     @Column(nullable = false)
+    @Builder.Default
     private boolean isAccountNonLocked = true;
 
     @Column(nullable = false)
+    @Builder.Default
     private boolean isCredentialNonExpired = true;
 
     @Column(nullable = false)
+    @Builder.Default
     private boolean isEnable = true;
 }

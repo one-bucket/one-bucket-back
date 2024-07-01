@@ -1,12 +1,16 @@
 package com.onebucket.global.auth.jwtAuth.service;
 
-import com.onebucket.global.auth.jwtAuth.dao.RefreshTokenRepository;
 import com.onebucket.global.auth.jwtAuth.domain.RefreshToken;
+import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.RegisterException;
+import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
+import com.onebucket.global.redis.RedisRepository;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
-import java.util.NoSuchElementException;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -35,34 +39,53 @@ import java.util.NoSuchElementException;
 @RequiredArgsConstructor
 public class RefreshTokenServiceImpl implements RefreshTokenService {
 
-    private final RefreshTokenRepository refreshTokenRepository;
+    private final RedisRepository redisRepository;
 
-    /**
-     * @param username key of redis
-     * @param refreshToken value of redis
-     */
+    @Value("${jwt.expireDate.refreshToken}")
+    private long timeOutMillis;
+
+    private final String HEADEDLY = "refreshToken:";
+
     @Override
-    public void saveRefreshToken(String username, String refreshToken) {
-        RefreshToken token = new RefreshToken(username, refreshToken);
-        refreshTokenRepository.save(token);
+    public void saveRefreshToken(RefreshToken token) {
+        if(!StringUtils.hasText(token.getUsername()) || !StringUtils.hasText(token.getRefreshToken())) {
+            throw new RegisterException(AuthenticationErrorCode.INVALID_SUBMIT, "username or refresh token is null");
+        }
+        redisRepository.save()
+                .key(HEADEDLY + token.getUsername())
+                .value(token.getRefreshToken())
+                .timeout(timeOutMillis)
+                .timeUnit(TimeUnit.MILLISECONDS)
+                .save();
     }
 
-    /**
-     * @param username key of redis, id of what to search
-     * @return RefreshToken
-     * @throws NoSuchElementException when cannot find
-     */
     @Override
     public RefreshToken getRefreshToken(String username) {
-        return refreshTokenRepository.findById(username)
-                .orElseThrow(() -> new NoSuchElementException("Refresh token not found"));
+        String token = redisRepository.get(HEADEDLY + username);
+        if(token != null) {
+            return new RefreshToken(username, token);
+        } else {
+            throw new RegisterException(AuthenticationErrorCode.NON_EXIST_TOKEN);
+        }
+
     }
 
-    /**
-     * @param username key of redis, id of what to delete.
-     */
     @Override
     public void deleteRefreshToken(String username) {
-        refreshTokenRepository.deleteById(username);
+        redisRepository.delete(username);
+    }
+
+
+    // TODO: test case 작성
+    @Override
+    public boolean isTokenExist(RefreshToken refreshToken) {
+        String username = refreshToken.getUsername();
+        String token = refreshToken.getRefreshToken();
+
+        if(redisRepository.isTokenExists(HEADEDLY + username)) {
+            String savedToken = redisRepository.get(HEADEDLY + username);
+            return savedToken.equals(token);
+        }
+        return false;
     }
 }

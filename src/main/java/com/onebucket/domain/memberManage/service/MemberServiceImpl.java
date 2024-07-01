@@ -2,11 +2,15 @@ package com.onebucket.domain.memberManage.service;
 
 import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
-import com.onebucket.domain.memberManage.dto.CreateMemberRequestDTO;
-import com.onebucket.domain.memberManage.dto.UpdateNickNameRequestDTO;
+import com.onebucket.domain.memberManage.dto.CreateMemberRequestDto;
+import com.onebucket.domain.memberManage.dto.UpdateNicknameRequestDto;
+import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.RegisterException;
+import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 /**
@@ -21,7 +25,8 @@ import org.springframework.stereotype.Service;
  * <pre>
  * <span style="color: white;">usage:</span>
  * {@code
- *
+ * memberService.createMember(createMemberRequestDto);
+ * memberService.updateMember(username, updateNickNameRequestDto);
  * } </pre>
  * <pre>
  * modified log :
@@ -36,24 +41,30 @@ import org.springframework.stereotype.Service;
 @Transactional
 public class MemberServiceImpl implements MemberService {
     private final MemberRepository memberRepository;
+    private final PasswordEncoder passwordEncoder;
 
 
     @Override
-    public void createMember(CreateMemberRequestDTO createMemberRequestDTO) {
+    public void createMember(CreateMemberRequestDto createMemberRequestDto) {
         Member member = Member.builder()
-                .username(createMemberRequestDTO.getUsername())
-                .password(createMemberRequestDTO.getPassword())
-                .nickname(createMemberRequestDTO.getNickname())
+                .username(createMemberRequestDto.getUsername())
+                .password(passwordEncoder.encode(createMemberRequestDto.getPassword()))
+                .nickname(createMemberRequestDto.getNickname())
                 .build();
-        memberRepository.save(member);
+        try {
+            memberRepository.save(member);
+        } catch(DataIntegrityViolationException e) {
+            throw new RegisterException(AuthenticationErrorCode.DUPLICATE_USER,
+                    "username or nickname already exist.");
+        }
     }
 
     @Override
-    public void updateMember(String username, UpdateNickNameRequestDTO updateNickNameRequestDTO) {
+    public void updateMember(String username, UpdateNicknameRequestDto updateNicknameRequestDTO) {
         Member member = memberRepository.findByUsername(username)
                 .orElseThrow(()-> new EntityNotFoundException("Member not found"));
 
-        member.setNickname(updateNickNameRequestDTO.getNickname());
+        member.setNickname(updateNicknameRequestDTO.getNickname());
         memberRepository.save(member);
     }
 }
