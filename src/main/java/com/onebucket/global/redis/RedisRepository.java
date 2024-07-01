@@ -61,5 +61,8 @@ public class RedisRepository {
         stringRedisTemplate.delete(key);
     }
 
-
+    // TODO: test case 작성
+    public boolean isTokenExists(String key) {
+        return Boolean.TRUE.equals(stringRedisTemplate.hasKey(key));
+    }
 }

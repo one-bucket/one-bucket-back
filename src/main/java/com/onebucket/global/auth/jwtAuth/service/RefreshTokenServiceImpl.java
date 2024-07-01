@@ -74,4 +74,18 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     public void deleteRefreshToken(String username) {
         redisRepository.delete(username);
     }
+
+
+    // TODO: test case 작성
+    @Override
+    public boolean isTokenExist(RefreshToken refreshToken) {
+        String username = refreshToken.getUsername();
+        String token = refreshToken.getRefreshToken();
+
+        if(redisRepository.isTokenExists(HEADEDLY + username)) {
+            String savedToken = redisRepository.get(HEADEDLY + username);
+            return savedToken.equals(token);
+        }
+        return false;
+    }
 }

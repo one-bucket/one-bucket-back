@@ -29,4 +29,6 @@ public interface RefreshTokenService {
     void saveRefreshToken(RefreshToken token);
     RefreshToken getRefreshToken(String username);
     void deleteRefreshToken(String username);
+
+    boolean isTokenExist(RefreshToken refreshToken);
 }

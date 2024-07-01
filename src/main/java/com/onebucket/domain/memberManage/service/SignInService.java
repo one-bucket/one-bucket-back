@@ -1,6 +1,7 @@
 package com.onebucket.domain.memberManage.service;
 
 import com.onebucket.global.auth.jwtAuth.domain.JwtToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 
 /**
@@ -35,4 +36,6 @@ public interface SignInService {
 
     JwtToken signInByUsernameAndPassword(String username, String password)
             throws AuthenticationException;
+
+    Authentication getAuthenticationAndValidHeader(String headerString);
 }

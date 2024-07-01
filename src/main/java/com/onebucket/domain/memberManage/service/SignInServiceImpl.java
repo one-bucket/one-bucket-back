@@ -1,7 +1,11 @@
 package com.onebucket.domain.memberManage.service;
 
 import com.onebucket.global.auth.jwtAuth.component.JwtProvider;
+import com.onebucket.global.auth.jwtAuth.component.JwtValidator;
 import com.onebucket.global.auth.jwtAuth.domain.JwtToken;
+import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.RegisterException;
+import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
+import io.jsonwebtoken.ExpiredJwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -47,6 +51,7 @@ public class SignInServiceImpl implements SignInService{
 
     private final AuthenticationManager authenticationManager;
     private final JwtProvider jwtProvider;
+    private final JwtValidator jwtValidator;
 
     /**
      * @param username id to sign in
@@ -63,6 +68,23 @@ public class SignInServiceImpl implements SignInService{
 
         Authentication authentication = authenticationManager.authenticate(authenticationToken);
         return jwtProvider.generateToken(authentication);
+    }
 
+    @Override
+    public Authentication getAuthenticationAndValidHeader(String headerString) {
+
+        if (!(headerString != null && headerString.startsWith("Bearer "))) {
+            throw new RegisterException(AuthenticationErrorCode.INVALID_SUBMIT, "header form invalid");
+        }
+        String accessToken = headerString.substring(7);
+        try {
+            jwtValidator.isTokenValid(accessToken);
+        } catch (ExpiredJwtException ignore) {
+        } catch (Exception e) {
+            throw new RegisterException(AuthenticationErrorCode.INVALID_SUBMIT, "invalid access token");
+        }
+
+
+        return jwtValidator.getAuthentication(accessToken);
     }
 }

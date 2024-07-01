@@ -33,7 +33,9 @@ public enum AuthenticationErrorCode implements ErrorCode{
     //회원가입 과정 중 발생하는 오류의 종류
     DUPLICATE_USER("1001", HttpStatus.CONFLICT, "Already Exist value"),
     NON_EXIST_TOKEN("1002", HttpStatus.UNAUTHORIZED, "Token Not Exist"),
-    INVALID_SUBMIT("1003", HttpStatus.BAD_REQUEST, "Form to submit is invalid")
+    INVALID_SUBMIT("1003", HttpStatus.BAD_REQUEST, "Form to submit is invalid"),
+    NON_EXIST_AUTHENTICATION("1004",HttpStatus.UNAUTHORIZED, "no authentication or username"),
+    NOT_EXIST_AUTHENTICATION_IN_TOKEN("1005", HttpStatus.UNAUTHORIZED, "can't find authentication in token")
 
     ;
 
