@@ -3,6 +3,7 @@ package com.onebucket.domain.memberManage.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onebucket.domain.memberManage.dto.CreateMemberRequestDto;
 import com.onebucket.domain.memberManage.service.MemberService;
+import com.onebucket.domain.memberManage.service.ProfileService;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.RegisterException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.ValidateErrorCode;
@@ -54,6 +55,8 @@ class RegisterControllerTest {
 
     @Mock
     private MemberService memberService;
+    @Mock
+    private ProfileService profileService;
 
     @InjectMocks
     private RegisterController registerController;
