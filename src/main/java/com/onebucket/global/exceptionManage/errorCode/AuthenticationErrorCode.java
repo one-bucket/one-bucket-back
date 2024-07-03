@@ -35,7 +35,9 @@ public enum AuthenticationErrorCode implements ErrorCode{
     NON_EXIST_TOKEN("1002", HttpStatus.UNAUTHORIZED, "Token Not Exist"),
     INVALID_SUBMIT("1003", HttpStatus.BAD_REQUEST, "Form to submit is invalid"),
     NON_EXIST_AUTHENTICATION("1004",HttpStatus.UNAUTHORIZED, "no authentication or username"),
-    NOT_EXIST_AUTHENTICATION_IN_TOKEN("1005", HttpStatus.UNAUTHORIZED, "can't find authentication in token")
+    NOT_EXIST_AUTHENTICATION_IN_TOKEN("1005", HttpStatus.UNAUTHORIZED, "can't find authentication in token"),
+    UNKNOWN_USER("1006", HttpStatus.BAD_REQUEST, "can't find user"),
+    UNKNOWN_USER_PROFILE("1007", HttpStatus.BAD_REQUEST, "can't find profile")
 
     ;
 

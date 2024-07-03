@@ -1,7 +1,9 @@
 package com.onebucket.domain.memberManage.dao;
 
 import com.onebucket.domain.memberManage.domain.Member;
+import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -34,4 +36,7 @@ public interface MemberRepository extends JpaRepository<Member,Long> {
     Optional<Member> findByUsername(String username);
     boolean existsByUsername(String username);
     void deleteByUsername(String username);
+
+    @Query("SELECT m.id FROM Member m WHERE m.username = :username")
+    Long findIdByUsername(@Param("username") String username);
 }

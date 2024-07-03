@@ -1,4 +1,4 @@
-package com.onebucket.domain.memberManage.service;
+package com.onebucket.global.utils;
 
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.RegisterException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;

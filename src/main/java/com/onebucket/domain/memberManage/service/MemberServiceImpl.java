@@ -6,12 +6,13 @@ import com.onebucket.domain.memberManage.dto.CreateMemberRequestDto;
 import com.onebucket.domain.memberManage.dto.UpdateNicknameRequestDto;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.RegisterException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
-import jakarta.persistence.EntityNotFoundException;
+import com.onebucket.global.utils.RandomStringUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
 
 /**
  * <br>package name   : com.onebucket.domain.service
@@ -19,40 +20,30 @@ import org.springframework.stereotype.Service;
  * <br>date           : 2024-06-24
  * <pre>
  * <span style="color: white;">[description]</span>
- * password는 update를 추가하되, 어플리케이션 단에서 직접 입력하는게 아니라 서버에서 랜덤으로 문자열을 생성하여 컨트롤러로 반환하고, 이를 디코딩하여 저장하는 방식으로 만들어야됨.
- * 즉 password는 service단에서 매개변수를 받아서 update하는게 아니라 매개변수 없이 임의의 문자열을 집어넣고 해당 문자열을 return하는 메서드로 구현하면 될듯
- * </pre>
- * <pre>
- * <span style="color: white;">usage:</span>
- * {@code
- * memberService.createMember(createMemberRequestDto);
- * memberService.updateMember(username, updateNickNameRequestDto);
- * } </pre>
- * <pre>
- * modified log :
- * =======================================================
- * DATE           AUTHOR               NOTE
- * -------------------------------------------------------
- * 2024-06-24        SeungHoon              init create
+ * {@link MemberService}
  * </pre>
  */
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class MemberServiceImpl implements MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
+    private final RandomStringUtils randomStringUtils;
+
 
 
     @Override
-    public void createMember(CreateMemberRequestDto createMemberRequestDto) {
+    @Transactional
+    public Long createMember(CreateMemberRequestDto createMemberRequestDto) {
+
         Member member = Member.builder()
                 .username(createMemberRequestDto.getUsername())
                 .password(passwordEncoder.encode(createMemberRequestDto.getPassword()))
                 .nickname(createMemberRequestDto.getNickname())
                 .build();
         try {
-            memberRepository.save(member);
+            Member newMember = memberRepository.save(member);
+            return newMember.getId();
         } catch(DataIntegrityViolationException e) {
             throw new RegisterException(AuthenticationErrorCode.DUPLICATE_USER,
                     "username or nickname already exist.");
@@ -60,11 +51,43 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
+    @Transactional
     public void updateMember(String username, UpdateNicknameRequestDto updateNicknameRequestDTO) {
         Member member = memberRepository.findByUsername(username)
-                .orElseThrow(()-> new EntityNotFoundException("Member not found"));
+                .orElseThrow(()-> new RegisterException(AuthenticationErrorCode.UNKNOWN_USER));
 
         member.setNickname(updateNicknameRequestDTO.getNickname());
         memberRepository.save(member);
+    }
+    // TODO: test case
+
+    @Override
+    @Transactional
+    public String changePassword(String username) {
+        Member member = memberRepository.findByUsername(username)
+                .orElseThrow(()-> new RegisterException(AuthenticationErrorCode.UNKNOWN_USER));
+
+        String newPassword = randomStringUtils.generateRandomStr(15);
+
+        member.setPassword(passwordEncoder.encode(newPassword));
+        memberRepository.save(member);
+        return newPassword;
+    }
+
+    @Override
+    @Transactional
+    public String changePassword(String username, String newPassword) {
+        Member member = memberRepository.findByUsername(username)
+                .orElseThrow(()-> new RegisterException(AuthenticationErrorCode.UNKNOWN_USER));
+
+        member.setPassword(passwordEncoder.encode(newPassword));
+        memberRepository.save(member);
+        return newPassword;
+    }
+
+
+    @Override
+    public Long usernameToId(String username) {
+        return memberRepository.findIdByUsername(username);
     }
 }

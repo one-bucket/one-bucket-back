@@ -58,6 +58,10 @@ public class Member {
     @Builder.Default
     private List<String> roles = new ArrayList<>(List.of("GUEST"));
 
+    @OneToOne(fetch =FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @PrimaryKeyJoinColumn
+    private Profile profile;
+
     @Column(nullable = false)
     @Builder.Default
     private boolean isAccountNonExpired = true;
