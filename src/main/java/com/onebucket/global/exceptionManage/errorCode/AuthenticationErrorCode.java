@@ -37,7 +37,8 @@ public enum AuthenticationErrorCode implements ErrorCode{
     NON_EXIST_AUTHENTICATION("1004",HttpStatus.UNAUTHORIZED, "no authentication or username"),
     NOT_EXIST_AUTHENTICATION_IN_TOKEN("1005", HttpStatus.UNAUTHORIZED, "can't find authentication in token"),
     UNKNOWN_USER("1006", HttpStatus.BAD_REQUEST, "can't find user"),
-    UNKNOWN_USER_PROFILE("1007", HttpStatus.BAD_REQUEST, "can't find profile")
+    UNKNOWN_USER_PROFILE("1007", HttpStatus.NOT_FOUND, "can't find profile"),
+    PROFILE_IMAGE_ERROR("1008", HttpStatus.NOT_FOUND, "maybe, can't find image.")
 
     ;
 

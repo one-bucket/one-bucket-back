@@ -15,10 +15,11 @@ import java.time.LocalDate;
  * <span style="color: white;">[description]</span>
  * contain:
  * {@code
- *    private String name;
+ *     private String name;
  *     private String gender;
  *     private Integer age;
- *     private String description;}
+ *     private String description;
+ *     private LocalDate birth;}
  * <pre>
  * modified log :
  * ====================================================

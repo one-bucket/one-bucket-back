@@ -13,6 +13,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 
 /**
  * <br>package name   : com.onebucket.domain.service
@@ -88,6 +90,7 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public Long usernameToId(String username) {
-        return memberRepository.findIdByUsername(username);
+        return memberRepository.findIdByUsername(username)
+                .orElseThrow(() -> new RegisterException(AuthenticationErrorCode.UNKNOWN_USER));
     }
 }

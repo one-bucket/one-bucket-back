@@ -106,7 +106,12 @@ public class ProfileServiceImpl implements ProfileService {
                 .fileExtension("png")
                 .build();
 
-        return minioRepository.getFile(dto);
+        try {
+            return minioRepository.getFile(dto);
+        } catch(Exception e) {
+            throw new RegisterException(AuthenticationErrorCode.PROFILE_IMAGE_ERROR, e.getMessage());
+        }
+
 
     }
 

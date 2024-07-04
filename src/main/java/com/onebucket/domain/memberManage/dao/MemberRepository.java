@@ -38,5 +38,5 @@ public interface MemberRepository extends JpaRepository<Member,Long> {
     void deleteByUsername(String username);
 
     @Query("SELECT m.id FROM Member m WHERE m.username = :username")
-    Long findIdByUsername(@Param("username") String username);
+    Optional<Long> findIdByUsername(@Param("username") String username);
 }

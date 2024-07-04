@@ -34,7 +34,8 @@ public class SecurityUtils {
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if(authentication == null || authentication.getName() == null) {
-            throw new RegisterException(AuthenticationErrorCode.NON_EXIST_AUTHENTICATION, "can't get authentication from header");
+            throw new RegisterException(AuthenticationErrorCode.NON_EXIST_AUTHENTICATION,
+                    "Not exist Authentication in ContextHolder");
         }
         return authentication.getName();
     }
