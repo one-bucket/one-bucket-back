@@ -45,6 +45,7 @@ class UniversityRepositoryTest {
     void setUp() {
         university = University.builder()
                 .name("홍익대학교")
+                .address("서울시 마포구")
                 .build();
 
     }
