@@ -6,7 +6,7 @@ import com.onebucket.domain.memberManage.dto.ReadProfileDto;
 import com.onebucket.domain.memberManage.dto.UpdateProfileDto;
 import com.onebucket.domain.memberManage.service.MemberService;
 import com.onebucket.domain.memberManage.service.ProfileService;
-import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.RegisterException;
+import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import com.onebucket.global.exceptionManage.exceptionHandler.AuthenticationExceptionHandler;
 import com.onebucket.global.utils.SecurityUtils;
@@ -107,7 +107,7 @@ class MemberControllerTest {
                 .description("test description")
                 .build();
 
-        RegisterException exception = new RegisterException(AuthenticationErrorCode.NON_EXIST_AUTHENTICATION,
+        AuthenticationException exception = new AuthenticationException(AuthenticationErrorCode.NON_EXIST_AUTHENTICATION,
                 "Not exist Authentication in ContextHolder");
         when(securityUtils.getCurrentUsername()).thenThrow(exception);
 
@@ -134,7 +134,7 @@ class MemberControllerTest {
                 .build();
 
         when(securityUtils.getCurrentUsername()).thenReturn("username");
-        RegisterException exception = new RegisterException(AuthenticationErrorCode.UNKNOWN_USER_PROFILE);
+        AuthenticationException exception = new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER_PROFILE);
         when(memberService.usernameToId("username")).thenReturn(1L);
         doThrow(exception).when(profileService).updateProfile(eq(1L), any(UpdateProfileDto.class));
 
@@ -205,7 +205,7 @@ class MemberControllerTest {
     void testGetImage_fail_minioError() throws Exception {
         when(securityUtils.getCurrentUsername()).thenReturn("username");
         when(memberService.usernameToId("username")).thenReturn(1L);
-        RegisterException exception = new RegisterException(AuthenticationErrorCode.PROFILE_IMAGE_ERROR);
+        AuthenticationException exception = new AuthenticationException(AuthenticationErrorCode.PROFILE_IMAGE_ERROR);
         when(profileService.readProfileImage(1L)).thenThrow(exception);
 
         mockMvc.perform(get("/profile/image"))
@@ -243,7 +243,7 @@ class MemberControllerTest {
     void testProfile_fail_unknownProfile() throws Exception {
         when(securityUtils.getCurrentUsername()).thenReturn("username");
         when(memberService.usernameToId("username")).thenReturn(1L);
-        RegisterException exception = new RegisterException(AuthenticationErrorCode.UNKNOWN_USER_PROFILE);
+        AuthenticationException exception = new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER_PROFILE);
         when(profileService.readProfile(1L)).thenThrow(exception);
 
         mockMvc.perform(get("/profile/")

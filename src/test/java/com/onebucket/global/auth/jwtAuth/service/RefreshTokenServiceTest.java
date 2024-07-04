@@ -1,7 +1,7 @@
 package com.onebucket.global.auth.jwtAuth.service;
 
 import com.onebucket.global.auth.jwtAuth.domain.RefreshToken;
-import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.RegisterException;
+import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.redis.RedisRepository;
 import com.onebucket.global.redis.RedisSaveRequestBuilder;
 import org.junit.jupiter.api.DisplayName;
@@ -90,7 +90,7 @@ class RefreshTokenServiceTest {
         RefreshToken refreshToken = new RefreshToken(username, token);
 
         //when & then
-        assertThrows(RegisterException.class, () ->
+        assertThrows(AuthenticationException.class, () ->
                 refreshTokenService.saveRefreshToken(refreshToken));
     }
 
@@ -115,7 +115,7 @@ class RefreshTokenServiceTest {
 
         when(redisRepository.get(anyString())).thenReturn(null);
 
-        assertThrows(RegisterException.class, () ->
+        assertThrows(AuthenticationException.class, () ->
                 refreshTokenService.getRefreshToken(username));
     }
 

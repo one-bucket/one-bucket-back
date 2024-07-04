@@ -1,7 +1,7 @@
 package com.onebucket.global.auth.jwtAuth.service;
 
 import com.onebucket.global.auth.jwtAuth.domain.RefreshToken;
-import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.RegisterException;
+import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import com.onebucket.global.redis.RedisRepository;
 import lombok.RequiredArgsConstructor;
@@ -49,7 +49,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     @Override
     public void saveRefreshToken(RefreshToken token) {
         if(!StringUtils.hasText(token.getUsername()) || !StringUtils.hasText(token.getRefreshToken())) {
-            throw new RegisterException(AuthenticationErrorCode.INVALID_SUBMIT, "username or refresh token is null");
+            throw new AuthenticationException(AuthenticationErrorCode.INVALID_SUBMIT, "username or refresh token is null");
         }
         redisRepository.save()
                 .key(HEADEDLY + token.getUsername())
@@ -65,7 +65,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         if(token != null) {
             return new RefreshToken(username, token);
         } else {
-            throw new RegisterException(AuthenticationErrorCode.NON_EXIST_TOKEN);
+            throw new AuthenticationException(AuthenticationErrorCode.NON_EXIST_TOKEN);
         }
 
     }

@@ -4,7 +4,7 @@ import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.domain.memberManage.dto.CreateMemberRequestDto;
 import com.onebucket.domain.memberManage.dto.UpdateNicknameRequestDto;
-import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.RegisterException;
+import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import com.onebucket.global.utils.RandomStringUtils;
 import jakarta.transaction.Transactional;
@@ -12,8 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 
 /**
@@ -47,7 +45,7 @@ public class MemberServiceImpl implements MemberService {
             Member newMember = memberRepository.save(member);
             return newMember.getId();
         } catch(DataIntegrityViolationException e) {
-            throw new RegisterException(AuthenticationErrorCode.DUPLICATE_USER,
+            throw new AuthenticationException(AuthenticationErrorCode.DUPLICATE_USER,
                     "username or nickname already exist.");
         }
     }
@@ -56,7 +54,7 @@ public class MemberServiceImpl implements MemberService {
     @Transactional
     public void updateMember(String username, UpdateNicknameRequestDto updateNicknameRequestDTO) {
         Member member = memberRepository.findByUsername(username)
-                .orElseThrow(()-> new RegisterException(AuthenticationErrorCode.UNKNOWN_USER));
+                .orElseThrow(()-> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
 
         member.setNickname(updateNicknameRequestDTO.getNickname());
         memberRepository.save(member);
@@ -67,7 +65,7 @@ public class MemberServiceImpl implements MemberService {
     @Transactional
     public String changePassword(String username) {
         Member member = memberRepository.findByUsername(username)
-                .orElseThrow(()-> new RegisterException(AuthenticationErrorCode.UNKNOWN_USER));
+                .orElseThrow(()-> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
 
         String newPassword = randomStringUtils.generateRandomStr(15);
 
@@ -80,7 +78,7 @@ public class MemberServiceImpl implements MemberService {
     @Transactional
     public String changePassword(String username, String newPassword) {
         Member member = memberRepository.findByUsername(username)
-                .orElseThrow(()-> new RegisterException(AuthenticationErrorCode.UNKNOWN_USER));
+                .orElseThrow(()-> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
 
         member.setPassword(passwordEncoder.encode(newPassword));
         memberRepository.save(member);
@@ -91,6 +89,6 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public Long usernameToId(String username) {
         return memberRepository.findIdByUsername(username)
-                .orElseThrow(() -> new RegisterException(AuthenticationErrorCode.UNKNOWN_USER));
+                .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
     }
 }
