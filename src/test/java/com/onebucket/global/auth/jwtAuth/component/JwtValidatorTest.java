@@ -1,6 +1,6 @@
 package com.onebucket.global.auth.jwtAuth.component;
 
-import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.RegisterException;
+import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
@@ -129,7 +129,7 @@ class JwtValidatorTest {
                 .compact();
 
         //when & then
-        assertThrows(RegisterException.class, () -> jwtValidator.getAuthentication(token));
+        assertThrows(AuthenticationException.class, () -> jwtValidator.getAuthentication(token));
     }
 
 

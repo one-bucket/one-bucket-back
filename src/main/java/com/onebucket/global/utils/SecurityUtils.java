@@ -1,6 +1,6 @@
-package com.onebucket.domain.memberManage.service;
+package com.onebucket.global.utils;
 
-import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.RegisterException;
+import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -34,7 +34,8 @@ public class SecurityUtils {
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if(authentication == null || authentication.getName() == null) {
-            throw new RegisterException(AuthenticationErrorCode.NON_EXIST_AUTHENTICATION, "can't get authentication from header");
+            throw new AuthenticationException(AuthenticationErrorCode.NON_EXIST_AUTHENTICATION,
+                    "Not exist Authentication in ContextHolder");
         }
         return authentication.getName();
     }

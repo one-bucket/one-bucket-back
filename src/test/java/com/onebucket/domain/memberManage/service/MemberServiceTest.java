@@ -9,8 +9,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import com.onebucket.domain.memberManage.dto.UpdateNicknameRequestDto;
-import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.RegisterException;
-import jakarta.persistence.EntityNotFoundException;
+import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,6 +29,9 @@ public class MemberServiceTest {
 
     @Mock
     private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private Member mockMember;
     @InjectMocks
     private MemberServiceImpl memberService;
 
@@ -53,6 +55,9 @@ public class MemberServiceTest {
         //given
         CreateMemberRequestDto dto = getDto();
 
+        when(memberRepository.save(any(Member.class))).thenReturn(mockMember);
+        when(mockMember.getId()).thenReturn(any(Long.class));
+
         //when
         memberService.createMember(dto);
 
@@ -68,7 +73,7 @@ public class MemberServiceTest {
 
         doThrow(DataIntegrityViolationException.class).when(memberRepository).save(any(Member.class));
 
-        assertThrows(RegisterException.class ,() ->
+        assertThrows(AuthenticationException.class ,() ->
             memberService.createMember(dto)
         );
     }
@@ -107,7 +112,7 @@ public class MemberServiceTest {
         when(memberRepository.findByUsername(username)).thenReturn(Optional.empty());
 
         //when & then
-        assertThrows(EntityNotFoundException.class, () ->
+        assertThrows(AuthenticationException.class, () ->
             memberService.updateMember(username, dto)
         );
     }

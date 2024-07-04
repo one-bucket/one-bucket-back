@@ -12,7 +12,8 @@ import com.onebucket.domain.memberManage.dto.UpdateNicknameRequestDto;
  * <br>TODO: add readMember method.
  * <pre>
  * <span style="color: white;">[description]</span>
- * Interface of {@link MemberServiceImpl}.
+ * CRUD algorithm of {@link com.onebucket.domain.memberManage.domain.Member Member}.
+ * Two way of changing password, by random string and user set.
  * </pre>
  * <pre>
  * <span style="color: white;">usage:</span>
@@ -28,8 +29,11 @@ import com.onebucket.domain.memberManage.dto.UpdateNicknameRequestDto;
  * </pre>
  */
 public interface MemberService {
-    void createMember(CreateMemberRequestDto createMemberRequestDTO);
-
-    // 일단 nickname을 수정하는 dto를 따로 만들고 비밀번호를 따로 매개변수 없이 구현해야 될듯
+    Long createMember(CreateMemberRequestDto createMemberRequestDTO);
     void updateMember(String username, UpdateNicknameRequestDto updateNickNameRequestDTO);
+
+    Long usernameToId(String username);
+    String changePassword(String username);
+    String changePassword(String username, String newPassword);
+
 }

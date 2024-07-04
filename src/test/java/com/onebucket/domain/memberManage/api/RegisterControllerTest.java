@@ -3,7 +3,8 @@ package com.onebucket.domain.memberManage.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onebucket.domain.memberManage.dto.CreateMemberRequestDto;
 import com.onebucket.domain.memberManage.service.MemberService;
-import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.RegisterException;
+import com.onebucket.domain.memberManage.service.ProfileService;
+import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.ValidateErrorCode;
 import com.onebucket.global.exceptionManage.exceptionHandler.AuthenticationExceptionHandler;
@@ -54,6 +55,8 @@ class RegisterControllerTest {
 
     @Mock
     private MemberService memberService;
+    @Mock
+    private ProfileService profileService;
 
     @InjectMocks
     private RegisterController registerController;
@@ -122,7 +125,7 @@ class RegisterControllerTest {
                 .nickname("duplicatenickname")
                 .build();
 
-        doThrow(new RegisterException(AuthenticationErrorCode.DUPLICATE_USER, "username or nickname already exist."))
+        doThrow(new AuthenticationException(AuthenticationErrorCode.DUPLICATE_USER, "username or nickname already exist."))
                 .when(memberService).createMember(any(CreateMemberRequestDto.class));
 
         // when & then

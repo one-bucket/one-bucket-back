@@ -3,14 +3,13 @@ package com.onebucket.domain.memberManage.service;
 import com.onebucket.global.auth.jwtAuth.component.JwtProvider;
 import com.onebucket.global.auth.jwtAuth.component.JwtValidator;
 import com.onebucket.global.auth.jwtAuth.domain.JwtToken;
-import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.RegisterException;
+import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
 
 
@@ -57,11 +56,11 @@ public class SignInServiceImpl implements SignInService{
      * @param username id to sign in
      * @param password password to sign in
      * @return jwt, Bearer [access token] [refresh token]
-     * @throws AuthenticationException when username or password incorrect...
+     * @throws org.springframework.security.core.AuthenticationException when username or password incorrect...
      */
     @Override
     public JwtToken signInByUsernameAndPassword(String username, String password)
-            throws AuthenticationException {
+            throws org.springframework.security.core.AuthenticationException {
 
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(username, password);
@@ -74,14 +73,14 @@ public class SignInServiceImpl implements SignInService{
     public Authentication getAuthenticationAndValidHeader(String headerString) {
 
         if (!(headerString != null && headerString.startsWith("Bearer "))) {
-            throw new RegisterException(AuthenticationErrorCode.INVALID_SUBMIT, "header form invalid");
+            throw new AuthenticationException(AuthenticationErrorCode.INVALID_SUBMIT, "header form invalid");
         }
         String accessToken = headerString.substring(7);
         try {
             jwtValidator.isTokenValid(accessToken);
         } catch (ExpiredJwtException ignore) {
         } catch (Exception e) {
-            throw new RegisterException(AuthenticationErrorCode.INVALID_SUBMIT, "invalid access token");
+            throw new AuthenticationException(AuthenticationErrorCode.INVALID_SUBMIT, "invalid access token");
         }
 
 

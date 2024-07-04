@@ -8,7 +8,7 @@ import com.onebucket.global.auth.jwtAuth.component.JwtValidator;
 import com.onebucket.global.auth.jwtAuth.domain.JwtToken;
 import com.onebucket.global.auth.jwtAuth.domain.RefreshToken;
 import com.onebucket.global.auth.jwtAuth.service.RefreshTokenService;
-import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.RegisterException;
+import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -77,7 +77,7 @@ public class SignInController {
             refreshTokenService.saveRefreshToken(new RefreshToken(username, newToken.getRefreshToken()));
             return ResponseEntity.ok(newToken);
         }
-        throw new RegisterException(AuthenticationErrorCode.NON_EXIST_TOKEN, "access token required or invalid.");
+        throw new AuthenticationException(AuthenticationErrorCode.NON_EXIST_TOKEN, "access token required or invalid.");
     }
 
 }

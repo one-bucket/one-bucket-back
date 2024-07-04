@@ -24,12 +24,12 @@ import com.onebucket.global.exceptionManage.errorCode.ErrorCode;
  * 2024-06-27        jack8              init create
  * </pre>
  */
-public class RegisterException extends MemberManageException {
-    public RegisterException(AuthenticationErrorCode authenticationErrorCode) {
+public class AuthenticationException extends MemberManageException {
+    public AuthenticationException(AuthenticationErrorCode authenticationErrorCode) {
         super(authenticationErrorCode);
     }
 
-    public RegisterException(ErrorCode errorCode, String message) {
+    public AuthenticationException(ErrorCode errorCode, String message) {
         super(errorCode, message);
     }
 }

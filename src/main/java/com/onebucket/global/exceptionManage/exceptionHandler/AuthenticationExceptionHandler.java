@@ -1,7 +1,7 @@
 package com.onebucket.global.exceptionManage.exceptionHandler;
 
 import com.onebucket.global.exceptionManage.ErrorResponse;
-import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.RegisterException;
+import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -25,15 +25,15 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
  * ----------------------------------------------------
  * 2024-06-27        jack8              init create
  * </pre>
- * @see RegisterException
+ * @see AuthenticationException
  */
 
 @Order(1)
 @RestControllerAdvice
 public class AuthenticationExceptionHandler {
 
-    @ExceptionHandler(RegisterException.class)
-    public ResponseEntity<ErrorResponse> handleRegisterException(RegisterException ex) {
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handleRegisterException(AuthenticationException ex) {
         ErrorResponse errorResponse = new ErrorResponse(ex.getErrorCode(), ex.getMessage());
         return new ResponseEntity<>(errorResponse, ex.getErrorCode().getHttpStatus());
     }

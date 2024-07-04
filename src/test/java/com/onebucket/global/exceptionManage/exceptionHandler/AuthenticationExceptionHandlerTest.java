@@ -1,7 +1,7 @@
 package com.onebucket.global.exceptionManage.exceptionHandler;
 
 import com.onebucket.global.exceptionManage.ErrorResponse;
-import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.RegisterException;
+import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.errorCode.ErrorCode;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,15 +46,15 @@ class AuthenticationExceptionHandlerTest {
 
     @Test
     public void testHandleRegisterException() {
-        RegisterException registerException = mock(RegisterException.class);
+        AuthenticationException authenticationException = mock(AuthenticationException.class);
         ErrorCode errorCode = mock(ErrorCode.class);
 
-        when(registerException.getErrorCode()).thenReturn(errorCode);
+        when(authenticationException.getErrorCode()).thenReturn(errorCode);
         when(errorCode.getHttpStatus()).thenReturn(HttpStatus.CONFLICT);
-        when(registerException.getMessage()).thenReturn("test exception occur");
+        when(authenticationException.getMessage()).thenReturn("test exception occur");
 
         ResponseEntity<ErrorResponse> response =
-                authenticationExceptionHandler.handleRegisterException(registerException);
+                authenticationExceptionHandler.handleRegisterException(authenticationException);
 
         assertNotNull(response);
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
