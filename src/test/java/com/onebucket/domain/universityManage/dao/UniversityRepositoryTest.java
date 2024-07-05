@@ -44,8 +44,10 @@ class UniversityRepositoryTest {
     @BeforeEach
     void setUp() {
         university = University.builder()
+                .id(-1L)
                 .name("홍익대학교")
                 .address("서울시 마포구")
+                .email("@hongik.ac.kr")
                 .build();
 
     }
@@ -58,10 +60,9 @@ class UniversityRepositoryTest {
     }
 
     @Test
-    @DisplayName("학교 이름 찾기 실패")
+    @DisplayName("학교 이름 찾기  - 없는 학교임")
     void CantGetUniversityByName() {
         universityRepository.save(university);
         assertThat(universityRepository.findByName("서울대학교")).isEmpty();
     }
-
 }
