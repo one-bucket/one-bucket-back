@@ -1,5 +1,9 @@
 package com.onebucket.domain.universityManage.service;
 
+import com.onebucket.domain.universityManage.dto.ResponseUniversityDto;
+
+import java.util.List;
+
 /**
  * <br>package name   : com.onebucket.domain.universityManage.service
  * <br>file name      : UniversityService
@@ -22,4 +26,6 @@ package com.onebucket.domain.universityManage.service;
  * </pre>
  */
 public interface UniversityService {
+    List<ResponseUniversityDto> findAll();
+    ResponseUniversityDto getUniversityByName(String name);
 }
