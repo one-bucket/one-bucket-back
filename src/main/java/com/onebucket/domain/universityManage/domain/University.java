@@ -41,4 +41,7 @@ public class University {
 
     @Column(nullable = false)
     private String address;
+
+    @Column(nullable = false)
+    private String email;
 }
