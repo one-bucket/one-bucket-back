@@ -1,6 +1,7 @@
 package com.onebucket.testComponent;
 
 import com.onebucket.global.exceptionManage.errorCode.ErrorCode;
+import org.junit.jupiter.api.Assertions;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -52,6 +53,10 @@ public class JsonFieldResultMatcher implements ResultMatcher {
         List<ResultMatcher> matchers = new ArrayList<>();
         matchers.add(MockMvcResultMatchers.jsonPath("$." + key).value(value));
         return new JsonFieldResultMatcher(matchers);
+    }
+
+    public static ResultMatcher hasKey(String outputString) {
+        return result -> Assertions.assertEquals(outputString, result.getResponse().getContentAsString());
     }
 
     public static ResultMatcher hasKey(ErrorCode errorCode) {

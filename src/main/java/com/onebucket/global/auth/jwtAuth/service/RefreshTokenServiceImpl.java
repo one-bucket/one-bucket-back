@@ -49,7 +49,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     @Override
     public void saveRefreshToken(RefreshToken token) {
         if(!StringUtils.hasText(token.getUsername()) || !StringUtils.hasText(token.getRefreshToken())) {
-            throw new AuthenticationException(AuthenticationErrorCode.INVALID_SUBMIT, "username or refresh token is null");
+            throw new AuthenticationException(AuthenticationErrorCode.NON_VALID_TOKEN, "username or refresh token is null");
         }
         redisRepository.save()
                 .key(HEADEDLY + token.getUsername())
@@ -65,7 +65,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         if(token != null) {
             return new RefreshToken(username, token);
         } else {
-            throw new AuthenticationException(AuthenticationErrorCode.NON_EXIST_TOKEN);
+            throw new AuthenticationException(AuthenticationErrorCode.NON_VALID_TOKEN);
         }
 
     }
