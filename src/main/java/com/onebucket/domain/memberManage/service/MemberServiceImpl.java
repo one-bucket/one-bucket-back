@@ -68,7 +68,6 @@ public class MemberServiceImpl implements MemberService {
                 .orElseThrow(()-> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
 
         String newPassword = randomStringUtils.generateRandomStr(15);
-
         member.setPassword(passwordEncoder.encode(newPassword));
         memberRepository.save(member);
         return newPassword;

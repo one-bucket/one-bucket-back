@@ -4,12 +4,15 @@ import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.domain.memberManage.dto.CreateMemberRequestDto;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import com.onebucket.domain.memberManage.dto.UpdateNicknameRequestDto;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
+import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
+import com.onebucket.global.utils.RandomStringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,6 +35,9 @@ public class MemberServiceTest {
 
     @Mock
     private Member mockMember;
+
+    @Mock
+    private RandomStringUtils randomStringUtils;
     @InjectMocks
     private MemberServiceImpl memberService;
 
@@ -56,10 +62,11 @@ public class MemberServiceTest {
         CreateMemberRequestDto dto = getDto();
 
         when(memberRepository.save(any(Member.class))).thenReturn(mockMember);
-        when(mockMember.getId()).thenReturn(any(Long.class));
+        when(mockMember.getId()).thenReturn(1L);
 
         //when
-        memberService.createMember(dto);
+        Long id = memberService.createMember(dto);
+        assertEquals(id, 1L);
 
         //then
         verify(memberRepository).save(any(Member.class));
@@ -137,6 +144,51 @@ public class MemberServiceTest {
         assertThrows(DataIntegrityViolationException.class, () ->
             memberService.updateMember(username, dto)
         );
+    }
+
+    @Test
+    @DisplayName("비밀번호 변경 성공 - 무작위 문자열로")
+    void testChangePassword_success_randomString() {
+        //given
+        String username = "username";
+        Member member = Member.builder()
+                .username(username)
+                .password("oldPassword")
+                .nickname("nickname")
+                .build();
+
+        when(memberRepository.findByUsername(username)).thenReturn(Optional.of(member));
+        when(randomStringUtils.generateRandomStr(15)).thenReturn("newPassword");
+
+        String newPassword = memberService.changePassword(username);
+        verify(memberRepository,times(1)).save(member);
+        assertEquals(newPassword, "newPassword");
+    }
+
+    @Test
+    @DisplayName("비밀번호 변경 성공 - 설정한 문자열로")
+    void testChangePassword_success_definedString() {
+        String username = "username";
+        String newPassword = "newPassword";
+        Member member = Member.builder()
+                .username(username)
+                .password("oldPassword")
+                .nickname("nickname")
+                .build();
+
+        when(memberRepository.findByUsername(username)).thenReturn(Optional.of(member));
+
+        String result = memberService.changePassword(username, newPassword);
+        assertEquals(result, newPassword);
+    }
+
+    @Test
+    @DisplayName("비밀번호 변경 실패 - unknown user")
+    void testChangePassword_fail_unknownUser() {
+
+        when(memberRepository.findByUsername(anyString())).thenReturn(Optional.empty());
+
+        assertThrows(AuthenticationException.class, () -> memberService.changePassword("username"));
     }
 
 }
