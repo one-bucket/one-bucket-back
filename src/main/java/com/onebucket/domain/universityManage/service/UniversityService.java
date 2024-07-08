@@ -1,6 +1,10 @@
 package com.onebucket.domain.universityManage.service;
 
+import com.onebucket.domain.universityManage.domain.University;
+import com.onebucket.domain.universityManage.dto.CreateUniversityDto;
 import com.onebucket.domain.universityManage.dto.ResponseUniversityDto;
+import com.onebucket.domain.universityManage.dto.UpdateUniversityAddressDto;
+import com.onebucket.domain.universityManage.dto.UpdateUniversityEmailDto;
 
 import java.util.List;
 
@@ -10,7 +14,7 @@ import java.util.List;
  * <br>date           : 2024-07-01
  * <pre>
  * <span style="color: white;">[description]</span>
- * 추후 필요하다고 생각되면 구현을 하는 것으로 하자.
+ *
  * </pre>
  * <pre>
  * <span style="color: white;">usage:</span>
@@ -26,6 +30,10 @@ import java.util.List;
  * </pre>
  */
 public interface UniversityService {
-    List<ResponseUniversityDto> findAll();
-    ResponseUniversityDto getUniversityByName(String name);
+    Long createUniversity(CreateUniversityDto createUniversityDto);
+    List<ResponseUniversityDto> findAllUniversity();
+    ResponseUniversityDto getUniversity(Long id);
+    void updateUniversityAddress(Long id, UpdateUniversityAddressDto updateUniversityAddressDto);
+    void updateUniversityEmail(Long id, UpdateUniversityEmailDto updateUniversityEmailDto);
+    void deleteUniversity(Long id);
 }
