@@ -1,6 +1,7 @@
 package com.onebucket.domain.memberManage.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -26,7 +27,8 @@ import lombok.Setter;
 @Builder
 @Getter
 @Setter
-public class UpdateNicknameRequestDto {
+@AllArgsConstructor
+public class NicknameRequestDto {
     @NotBlank(message = "nickname must not be empty")
     private String nickname;
 }

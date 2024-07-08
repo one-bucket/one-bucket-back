@@ -1,7 +1,8 @@
 package com.onebucket.domain.memberManage.service;
 
 import com.onebucket.domain.memberManage.dto.CreateMemberRequestDto;
-import com.onebucket.domain.memberManage.dto.UpdateNicknameRequestDto;
+import com.onebucket.domain.memberManage.dto.NicknameRequestDto;
+import com.onebucket.domain.memberManage.dto.ReadMemberInfoDto;
 
 /**
  * <br>package name   : com.onebucket.domain.service
@@ -30,10 +31,13 @@ import com.onebucket.domain.memberManage.dto.UpdateNicknameRequestDto;
  */
 public interface MemberService {
     Long createMember(CreateMemberRequestDto createMemberRequestDTO);
-    void updateMember(String username, UpdateNicknameRequestDto updateNickNameRequestDTO);
-
+    ReadMemberInfoDto readMember(String username);
+    void updateMember(String username, NicknameRequestDto nickNameRequestDTO);
+    void quitMember(String username);
     Long usernameToId(String username);
     String changePassword(String username);
     String changePassword(String username, String newPassword);
+
+    String idToNickname(Long id);
 
 }
