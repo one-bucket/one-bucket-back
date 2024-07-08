@@ -2,10 +2,12 @@ package com.onebucket.domain.universityManage.service;
 
 import com.onebucket.domain.universityManage.dao.UniversityRepository;
 import com.onebucket.domain.universityManage.domain.University;
+import com.onebucket.domain.universityManage.dto.CreateUniversityDto;
 import com.onebucket.domain.universityManage.dto.ResponseUniversityDto;
 import com.onebucket.global.exceptionManage.customException.universityManageException.UniversityException;
 import com.onebucket.global.exceptionManage.errorCode.UniversityErrorCode;
 import com.onebucket.global.utils.UniversityEmailValidator;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,8 +19,10 @@ import org.springframework.http.HttpStatus;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
 
 /**
  * <br>package name   : com.onebucket.domain.universityManage.service
@@ -47,15 +51,23 @@ class UniversityServiceTest {
     private UniversityRepository universityRepository;
 
     @Mock
-    private University university;
+    private UniversityEmailValidator universityEmailValidator;
 
     @Mock
-    private UniversityEmailValidator universityEmailValidator;
+    private University university;
 
     @InjectMocks
     private UniversityServiceImpl universityService;
 
-    private University getDto1() {
+    private CreateUniversityDto createUniversityDto() {
+        return CreateUniversityDto.builder()
+                .name("홍익대학교")
+                .address("서울시 마포구 상수동")
+                .email("@hongik.ac.kr")
+                .build();
+    }
+
+    private University createUniversity() {
         return University.builder()
                 .id(-1L)
                 .name("홍익대학교")
@@ -64,34 +76,43 @@ class UniversityServiceTest {
                 .build();
     }
 
-    // 새로운 getDto2() 메서드
-    private University getDto2() {
-        return University.builder()
-                .id(-2L)
-                .name("서울대학교")
-                .address("서울시 관악구 관악로")
-                .email("@snu.ac.kr")
-                .build();
-    }
+//    /**
+//     * 실제 DB에 저장하는 것이 아니기 때문에 id가 자동으로 생성되지 않는듯. 그래서 저렇게 assertThat을 작성하면 안됨.
+//     * UniversityService에서는 id를 Builder에서 삽입하지 않음. 그래서 id==null 이 된다. 추후 다시 작성해보자.
+//     */
+//    @Test
+//    @DisplayName("대학교 만들기 성공")
+//    void createUniversity_success() {
+//        university = createUniversity();
+//        CreateUniversityDto dto = createUniversityDto();
+//        when(universityEmailValidator.isValidUniversityEmail(dto.getName(), dto.getEmail())).thenReturn(true);
+//        doReturn(University.builder().build()).when(universityRepository).save(any(University.class));
+//        doReturn(-1L).when(university.getId());
+//        // 대학 생성 서비스 호출
+//        Long result = universityService.createUniversity(dto);
+//        // 결과 검증
+//        assertThat(result).isNotNull();
+//    }
+
 
     @Test
     @DisplayName("대학교 찾기 실패 - 해당 이름을 가진 대학교가 없음")
-    void FindUniversityByName_fail_notExistUniversity() {
+    void FindUniversityById_fail_notExistUniversity() {
 
-        doReturn(Optional.empty()).when(universityRepository).findByName("연세대학교");
+        doReturn(Optional.empty()).when(universityRepository).findById(-1L);
 
         final UniversityException result = assertThrows(UniversityException.class,
-                ()->universityService.getUniversityByName("연세대학교"));
+                ()->universityService.getUniversity(-1L));
 
         assertThat(result.getErrorCode()).isEqualTo(UniversityErrorCode.NOT_EXIST_UNIVERSITY);
     }
 
     @Test
     @DisplayName("대학교 찾기 성공")
-    void FindUniversityByName_success_existUniversity() {
-        doReturn(Optional.of(getDto1())).when(universityRepository).findByName("홍익대학교");
+    void FindUniversityByName_success() {
+        doReturn(Optional.of(createUniversity())).when(universityRepository).findById(-1L);
 
-        final ResponseUniversityDto result = universityService.getUniversityByName("홍익대학교");
+        final ResponseUniversityDto result = universityService.getUniversity(-1L);
 
         assertThat(result.getName()).isEqualTo("홍익대학교");
         assertThat(result.getAddress()).isEqualTo("서울시 마포구 상수동");
