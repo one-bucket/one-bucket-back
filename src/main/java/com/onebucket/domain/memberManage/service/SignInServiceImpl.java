@@ -7,8 +7,7 @@ import com.onebucket.global.exceptionManage.customException.memberManageExceptoi
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -59,28 +58,44 @@ public class SignInServiceImpl implements SignInService{
      * @throws org.springframework.security.core.AuthenticationException when username or password incorrect...
      */
     @Override
-    public JwtToken signInByUsernameAndPassword(String username, String password)
-            throws org.springframework.security.core.AuthenticationException {
+    public JwtToken signInByUsernameAndPassword(String username, String password) {
 
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(username, password);
 
-        Authentication authentication = authenticationManager.authenticate(authenticationToken);
-        return jwtProvider.generateToken(authentication);
+        try {
+            Authentication authentication = authenticationManager.authenticate(authenticationToken);
+            return jwtProvider.generateToken(authentication);
+        } catch(BadCredentialsException e) {
+            throw new AuthenticationException(AuthenticationErrorCode.CREDENTIAL_INVALID);
+        } catch(LockedException e) {
+            throw new AuthenticationException(AuthenticationErrorCode.LOCK_ACCOUNT);
+        } catch(DisabledException e) {
+            throw new AuthenticationException(AuthenticationErrorCode.DISABLED_ACCOUNT);
+        } catch(AccountExpiredException e) {
+            throw new AuthenticationException(AuthenticationErrorCode.EXPIRED_ACCOUNT);
+        } catch(CredentialsExpiredException e) {
+            throw new AuthenticationException(AuthenticationErrorCode.CREDENTIAL_EXPIRED_ACCOUNT);
+        } catch(InternalAuthenticationServiceException e) {
+            throw new AuthenticationException(AuthenticationErrorCode.INTERNAL_AUTHENTICATION_ERROR);
+        }
+
     }
 
     @Override
     public Authentication getAuthenticationAndValidHeader(String headerString) {
 
         if (!(headerString != null && headerString.startsWith("Bearer "))) {
-            throw new AuthenticationException(AuthenticationErrorCode.INVALID_SUBMIT, "header form invalid");
+            throw new AuthenticationException(AuthenticationErrorCode.NON_VALID_TOKEN,
+                    "can't access access token while get refresh token");
         }
         String accessToken = headerString.substring(7);
         try {
             jwtValidator.isTokenValid(accessToken);
         } catch (ExpiredJwtException ignore) {
         } catch (Exception e) {
-            throw new AuthenticationException(AuthenticationErrorCode.INVALID_SUBMIT, "invalid access token");
+            throw new AuthenticationException(AuthenticationErrorCode.NON_VALID_TOKEN,
+                    "access token form invalid.");
         }
 
 

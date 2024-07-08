@@ -52,6 +52,7 @@ class JwtProviderTest {
         long expireDateRefreshToken = 86400000L;
 
         jwtProvider = new JwtProvider(secretKey, expireDateAccessToken, expireDateRefreshToken);
+        SecurityContextHolder.clearContext();
 
     }
 

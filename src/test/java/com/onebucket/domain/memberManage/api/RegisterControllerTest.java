@@ -20,8 +20,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import static com.onebucket.testComponent.JsonFieldResultMatcher.hasKey;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.*;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -34,19 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * <br>date           : 2024-06-27
  * <pre>
  * <span style="color: white;">[description]</span>
- *
- * </pre>
- * <pre>
- * <span style="color: white;">usage:</span>
- * {@code
- *
- * } </pre>
- * <pre>
- * modified log :
- * ====================================================
- * DATE           AUTHOR               NOTE
- * ----------------------------------------------------
- * 2024-06-27        jack8              init create
+ * {@link RegisterController} 에 대한 테스트 코드이다.
  * </pre>
  */
 
@@ -55,6 +43,8 @@ class RegisterControllerTest {
 
     @Mock
     private MemberService memberService;
+
+
     @Mock
     private ProfileService profileService;
 
@@ -85,7 +75,7 @@ class RegisterControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(dto)))
                         .andExpect(status().isOk())
-                        .andExpect(result -> assertEquals("success create", result.getResponse().getContentAsString()));
+                        .andExpect(hasKey("success create"));
 
         verify(memberService, times(1)).createMember(any(CreateMemberRequestDto.class));
     }
@@ -105,9 +95,7 @@ class RegisterControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(dto)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value(ValidateErrorCode.INVALID_DATA.getCode()))
-                .andExpect(jsonPath("$.type").value(ValidateErrorCode.INVALID_DATA.getType()))
-                .andExpect(jsonPath("$.message").value(ValidateErrorCode.INVALID_DATA.getMessage()))
+                .andExpect((hasKey(ValidateErrorCode.INVALID_DATA)))
                 .andExpect(content().string(containsString("username: username must not be empty")))
                 .andExpect(content().string(containsString("password: password must not be empty")))
                 .andExpect(content().string(containsString("nickname: nickname must not be empty")));
@@ -125,7 +113,8 @@ class RegisterControllerTest {
                 .nickname("duplicatenickname")
                 .build();
 
-        doThrow(new AuthenticationException(AuthenticationErrorCode.DUPLICATE_USER, "username or nickname already exist."))
+        doThrow(new AuthenticationException(AuthenticationErrorCode.DUPLICATE_USER,
+                "username or nickname already exist."))
                 .when(memberService).createMember(any(CreateMemberRequestDto.class));
 
         // when & then
@@ -133,11 +122,30 @@ class RegisterControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(dto)))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.code").value("1001"))
-                .andExpect(jsonPath("$.type").value("AUTH"))
-                .andExpect(jsonPath("$.message").value("Already Exist value"));
+                .andExpect(hasKey(AuthenticationErrorCode.DUPLICATE_USER, "username or nickname already exist."));
 
         verify(memberService, times(1)).createMember(any(CreateMemberRequestDto.class));
+    }
+
+    @Test
+    @DisplayName("회원 등록 실패 - 프로필 생성 오류")
+    void testRegister_fail_duplicateProfile() throws Exception {
+        //given
+        CreateMemberRequestDto dto = CreateMemberRequestDto.builder()
+                .username("testuser")
+                .password("password")
+                .nickname("nickname")
+                .build();
+        when(memberService.createMember(any(CreateMemberRequestDto.class))).thenReturn(1L);
+        doThrow(new AuthenticationException(AuthenticationErrorCode.DUPLICATE_PROFILE))
+                .when(profileService).createInitProfile(1L);
+
+        mockMvc.perform(post("/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(new ObjectMapper().writeValueAsString(dto)))
+                .andExpect(status().isConflict())
+                .andExpect(hasKey(AuthenticationErrorCode.DUPLICATE_PROFILE));
+
     }
 
 }

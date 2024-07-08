@@ -26,7 +26,10 @@ import org.springframework.web.bind.annotation.RestController;
  * <br>date           : 2024-06-27
  * <pre>
  * <span style="color: white;">[description]</span>
- * 1. post - "/sign-in" by {@link SignInRequestDto} / Return {@link JwtToken}
+ * 해당 컨트롤러는 로그인에 대한 endpoint 를 제공한다. 또한 accessToken 이 만료되어 해당 오류 메시지를 반환하는 경우,
+ * refreshToken 을 이용한 갱신에 대해 endpoint 를 제공한다.
+ * 1. POST - "/sign-in"
+ * 2. POST - "/refresh-token"
  * </pre>
  * <pre>
  * modified log :
@@ -58,26 +61,31 @@ public class SignInController {
         return ResponseEntity.ok(jwtToken);
     }
 
-    // TODO: make test case.
     @PostMapping("/refresh-token")
     public ResponseEntity<JwtToken> tokenRefresh(HttpServletRequest request,
                                                  @Valid @RequestBody RefreshTokenDto refreshTokenDto) {
         String accessToken = request.getHeader("Authorization");
         String refreshToken = refreshTokenDto.getRefreshToken();
 
+
+        //access 토큰 검증 및 예외 처리 로직
+        //access 토큰 존재 여부에 대한 예외(AuthenticationErrorCode.NON_VALID_TOKEN)
+        //access 토큰 검증에 대한 예외(AuthenticationErrorCode.NON_VALID_TOKEN) - JwtExpiredToken 제외.
        Authentication authentication = signInService.getAuthenticationAndValidHeader(accessToken);
        String username = authentication.getName();
+       RefreshToken token2Validate = new RefreshToken(username, refreshToken);
 
         if(refreshToken != null &&
                 jwtValidator.isTokenValid(refreshToken) &&
-                refreshTokenService.isTokenExist(new RefreshToken(username, refreshToken))) {
+                refreshTokenService.isTokenExist(token2Validate)) {
 
             JwtToken newToken = jwtProvider.generateToken(authentication);
+            RefreshToken token2Save = new RefreshToken(username, newToken.getRefreshToken());
 
-            refreshTokenService.saveRefreshToken(new RefreshToken(username, newToken.getRefreshToken()));
+            refreshTokenService.saveRefreshToken(token2Save);
             return ResponseEntity.ok(newToken);
         }
-        throw new AuthenticationException(AuthenticationErrorCode.NON_EXIST_TOKEN, "access token required or invalid.");
+        throw new AuthenticationException(AuthenticationErrorCode.NON_VALID_TOKEN, "error to validate refresh token");
     }
 
 }

@@ -3,11 +3,13 @@ package com.onebucket.domain.memberManage.service;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.domain.memberManage.dto.CreateMemberRequestDto;
-import com.onebucket.domain.memberManage.dto.UpdateNicknameRequestDto;
+import com.onebucket.domain.memberManage.dto.NicknameRequestDto;
+import com.onebucket.domain.memberManage.dto.ReadMemberInfoDto;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import com.onebucket.global.utils.RandomStringUtils;
 import jakarta.transaction.Transactional;
+import lombok.Locked;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,6 +26,7 @@ import org.springframework.stereotype.Service;
  * </pre>
  */
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class MemberServiceImpl implements MemberService {
     private final MemberRepository memberRepository;
@@ -33,7 +36,6 @@ public class MemberServiceImpl implements MemberService {
 
 
     @Override
-    @Transactional
     public Long createMember(CreateMemberRequestDto createMemberRequestDto) {
 
         Member member = Member.builder()
@@ -51,31 +53,41 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    @Transactional
-    public void updateMember(String username, UpdateNicknameRequestDto updateNicknameRequestDTO) {
+    public ReadMemberInfoDto readMember(String username) {
+        Member member = memberRepository.findByUsername(username)
+                .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
+        return new ReadMemberInfoDto(username, member.getNickname());
+    }
+
+    @Override
+    public void updateMember(String username, NicknameRequestDto nicknameRequestDTO) {
         Member member = memberRepository.findByUsername(username)
                 .orElseThrow(()-> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
 
-        member.setNickname(updateNicknameRequestDTO.getNickname());
+        member.setNickname(nicknameRequestDTO.getNickname());
         memberRepository.save(member);
     }
-    // TODO: test case
 
     @Override
-    @Transactional
+    public void quitMember(String username) {
+        Member member = memberRepository.findByUsername(username)
+                .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
+        member.setEnable(false);
+        memberRepository.save(member);
+    }
+
+    @Override
     public String changePassword(String username) {
         Member member = memberRepository.findByUsername(username)
                 .orElseThrow(()-> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
 
         String newPassword = randomStringUtils.generateRandomStr(15);
-
         member.setPassword(passwordEncoder.encode(newPassword));
         memberRepository.save(member);
         return newPassword;
     }
 
     @Override
-    @Transactional
     public String changePassword(String username, String newPassword) {
         Member member = memberRepository.findByUsername(username)
                 .orElseThrow(()-> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
@@ -91,4 +103,12 @@ public class MemberServiceImpl implements MemberService {
         return memberRepository.findIdByUsername(username)
                 .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
     }
+
+    @Override
+    public String idToNickname(Long id) {
+        return memberRepository.findNicknameById(id)
+                .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
+    }
+
+
 }

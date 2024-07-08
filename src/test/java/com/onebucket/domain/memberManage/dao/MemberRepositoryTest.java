@@ -35,7 +35,8 @@ import static org.assertj.core.api.Assertions.*;
  * </pre>
  */
 @DataJpaTest
-public class MemberRepositoryTest {
+public class
+MemberRepositoryTest {
     private Member member1;
 
     @Autowired
@@ -52,7 +53,7 @@ public class MemberRepositoryTest {
 
     @Test
     @DisplayName("findByUsername 테스트 성공")
-    void findByUsernameTestSuccess() {
+    void testFindByUsername_success() {
         //given
         memberRepository.save(member1);
         //when
