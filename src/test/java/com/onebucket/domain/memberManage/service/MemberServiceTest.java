@@ -9,9 +9,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import com.onebucket.domain.memberManage.dto.UpdateNicknameRequestDto;
+import com.onebucket.domain.memberManage.dto.NicknameRequestDto;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
-import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import com.onebucket.global.utils.RandomStringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -90,7 +89,7 @@ public class MemberServiceTest {
     void testUpdateMember_success() {
         //given
         String username = "testuser";
-        UpdateNicknameRequestDto dto = UpdateNicknameRequestDto.builder()
+        NicknameRequestDto dto = NicknameRequestDto.builder()
                 .nickname("nickname")
                 .build();
         Member member = Member.builder()
@@ -113,7 +112,7 @@ public class MemberServiceTest {
     void testUpdateMember_fail_notExistUser() {
         //given
         String username = "nonExistentUser";
-        UpdateNicknameRequestDto dto = UpdateNicknameRequestDto.builder()
+        NicknameRequestDto dto = NicknameRequestDto.builder()
                 .nickname("nickname").build();
 
         when(memberRepository.findByUsername(username)).thenReturn(Optional.empty());
@@ -129,7 +128,7 @@ public class MemberServiceTest {
     void testUpdateMember_fail_duplicateNickname() {
         //given
         String username = "testuser";
-        UpdateNicknameRequestDto dto = UpdateNicknameRequestDto.builder()
+        NicknameRequestDto dto = NicknameRequestDto.builder()
                 .nickname("nickname").build();
         Member member = Member.builder()
                 .username(username)
