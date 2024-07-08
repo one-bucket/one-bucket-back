@@ -44,25 +44,25 @@ class UniversityRepositoryTest {
     @BeforeEach
     void setUp() {
         university = University.builder()
-                .id(-1L)
                 .name("홍익대학교")
                 .address("서울시 마포구")
                 .email("@hongik.ac.kr")
                 .build();
-
     }
 
     @Test
-    @DisplayName("학교 이름 찾기 성공")
-    void getUniversityByName() {
+    @DisplayName("학교 찾기 성공 - id로 찾기")
+    void getUniversityById() {
         universityRepository.save(university);
-        assertThat(universityRepository.findByName(university.getName())).isNotEmpty();
+        boolean present = universityRepository.findById(university.getId()).isPresent();
+        assertThat(present).isTrue();
     }
 
     @Test
-    @DisplayName("학교 이름 찾기  - 없는 학교임")
-    void CantGetUniversityByName() {
+    @DisplayName("학교 찾기  - 없는 학교임")
+    void CantGetUniversityById() {
         universityRepository.save(university);
-        assertThat(universityRepository.findByName("서울대학교")).isEmpty();
+        boolean present = universityRepository.findById(-1L).isPresent();
+        assertThat(present).isFalse();
     }
 }
