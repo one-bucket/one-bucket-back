@@ -30,6 +30,6 @@ import lombok.Setter;
 @Setter
 @Builder
 public class RequestUniversityDto {
-    @NotBlank(message = "name can't be blank")
+    @NotBlank(message = "name can't be empty")
     private String name;
 }
