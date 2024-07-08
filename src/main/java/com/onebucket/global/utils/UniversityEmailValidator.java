@@ -1,5 +1,7 @@
 package com.onebucket.global.utils;
 
+import org.springframework.stereotype.Component;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,6 +26,7 @@ import java.util.Map;
  * 2024-07-05        SeungHoon              init create
  * </pre>
  */
+@Component
 public class UniversityEmailValidator {
     private static final Map<String, String> universityEmailDomains = new HashMap<>();
 
@@ -47,7 +50,7 @@ public class UniversityEmailValidator {
         universityEmailDomains.put("단국대학교", "@dankook.ac.kr");
     }
 
-    public static boolean isValidUniversityEmail(String universityName, String email) {
+    public boolean isValidUniversityEmail(String universityName, String email) {
         String domain = universityEmailDomains.get(universityName);
         return domain != null && email.endsWith(domain);
     }
