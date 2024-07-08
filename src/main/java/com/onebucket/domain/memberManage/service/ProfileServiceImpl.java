@@ -68,7 +68,7 @@ public class ProfileServiceImpl implements ProfileService {
         try{
             profileRepository.save(profile);
         } catch(DataIntegrityViolationException e) {
-            throw new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER_PROFILE);
+            throw new AuthenticationException(AuthenticationErrorCode.DUPLICATE_PROFILE);
         }
     }
 

@@ -13,6 +13,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 
 import java.security.Key;
@@ -44,6 +45,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * 2024-06-24        jack8              init create
  * </pre>
  */
+@SpringJUnitConfig
 class JwtValidatorTest {
 
     private JwtValidator jwtValidator;
@@ -131,6 +133,7 @@ class JwtValidatorTest {
         //when & then
         assertThrows(AuthenticationException.class, () -> jwtValidator.getAuthentication(token));
     }
+
 
 
 

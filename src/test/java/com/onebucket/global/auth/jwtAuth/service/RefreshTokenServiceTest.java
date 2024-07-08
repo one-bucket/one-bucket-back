@@ -4,6 +4,7 @@ import com.onebucket.global.auth.jwtAuth.domain.RefreshToken;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.redis.RedisRepository;
 import com.onebucket.global.redis.RedisSaveRequestBuilder;
+import com.onebucket.testComponent.mockmember.MockMember;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -83,6 +84,7 @@ class RefreshTokenServiceTest {
 
     @Test
     @DisplayName("saveRefreshToken 메서드 실패 - 공백 입력")
+    @MockMember
     void testSaveRefreshToken_fail_nullValue() {
         //given
         String username = "";

@@ -1,13 +1,14 @@
 package com.onebucket.domain.memberManage.api;
 
+import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.domain.memberManage.domain.Profile;
-import com.onebucket.domain.memberManage.dto.ReadProfileDto;
-import com.onebucket.domain.memberManage.dto.UpdateProfileDto;
+import com.onebucket.domain.memberManage.dto.*;
 import com.onebucket.domain.memberManage.service.MemberService;
 import com.onebucket.domain.memberManage.service.ProfileService;
 import com.onebucket.global.utils.SecurityUtils;
 import jakarta.validation.Valid;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -46,11 +47,79 @@ public class MemberController {
     private final MemberService memberService;
     private final ProfileService profileService;
     private final SecurityUtils securityUtils;
+    private final MemberRepository memberRepository;
 
     /**
-     * 사용자의 profile 을 업데이트한다. 이를 위한 dto에는 null 이 존재할 수 있으며 이 경우 해당 필드는 갱신되지 않는다.
+     * 사용자가 비밀번호를 잊었을 때, 임시 비밀번호를 설정한다.
+     * TODO: 이메일 송신 로직을 추가해야 한다. , 권한 문제
+     * @return 200 code
+     */
+    @PostMapping("/member/password/reset")
+    public ResponseEntity<String> resetPassword() {
+        String username = securityUtils.getCurrentUsername();
+        memberService.changePassword(username);
+        return ResponseEntity.ok("success reset password");
+    }
+
+    /**
+     * 로그인이 되어 있는 상태에서 비밀번호를 변경할 수 있도록 한다.
+     * @param dto 비밀번호가 포함되어 있다.
+     * @return 200 code
+     */
+    @PostMapping("/member/password/set")
+    public ResponseEntity<String> setPassword(@Valid @RequestBody SetPasswordDto dto) {
+        String username = securityUtils.getCurrentUsername();
+        String password = dto.getPassword();
+        memberService.changePassword(username, password);
+        return ResponseEntity.ok("success set password");
+    }
+
+    /**
+     * 로그인이 되어 있는 상태에서 자신의 nickname 을 바꾼다.
+     * @param dto nickname 이 포함되어 있다.
+     * @return 200 return
+     */
+    @PostMapping("/member/nickname/set")
+    public ResponseEntity<String> setNickname(@Valid @RequestBody NicknameRequestDto dto) {
+        String username = securityUtils.getCurrentUsername();
+        memberService.updateMember(username, dto);
+        return ResponseEntity.ok("success set nickname");
+    }
+
+    /**
+     * id를 입력받아 nickname 을 출력한다. id는 url 에 포함되어 있으며 이를 통해 닉네임을 불러온다.
+     * @param id url 에 포함되어 있다.
+     * @return nickname 에 대한 dto
+     */
+    @GetMapping("/member/{id}/nickname/")
+    public ResponseEntity<NicknameRequestDto> getNickname(@PathVariable("id") long id) {
+        String nickname = memberService.idToNickname(id);
+        NicknameRequestDto result = new NicknameRequestDto(nickname);
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * 로그인한 상태에서 해당 유저의 닉네임과 username 을 반환한다.
+     * @return username, nickname
+     */
+    @GetMapping("/member/info")
+    public ResponseEntity<ReadMemberInfoDto> getMemberInfo() {
+        String username = securityUtils.getCurrentUsername();
+       return ResponseEntity.ok(memberService.readMember(username));
+    }
+
+    @DeleteMapping("/member")
+    public ResponseEntity<String> quitAccount() {
+        String username = securityUtils.getCurrentUsername();
+        memberService.quitMember(username);
+        return ResponseEntity.ok("success delete account");
+    }
+
+
+    /**
+     * 사용자의 profile 을 업데이트한다. 이를 위한 dto dtp 에는 null 이 존재할 수 있으며 이 경우 해당 필드는 갱신되지 않는다.
      * @param dto 이는 {@link UpdateProfileDto}에 대한 매개변수이며 profile 에 대한 기본적인 정보를 가진다.
-     * @return 성공 시 "success update profile" 과 200 code를 반환한다.
+     * @return 성공 시 "success update profile" 과 200 code 를 반환한다.
      */
     @PostMapping("/profile/update")
     public ResponseEntity<?> updateProfile(@Valid @RequestBody UpdateProfileDto dto) {
@@ -116,6 +185,7 @@ public class MemberController {
         Long id = memberService.usernameToId(username);
         return ResponseEntity.ok(profileService.readProfile(id));
     }
+
 
 
 }
