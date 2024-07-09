@@ -2,7 +2,6 @@ package com.onebucket.global.exceptionManage.exceptionHandler;
 
 import com.onebucket.global.exceptionManage.ErrorResponse;
 import com.onebucket.global.exceptionManage.customException.chatManageException.ChatManageException;
-import com.onebucket.global.exceptionManage.customException.chatManageException.TopicNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -32,7 +31,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 @Slf4j
 public class ChatExceptionHandler {
-    @ExceptionHandler(TopicNotFoundException.class)
+    @ExceptionHandler(ChatManageException.class)
     public ResponseEntity<?> handleChatException(ChatManageException ex) {
         ErrorResponse errorResponse = new ErrorResponse(ex.getErrorCode(), ex.getMessage());
         return new ResponseEntity<>(errorResponse, ex.getErrorCode().getHttpStatus());
