@@ -1,11 +1,12 @@
-package com.onebucket.global.exceptionManage.customException.chatManageException;
+package com.onebucket.global.exceptionManage.customException.chatManageException.Exceptions;
 
+import com.onebucket.global.exceptionManage.customException.chatManageException.ChatManageException;
 import com.onebucket.global.exceptionManage.errorCode.ChatErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.ErrorCode;
 
 /**
  * <br>package name   : com.onebucket.global.exceptionManage.customException.chatManageException
- * <br>file name      : RoomNotFoundException
+ * <br>file name      : TopicNotFoundException
  * <br>date           : 2024-07-08
  * <pre>
  * <span style="color: white;">[description]</span>
@@ -24,8 +25,7 @@ import com.onebucket.global.exceptionManage.errorCode.ErrorCode;
  * 2024-07-08        SeungHoon              init create
  * </pre>
  */
-public class RoomNotFoundException extends ChatManageException{
-    public RoomNotFoundException(ChatErrorCode chatErrorCode) {super(chatErrorCode);}
-
-    public RoomNotFoundException(ErrorCode errorCode,String message) {super(errorCode,message);}
+public class TopicNotFoundException extends ChatManageException {
+    public TopicNotFoundException(ChatErrorCode chatErrorCode) {super(chatErrorCode);}
+    public TopicNotFoundException(ErrorCode errorCode,String message) {super(errorCode,message);}
 }
