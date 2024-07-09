@@ -31,6 +31,11 @@ public enum ChatErrorCode implements ErrorCode {
 
     NOT_EXIST_TOPIC("3001",HttpStatus.NOT_FOUND,"Can't find topic"),
     NOT_EXIST_ROOM("3002",HttpStatus.NOT_FOUND,"Can't find ChatRoom"),
+    NOT_EXIST_Directory("3003",HttpStatus.NOT_FOUND,"Can't find directory"),
+    MESSAGING_ERROR("3004", HttpStatus.INTERNAL_SERVER_ERROR, "Fail to send message"),
+    INVALID_JSON_FORMAT("3005", HttpStatus.BAD_REQUEST, "Invalid JSON format"),
+    INTERNAL_ERROR("3006", HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error"),
+    SAVE_LOG_FAILED("3007", HttpStatus.INTERNAL_SERVER_ERROR, "Save log failed"),
     ;
 
     private final String code;
