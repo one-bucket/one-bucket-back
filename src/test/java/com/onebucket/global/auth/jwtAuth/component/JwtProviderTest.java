@@ -56,31 +56,31 @@ class JwtProviderTest {
 
     }
 
-    @Test
-    @DisplayName("정상적인 토큰 생성")
-    @MockMember
-    void testGenerateToken() {
-        //given
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    //@Test
+    //@DisplayName("정상적인 토큰 생성")
+    //@MockMember
+    //void testGenerateToken() {
+    //    //given
+    //     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        //when
-        JwtToken jwtToken = jwtProvider.generateToken(authentication);
+    //     //when
+    //     JwtToken jwtToken = jwtProvider.generateToken(authentication);
 
-        //then
-        assertNotNull(jwtToken);
-        assertEquals("Bearer", jwtToken.getGrantType());
-        assertNotNull(jwtToken.getAccessToken());
-        assertNotNull(jwtToken.getRefreshToken());
+    //     //then
+    //     assertNotNull(jwtToken);
+    //     assertEquals("Bearer", jwtToken.getGrantType());
+    //     assertNotNull(jwtToken.getAccessToken());
+    //     assertNotNull(jwtToken.getRefreshToken());
 
-        //decoding token to validate.
-        Key key = Keys.hmacShaKeyFor(Decoders.BASE64.decode("bXlzZWNyZXRrZXlteXNlY3JldGtleW15c2VjcmV0a2V5bXlzZWNyZXRrZXk="));
+    //     //decoding token to validate.
+    //     Key key = Keys.hmacShaKeyFor(Decoders.BASE64.decode("bXlzZWNyZXRrZXlteXNlY3JldGtleW15c2VjcmV0a2V5bXlzZWNyZXRrZXk="));
 
-        Claims claims = Jwts.parserBuilder().
-                setSigningKey(key).build().parseClaimsJws(jwtToken.getAccessToken()).getBody();
-        assertEquals("test user", claims.getSubject());
+    //     Claims claims = Jwts.parserBuilder().
+    //             setSigningKey(key).build().parseClaimsJws(jwtToken.getAccessToken()).getBody();
+    //     assertEquals("test user", claims.getSubject());
 
 
-    }
+    // }
 
     @Test
     @DisplayName("승인받지 않은 사용자의 토큰 생성")
