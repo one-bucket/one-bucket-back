@@ -1,21 +1,18 @@
 package com.onebucket.domain.chatManage.controller;
 
-import com.onebucket.domain.chatManage.ChatLogManager;
 import com.onebucket.domain.chatManage.domain.ChatMessage;
 import com.onebucket.domain.chatManage.pubsub.RedisPublisher;
 import com.onebucket.domain.chatManage.service.ChatMessageService;
 import com.onebucket.domain.chatManage.service.ChatRoomService;
+import com.onebucket.global.utils.ChatLogUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.util.List;
@@ -47,7 +44,7 @@ import java.util.List;
 public class ChatMessageController {
     private final ChatMessageService chatMessageService;
     private final ChatRoomService chatRoomService;
-    private final ChatLogManager chatLogManager;
+    private final ChatLogUtil chatLogUtil;
     private final RedisPublisher redisPublisher;
 
     /**
@@ -63,7 +60,7 @@ public class ChatMessageController {
         // 채팅을 입력하는 경우 메세지를 redis에 저장해야함.
         if(ChatMessage.MessageType.TALK.equals(chatMessage.getType())) {
             chatMessageService.saveChatMessage(chatMessage);
-            chatLogManager.saveChatLog(chatMessage);
+            chatLogUtil.saveChatLog(chatMessage);
         }
         // 기존 유저가 입장하는 경우(Join), 아무것도 출력하지않음.
         // Websocket에 발행된 메세지를 redis로 발행한다.
