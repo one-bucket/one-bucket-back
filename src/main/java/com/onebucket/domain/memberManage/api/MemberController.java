@@ -1,6 +1,5 @@
 package com.onebucket.domain.memberManage.api;
 
-import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.domain.memberManage.domain.Profile;
 import com.onebucket.domain.memberManage.dto.*;
@@ -8,7 +7,6 @@ import com.onebucket.domain.memberManage.service.MemberService;
 import com.onebucket.domain.memberManage.service.ProfileService;
 import com.onebucket.global.utils.SecurityUtils;
 import jakarta.validation.Valid;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -47,7 +45,6 @@ public class MemberController {
     private final MemberService memberService;
     private final ProfileService profileService;
     private final SecurityUtils securityUtils;
-    private final MemberRepository memberRepository;
 
     /**
      * 사용자가 비밀번호를 잊었을 때, 임시 비밀번호를 설정한다.
@@ -91,8 +88,8 @@ public class MemberController {
      * @param id url 에 포함되어 있다.
      * @return nickname 에 대한 dto
      */
-    @GetMapping("/member/{id}/nickname/")
-    public ResponseEntity<NicknameRequestDto> getNickname(@PathVariable("id") long id) {
+    @GetMapping("/member/{id}/nickname")
+    public ResponseEntity<NicknameRequestDto> getNickname(@PathVariable("id") Long id) {
         String nickname = memberService.idToNickname(id);
         NicknameRequestDto result = new NicknameRequestDto(nickname);
         return ResponseEntity.ok(result);

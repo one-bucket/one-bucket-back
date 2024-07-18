@@ -2,8 +2,7 @@ package com.onebucket.domain.memberManage.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.onebucket.domain.memberManage.dto.ReadProfileDto;
-import com.onebucket.domain.memberManage.dto.UpdateProfileDto;
+import com.onebucket.domain.memberManage.dto.*;
 import com.onebucket.domain.memberManage.service.MemberService;
 import com.onebucket.domain.memberManage.service.ProfileService;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
@@ -22,6 +21,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -29,6 +29,7 @@ import static com.onebucket.testComponent.JsonFieldResultMatcher.hasKey;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
@@ -68,16 +69,126 @@ class MemberControllerTest {
                 .build();
     }
 
+    //-+-+-+-+-+-+]] resetPassword test [[-+-+-+-+-+-+
+    @Test
+    @DisplayName("resetPassword - success")
+    void testResetPassword_success() throws Exception {
+        when(securityUtils.getCurrentUsername()).thenReturn("username");
+        mockMvc.perform(post("/member/password/reset")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect((hasKey("success reset password")));
+
+        verify(memberService,  times(1)).changePassword("username");
+    }
+
+    @Test
+    @DisplayName("resetPassword - fail / unknown username")
+    void testResetPassword_fail_unknownUser() throws Exception {
+        AuthenticationException exception = new AuthenticationException(AuthenticationErrorCode.NON_EXIST_AUTHENTICATION);
+        when(securityUtils.getCurrentUsername()).thenThrow(exception);
+
+        mockMvc.perform(post("/member/password/reset")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized())
+                .andExpect(hasKey(AuthenticationErrorCode.NON_EXIST_AUTHENTICATION));
+    }
+
+    //-+-+-+-+-+-+]] resetPassword test [[-+-+-+-+-+-+
+    @Test
+    @DisplayName("setPassword - success")
+    void testSetPassword_success() throws Exception {
+        SetPasswordDto dto = new SetPasswordDto("newPassword");
+        when(securityUtils.getCurrentUsername()).thenReturn("username");
+        mockMvc.perform(post("/member/password/set")
+                .contentType(MediaType.APPLICATION_JSON)
+                .characterEncoding(StandardCharsets.UTF_8)
+                .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isOk())
+                .andExpect(hasKey("success set password"));
+
+        verify(memberService, times(1)).changePassword("username", "newPassword");
+    }
+
+    //-+-+-+-+-+-+]] setNickname test [[-+-+-+-+-+-+
+    @Test
+    @DisplayName("setNickname - success")
+    void testSetNickname_success() throws Exception {
+        NicknameRequestDto dto = new NicknameRequestDto("nickname");
+        when(securityUtils.getCurrentUsername()).thenReturn("username");
+
+        mockMvc.perform(post("/member/nickname/set")
+                .contentType(MediaType.APPLICATION_JSON)
+                .characterEncoding(StandardCharsets.UTF_8)
+                .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isOk())
+                .andExpect(hasKey("success set nickname"));
+
+        verify(memberService).updateMember(eq("username"), any(NicknameRequestDto.class));
+    }
+
+    //-+-+-+-+-+-+]] getNickname test [[-+-+-+-+-+-+
+    @Test
+    @DisplayName("getNickname - success")
+    void testGetNickname_success () throws Exception {
+        Long memberId = 1L;
+        String expectedNickname = "john";
+
+        when(memberService.idToNickname(memberId)).thenReturn(expectedNickname);
+
+        mockMvc.perform(get("/member/{id}/nickname", memberId)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(hasKey(new NicknameRequestDto("john")));
+    }
+
+    //-+-+-+-+-+-+]] getMemberInfo test [[-+-+-+-+-+-+
+    @Test
+    @DisplayName("getMemberInfo - success")
+    void testGetMemberInfo_success() throws Exception {
+        ReadMemberInfoDto dto = ReadMemberInfoDto.builder()
+                .username("username")
+                .nickname("nickname")
+                .university("university")
+                .build();
+        when(securityUtils.getCurrentUsername()).thenReturn("username");
+        when(memberService.readMember("username")).thenReturn(dto);
+
+        mockMvc.perform(get("/member/info"))
+                .andExpect(status().isOk())
+                .andExpect(hasKey(dto));
+
+    }
+
+    @Test
+    @DisplayName("getMemberInfo - success / university is null")
+    void testGetMemberInfo_success_nullUniv() throws Exception {
+        ReadMemberInfoDto dto = ReadMemberInfoDto.builder()
+                .username("username")
+                .nickname("nickname")
+                .university("null") //실제로 member 엔티티에 university 필드가 null 이라면 이를 "null"로 변환해준다.
+                .build();
+
+        when(securityUtils.getCurrentUsername()).thenReturn("username");
+        when(memberService.readMember("username")).thenReturn(dto);
+
+        mockMvc.perform(get("/member/info"))
+                .andExpect(status().isOk())
+                .andExpect(hasKey(dto));
+    }
+
     //-+-+-+-+-+-+]] updateProfile test [[-+-+-+-+-+-+
     @Test
-    @DisplayName("정상적인 프로필 갱신")
+    @DisplayName("updateProfile - success")
     void testUpdateProfile_success() throws Exception {
+
         //given
         UpdateProfileDto dto = UpdateProfileDto.builder()
                 .name("test user")
                 .gender("man")
                 .age(20)
-                .birth(LocalDate.of(1999,8,20))
+                .birth(LocalDate.of(1999, 8, 20))
                 .description("test description")
                 .build();
 
@@ -85,8 +196,9 @@ class MemberControllerTest {
         when(memberService.usernameToId("username")).thenReturn(1L);
 
         mockMvc.perform(post("/profile/update")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(dto)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
                 .andExpect(result ->
                         assertEquals("success update profile", result.getResponse().getContentAsString()));
@@ -96,7 +208,7 @@ class MemberControllerTest {
     }
 
     @Test
-    @DisplayName("비정상적인 프로필 갱신 - 유저 찾을 수 없음")
+    @DisplayName("updateProfile - fail / unknown user")
     void testUpdateProfile_fail_unknownUser() throws Exception {
         //given
         UpdateProfileDto dto = UpdateProfileDto.builder()
@@ -122,7 +234,7 @@ class MemberControllerTest {
     }
 
     @Test
-    @DisplayName("비정상적인 프로필 갱신 - 프로필을 찾을 수 없음")
+    @DisplayName("updateProfile - fail / unknown profile")
     void testUpdateProfile_fail_unknownProfile() throws Exception {
         //given
         UpdateProfileDto dto = UpdateProfileDto.builder()
@@ -153,7 +265,7 @@ class MemberControllerTest {
     //객체 내 동일한 메서드를 의존하므로 이 역시도 생략함.
 
     @Test
-    @DisplayName("정상적인 이미지 업데이트")
+    @DisplayName("updateImage - success")
     void testUpdateImage_success() throws Exception {
         //given
         MockMultipartFile mockFile = new MockMultipartFile(
@@ -185,7 +297,7 @@ class MemberControllerTest {
 
     //-+-+-+-+-+-+]] getImage test [[-+-+-+-+-+-+
     @Test
-    @DisplayName("정상적인 이미지 반환")
+    @DisplayName("getImage - success")
     void testGetImage_success() throws Exception {
         //given
         byte[] imageBytes = "test image content".getBytes();
@@ -201,7 +313,7 @@ class MemberControllerTest {
     }
 
     @Test
-    @DisplayName("비정상적인 이미지 변환 - minio 관련 예외")
+    @DisplayName("getImage - fail / minio exception")
     void testGetImage_fail_minioError() throws Exception {
         when(securityUtils.getCurrentUsername()).thenReturn("username");
         when(memberService.usernameToId("username")).thenReturn(1L);
@@ -216,7 +328,7 @@ class MemberControllerTest {
 
     //-+-+-+-+-+-+]] getProfile test [[-+-+-+-+-+-+
     @Test
-    @DisplayName("정상적인 프로필 호출")
+    @DisplayName("getProfile - success")
     void testGetProfile_success() throws Exception {
         ReadProfileDto dto = ReadProfileDto.builder()
                 .name("test user")
@@ -239,8 +351,8 @@ class MemberControllerTest {
     }
 
     @Test
-    @DisplayName("비정상적인 프로필 호출 - 프로필 없음")
-    void testProfile_fail_unknownProfile() throws Exception {
+    @DisplayName("getProfile - fail / unknown profile")
+    void testGetProfile_fail_unknownProfile() throws Exception {
         when(securityUtils.getCurrentUsername()).thenReturn("username");
         when(memberService.usernameToId("username")).thenReturn(1L);
         AuthenticationException exception = new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER_PROFILE);

@@ -56,7 +56,11 @@ public class MemberServiceImpl implements MemberService {
     public ReadMemberInfoDto readMember(String username) {
         Member member = memberRepository.findByUsername(username)
                 .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
-        return new ReadMemberInfoDto(username, member.getNickname(), member.getUniversity().getName());
+        String universityName = member.getUniversity().getName();
+        if(universityName == null ) {
+            universityName = "null";
+        }
+        return new ReadMemberInfoDto(username, member.getNickname(), universityName);
     }
 
     @Override

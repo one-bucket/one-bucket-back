@@ -1,7 +1,7 @@
 package com.onebucket.domain.memberManage.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import jakarta.validation.constraints.NotBlank;
+import lombok.*;
 
 /**
  * <br>package name   : com.onebucket.domain.memberManage.dto
@@ -15,7 +15,9 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 public class SetPasswordDto {
 
+    @NotBlank(message = "password must not be empty")
     private String password;
 }
