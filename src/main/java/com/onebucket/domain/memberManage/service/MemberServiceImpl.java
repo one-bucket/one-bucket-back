@@ -5,11 +5,11 @@ import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.domain.memberManage.dto.CreateMemberRequestDto;
 import com.onebucket.domain.memberManage.dto.NicknameRequestDto;
 import com.onebucket.domain.memberManage.dto.ReadMemberInfoDto;
+import com.onebucket.domain.universityManage.domain.University;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import com.onebucket.global.utils.RandomStringUtils;
 import jakarta.transaction.Transactional;
-import lombok.Locked;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -56,7 +56,7 @@ public class MemberServiceImpl implements MemberService {
     public ReadMemberInfoDto readMember(String username) {
         Member member = memberRepository.findByUsername(username)
                 .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
-        return new ReadMemberInfoDto(username, member.getNickname());
+        return new ReadMemberInfoDto(username, member.getNickname(), member.getUniversity().getName());
     }
 
     @Override
@@ -108,6 +108,12 @@ public class MemberServiceImpl implements MemberService {
     public String idToNickname(Long id) {
         return memberRepository.findNicknameById(id)
                 .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
+    }
+
+    @Override
+    public University usernameToUniversity(String username) {
+        return memberRepository.findByUsername(username)
+                .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER)).getUniversity();
     }
 
 
