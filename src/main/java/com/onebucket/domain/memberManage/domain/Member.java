@@ -57,12 +57,7 @@ public class Member {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "university_id")
-    @Builder.Default
-    private University university = University.builder()
-            .name("invalid")
-            .address("invalid")
-            .email("invalid")
-            .build();
+    private University university;
 
     @ElementCollection(fetch=FetchType.EAGER)
     @Builder.Default
