@@ -31,4 +31,5 @@ import lombok.NoArgsConstructor;
 public class ReadMemberInfoDto {
     private String username;
     private String nickname;
+    private String university;
 }
