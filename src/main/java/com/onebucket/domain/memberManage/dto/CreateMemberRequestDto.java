@@ -37,4 +37,5 @@ public class CreateMemberRequestDto {
 
     @NotBlank(message = "nickname must not be empty")
     private String nickname;
+
 }
