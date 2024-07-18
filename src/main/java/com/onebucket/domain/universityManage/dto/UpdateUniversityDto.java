@@ -7,8 +7,8 @@ import lombok.Setter;
 
 /**
  * <br>package name   : com.onebucket.domain.universityManage.dto
- * <br>file name      : UpdateUniversityEmailDto
- * <br>date           : 2024-07-08
+ * <br>file name      : UpdateUniversityDto
+ * <br>date           : 2024-07-18
  * <pre>
  * <span style="color: white;">[description]</span>
  *
@@ -23,13 +23,13 @@ import lombok.Setter;
  * =======================================================
  * DATE           AUTHOR               NOTE
  * -------------------------------------------------------
- * 2024-07-08        SeungHoon              init create
+ * 2024-07-18        SeungHoon              init create
  * </pre>
  */
-@Getter
-@Setter
 @Builder
-public class UpdateUniversityEmailDto {
-    @NotBlank(message = "email can't be empty")
+@Getter
+public class UpdateUniversityDto {
+
+    private String address;
     private String email;
 }

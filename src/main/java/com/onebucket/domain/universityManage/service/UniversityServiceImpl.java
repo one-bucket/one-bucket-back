@@ -4,10 +4,10 @@ import com.onebucket.domain.universityManage.dao.UniversityRepository;
 import com.onebucket.domain.universityManage.domain.University;
 import com.onebucket.domain.universityManage.dto.CreateUniversityDto;
 import com.onebucket.domain.universityManage.dto.ResponseUniversityDto;
-import com.onebucket.domain.universityManage.dto.UpdateUniversityAddressDto;
-import com.onebucket.domain.universityManage.dto.UpdateUniversityEmailDto;
+import com.onebucket.domain.universityManage.dto.UpdateUniversityDto;
 import com.onebucket.global.exceptionManage.customException.universityManageException.UniversityException;
 import com.onebucket.global.exceptionManage.errorCode.UniversityErrorCode;
+import com.onebucket.global.utils.EntityUtils;
 import com.onebucket.global.utils.UniversityEmailValidator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -106,29 +106,18 @@ public class UniversityServiceImpl implements UniversityService {
     }
 
     /**
-     * 이메일을 바꾸기
+     * 대학 정보 업데이트하기.
      * @param id
-     * @param updateUniversityAddressDto
+     * @param dto
      */
     @Override
     @Transactional
-    public void updateUniversityAddress(Long id, UpdateUniversityAddressDto updateUniversityAddressDto) {
+    public void updateUniversity(Long id, UpdateUniversityDto dto) {
         University university = universityRepository.findById(id)
                 .orElseThrow(()->new UniversityException(UniversityErrorCode.NOT_EXIST_UNIVERSITY));
-        university.setAddress(updateUniversityAddressDto.getAddress());
-    }
 
-    /**
-     * 이메일을 바꾸기
-     * @param id
-     * @param updateUniversityEmailDto
-     */
-    @Override
-    @Transactional
-    public void updateUniversityEmail(Long id, UpdateUniversityEmailDto updateUniversityEmailDto) {
-        University university = universityRepository.findById(id)
-                .orElseThrow(()->new UniversityException(UniversityErrorCode.NOT_EXIST_UNIVERSITY));
-        university.setEmail(updateUniversityEmailDto.getEmail());
+        EntityUtils.updateIfNotNull(dto.getAddress(),university::setAddress);
+        EntityUtils.updateIfNotNull(dto.getEmail(),university::setEmail);
     }
 
     /**

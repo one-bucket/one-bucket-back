@@ -1,10 +1,8 @@
 package com.onebucket.domain.universityManage.service;
 
-import com.onebucket.domain.universityManage.domain.University;
 import com.onebucket.domain.universityManage.dto.CreateUniversityDto;
 import com.onebucket.domain.universityManage.dto.ResponseUniversityDto;
-import com.onebucket.domain.universityManage.dto.UpdateUniversityAddressDto;
-import com.onebucket.domain.universityManage.dto.UpdateUniversityEmailDto;
+import com.onebucket.domain.universityManage.dto.UpdateUniversityDto;
 
 import java.util.List;
 
@@ -33,7 +31,6 @@ public interface UniversityService {
     Long createUniversity(CreateUniversityDto createUniversityDto);
     List<ResponseUniversityDto> findAllUniversity();
     ResponseUniversityDto getUniversity(Long id);
-    void updateUniversityAddress(Long id, UpdateUniversityAddressDto updateUniversityAddressDto);
-    void updateUniversityEmail(Long id, UpdateUniversityEmailDto updateUniversityEmailDto);
+    void updateUniversity(Long id, UpdateUniversityDto dto);
     void deleteUniversity(Long id);
 }

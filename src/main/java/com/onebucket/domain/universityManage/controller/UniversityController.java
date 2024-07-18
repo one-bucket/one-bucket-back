@@ -61,16 +61,10 @@ public class UniversityController {
         return ResponseEntity.ok(universityDto);
     }
 
-    @PatchMapping("/univs/{id}/email")
-    public ResponseEntity<?> updateUniversityEmail(@PathVariable Long id, @Valid @RequestBody UpdateUniversityEmailDto updateUniversityEmailDto) {
-        universityService.updateUniversityEmail(id,updateUniversityEmailDto);
+    @PatchMapping("/univs/{id}")
+    public ResponseEntity<?> updateUniversityEmail(@PathVariable Long id, @Valid @RequestBody UpdateUniversityDto dto) {
+        universityService.updateUniversity(id,dto);
         return ResponseEntity.ok("update email success");
-    }
-
-    @PatchMapping("/univs/{id}/address")
-    public ResponseEntity<?> updateUniversityAddress(@PathVariable Long id, @Valid @RequestBody UpdateUniversityAddressDto updateUniversityAddressDto) {
-        universityService.updateUniversityAddress(id,updateUniversityAddressDto);
-        return ResponseEntity.ok("update address success");
     }
 
     @DeleteMapping("/univs/{id}")
