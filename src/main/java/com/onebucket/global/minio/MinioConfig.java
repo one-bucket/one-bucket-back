@@ -31,7 +31,7 @@ public class MinioConfig {
     @Bean
     public MinioClient minioClient() {
         return MinioClient.builder()
-                .endpoint("http://jack8226.ddns.net:3005/")
+                .endpoint("http://jack8226.ddns.net:3100/")
                 .credentials("jack8226", "m7128226")
                 .build();
     }
