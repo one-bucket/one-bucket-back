@@ -2,6 +2,8 @@ package com.onebucket.domain.boardManage.entity;
 
 import com.onebucket.domain.universityManage.domain.University;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -29,7 +31,12 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "board", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"university_id", "name"})
+})
 public class Board {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -1,8 +1,11 @@
 package com.onebucket.domain.boardManage.entity.post;
 
 import com.onebucket.domain.boardManage.entity.Board;
+import com.onebucket.domain.boardManage.entity.Comment;
 import com.onebucket.domain.memberManage.domain.Member;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
@@ -10,6 +13,8 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <br>package name   : com.onebucket.domain.boardManage.entity
@@ -34,7 +39,9 @@ import java.time.LocalDateTime;
  */
 @Getter
 @Entity
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 public class Post {
 
@@ -54,6 +61,19 @@ public class Post {
     @Column(columnDefinition = "TEXT")
     private String text;
 
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
+
+    public void addComment(Comment comment) {
+        comments.add(comment);
+        comment.setPost(this);
+    }
+
+    public void deleteComment(Comment comment) {
+        comments.remove(comment);
+        comment.setPost(null);
+    }
 
 
     @CreatedDate

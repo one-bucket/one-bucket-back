@@ -5,6 +5,7 @@ import com.onebucket.domain.memberManage.domain.Member;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -42,8 +43,9 @@ public class Comment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
+    @Setter
     private Post post;
 
     @OneToOne
@@ -51,7 +53,7 @@ public class Comment {
     private Member author;
 
     @Column(columnDefinition = "TEXT")
-    private String content;
+    private String text;
 
     @CreatedDate
     private LocalDateTime localDateTime;

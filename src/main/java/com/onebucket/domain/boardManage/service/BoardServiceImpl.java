@@ -1,7 +1,14 @@
 package com.onebucket.domain.boardManage.service;
 
 import com.onebucket.domain.boardManage.dao.BoardRepository;
+import com.onebucket.domain.boardManage.dto.CreateBoardDto;
+import com.onebucket.domain.boardManage.entity.Board;
+import com.onebucket.domain.boardManage.entity.BoardType;
+import com.onebucket.domain.universityManage.domain.University;
+import com.onebucket.global.exceptionManage.customException.boardManageException.AdminManageBoardException;
+import com.onebucket.global.exceptionManage.errorCode.BoardErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 /**
@@ -28,10 +35,24 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class BoardServiceImpl {
+public class BoardServiceImpl implements BoardService {
 
     private final BoardRepository boardRepository;
 
+    @Override
+    public void createBoard(CreateBoardDto createBoardDto) {
+        Board newBoard = Board.builder()
+                .university(createBoardDto.getUniversity())
+                .boardType(createBoardDto.getBoardType())
+                .name(createBoardDto.getName())
+                .description(createBoardDto.getDescription())
+                .build();
 
+        try {
+            boardRepository.save(newBoard);
+        }catch (DataIntegrityViolationException e) {
+            throw new AdminManageBoardException(BoardErrorCode.DUPLICATE_BOARD);
+        }
 
+    }
 }

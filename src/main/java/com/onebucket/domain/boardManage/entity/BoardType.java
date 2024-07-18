@@ -1,16 +1,15 @@
 package com.onebucket.domain.boardManage.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
  * <br>package name   : com.onebucket.domain.boardManage.entity
  * <br>file name      : BoardType
- * <br>date           : 2024-07-12
+ * <br>date           : 2024-07-18
  * <pre>
  * <span style="color: white;">[description]</span>
  *
@@ -25,13 +24,14 @@ import lombok.NoArgsConstructor;
  * ====================================================
  * DATE           AUTHOR               NOTE
  * ----------------------------------------------------
- * 2024-07-12        jack8              init create
+ * 2024-07-18        jack8              init create
  * </pre>
  */
 
 @Entity
-@Getter
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class BoardType {
 
     @Id
@@ -39,4 +39,7 @@ public class BoardType {
     private Long id;
 
     private String name;
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
 }

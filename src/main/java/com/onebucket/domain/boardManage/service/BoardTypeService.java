@@ -1,12 +1,8 @@
-package com.onebucket.domain.boardManage.dao;
-
-import com.onebucket.domain.boardManage.entity.BoardType;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+package com.onebucket.domain.boardManage.service;
 
 /**
- * <br>package name   : com.onebucket.domain.boardManage.dao
- * <br>file name      : BoardTypeRepository
+ * <br>package name   : com.onebucket.domain.boardManage.service
+ * <br>file name      : BoardTypeService
  * <br>date           : 2024-07-18
  * <pre>
  * <span style="color: white;">[description]</span>
@@ -25,6 +21,6 @@ import org.springframework.stereotype.Repository;
  * 2024-07-18        jack8              init create
  * </pre>
  */
-@Repository
-public interface BoardTypeRepository extends JpaRepository<BoardType, Long> {
+public interface BoardTypeService {
+    void createBoardType(String name, String description);
 }
