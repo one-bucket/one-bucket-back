@@ -130,7 +130,7 @@ class MemberControllerTest {
     @DisplayName("setPassword - success")
     void testSetPassword_success() throws Exception {
         String username = "username";
-        String password = "newPassword";
+        String password = "!1Password1!";
         SetPasswordDto dto = new SetPasswordDto(password);
         when(securityUtils.getCurrentUsername()).thenReturn(username);
         mockMvc.perform(post("/member/password/set")
@@ -152,7 +152,7 @@ class MemberControllerTest {
         AuthenticationException exception = new AuthenticationException(code, internalMessage);
         when(securityUtils.getCurrentUsername()).thenThrow(exception);
 
-        SetPasswordDto dto = new SetPasswordDto("password");
+        SetPasswordDto dto = new SetPasswordDto("!1Password1!");
 
         mockMvc.perform(post("/member/password/set")
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -168,7 +168,7 @@ class MemberControllerTest {
     @DisplayName("setPassword - fail / unknown username while change password")
     void testSetPassword_fail_unknownUser() throws Exception {
         String username = "username";
-        String password = "password";
+        String password = "!1Password1!";
         SetPasswordDto dto = new SetPasswordDto(password);
         AuthenticationErrorCode code = AuthenticationErrorCode.UNKNOWN_USER;
         AuthenticationException exception = new AuthenticationException(code);
@@ -204,6 +204,7 @@ class MemberControllerTest {
                 .andExpect(hasStatus(code))
                 .andExpect(hasKey(code))
                 .andExpect(content().string(containsString("password must not be empty")))
+                .andExpect(content().string(containsString("password must contain at least one uppercase letter, one lowercase letter, one number, and one special character")))
                 .andExpect(content().string(containsString("size of password must be over 8, under 20")));
 
         verify(memberService, never()).changePassword(anyString(), anyString());
