@@ -75,8 +75,8 @@ class RegisterControllerTest {
     void testRegister_success() throws Exception {
         //given
         CreateMemberRequestDto dto = CreateMemberRequestDto.builder()
-                .username("testuser")
-                .password("password")
+                .username("username")
+                .password("!1Password1!")
                 .nickname("nickname")
                 .build();
 
