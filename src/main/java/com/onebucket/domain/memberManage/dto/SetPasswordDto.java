@@ -1,6 +1,7 @@
 package com.onebucket.domain.memberManage.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 /**
@@ -19,5 +20,6 @@ import lombok.*;
 public class SetPasswordDto {
 
     @NotBlank(message = "password must not be empty")
+    @Size(min = 8, max = 20, message = "size of password must be over 8, under 20")
     private String password;
 }
