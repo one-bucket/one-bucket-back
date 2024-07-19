@@ -8,7 +8,7 @@ import com.onebucket.domain.memberManage.service.ProfileService;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.ValidateErrorCode;
-import com.onebucket.global.exceptionManage.exceptionHandler.AuthenticationExceptionHandler;
+import com.onebucket.global.exceptionManage.exceptionHandler.BaseExceptionHandler;
 import com.onebucket.global.exceptionManage.exceptionHandler.DataExceptionHandler;
 import com.onebucket.global.utils.SecurityUtils;
 import com.onebucket.global.utils.SuccessResponseDto;
@@ -69,7 +69,7 @@ class MemberControllerTest {
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         mockMvc = MockMvcBuilders.standaloneSetup(memberController)
-                .setControllerAdvice(new AuthenticationExceptionHandler(), new DataExceptionHandler())
+                .setControllerAdvice(new BaseExceptionHandler(), new DataExceptionHandler())
                 .build();
     }
 
