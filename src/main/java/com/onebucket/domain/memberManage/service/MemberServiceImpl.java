@@ -15,6 +15,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 
 /**
  * <br>package name   : com.onebucket.domain.service
@@ -56,10 +58,9 @@ public class MemberServiceImpl implements MemberService {
     public ReadMemberInfoDto readMember(String username) {
         Member member = memberRepository.findByUsername(username)
                 .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
-        String universityName = member.getUniversity().getName();
-        if(universityName == null ) {
-            universityName = "null";
-        }
+        String universityName = Optional.ofNullable(member.getUniversity())
+                .map(University::getName)
+                .orElse("null");
         return new ReadMemberInfoDto(username, member.getNickname(), universityName);
     }
 
@@ -69,7 +70,11 @@ public class MemberServiceImpl implements MemberService {
                 .orElseThrow(()-> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
 
         member.setNickname(nicknameRequestDTO.getNickname());
-        memberRepository.save(member);
+        try {
+            memberRepository.save(member);
+        } catch(DataIntegrityViolationException e) {
+            throw new AuthenticationException(AuthenticationErrorCode.DUPLICATE_USER, "nickname duplicate");
+        }
     }
 
     @Override
@@ -116,8 +121,14 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public University usernameToUniversity(String username) {
-        return memberRepository.findByUsername(username)
-                .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER)).getUniversity();
+        University university = University.builder()
+                .name("null")
+                .email("null")
+                .address("null")
+                .build();
+        return Optional.ofNullable(memberRepository.findByUsername(username)
+                .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER)).getUniversity())
+                .orElse(university);
     }
 
 
