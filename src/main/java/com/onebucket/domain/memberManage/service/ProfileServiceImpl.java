@@ -72,6 +72,7 @@ public class ProfileServiceImpl implements ProfileService {
             profileRepository.save(profile);
             Member member = memberRepository.findById(id).orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
             member.setProfile(profile);
+            memberRepository.save(member);
         } catch(DataIntegrityViolationException e) {
             throw new AuthenticationException(AuthenticationErrorCode.DUPLICATE_PROFILE);
         }
@@ -103,7 +104,7 @@ public class ProfileServiceImpl implements ProfileService {
         if(profile.isBasicImage()) {
             fileName ="/profile/basic_profile_image";
         } else {
-            fileName = "profile/" + id + "/profile_image";
+            fileName = "/profile/" + id + "/profile_image";
         }
         MinioSaveInfoDto dto = MinioSaveInfoDto.builder()
                 .bucketName(bucketName)
@@ -116,8 +117,6 @@ public class ProfileServiceImpl implements ProfileService {
         } catch(Exception e) {
             throw new AuthenticationException(AuthenticationErrorCode.PROFILE_IMAGE_ERROR, e.getMessage());
         }
-
-
     }
 
     @Override
@@ -142,13 +141,15 @@ public class ProfileServiceImpl implements ProfileService {
                 .fileName("profile/" + id + "/" + "profile_image")
                 .fileExtension("png")
                 .build();
-        minioRepository.uploadFile(file, minioDto);
 
-
-        profile.setBasicImage(false);
-        profile.setUpdateAt(LocalDateTime.now());
-        profileRepository.save(profile);
-
+        try {
+            minioRepository.uploadFile(file, minioDto);
+            profile.setBasicImage(false);
+            profile.setUpdateAt(LocalDateTime.now());
+            profileRepository.save(profile);
+        } catch(Exception e) {
+            throw new AuthenticationException(AuthenticationErrorCode.PROFILE_IMAGE_ERROR, e.getMessage());
+        }
     }
 
     @Override
