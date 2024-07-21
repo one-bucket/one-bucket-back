@@ -4,13 +4,17 @@ import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.domain.memberManage.dto.CreateMemberRequestDto;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import com.onebucket.domain.memberManage.dto.NicknameRequestDto;
+import com.onebucket.domain.memberManage.dto.ReadMemberInfoDto;
+import com.onebucket.domain.universityManage.domain.University;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
+import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import com.onebucket.global.utils.RandomStringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -36,79 +40,136 @@ public class MemberServiceTest {
     private Member mockMember;
 
     @Mock
+    private University mockUniversity;
+
+    @Mock
     private RandomStringUtils randomStringUtils;
     @InjectMocks
     private MemberServiceImpl memberService;
 
 
-
     private CreateMemberRequestDto getDto() {
-        return  CreateMemberRequestDto.builder()
-                .username("testuser")
-                .password("password")
+        return CreateMemberRequestDto.builder()
+                .username("username")
+                .password("!1password1!")
                 .nickname("nickname")
                 .build();
     }
 
     @BeforeEach
     void setUp() {
-        lenient().when(passwordEncoder.encode(anyString())).thenReturn("password");
+
     }
+
+    //-+-+-+-+-+-+]] createMember test [[-+-+-+-+-+-+
     @Test
-    @DisplayName("멤버 생성 성공")
+    @DisplayName("createMember - success")
     void testCreateMember_success() {
         //given
         CreateMemberRequestDto dto = getDto();
 
+        when(passwordEncoder.encode(anyString())).thenReturn("password");
         when(memberRepository.save(any(Member.class))).thenReturn(mockMember);
         when(mockMember.getId()).thenReturn(1L);
 
         //when
         Long id = memberService.createMember(dto);
-        assertEquals(id, 1L);
 
         //then
+        assertThat(id).isEqualTo(1L);
         verify(memberRepository).save(any(Member.class));
     }
 
     @Test
-    @DisplayName("멤버 생성 실패 - 중복된 유저")
-    void testCreateMember_fail() {
+    @DisplayName("createMember - fail / duplicate user")
+    void testCreateMember_fail_duplicateUser() {
         //given
         CreateMemberRequestDto dto = getDto();
 
+        when(passwordEncoder.encode(anyString())).thenReturn("password");
         doThrow(DataIntegrityViolationException.class).when(memberRepository).save(any(Member.class));
 
-        assertThrows(AuthenticationException.class ,() ->
-            memberService.createMember(dto)
-        );
+
+        assertThatThrownBy(() -> memberService.createMember(dto))
+                .isInstanceOf(AuthenticationException.class)
+                .hasMessageContaining("username or nickname already exist.")
+                .extracting("errorCode")
+                .isEqualTo(AuthenticationErrorCode.DUPLICATE_USER);
+    }
+
+    //-+-+-+-+-+-+]] readMember test [[-+-+-+-+-+-+
+    @Test
+    @DisplayName("readMember - success")
+    void testReadMember_success() {
+        String username = "username";
+        String nickname = "nickname";
+        String university = "university";
+        when(memberRepository.findByUsername(username)).thenReturn(Optional.of(mockMember));
+        when(mockMember.getUniversity()).thenReturn(mockUniversity);
+        when(mockMember.getNickname()).thenReturn(nickname);
+        when(mockUniversity.getName()).thenReturn(university);
+
+        ReadMemberInfoDto result = memberService.readMember(username);
+
+        assertEquals(username, result.getUsername());
+        assertEquals(nickname, result.getNickname());
+        assertEquals(university, result.getUniversity());
     }
 
     @Test
-    @DisplayName("멤버 업데이트 성공")
+    @DisplayName("readMember - success / university is null")
+    void testReadMember_success_universityNull() {
+        String username = "username";
+        String nickname = "nickname";
+        when(memberRepository.findByUsername(username)).thenReturn(Optional.of(mockMember));
+        when(mockMember.getUniversity()).thenReturn(null);
+        when(mockMember.getNickname()).thenReturn(nickname);
+
+        ReadMemberInfoDto result = memberService.readMember(username);
+
+        assertThat(result.getUsername()).isEqualTo(username);
+        assertThat(result.getUniversity()).isEqualTo("null");
+        assertThat(result.getNickname()).isEqualTo(nickname);
+    }
+
+    @Test
+    @DisplayName("readMember - fail / can't find user")
+    void testReadMember_fail_unknownUser() {
+        String username = "username";
+
+        when(memberRepository.findByUsername(username)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> memberService.readMember(username))
+                .isInstanceOf(AuthenticationException.class)
+                .extracting("errorCode")
+                .isEqualTo(AuthenticationErrorCode.UNKNOWN_USER);
+    }
+
+
+    //-+-+-+-+-+-+]] updateMember test [[-+-+-+-+-+-+
+    @Test
+    @DisplayName("updateMember - success")
     void testUpdateMember_success() {
+
         //given
-        String username = "testuser";
+        String username = "username";
         NicknameRequestDto dto = NicknameRequestDto.builder()
                 .nickname("nickname")
                 .build();
-        Member member = Member.builder()
-                .username(username)
-                .password("password")
-                .nickname("oldname")
-                .build();
 
-        when(memberRepository.findByUsername(username)).thenReturn(Optional.of(member));
+
+        when(memberRepository.findByUsername(username)).thenReturn(Optional.of(mockMember));
+
 
         //when
         memberService.updateMember(username, dto);
 
         //then
-        verify(memberRepository).save(member);
+        verify(memberRepository).save(mockMember);
     }
 
     @Test
-    @DisplayName("멤버 업데이트 실패 - 존재하지 않는 유저")
+    @DisplayName("updateMember - fail / can't find user")
     void testUpdateMember_fail_notExistUser() {
         //given
         String username = "nonExistentUser";
@@ -118,76 +179,185 @@ public class MemberServiceTest {
         when(memberRepository.findByUsername(username)).thenReturn(Optional.empty());
 
         //when & then
-        assertThrows(AuthenticationException.class, () ->
-            memberService.updateMember(username, dto)
-        );
+        assertThatThrownBy(() -> memberService.updateMember(username, dto))
+                .isInstanceOf(AuthenticationException.class)
+                .extracting("errorCode")
+                .isEqualTo(AuthenticationErrorCode.UNKNOWN_USER);
+
     }
 
     @Test
-    @DisplayName("멤버 업데이트 실패 - 중복된 닉네임 입력")
+    @DisplayName("updateMember - fail / duplicate nickname")
     void testUpdateMember_fail_duplicateNickname() {
         //given
         String username = "testuser";
         NicknameRequestDto dto = NicknameRequestDto.builder()
                 .nickname("nickname").build();
-        Member member = Member.builder()
-                .username(username)
-                .password("password")
-                .nickname("oldname")
-                .build();
 
-        when(memberRepository.findByUsername(username)).thenReturn(Optional.of(member));
+
+        when(memberRepository.findByUsername(username)).thenReturn(Optional.of(mockMember));
         doThrow(DataIntegrityViolationException.class).when(memberRepository).save(any(Member.class));
 
         //when & then
-        assertThrows(DataIntegrityViolationException.class, () ->
-            memberService.updateMember(username, dto)
-        );
+        assertThatThrownBy(() -> memberService.updateMember(username, dto))
+                .isInstanceOf(AuthenticationException.class)
+                .hasMessageContaining("nickname duplicate")
+                .extracting("errorCode")
+                .isEqualTo(AuthenticationErrorCode.DUPLICATE_USER);
+    }
+
+
+    //-+-+-+-+-+-+]] quitMember test [[-+-+-+-+-+-+
+    @Test
+    @DisplayName("quitMember - success")
+    void testQuitMember_success() {
+        String username = "username";
+
+        when(memberRepository.findByUsername(username)).thenReturn(Optional.of(mockMember));
+
+        memberService.quitMember(username);
+
+        verify(memberRepository, times(1)).save(mockMember);
     }
 
     @Test
-    @DisplayName("비밀번호 변경 성공 - 무작위 문자열로")
+    @DisplayName("quitMember - fail / unknown user")
+    void testQuitMember_fail_unknownUser() {
+        String username = "username";
+        when(memberRepository.findByUsername(username)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> memberService.quitMember(username))
+                .isInstanceOf(AuthenticationException.class)
+                .extracting("errorCode")
+                .isEqualTo(AuthenticationErrorCode.UNKNOWN_USER);
+
+        verify(memberRepository, never()).save(any(Member.class));
+    }
+
+    //-+-+-+-+-+-+]] changePassword test [[-+-+-+-+-+-+
+    @Test
+    @DisplayName("changePassword - success / to random string")
     void testChangePassword_success_randomString() {
         //given
         String username = "username";
-        Member member = Member.builder()
-                .username(username)
-                .password("oldPassword")
-                .nickname("nickname")
-                .build();
+        String password = "password";
 
-        when(memberRepository.findByUsername(username)).thenReturn(Optional.of(member));
-        when(randomStringUtils.generateRandomStr(15)).thenReturn("newPassword");
+        when(memberRepository.findByUsername(username)).thenReturn(Optional.of(mockMember));
+        when(randomStringUtils.generateRandomStr(15)).thenReturn(password);
 
         String newPassword = memberService.changePassword(username);
-        verify(memberRepository,times(1)).save(member);
-        assertEquals(newPassword, "newPassword");
+        verify(memberRepository, times(1)).save(mockMember);
+        assertThat(newPassword).isEqualTo(password);
     }
 
     @Test
-    @DisplayName("비밀번호 변경 성공 - 설정한 문자열로")
+    @DisplayName("changePassword -success / to defined string")
     void testChangePassword_success_definedString() {
         String username = "username";
-        String newPassword = "newPassword";
-        Member member = Member.builder()
-                .username(username)
-                .password("oldPassword")
-                .nickname("nickname")
-                .build();
+        String password = "password";
 
-        when(memberRepository.findByUsername(username)).thenReturn(Optional.of(member));
+        when(memberRepository.findByUsername(username)).thenReturn(Optional.of(mockMember));
 
-        String result = memberService.changePassword(username, newPassword);
-        assertEquals(result, newPassword);
+        String result = memberService.changePassword(username, password);
+        assertThat(result).isEqualTo(password);
     }
 
     @Test
-    @DisplayName("비밀번호 변경 실패 - unknown user")
+    @DisplayName("changePassword - fail / unknown user")
     void testChangePassword_fail_unknownUser() {
-
         when(memberRepository.findByUsername(anyString())).thenReturn(Optional.empty());
 
-        assertThrows(AuthenticationException.class, () -> memberService.changePassword("username"));
+        assertThatThrownBy(() -> memberService.changePassword("username"))
+                .isInstanceOf(AuthenticationException.class)
+                .extracting("errorCode")
+                .isEqualTo(AuthenticationErrorCode.UNKNOWN_USER);
+    }
+
+    //-+-+-+-+-+-+]] usernameToId test [[-+-+-+-+-+-+
+    @Test
+    @DisplayName("usernameToId - success")
+    void testUsernameToId_success() {
+        String username = "username";
+        Long id = 1L;
+        when(memberRepository.findIdByUsername(username)).thenReturn(Optional.of(id));
+        Long result = memberService.usernameToId(username);
+        assertThat(result).isEqualTo(1L);
+    }
+
+    @Test
+    @DisplayName("usernameToId - fail / unknown user")
+    void testUsernameToId_fail_unknownUser() {
+        String username = "username";
+        when(memberRepository.findIdByUsername(username)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> memberService.usernameToId(username))
+                .isInstanceOf(AuthenticationException.class)
+                .extracting("errorCode")
+                .isEqualTo(AuthenticationErrorCode.UNKNOWN_USER);
+    }
+
+    //-+-+-+-+-+-+]] idToNickname Test [[-+-+-+-+-+-+
+    @Test
+    @DisplayName("idToNickname - success")
+    void testIdToNickname_success() {
+        Long id = 1L;
+        String nickname = "nickname";
+
+        when(memberRepository.findNicknameById(id)).thenReturn(Optional.of(nickname));
+
+        String result = memberService.idToNickname(id);
+        assertThat(result).isEqualTo(nickname);
+    }
+
+    @Test
+    @DisplayName("idToNickname - fail / unknown user")
+    void testIdToNickname_fail_unknownUser() {
+        Long id = 1L;
+
+        when(memberRepository.findNicknameById(id)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> memberService.idToNickname(id))
+                .isInstanceOf(AuthenticationException.class)
+                .extracting("errorCode")
+                .isEqualTo(AuthenticationErrorCode.UNKNOWN_USER);
+    }
+
+
+    //-+-+-+-+-+-+]] usernameToUniversity test[[-+-+-+-+-+-+
+    @Test
+    @DisplayName("usernameToUniversity - success")
+    void testUsernameToUniversity_success() {
+        String username = "username";
+        when(memberRepository.findByUsername(username)).thenReturn(Optional.of(mockMember));
+        when(mockMember.getUniversity()).thenReturn(mockUniversity);
+
+        University result = memberService.usernameToUniversity(username);
+
+        assertThat(result).isEqualTo(mockUniversity);
+    }
+
+    @Test
+    @DisplayName("usernameToUniversity - success / null university")
+    void testUsernameToUniversity_success_nullUniversity() {
+        String username = "username";
+        when(memberRepository.findByUsername(username)).thenReturn(Optional.of(mockMember));
+        when(mockMember.getUniversity()).thenReturn(null);
+
+        University result = memberService.usernameToUniversity(username);
+        assertThat(result.getName()).isEqualTo("null");
+        assertThat(result.getAddress()).isEqualTo("null");
+    }
+
+    @Test
+    @DisplayName("usernameToUniversity - fail / unknown user")
+    void testUsernameToUniversity_fail_unknownUser() {
+        String username = "username";
+        when(memberRepository.findByUsername(username)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> memberService.usernameToUniversity(username))
+                .isInstanceOf(AuthenticationException.class)
+                .extracting("errorCode")
+                .isEqualTo(AuthenticationErrorCode.UNKNOWN_USER);
     }
 
 }

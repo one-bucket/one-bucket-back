@@ -1,10 +1,8 @@
 package com.onebucket.domain.memberManage.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.validation.constraints.Size;
+import lombok.*;
 
 /**
  * <br>package name   : com.onebucket.domain.dto
@@ -28,7 +26,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
+@NoArgsConstructor
 public class NicknameRequestDto {
     @NotBlank(message = "nickname must not be empty")
+    @Size(min = 4, max = 14, message = "size of nickname must be over 4 under 14")
     private String nickname;
 }

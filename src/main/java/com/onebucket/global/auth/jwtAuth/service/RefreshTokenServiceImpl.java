@@ -1,12 +1,16 @@
 package com.onebucket.global.auth.jwtAuth.service;
 
 import com.onebucket.global.auth.jwtAuth.domain.RefreshToken;
+import com.onebucket.global.exceptionManage.customException.CommonException;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
+import com.onebucket.global.exceptionManage.errorCode.CommonErrorCode;
 import com.onebucket.global.redis.RedisRepository;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -51,12 +55,21 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         if(!StringUtils.hasText(token.getUsername()) || !StringUtils.hasText(token.getRefreshToken())) {
             throw new AuthenticationException(AuthenticationErrorCode.NON_VALID_TOKEN, "username or refresh token is null");
         }
-        redisRepository.save()
-                .key(HEADEDLY + token.getUsername())
-                .value(token.getRefreshToken())
-                .timeout(timeOutMillis)
-                .timeUnit(TimeUnit.MILLISECONDS)
-                .save();
+        try {
+            redisRepository.save()
+                    .key(HEADEDLY + token.getUsername())
+                    .value(token.getRefreshToken())
+                    .timeout(timeOutMillis)
+                    .timeUnit(TimeUnit.MILLISECONDS)
+                    .save();
+        } catch (RedisConnectionFailureException e) {
+            throw new CommonException(CommonErrorCode.REDIS_CONNECTION_ERROR, "connection fail while save token in redis");
+        } catch (DataAccessException e) {
+            throw new CommonException(CommonErrorCode.DATA_ACCESS_ERROR, "while save token in redis");
+        } catch (IllegalArgumentException e) {
+            throw new CommonException(CommonErrorCode.ILLEGAL_ARGUMENT, "invalid data");
+        }
+
     }
 
     @Override

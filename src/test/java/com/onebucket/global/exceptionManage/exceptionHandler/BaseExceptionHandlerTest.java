@@ -39,10 +39,10 @@ import static org.mockito.Mockito.when;
  */
 
 @ExtendWith(MockitoExtension.class)
-class AuthenticationExceptionHandlerTest {
+class BaseExceptionHandlerTest {
 
     @InjectMocks
-    private AuthenticationExceptionHandler authenticationExceptionHandler;
+    private BaseExceptionHandler baseExceptionHandler;
 
     @Test
     public void testHandleRegisterException() {
@@ -54,7 +54,7 @@ class AuthenticationExceptionHandlerTest {
         when(authenticationException.getMessage()).thenReturn("test exception occur");
 
         ResponseEntity<ErrorResponse> response =
-                authenticationExceptionHandler.handleRegisterException(authenticationException);
+                baseExceptionHandler.handleException(authenticationException);
 
         assertNotNull(response);
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());

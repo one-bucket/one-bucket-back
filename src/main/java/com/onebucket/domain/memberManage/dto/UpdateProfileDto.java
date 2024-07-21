@@ -1,5 +1,6 @@
 package com.onebucket.domain.memberManage.dto;
 
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -35,10 +36,21 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class UpdateProfileDto {
 
+
+    @Size(min = 2, max = 5, message = "size of name must be over 2 under 5")
     private String name;
+
+    @Pattern(regexp = "^(man|woman)$", message = "Gender must be either 'man' or 'woman'")
     private String gender;
+
+    @Min(value= 0, message = "Age must be at least 0")
+    @Max(value=110, message = "Age must be at most 110")
     private Integer age;
+
+    @Size(max = 200, message = "Description must be at most 200 characters long")
     private String description;
+
+    @Past(message = "Birth date must be in the past")
     private LocalDate birth;
 
 }

@@ -3,6 +3,7 @@ package com.onebucket.domain.memberManage.api;
 import com.onebucket.domain.memberManage.dto.CreateMemberRequestDto;
 import com.onebucket.domain.memberManage.service.MemberService;
 import com.onebucket.domain.memberManage.service.ProfileService;
+import com.onebucket.global.utils.SuccessResponseDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -47,7 +48,7 @@ public class RegisterController {
     public ResponseEntity<?> register (@Valid @RequestBody CreateMemberRequestDto dto) {
         Long id = memberService.createMember(dto);
         profileService.createInitProfile(id);
-        return ResponseEntity.ok("success create");
+        return ResponseEntity.ok(new SuccessResponseDto("success register"));
     }
 
 

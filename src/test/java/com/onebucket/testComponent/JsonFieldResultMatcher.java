@@ -2,6 +2,7 @@ package com.onebucket.testComponent;
 
 import com.onebucket.global.exceptionManage.errorCode.ErrorCode;
 import org.junit.jupiter.api.Assertions;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -47,6 +48,15 @@ public class JsonFieldResultMatcher implements ResultMatcher {
         for (ResultMatcher matcher : matchers) {
             matcher.match(result);
         }
+    }
+
+    public static ResultMatcher hasStatus(ErrorCode errorCode) {
+        return result -> {
+            HttpStatus expectedStatus = errorCode.getHttpStatus();
+            int actualStatus = result.getResponse().getStatus();
+            Assertions.assertEquals(expectedStatus.value(), actualStatus,
+                    "Expected status code " + expectedStatus.value() + " but got " + actualStatus);
+        };
     }
 
     public static ResultMatcher hasKey(String key, String value) {

@@ -1,14 +1,13 @@
 package com.onebucket.domain.memberManage.api;
 
-import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.domain.memberManage.domain.Profile;
 import com.onebucket.domain.memberManage.dto.*;
 import com.onebucket.domain.memberManage.service.MemberService;
 import com.onebucket.domain.memberManage.service.ProfileService;
 import com.onebucket.global.utils.SecurityUtils;
+import com.onebucket.global.utils.SuccessResponseDto;
 import jakarta.validation.Valid;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -47,7 +46,6 @@ public class MemberController {
     private final MemberService memberService;
     private final ProfileService profileService;
     private final SecurityUtils securityUtils;
-    private final MemberRepository memberRepository;
 
     /**
      * 사용자가 비밀번호를 잊었을 때, 임시 비밀번호를 설정한다.
@@ -55,10 +53,10 @@ public class MemberController {
      * @return 200 code
      */
     @PostMapping("/member/password/reset")
-    public ResponseEntity<String> resetPassword() {
+    public ResponseEntity<SuccessResponseDto> resetPassword() {
         String username = securityUtils.getCurrentUsername();
         memberService.changePassword(username);
-        return ResponseEntity.ok("success reset password");
+        return ResponseEntity.ok(new SuccessResponseDto("success reset password"));
     }
 
     /**
@@ -67,11 +65,11 @@ public class MemberController {
      * @return 200 code
      */
     @PostMapping("/member/password/set")
-    public ResponseEntity<String> setPassword(@Valid @RequestBody SetPasswordDto dto) {
+    public ResponseEntity<SuccessResponseDto> setPassword(@Valid @RequestBody SetPasswordDto dto) {
         String username = securityUtils.getCurrentUsername();
         String password = dto.getPassword();
         memberService.changePassword(username, password);
-        return ResponseEntity.ok("success set password");
+        return ResponseEntity.ok(new SuccessResponseDto("success set password"));
     }
 
     /**
@@ -80,10 +78,10 @@ public class MemberController {
      * @return 200 return
      */
     @PostMapping("/member/nickname/set")
-    public ResponseEntity<String> setNickname(@Valid @RequestBody NicknameRequestDto dto) {
+    public ResponseEntity<SuccessResponseDto> setNickname(@Valid @RequestBody NicknameRequestDto dto) {
         String username = securityUtils.getCurrentUsername();
         memberService.updateMember(username, dto);
-        return ResponseEntity.ok("success set nickname");
+        return ResponseEntity.ok(new SuccessResponseDto("success set nickname"));
     }
 
     /**
@@ -91,8 +89,8 @@ public class MemberController {
      * @param id url 에 포함되어 있다.
      * @return nickname 에 대한 dto
      */
-    @GetMapping("/member/{id}/nickname/")
-    public ResponseEntity<NicknameRequestDto> getNickname(@PathVariable("id") long id) {
+    @GetMapping("/member/{id}/nickname")
+    public ResponseEntity<NicknameRequestDto> getNickname(@PathVariable("id") Long id) {
         String nickname = memberService.idToNickname(id);
         NicknameRequestDto result = new NicknameRequestDto(nickname);
         return ResponseEntity.ok(result);
@@ -108,11 +106,15 @@ public class MemberController {
        return ResponseEntity.ok(memberService.readMember(username));
     }
 
+    /**
+     * 로그인한 상태에서 자신의 계정을 탈퇴한다.
+     * @return "message" : "success delete account"
+     */
     @DeleteMapping("/member")
-    public ResponseEntity<String> quitAccount() {
+    public ResponseEntity<SuccessResponseDto> quitAccount() {
         String username = securityUtils.getCurrentUsername();
         memberService.quitMember(username);
-        return ResponseEntity.ok("success delete account");
+        return ResponseEntity.ok(new SuccessResponseDto("success delete account"));
     }
 
 
@@ -122,12 +124,12 @@ public class MemberController {
      * @return 성공 시 "success update profile" 과 200 code 를 반환한다.
      */
     @PostMapping("/profile/update")
-    public ResponseEntity<?> updateProfile(@Valid @RequestBody UpdateProfileDto dto) {
+    public ResponseEntity<SuccessResponseDto> updateProfile(@Valid @RequestBody UpdateProfileDto dto) {
         String username = securityUtils.getCurrentUsername();
         Long id = memberService.usernameToId(username);
         profileService.updateProfile(id, dto);
 
-        return ResponseEntity.ok("success update profile");
+        return ResponseEntity.ok(new SuccessResponseDto("success update profile"));
     }
 
     /**
@@ -136,25 +138,25 @@ public class MemberController {
      * @return 성공 시 "success update image" 와 200 code 를 반환한다.
      */
     @PostMapping("/profile/image")
-    public ResponseEntity<?> updateImage(@RequestParam("file")MultipartFile image) {
+    public ResponseEntity<SuccessResponseDto> updateImage(@RequestParam("file")MultipartFile image) {
         String username = securityUtils.getCurrentUsername();
         Long id = memberService.usernameToId(username);
         profileService.updateImage(id, image);
 
-        return ResponseEntity.ok("success update image");
+        return ResponseEntity.ok(new SuccessResponseDto("success update image"));
     }
 
     /**
      * 사용자가 원할 경우, 자신의 프로필 이미지를 기본 이미지로 바꾼다. 기본 이미지는 이미 저장되어 있다.
      * @return 성공 시 "success update basic image" 와 200 code 를 반환한다.
      */
-    @PostMapping("/profile/basicImage")
-    public ResponseEntity<?> updateToBasicImage() {
+    @PostMapping("/profile/basic-image")
+    public ResponseEntity<SuccessResponseDto> updateToBasicImage() {
         String username = securityUtils.getCurrentUsername();
         Long id = memberService.usernameToId(username);
 
         profileService.updateImageToBasic(id);
-        return ResponseEntity.ok("success update basic image");
+        return ResponseEntity.ok(new SuccessResponseDto("success update basic image"));
     }
 
     /**

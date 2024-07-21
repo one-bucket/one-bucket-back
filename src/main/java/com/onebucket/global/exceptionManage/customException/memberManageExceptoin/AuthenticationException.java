@@ -1,7 +1,6 @@
 package com.onebucket.global.exceptionManage.customException.memberManageExceptoin;
 
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
-import com.onebucket.global.exceptionManage.errorCode.ErrorCode;
 
 /**
  * <br>package name   : com.onebucket.global.exceptionManage.customException.memberManageExceptoin
@@ -29,7 +28,7 @@ public class AuthenticationException extends MemberManageException {
         super(authenticationErrorCode);
     }
 
-    public AuthenticationException(ErrorCode errorCode, String message) {
-        super(errorCode, message);
+    public AuthenticationException(AuthenticationErrorCode authenticationErrorCode, String message) {
+        super(authenticationErrorCode, message);
     }
 }
