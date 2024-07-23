@@ -24,8 +24,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.nio.charset.StandardCharsets;
 
-import static com.onebucket.testComponent.JsonFieldResultMatcher.hasKey;
-import static com.onebucket.testComponent.JsonFieldResultMatcher.hasStatus;
+import static com.onebucket.testComponent.testUtils.JsonFieldResultMatcher.hasKey;
+import static com.onebucket.testComponent.testUtils.JsonFieldResultMatcher.hasStatus;
 import static org.hamcrest.Matchers.containsString;
 
 import static org.mockito.ArgumentMatchers.any;

@@ -3,6 +3,7 @@ package com.onebucket.global.auth.jwtAuth.domain;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * <br>package name   : com.onebucket.gloabal.auth.jwtAuth.domain
@@ -35,6 +36,7 @@ import lombok.Data;
 @Builder
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class JwtToken {
 
     private String grantType;

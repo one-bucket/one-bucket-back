@@ -1,7 +1,8 @@
 package com.onebucket.global.auth.config;
 
+import com.onebucket.domain.memberManage.service.MemberService;
 import com.onebucket.global.auth.jwtAuth.component.JwtValidator;
-import com.onebucket.testComponent.AuthTestController;
+import com.onebucket.testComponent.testController.AuthTestController;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.impl.DefaultClaims;
@@ -59,6 +60,9 @@ class JwtAuthenticationFilterTest {
 
     @MockBean
     private JwtValidator jwtValidator;
+
+    @MockBean
+    private MemberService memberService;
 
 
     @Test

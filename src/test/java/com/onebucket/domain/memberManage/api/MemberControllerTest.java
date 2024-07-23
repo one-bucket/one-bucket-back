@@ -28,8 +28,8 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import static com.onebucket.testComponent.JsonFieldResultMatcher.hasKey;
-import static com.onebucket.testComponent.JsonFieldResultMatcher.hasStatus;
+import static com.onebucket.testComponent.testUtils.JsonFieldResultMatcher.hasKey;
+import static com.onebucket.testComponent.testUtils.JsonFieldResultMatcher.hasStatus;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
