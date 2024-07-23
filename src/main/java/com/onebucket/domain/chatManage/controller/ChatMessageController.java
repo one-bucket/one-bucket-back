@@ -59,7 +59,7 @@ public class ChatMessageController {
         }
         // 채팅을 입력하는 경우 메세지를 redis에 저장해야함.
         if(ChatMessage.MessageType.TALK.equals(chatMessage.getType())) {
-            chatMessageService.saveChatMessage(chatMessage);
+            chatMessageService.saveMessageInMinio(chatMessage);
             chatLogUtil.saveChatLog(chatMessage);
         }
         // 기존 유저가 입장하는 경우(Join), 아무것도 출력하지않음.

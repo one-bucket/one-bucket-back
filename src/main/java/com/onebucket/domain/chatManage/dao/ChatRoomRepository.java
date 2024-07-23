@@ -1,12 +1,16 @@
 package com.onebucket.domain.chatManage.dao;
 
 import com.onebucket.domain.chatManage.domain.ChatRoom;
+import com.onebucket.global.minio.MinioRepository;
+import com.onebucket.global.minio.MinioSaveInfoDto;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
@@ -36,31 +40,40 @@ import static com.onebucket.domain.chatManage.Const.CHAT_ROOMS;
 @RequiredArgsConstructor
 @Repository
 public class ChatRoomRepository {
-    private final RedisTemplate<String, Object> redisTemplate;
-    private HashOperations<String, String, ChatRoom> hashOperations;
+    private final MinioRepository minioRepository;
+    private final RedisTemplate<String,Object> redisTemplate;
+    private HashOperations<String,String,ChatRoom> opsHashChatRoom;
+
+    @Value("${minio.bucketName}")
+    private String bucketName;
 
     @PostConstruct
     private void init() {
-        hashOperations = redisTemplate.opsForHash();
+        opsHashChatRoom = redisTemplate.opsForHash();
     }
 
-    public List<ChatRoom> findAllRooms() {
-        return hashOperations.values(CHAT_ROOMS);
+    public List<ChatRoom> findAllRoom() {
+        return opsHashChatRoom.values(CHAT_ROOMS);
     }
 
     public ChatRoom findRoomById(String roomId) {
-        return hashOperations.get(CHAT_ROOMS, roomId);
+        return opsHashChatRoom.get(CHAT_ROOMS, roomId);
     }
 
     /**
-     * 채팅방 생성 : 서버 간 채팅의 공유를 위해 redis에 저장한다.
+     * 채팅방 생성 : 서버간 채팅의 공유를 위해 minio에 저장한다.
      */
     public ChatRoom createChatRoom(String name) {
-        ChatRoom chatRoom = ChatRoom.builder()
+        ChatRoom room = ChatRoom.builder()
                 .name(name)
                 .roomId(UUID.randomUUID().toString())
                 .build();
-        hashOperations.put(CHAT_ROOMS, name, chatRoom);
-        return chatRoom;
+        MinioSaveInfoDto dto = MinioSaveInfoDto.builder()
+                .bucketName(bucketName)
+                .fileName("chat/"+"ChatRoom/"+room.getRoomId())
+                .fileExtension("json")
+                .build();
+        minioRepository.uploadChatDto(room,dto);
+        return room;
     }
 }
