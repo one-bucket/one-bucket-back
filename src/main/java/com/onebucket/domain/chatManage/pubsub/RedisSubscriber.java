@@ -51,7 +51,7 @@ public class RedisSubscriber implements MessageListener {
     public void onMessage(@NotNull Message message, byte[] pattern) {
         try {
             // redis에서 발행된 메세지를 받아 역직렬화
-            String publishMessage = (String) redisTemplate.getStringSerializer().deserialize(message.getBody());
+            String publishMessage =  redisTemplate.getStringSerializer().deserialize(message.getBody());
             // ChatMessage 객체로 매핑
             ChatMessage roomMessage = objectMapper.readValue(publishMessage, ChatMessage.class);
             log.info("Redis Subscribe Channel : {}", roomMessage.getRoomId());
