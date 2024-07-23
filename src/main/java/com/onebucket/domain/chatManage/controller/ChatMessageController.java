@@ -26,12 +26,13 @@ import java.util.List;
  * <br>date           : 2024-07-09
  * <pre>
  * <span style="color: white;">[description]</span>
- *
+ * "@MessageMapping("/chat/message")" :  Spring에서 WebSocket 메시지 매핑을 위해 사용.
  * </pre>
  * <pre>
  * <span style="color: white;">usage:</span>
  * {@code
- *
+ *  public void chatMessage(ChatMessage chatMessage)
+ *  public List<ChatMessage> getChatMessages(@PathVariable("roomId") String roomId)
  * } </pre>
  * <pre>
  * modified log :
@@ -54,7 +55,7 @@ public class ChatMessageController {
      * websocket "/pub/chat/message"로 들어오는 메세지를 처리한다.
      */
     @MessageMapping("/chat/message")
-    public void chatMessage(ChatMessage chatMessage) throws IOException {
+    public void chatMessage(ChatMessage chatMessage) {
         // 처음 입장했을 경우 (ENTER)
         if(ChatMessage.MessageType.ENTER.equals(chatMessage.getType())) {
             chatRoomService.enterChatRoom(chatMessage.getRoomId());
