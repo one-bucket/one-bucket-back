@@ -2,8 +2,12 @@ package com.onebucket.global.redis;
 
 import com.onebucket.domain.chatManage.domain.ChatMessage;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.cache.RedisCacheConfiguration;
+import org.springframework.data.redis.cache.RedisCacheManager;
+import org.springframework.data.redis.cache.RedisCacheWriter;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
@@ -12,8 +16,12 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+
+import java.time.Duration;
 
 /**
  * <br>package name   : com.onebucket.gloabal.config
@@ -88,4 +96,16 @@ public class RedisConfig {
         return container;
     }
 
+//    // 만약 redis cache 애노테이션을 사용하려면 추가.
+//    @Bean
+//    public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
+//        RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
+//                .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
+//                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()))
+//                .entryTtl(Duration.ofMinutes(10L));
+//
+//        return RedisCacheManager.builder(RedisCacheWriter.nonLockingRedisCacheWriter(connectionFactory))
+//                .cacheDefaults(config)
+//                .build();
+//    }
 }
