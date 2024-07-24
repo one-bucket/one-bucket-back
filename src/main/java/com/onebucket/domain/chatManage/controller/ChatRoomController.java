@@ -50,7 +50,7 @@ public class ChatRoomController {
     @GetMapping("/rooms")
     @ResponseBody
     public List<ChatRoom> room() {
-        return chatRoomRepository.findAllRooms();
+        return chatRoomRepository.findAllRoom();
     }
 
     // 채팅방 생성
