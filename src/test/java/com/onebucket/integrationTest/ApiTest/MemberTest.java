@@ -8,6 +8,7 @@ import com.onebucket.testComponent.testSupport.RestDocsSupportTest;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.transaction.TestTransaction;
 import org.springframework.test.web.servlet.MvcResult;
 
 import static com.onebucket.testComponent.testUtils.JsonFieldResultMatcher.hasKey;
@@ -99,6 +100,7 @@ public class MemberTest extends RestDocsSupportTest {
     void signIn() throws Exception {
         createInitUser();
         SignInRequestDto dto = new SignInRequestDto(testUsername, testPassword);
+        TestTransaction.flagForCommit();
 
         MvcResult result = mockMvc.perform(post("/sign-in")
                         .accept(MediaType.APPLICATION_JSON)
@@ -259,6 +261,8 @@ public class MemberTest extends RestDocsSupportTest {
 
         SignInRequestDto oldPasswordSignInDto = new SignInRequestDto(testUsername, testPassword);
         SignInRequestDto newPasswordSignInDto = new SignInRequestDto(testUsername, newPassword);
+
+        TestTransaction.flagForCommit();
 
         mockMvc.perform(post("/sign-in")
                         .contentType(MediaType.APPLICATION_JSON)
