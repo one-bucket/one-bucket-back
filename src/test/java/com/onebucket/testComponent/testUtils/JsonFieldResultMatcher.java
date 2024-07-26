@@ -1,6 +1,7 @@
-package com.onebucket.testComponent;
+package com.onebucket.testComponent.testUtils;
 
 import com.onebucket.global.exceptionManage.errorCode.ErrorCode;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.MvcResult;
@@ -44,7 +45,7 @@ public class JsonFieldResultMatcher implements ResultMatcher {
     }
 
     @Override
-    public void match(MvcResult result) throws Exception {
+    public void match(@NotNull MvcResult result) throws Exception {
         for (ResultMatcher matcher : matchers) {
             matcher.match(result);
         }

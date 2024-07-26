@@ -79,10 +79,11 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public void quitMember(String username) {
-        Member member = memberRepository.findByUsername(username)
-                .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
-        member.setEnable(false);
-        memberRepository.save(member);
+//        Member member = memberRepository.findByUsername(username)
+//                .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
+        memberRepository.deleteByUsername(username);
+//        member.setEnable(false);
+//        memberRepository.save(member);
     }
 
     @Override
