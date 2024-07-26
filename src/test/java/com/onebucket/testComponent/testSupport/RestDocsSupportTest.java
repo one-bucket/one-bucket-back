@@ -60,7 +60,7 @@ import static org.springframework.restdocs.snippet.Attributes.key;
  */
 
 @Disabled
-@ActiveProfiles("test")
+//@ActiveProfiles("test")
 @SpringBootTest
 @AutoConfigureMockMvc
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
