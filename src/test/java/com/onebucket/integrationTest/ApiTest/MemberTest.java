@@ -100,7 +100,7 @@ public class MemberTest extends RestDocsSupportTest {
     void signIn() throws Exception {
         createInitUser();
         SignInRequestDto dto = new SignInRequestDto(testUsername, testPassword);
-        TestTransaction.flagForCommit();
+
 
         MvcResult result = mockMvc.perform(post("/sign-in")
                         .accept(MediaType.APPLICATION_JSON)
@@ -262,7 +262,6 @@ public class MemberTest extends RestDocsSupportTest {
         SignInRequestDto oldPasswordSignInDto = new SignInRequestDto(testUsername, testPassword);
         SignInRequestDto newPasswordSignInDto = new SignInRequestDto(testUsername, newPassword);
 
-        TestTransaction.flagForCommit();
 
         mockMvc.perform(post("/sign-in")
                         .contentType(MediaType.APPLICATION_JSON)
