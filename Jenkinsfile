@@ -35,7 +35,7 @@ pipeline {
                     "MYSQL_USER=${JENKINS_MYSQL_USER}",
                     "MYSQL_PASSWORD=${JENKINS_MYSQL_PASSWORD}"
                 ]) {
-                    sh './gradlew test'
+                    sh './gradlew test -Dspring.profiles.active=test'
                 }
             }
         }
