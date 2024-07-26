@@ -8,7 +8,6 @@ import com.onebucket.testComponent.testSupport.RestDocsSupportTest;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.transaction.TestTransaction;
 import org.springframework.test.web.servlet.MvcResult;
 
 import static com.onebucket.testComponent.testUtils.JsonFieldResultMatcher.hasKey;
@@ -101,9 +100,6 @@ public class MemberTest extends RestDocsSupportTest {
         createInitUser();
         SignInRequestDto dto = new SignInRequestDto(testUsername, testPassword);
 
-        TestTransaction.flagForCommit();
-        TestTransaction.end();
-
 
         MvcResult result = mockMvc.perform(post("/sign-in")
                         .accept(MediaType.APPLICATION_JSON)
@@ -180,9 +176,6 @@ public class MemberTest extends RestDocsSupportTest {
                         )
                 ));
 
-        TestTransaction.flagForCommit();
-        TestTransaction.end();
-
         String query = """
                 SELECT EXISTS (
                 SELECT 1
@@ -223,8 +216,6 @@ public class MemberTest extends RestDocsSupportTest {
                         )
                 ));
 
-        TestTransaction.flagForCommit();
-        TestTransaction.end();
 
 
         String newPassword = jdbcTemplate.queryForObject(query, String.class, testUsername);
@@ -264,8 +255,6 @@ public class MemberTest extends RestDocsSupportTest {
                                 fieldWithPath("message").description("success set password")
                         )));
 
-        TestTransaction.flagForCommit();
-        TestTransaction.end();
 
         String newSavedPassword = jdbcTemplate.queryForObject(query, String.class, testUsername);
         assertThat(oldSavedPassword).isNotEqualTo(newSavedPassword);
@@ -310,9 +299,7 @@ public class MemberTest extends RestDocsSupportTest {
 //                                fieldWithPath("message").description("success set nickname")
 //                        )));
 //
-//        TestTransaction.flagForCommit();
-//        TestTransaction.end();
-//
+
 //        String query = """
 //                SELECT nickname
 //                FROM member

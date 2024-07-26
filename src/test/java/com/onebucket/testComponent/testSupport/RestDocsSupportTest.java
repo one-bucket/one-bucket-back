@@ -67,7 +67,6 @@ import static org.springframework.restdocs.snippet.Attributes.key;
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 @Import({RestDocsConfiguration.class, SecurityConfig.class})
 @ExtendWith(RestDocumentationExtension.class)
-@Transactional
 public class RestDocsSupportTest {
 
     @Autowired
