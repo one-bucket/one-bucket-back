@@ -177,6 +177,9 @@ public class MemberTest extends RestDocsSupportTest {
                         )
                 ));
 
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+
         String query = """
                 SELECT EXISTS (
                 SELECT 1
@@ -217,6 +220,9 @@ public class MemberTest extends RestDocsSupportTest {
                         )
                 ));
 
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+
 
         String newPassword = jdbcTemplate.queryForObject(query, String.class, testUsername);
         assertThat(oldPassword).isNotEqualTo(newPassword);
@@ -255,8 +261,12 @@ public class MemberTest extends RestDocsSupportTest {
                                 fieldWithPath("message").description("success set password")
                         )));
 
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+
         String newSavedPassword = jdbcTemplate.queryForObject(query, String.class, testUsername);
         assertThat(oldSavedPassword).isNotEqualTo(newSavedPassword);
+
 
 
         SignInRequestDto oldPasswordSignInDto = new SignInRequestDto(testUsername, testPassword);
