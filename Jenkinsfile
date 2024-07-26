@@ -96,9 +96,9 @@ pipeline {
     }
 
    post {
-        always {
-            cleanWs()
-        }
+//         always {
+//             cleanWs()
+//         }
         success {
             echo 'Build and archive completed successfully!'
         }
