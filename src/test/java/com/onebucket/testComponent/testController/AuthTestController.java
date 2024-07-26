@@ -1,7 +1,6 @@
 package com.onebucket.testComponent.testController;
 
 import com.onebucket.domain.memberManage.dto.CreateMemberRequestDto;
-import com.onebucket.domain.memberManage.dto.SignInRequestDto;
 import com.onebucket.domain.memberManage.service.MemberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -49,14 +48,9 @@ public class AuthTestController {
     }
 
     @PostMapping("/test/create-testuser")
-    public ResponseEntity<String> createTestUser(@RequestBody SignInRequestDto signInDto) {
-        CreateMemberRequestDto dto = CreateMemberRequestDto.builder()
-                .username(signInDto.getUsername())
-                .password(signInDto.getPassword())
-                .nickname("test-nick")
-                .build();
+    public ResponseEntity<String> createTestUser(@RequestBody CreateMemberRequestDto registerDto) {
         try {
-            memberService.createMember(dto);
+            memberService.createMember(registerDto);
             return ResponseEntity.ok("success");
         } catch(DataIntegrityViolationException ignore) {
             return ResponseEntity.ok("success");
