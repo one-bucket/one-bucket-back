@@ -268,6 +268,7 @@ public class MemberTest extends RestDocsSupportTest {
         mockMvc.perform(post("/sign-in")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(newPasswordSignInDto)))
+
                 .andExpect(status().isOk());
     }
 }
