@@ -157,7 +157,7 @@ include::{snippets}/member-test/reset-password/http-request.adoc[]
 include::{snippets}/member-test/reset-password/http-response.adoc[]
 include::{snippets}/member-test/reset-password/response-fields.adoc[]
 
-=== 7. set-nickname
+==== 7. set-nickname
 *Description* +
 
 '''
@@ -178,7 +178,7 @@ include::{snippets}/member-test/set-nickname/request-fields.adoc[]
 include::{snippets}/member-test/set-nickname/http-response.adoc[]
 include::{snippets}/member-test/set-nickname/response-fields.adoc[]
 
-=== 8. get-nickname
+==== 8. get-nickname
 *Description* +
 
 '''
@@ -199,7 +199,7 @@ include::{snippets}/member-test/get-nickname/path-parameters.adoc[]
 include::{snippets}/member-test/get-nickname/http-response.adoc[]
 include::{snippets}/member-test/get-nickname/response-fields.adoc[]
 
-=== 9. update profile
+==== 9. update profile
 *Description* +
 
 '''
@@ -219,7 +219,7 @@ include::{snippets}/member-test/update-profile/request-fields.adoc[]
 include::{snippets}/member-test/update-profile/http-response.adoc[]
 include::{snippets}/member-test/update-profile/response-fields.adoc[]
 
-=== 10. update image
+==== 10. update image
 *Description* +
 
 '''
@@ -240,7 +240,7 @@ include::{snippets}/member-test/update-image/http-request.adoc[]
 include::{snippets}/member-test/update-image/http-response.adoc[]
 include::{snippets}/member-test/update-image/response-fields.adoc[]
 
-=== 11. update image
+==== 11. update image
 *Description* +
 
 '''
@@ -261,7 +261,7 @@ include::{snippets}/member-test/update-image/http-request.adoc[]
 include::{snippets}/member-test/update-image/http-response.adoc[]
 include::{snippets}/member-test/update-image/response-fields.adoc[]
 
-=== 12. get image
+==== 12. get image
 *Description* +
 
 '''
@@ -283,7 +283,7 @@ include::{snippets}/member-test/get-image/http-request.adoc[]
 '''
 include::{snippets}/member-test/get-image/http-response.adoc[]
 
-=== 13. update basic image
+==== 13. update basic image
 *Description* +
 
 '''
@@ -305,7 +305,7 @@ include::{snippets}/member-test/update-basic-image/http-request.adoc[]
 include::{snippets}/member-test/update-basic-image/http-response.adoc[]
 include::{snippets}/member-test/update-basic-image/response-fields.adoc[]
 
-=== 14. get profile
+==== 14. get profile
 *Description* +
 
 '''
