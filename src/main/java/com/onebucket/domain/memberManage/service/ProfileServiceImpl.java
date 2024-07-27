@@ -156,7 +156,7 @@ public class ProfileServiceImpl implements ProfileService {
     public void updateImageToBasic(Long id) {
         Profile profile = getprofile(id);
 
-        profile.setBasicImage(false);
+        profile.setBasicImage(true);
         profile.setUpdateAt(LocalDateTime.now());
         profileRepository.save(profile);
     }

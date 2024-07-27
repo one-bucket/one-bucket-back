@@ -51,6 +51,17 @@ use of HTTP status codes.
 | The requested resource did not exist
 |===
 
+[[overview-error-code]]
+== Error code
+|===
+| code type | code | description
+
+| AUTH | 1000~1999 | 로그인 및 사용자 인증 전반에 걸친 예외
+| BOARD | 2000~2999 | 게시판 관리 및 데이터에 관한 예외
+| UNIV | 3000~3999 | 대학 및 대학 인증에 관한 예외
+| DATA | 5000~5999 | 데이터 폼 검증 등에 관한 예외
+| COMMON | 9000~9999 | 일반적인 예외 및 기타 예외 코드
+|===
 
 [[API]]
 == API
