@@ -6,10 +6,13 @@ import com.onebucket.domain.memberManage.dto.UpdateProfileDto;
 import com.onebucket.global.auth.config.SecurityConfig;
 import com.onebucket.global.auth.jwtAuth.component.JwtProvider;
 import com.onebucket.global.auth.jwtAuth.domain.JwtToken;
+import com.onebucket.global.minio.MinioRepository;
+import com.onebucket.global.redis.RedisRepository;
 import com.onebucket.testComponent.testUtils.RestDocsConfiguration;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
@@ -28,11 +31,12 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.filter.CharacterEncodingFilter;
 
+import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -83,6 +87,14 @@ public class RestDocsSupportTest {
     protected AuthenticationManager authenticationManager;
     @Autowired
     protected JwtProvider jwtProvider;
+    @Autowired
+    protected RedisRepository redisRepository;
+    @Autowired
+    protected MinioRepository minioRepository;
+
+    @Value("${minio.bucketName}")
+    protected String bucketName;
+
 
     protected final String testUsername = "test-user";
     protected final String testPassword = "!1Password1!";
@@ -165,6 +177,10 @@ public class RestDocsSupportTest {
         return createInitUser(testUsername);
     }
 
+    protected void deleteRedisUser(String username) {
+        redisRepository.delete("refreshToken:" + username);
+    }
+
     protected void deleteUser(String username) {
         String getIdQuery = """
                 SELECT id
@@ -198,8 +214,8 @@ public class RestDocsSupportTest {
 
     protected Long createInitProfile(String username) {
         String query = """
-                INSERT INTO profile (id, name, gender, age, description, birth, is_basic_image)
-                SELECT m.id, ?, ?, ?, ? ,?, 1
+                INSERT INTO profile (id, name, gender, age, description, birth, is_basic_image, create_at, update_at)
+                SELECT m.id, ?, ?, ?, ? ,?, 1, ?, ?
                 FROM member m
                 WHERE m.username = ?
                 """;
@@ -210,7 +226,10 @@ public class RestDocsSupportTest {
                 initProfileInfo.getAge(),
                 initProfileInfo.getDescription(),
                 initProfileInfo.getBirth(),
+                Timestamp.valueOf(LocalDateTime.now()),
+                Timestamp.valueOf(LocalDateTime.now()),
                 username
+
         );
 
         String getIdQuery = """

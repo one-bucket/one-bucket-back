@@ -29,11 +29,11 @@ import org.springframework.http.HttpStatus;
 @Getter
 @RequiredArgsConstructor
 public enum UniversityErrorCode implements ErrorCode {
-    DUPLICATE_UNIVERSITY("2001", HttpStatus.CONFLICT, "Duplicate University"),
+    DUPLICATE_UNIVERSITY("3001", HttpStatus.CONFLICT, "Duplicate University"),
     // 대학 정보 조회중에서 발생하는 오류의 종류
-    NOT_EXIST_UNIVERSITY("2002",HttpStatus.NOT_FOUND,"Can't find University"),
+    NOT_EXIST_UNIVERSITY("3002",HttpStatus.NOT_FOUND,"Can't find University"),
     // 여기에 들어가지 않을수 있음. 추후 변경 필요할지도.
-    INVALID_EMAIL("2003", HttpStatus.BAD_REQUEST, "Invalid student email address"),
+    INVALID_EMAIL("3003", HttpStatus.BAD_REQUEST, "Invalid student email address"),
     ;
 
     private final String code;
@@ -43,7 +43,7 @@ public enum UniversityErrorCode implements ErrorCode {
 
     @Override
     public String getType() {
-        return "UNIVERSITY";
+        return "UNIV";
     }
     @Override
     public String getCode() {

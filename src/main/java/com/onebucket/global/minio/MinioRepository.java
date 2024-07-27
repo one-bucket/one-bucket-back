@@ -92,4 +92,21 @@ public class MinioRepository {
              throw new RuntimeException("Unknown Exception in MinioRepository.class : " + e.getMessage());
          }
      }
+
+     public void deleteFile(MinioSaveInfoDto dto) {
+         try{
+             minioClient.removeObject(
+                     RemoveObjectArgs.builder()
+                             .bucket(dto.getBucketName())
+                             .object(dto.getFileName() + "." + dto.getFileExtension())
+                             .build()
+             );
+         } catch(MinioException | IOException e) {
+             throw new RuntimeException("Error occurred while deleting file: " + e.getMessage());
+         }catch (Exception e) {
+             throw new RuntimeException("Unknown Exception in MinioRepository.class : " + e.getMessage());
+         }
+     }
+
+
 }
