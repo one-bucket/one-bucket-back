@@ -37,6 +37,8 @@ import org.springframework.web.multipart.MultipartFile;
  * -------------------------------------------------
  * 2024-07-01        jack8              init create
  * </pre>
+ *
+ * @tested yes
  */
 
 @RestController
@@ -51,6 +53,7 @@ public class MemberController {
      * 사용자가 비밀번호를 잊었을 때, 임시 비밀번호를 설정한다.
      * TODO: 이메일 송신 로직을 추가해야 한다. , 권한 문제
      * @return 200 code
+     * @tested yes
      */
     @PostMapping("/member/password/reset")
     public ResponseEntity<SuccessResponseDto> resetPassword() {
@@ -63,6 +66,7 @@ public class MemberController {
      * 로그인이 되어 있는 상태에서 비밀번호를 변경할 수 있도록 한다.
      * @param dto 비밀번호가 포함되어 있다.
      * @return 200 code
+     * @tested yes
      */
     @PostMapping("/member/password/set")
     public ResponseEntity<SuccessResponseDto> setPassword(@Valid @RequestBody SetPasswordDto dto) {
@@ -76,6 +80,7 @@ public class MemberController {
      * 로그인이 되어 있는 상태에서 자신의 nickname 을 바꾼다.
      * @param dto nickname 이 포함되어 있다.
      * @return 200 return
+     * @tested yes
      */
     @PostMapping("/member/nickname/set")
     public ResponseEntity<SuccessResponseDto> setNickname(@Valid @RequestBody NicknameRequestDto dto) {
@@ -88,6 +93,7 @@ public class MemberController {
      * id를 입력받아 nickname 을 출력한다. id는 url 에 포함되어 있으며 이를 통해 닉네임을 불러온다.
      * @param id url 에 포함되어 있다.
      * @return nickname 에 대한 dto
+     * @tested yes
      */
     @GetMapping("/member/{id}/nickname")
     public ResponseEntity<NicknameRequestDto> getNickname(@PathVariable("id") Long id) {
@@ -99,6 +105,7 @@ public class MemberController {
     /**
      * 로그인한 상태에서 해당 유저의 닉네임과 username 을 반환한다.
      * @return username, nickname
+     * @tested yes
      */
     @GetMapping("/member/info")
     public ResponseEntity<ReadMemberInfoDto> getMemberInfo() {
@@ -109,6 +116,7 @@ public class MemberController {
     /**
      * 로그인한 상태에서 자신의 계정을 탈퇴한다.
      * @return "message" : "success delete account"
+     * @tested yes
      */
     @DeleteMapping("/member")
     public ResponseEntity<SuccessResponseDto> quitAccount() {
@@ -122,6 +130,7 @@ public class MemberController {
      * 사용자의 profile 을 업데이트한다. 이를 위한 dto dtp 에는 null 이 존재할 수 있으며 이 경우 해당 필드는 갱신되지 않는다.
      * @param dto 이는 {@link UpdateProfileDto}에 대한 매개변수이며 profile 에 대한 기본적인 정보를 가진다.
      * @return 성공 시 "success update profile" 과 200 code 를 반환한다.
+     * @tested yes
      */
     @PostMapping("/profile/update")
     public ResponseEntity<SuccessResponseDto> updateProfile(@Valid @RequestBody UpdateProfileDto dto) {
@@ -136,6 +145,7 @@ public class MemberController {
      * 사용자 profile 의 image 를 갱신한다.
      * @param image MultipartFile 타입의 파일을 http 로부터 받아와 minio 에 저장한다.
      * @return 성공 시 "success update image" 와 200 code 를 반환한다.
+     * @tested yes
      */
     @PostMapping("/profile/image")
     public ResponseEntity<SuccessResponseDto> updateImage(@RequestParam("file")MultipartFile image) {
@@ -149,6 +159,7 @@ public class MemberController {
     /**
      * 사용자가 원할 경우, 자신의 프로필 이미지를 기본 이미지로 바꾼다. 기본 이미지는 이미 저장되어 있다.
      * @return 성공 시 "success update basic image" 와 200 code 를 반환한다.
+     * @tested yes
      */
     @PostMapping("/profile/basic-image")
     public ResponseEntity<SuccessResponseDto> updateToBasicImage() {
@@ -162,6 +173,7 @@ public class MemberController {
     /**
      * 저장된 이미지를 불러와 반환한다. 반환 타입은 byte[] 이며 http 메시지의 헤더를 MediaType.IMAGE_PNG 로 설정한다.
      * @return byte 로 구성된 이미지와 헤더, 200 code 를 반환한다.
+     * @tested yes
      */
     @GetMapping("/profile/image")
     public ResponseEntity<byte[]> getImage() {
@@ -180,6 +192,7 @@ public class MemberController {
      * Get 요청이며, 사용자의 프로필 정보를 불러온다. 단, 이미지의 경우 개별적인 엔드포인트를 통해 가져온다.
      * name, gender, age, description, birth 및 createAt, updateAt을 반환한다.
      * @return ReadProfileDto 를 반환하며 저장된 데이터이다.
+     * @tested yes
      */
     @GetMapping("/profile")
     public ResponseEntity<ReadProfileDto> getProfile() {

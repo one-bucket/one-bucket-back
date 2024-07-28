@@ -43,6 +43,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * <pre>
  * <span style="color: white;">[description]</span>
  * {@link MemberController} 에 대한 테스트 코드이다.
+ *
+ * "/member/password/reset"
+ * "/member/password/set"
+ * "/member/nickname/set"
+ * "member/{id}/set"
+ * "/member/info"
+ * "/member"
+ * "/profile/update"
+ * "/profile/image(POST)"
+ * "/profile/basic-image"
+ * "/profile/image(GET)"
+ * "/profile"
  * </pre>
  */
 

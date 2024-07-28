@@ -29,6 +29,8 @@ import org.springframework.web.bind.annotation.RestController;
  * 2024-06-27        jack8              init create
  * 2024-07-05        jack8              documentation
  * </pre>
+ *
+ * @tested yes
  */
 
 @RestController
@@ -43,6 +45,7 @@ public class RegisterController {
      *
      * @param dto {@link CreateMemberRequestDto} 를 입력받아 사용한다.
      * @return "success create" 메시지를 제공한다.
+     * @tested yes
      */
     @PostMapping(path = "/register")
     public ResponseEntity<?> register (@Valid @RequestBody CreateMemberRequestDto dto) {

@@ -1,10 +1,7 @@
 package com.onebucket.domain.memberManage.dao;
 
 import com.onebucket.domain.memberManage.domain.Member;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -35,48 +32,56 @@ import static org.assertj.core.api.Assertions.*;
  * </pre>
  */
 @DataJpaTest
-public class
-MemberRepositoryTest {
-    private Member member1;
+public class MemberRepositoryTest {
+
+    private final String username = "test-user";
+    private final String password = "!1Password1!";
+    private final String nickname =  "test-nick";
+
+    private final Member member = Member.builder()
+            .username(username)
+            .password(password)
+            .nickname(nickname)
+            .build();
+
 
     @Autowired
     private MemberRepository memberRepository;
 
     @BeforeEach
     void setUp() {
-        member1 = Member.builder()
-                .username("hongik")
-                .password("1234")
-                .nickname("Han")
-                .build();
+        memberRepository.save(member);
     }
 
+
+    //-+-+-+-+-+-+]] findByUsername test [[-+-+-+-+-+-+
     @Test
-    @DisplayName("findByUsername 테스트 성공")
+    @DisplayName("findByUsername - success")
     void testFindByUsername_success() {
-        //given
-        memberRepository.save(member1);
         //when
-        Optional<Member> findMember = memberRepository.findByUsername("hongik");
+        Member findMember = memberRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("Expected member is present, but was not"));
+
         //then
-        assertThat(findMember).isNotNull();
+        assertThat(findMember.getUsername()).isEqualTo(username);
+        assertThat(findMember.getNickname()).isEqualTo(nickname);
+
     }
 
     @Test
-    @DisplayName("유저 검색 실패")
-    void findByUsernameTestFail() {
+    @DisplayName("findByUsername - fail / unknown user")
+    void testFindByUsername_fail_unknownUser() {
         //when & then
-        assertThat(memberRepository.findByUsername("invalid name")).isEqualTo(Optional.empty());
+        assertThat(memberRepository.findByUsername("invalid name"))
+                .isEqualTo(Optional.empty());
     }
 
+    //-+-+-+-+-+-+]] existByUsername test [[-+-+-+-+-+-+
     @Test
-    @DisplayName("existsByUsername 테스트 성공")
-    void existsByUsernameTestSuccess() {
-        //given
-        memberRepository.save(member1);
-
+    @DisplayName("existsByUsername - success")
+    void testExistsByUsername_success() {
         //when
-        boolean isExists = memberRepository.existsByUsername("hongik");
+        boolean isExists = memberRepository.existsByUsername(username);
         boolean isNotExists = memberRepository.existsByUsername("invalid name");
 
         //then
@@ -84,42 +89,64 @@ MemberRepositoryTest {
         assertThat(isNotExists).isFalse();
     }
 
+    //-+-+-+-+-+-+]] deleteByUsername test [[-+-+-+-+-+-+
     @Test
-    @DisplayName("deleteByUsername 테스트 성공")
-    void deleteByUsernameTestSuccess() {
-        memberRepository.save(member1);
+    @DisplayName("deleteByUsername - success")
+    void testDeleteByUsername_success() {
 
-        memberRepository.deleteByUsername("hongik");
+        memberRepository.deleteByUsername(username);
 
-        boolean exists = memberRepository.existsByUsername("hongik");
+        boolean exists = memberRepository.existsByUsername(username);
         assertThat(exists).isFalse();
     }
 
+    //-+-+-+-+-+-+]] save test [[-+-+-+-+-+-+
     @Test
-    @DisplayName("save 테스트 실패 - 중복된 id")
-    void testSave_fail_duplicateId() {
-        Member member2 = Member.builder()
-                .username("hongik")
-                .password("1111")
-                .nickname("nicknick")
-                .build();
+    @DisplayName("save -fail / data duplicate")
+    void testSave_fail_duplicate() {
+        Member duplicateMember = Member.builder()
+                .username(username)
+                .nickname(nickname)
+                .password(password).build();
 
-        memberRepository.save(member1);
         Assertions.assertThrows(DataIntegrityViolationException.class,
-                () -> memberRepository.save(member2));
+                () -> memberRepository.save(duplicateMember));
+    }
+
+    //-+-+-+-+-+-+]] findIdByUsername test [[-+-+-+-+-+-+
+    @Test
+    @DisplayName("findIdByUsername - success")
+    void testFindIdByUsername_success() {
+        memberRepository.findIdByUsername(username).orElseThrow(
+                () -> new IllegalArgumentException("expect id of username but not exist user")
+        );
     }
 
     @Test
-    @DisplayName("save 테스트 실패 - 중복된 nickname")
-    void testSave_fail_duplicateNickname() {
-        Member member2 = Member.builder()
-                .username("test")
-                .password("1111")
-                .nickname("Han")
-                .build();
+    @DisplayName("findIdByUsername - fail / unknown user")
+    void testFindIdByUsername_fail_unknownUser() {
+        Optional<Long> id = memberRepository.findIdByUsername(username);
 
-        memberRepository.save(member1);
-        Assertions.assertThrows(DataIntegrityViolationException.class,
-                () -> memberRepository.save(member2));
+        assertThat(id).isEqualTo(Optional.empty());
+    }
+    //-+-+-+-+-+-+]] findNicknameById test [[-+-+-+-+-+-+
+    @Test
+    @DisplayName("findNicknameById - success")
+    void testFindNicknameById_success() {
+        Long id = memberRepository.findIdByUsername(username).orElseThrow(
+                () -> new IllegalArgumentException("expect id of username but not exist user")
+        );
+
+        String findNick = memberRepository.findNicknameById(id).orElseThrow(
+                () -> new IllegalArgumentException("expect nickname but not exist")
+        );
+        assertThat(findNick).isEqualTo(nickname);
+    }
+
+    @Test
+    @DisplayName("findNicknameById - fail / unknown user")
+    void testFindNicknameById_fail_unknownUser() {
+        Optional<String> findNick = memberRepository.findNicknameById(2039847650293L);
+        assertThat(findNick).isEqualTo(Optional.empty());
     }
 }

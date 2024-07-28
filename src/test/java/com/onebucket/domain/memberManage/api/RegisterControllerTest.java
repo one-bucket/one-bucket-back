@@ -41,6 +41,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * <pre>
  * <span style="color: white;">[description]</span>
  * {@link RegisterController} 에 대한 테스트 코드이다.
+ * 1. test register
+ *      1.1 success
+ *      1.2 회원가입 시 양식 오류
+ *      1.3 중복된 username 혹은 nickname 오류
+ *      1.4 이미 존재하는 프로필로 인한 신규 생성 오류
  * </pre>
  */
 

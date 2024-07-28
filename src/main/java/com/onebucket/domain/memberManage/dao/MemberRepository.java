@@ -18,18 +18,7 @@ import java.util.Optional;
  * also include {@code findByUsername(username), existsByUsername(username), deleteByUsername(username)}
  * Exception should be change to domain custom exception at service.
  * </pre>
- * <pre>
- * <span style="color: white;">usage:</span>
- * {@code
- *
- * } </pre>
- * <pre>
- * modified log :
- * =======================================================
- * DATE           AUTHOR               NOTE
- * -------------------------------------------------------
- * 2024-06-22        pokjm              init create
- * </pre>
+ * @tested true
  */
 @Repository
 public interface MemberRepository extends JpaRepository<Member,Long> {
