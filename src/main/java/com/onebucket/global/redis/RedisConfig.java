@@ -95,17 +95,4 @@ public class RedisConfig {
         container.setConnectionFactory(connectionFactory);
         return container;
     }
-
-//    // 만약 redis cache 애노테이션을 사용하려면 추가.
-//    @Bean
-//    public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
-//        RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
-//                .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
-//                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()))
-//                .entryTtl(Duration.ofMinutes(10L));
-//
-//        return RedisCacheManager.builder(RedisCacheWriter.nonLockingRedisCacheWriter(connectionFactory))
-//                .cacheDefaults(config)
-//                .build();
-//    }
 }
