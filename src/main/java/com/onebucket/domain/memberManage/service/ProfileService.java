@@ -36,4 +36,6 @@ public interface ProfileService {
     void updateImage(Long id, MultipartFile file);
     void updateImageToBasic(Long id);
 
+    String getImageUrl(Long id);
+
 }

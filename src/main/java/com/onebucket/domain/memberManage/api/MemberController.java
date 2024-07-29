@@ -188,6 +188,16 @@ public class MemberController {
         return ResponseEntity.ok(profileService.readProfile(id));
     }
 
+    //TODO : not test yet.
+    @GetMapping("/profile/image/url")
+    public ResponseEntity<SuccessResponseDto> getImageUrl() {
+        String username = securityUtils.getCurrentUsername();
+        Long id = memberService.usernameToId(username);
+        String url = profileService.getImageUrl(id);
+
+        return ResponseEntity.ok(new SuccessResponseDto(url));
+    }
+
 
 
 }

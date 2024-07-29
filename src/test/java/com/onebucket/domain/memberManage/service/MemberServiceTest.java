@@ -51,7 +51,7 @@ public class MemberServiceTest {
     private CreateMemberRequestDto getDto() {
         return CreateMemberRequestDto.builder()
                 .username("username")
-                .password("!1password1!")
+                .password("!1Password1!")
                 .nickname("nickname")
                 .build();
     }

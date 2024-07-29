@@ -36,7 +36,13 @@ public class MemberServiceImpl implements MemberService {
     private final RandomStringUtils randomStringUtils;
 
 
-
+    /**
+     * {@link CreateMemberRequestDto} 를 받아 member 테이블에 정보를 입력한다.
+     * 만약 이미 존재하는 username 혹은 nickname 이면 {@link AuthenticationException} 을 뱉는다.
+     *
+     * @param createMemberRequestDto username, password, nickname 정보를 가진다.
+     * @return 사용자의 id를 반환한다.
+     */
     @Override
     public Long createMember(CreateMemberRequestDto createMemberRequestDto) {
 
@@ -131,6 +137,7 @@ public class MemberServiceImpl implements MemberService {
                 .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER)).getUniversity())
                 .orElse(university);
     }
+
 
 
 }
