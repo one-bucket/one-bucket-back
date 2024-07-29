@@ -43,6 +43,14 @@
     <div class="chat-header">
         <h2>{{ room.name }}</h2>
     </div>
+    <div class="user-list">
+        <h4>Users:</h4>
+        <ul class="list-group">
+            <li class="list-group-item" v-for="user in users" :key="user.id">
+                {{ user.name }}
+            </li>
+        </ul>
+    </div>
     <div class="input-group">
         <div class="input-group-prepend">
             <label class="input-group-text">내용</label>
@@ -57,14 +65,6 @@
             <strong>{{ msg.sender }}</strong>: {{ msg.message }}
         </li>
     </ul>
-    <div>
-        <h3>현재 유저 목록</h3>
-        <ul class="list-group user-list">
-            <li class="list-group-item" v-for="user in users" :key="user.id">
-                {{ user.name }}
-            </li>
-        </ul>
-    </div>
 </div>
 <script src="/webjars/vue/2.5.16/dist/vue.min.js"></script>
 <script src="/webjars/axios/0.17.1/dist/axios.min.js"></script>
@@ -79,22 +79,28 @@
         data: {
             roomId: '',
             room: {},
+            users: [],
             sender: '',
             message: '',
             messages: [],
-            users: [] // 유저 목록 유지
         },
         created() {
             this.roomId = localStorage.getItem('chat.roomId');
             this.sender = localStorage.getItem('chat.sender');
             this.findRoom();
             this.loadMessages();
-            this.loadUsers(); // 유저 목록 로드
+            this.loadUsers();
+            window.addEventListener('beforeunload', this.leaveRoom); // 창 닫기 또는 새로고침 시 LEAVE 메시지 전송
         },
         methods: {
             findRoom: function () {
                 axios.get('/chat/room/' + this.roomId).then(response => {
                     this.room = response.data;
+                });
+            },
+            loadUsers: function () {
+                axios.get('/chat/room/' + this.roomId + '/users').then(response => {
+                    this.users = response.data;
                 });
             },
             sendMessage: function () {
@@ -113,26 +119,19 @@
                     "sender": recv.type === 'ENTER' ? '[알림]' : recv.sender,
                     "message": recv.message
                 });
-                // 유저가 입장 또는 퇴장할 때 유저 목록 갱신
-                if (recv.type === 'ENTER') {
-                    this.loadUsers();
-                }
             },
             loadMessages: function () {
                 axios.get('/chat/messages/' + this.roomId).then(response => {
-                    this.messages = response.data.reverse();
+                    this.messages = response.data;
                 });
             },
-            loadUsers: function () {
-                axios.get('/chat/room/' + this.roomId + '/users').then(response => {
-                    this.users = response.data;
-                    // 유저들의 name을 콘솔에 출력
-                    this.users.forEach(user => {
-                        console.log("username:"+ user.name);
-                    });
-                }).catch(error => {
-                    console.error('Error loading users:', error); // 에러 발생 시 에러 메시지 출력
-                });
+            leaveRoom: function () {
+                stompClient.send("/pub/chat/message", {}, JSON.stringify({
+                    type: 'LEAVE',
+                    roomId: this.roomId,
+                    sender: this.sender,
+                    timestamp: Date.now()
+                }));
             }
         }
     });
@@ -143,7 +142,12 @@
                 const recv = JSON.parse(message.body);
                 vm.recvMessage(recv);
             });
-            stompClient.send("/pub/chat/message", {}, JSON.stringify({type:'ENTER', roomId:vm.$data.roomId, sender:vm.$data.sender}));
+            stompClient.send("/pub/chat/message", {}, JSON.stringify({
+                type:'ENTER',
+                roomId:vm.$data.roomId,
+                sender:vm.$data.sender,
+                timestamp: Date.now()
+            }));
         }, function(error) {
             if (reconnect++ <= 5) {
                 setTimeout(function() {
