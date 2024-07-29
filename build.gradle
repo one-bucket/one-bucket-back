@@ -54,8 +54,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     testImplementation 'com.h2database:h2'
     implementation 'io.minio:minio:8.5.11'
-
-    //implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
 
     //chat
     implementation 'org.webjars:stomp-websocket:2.3.3-1'
