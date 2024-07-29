@@ -2,6 +2,7 @@ package com.onebucket.domain.chatManage.controller;
 
 import com.onebucket.domain.chatManage.dao.ChatRoomRepository;
 import com.onebucket.domain.chatManage.domain.ChatRoom;
+import com.onebucket.domain.chatManage.service.ChatRoomService;
 import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.domain.memberManage.service.MemberService;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 /**
  * <br>package name   : com.onebucket.domain.chatManage.controller
@@ -41,8 +41,6 @@ import java.util.Set;
 public class ChatRoomController {
     private final ChatRoomRepository chatRoomRepository;
     private final ChatRoomService chatRoomService;
-
-    private final UserService userService;
 
     // 채팅방 리스트 화면
     @GetMapping("/room")
