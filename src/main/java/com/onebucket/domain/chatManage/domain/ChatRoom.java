@@ -2,6 +2,7 @@ package com.onebucket.domain.chatManage.domain;
 
 import lombok.Builder;
 import lombok.Getter;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -29,10 +30,8 @@ import java.io.Serializable;
  */
 @Getter
 @Builder
-public class ChatRoom implements Serializable {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
+@Document(collection = "chatroom")
+public class ChatRoom  {
 
     private String roomId;
     private String name;

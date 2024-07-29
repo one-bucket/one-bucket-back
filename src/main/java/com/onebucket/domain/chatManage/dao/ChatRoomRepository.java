@@ -6,12 +6,14 @@ import com.onebucket.global.minio.MinioSaveInfoDto;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static com.onebucket.domain.chatManage.Const.CHAT_ROOMS;
@@ -37,43 +39,6 @@ import static com.onebucket.domain.chatManage.Const.CHAT_ROOMS;
  * 2024-07-09        SeungHoon              init create
  * </pre>
  */
-@RequiredArgsConstructor
-@Repository
-public class ChatRoomRepository {
-    private final MinioRepository minioRepository;
-    private final RedisTemplate<String,Object> redisTemplate;
-    private HashOperations<String,String,ChatRoom> opsHashChatRoom;
-
-    @Value("${minio.bucketName}")
-    private String bucketName;
-
-    @PostConstruct
-    private void init() {
-        opsHashChatRoom = redisTemplate.opsForHash();
-    }
-
-    public List<ChatRoom> findAllRoom() {
-        return opsHashChatRoom.values(CHAT_ROOMS);
-    }
-
-    public ChatRoom findRoomById(String roomId) {
-        return opsHashChatRoom.get(CHAT_ROOMS, roomId);
-    }
-
-    /**
-     * 채팅방 생성 : 서버간 채팅의 공유를 위해 minio에 저장한다.
-     */
-    public ChatRoom createChatRoom(String name) {
-        ChatRoom room = ChatRoom.builder()
-                .name(name)
-                .roomId(UUID.randomUUID().toString())
-                .build();
-        MinioSaveInfoDto dto = MinioSaveInfoDto.builder()
-                .bucketName(bucketName)
-                .fileName("chat/"+"ChatRoom/"+room.getRoomId())
-                .fileExtension("json")
-                .build();
-        minioRepository.uploadChatDto(room,dto);
-        return room;
-    }
+public interface ChatRoomRepository extends MongoRepository<ChatRoom, String> {
+    Optional<ChatRoom> findByRoomId(String id);
 }

@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 
 
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * <br>package name   : com.onebucket.domain.chatManage.controller
@@ -33,16 +35,18 @@ import java.util.List;
  * 2024-07-09        SeungHoon              init create
  * </pre>
  */
-@Controller
 @RequiredArgsConstructor
+@Controller
 @RequestMapping("/chat")
 public class ChatRoomController {
     private final ChatRoomRepository chatRoomRepository;
-    private final MemberService memberService;
+    private final ChatRoomService chatRoomService;
+
+    private final UserService userService;
 
     // 채팅방 리스트 화면
     @GetMapping("/room")
-    public String room(Model model) {
+    public String rooms(Model model) {
         return "room";
     }
 
@@ -50,17 +54,17 @@ public class ChatRoomController {
     @GetMapping("/rooms")
     @ResponseBody
     public List<ChatRoom> room() {
-        return chatRoomRepository.findAllRoom();
+        return chatRoomService.getChatRooms();
     }
 
     // 채팅방 생성
     @PostMapping("/room")
     @ResponseBody
     public ChatRoom createRoom(@RequestParam String name) {
-        return chatRoomRepository.createChatRoom(name);
+        return chatRoomService.createChatRoom(name);
     }
 
-    // 채팅방 화면
+    // 채팅방 입장 화면
     @GetMapping("/room/enter/{roomId}")
     public String roomDetail(@PathVariable String roomId, Model model) {
         model.addAttribute("roomId", roomId);
@@ -70,14 +74,7 @@ public class ChatRoomController {
     // 특정 채팅방 조회
     @GetMapping("/room/{roomId}")
     @ResponseBody
-    public ChatRoom roomInfo(@PathVariable String roomId) {
-        return chatRoomRepository.findRoomById(roomId);
-    }
-
-    // 특정 채팅방에 있는 유저들 조회 - 아직 구현 x MemberService에 추가해야 함.
-    @GetMapping("/room/{roomId}/members")
-    @ResponseBody
-    public List<Member> getMembers(@PathVariable String roomId) {
-        return List.of();
+    public Optional<ChatRoom> roomInfo(@PathVariable String roomId) {
+        return chatRoomRepository.findByRoomId(roomId);
     }
 }

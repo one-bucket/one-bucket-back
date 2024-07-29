@@ -2,6 +2,7 @@ package com.onebucket.domain.chatManage.domain;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.awt.*;
 import java.io.Serializable;
@@ -22,6 +23,7 @@ import java.time.LocalDateTime;
  *  - ENTER : 채팅방에 처음 입장함. 그 때 안내문을 작성하기 위해 사용한다.
  *  - JOIN : 기존에 이미 채팅방에 입장한 적이 있는 유저가 다시 입장한다.
  *  - TALK : 채팅방에서 유저들이 작성한 채팅을 나타낸다. 이 메세지는 DB에 저장된다.
+ *  - Leave : 채팅방에서 유저가 나감 (탈퇴)
  * } </pre>
  * <pre>
  * modified log :
@@ -32,13 +34,16 @@ import java.time.LocalDateTime;
  * </pre>
  */
 @Getter
-@Setter
-public class ChatMessage implements Serializable {
+@Document(collection = "chat")
+public class ChatMessage  {
     public enum MessageType {
-        ENTER,JOIN,TALK
+        ENTER,JOIN,TALK,LEAVE
     }
+
     private MessageType type;
+    @Setter
     private String message;
+
     private String sender;
     private String roomId;
     private LocalDateTime createAt;
