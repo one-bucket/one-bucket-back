@@ -32,6 +32,7 @@ public interface ChatRoomService {
     ChatRoom createChatRoom(String name);
     void enterChatRoom(String roomId);
     List<ChatRoom> getChatRooms();
-    Optional<ChatRoom> getChatRoom(String roomId);
+    ChatRoom getChatRoom(String roomId);
     ChannelTopic getTopic(String roomId);
+    void addMember(String roomId,String username);
 }

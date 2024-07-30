@@ -3,7 +3,16 @@ package com.onebucket.domain.chatManage.service;
 import com.onebucket.domain.chatManage.dao.ChatRoomRepository;
 import com.onebucket.domain.chatManage.domain.ChatRoom;
 import com.onebucket.domain.chatManage.pubsub.RedisSubscriber;
+import com.onebucket.domain.memberManage.dao.MemberRepository;
+import com.onebucket.domain.memberManage.dao.ProfileRepository;
+import com.onebucket.domain.memberManage.domain.Member;
+import com.onebucket.domain.memberManage.domain.Profile;
+import com.onebucket.domain.memberManage.dto.ChatMemberDto;
+import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
+import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.MemberManageException;
+import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import com.onebucket.global.minio.MinioRepository;
+import com.onebucket.global.utils.SecurityUtils;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,8 +47,9 @@ import java.util.*;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ChatRoomServiceImpl implements ChatRoomService{
+public class ChatRoomServiceImpl implements ChatRoomService {
 
+    private final MemberRepository memberRepository;
     // 채팅방의 대화 메세지를 발행하기 위한 redis topic 정보.
     // 서버별로 채팅방에 매치되는 topic 정보를 Map에 넣어서 roomId로 찾을 수 있게 한다.
     private Map<String, ChannelTopic> topics;
@@ -50,6 +60,7 @@ public class ChatRoomServiceImpl implements ChatRoomService{
     private final RedisSubscriber redisSubscriber;
 
     private final ChatRoomRepository chatRoomRepository;
+    private final ProfileRepository profileRepository;
 
     @PostConstruct
     public void init() {
@@ -61,6 +72,7 @@ public class ChatRoomServiceImpl implements ChatRoomService{
         ChatRoom chatRoom = ChatRoom.builder()
                 .name(name)
                 .roomId(UUID.randomUUID().toString())
+                .members(new HashSet<>())
                 .build();
         chatRoomRepository.save(chatRoom);
         return chatRoom;
@@ -86,13 +98,26 @@ public class ChatRoomServiceImpl implements ChatRoomService{
     }
 
     @Override
-    public Optional<ChatRoom> getChatRoom(String roomId) {
-        return Optional.ofNullable(chatRoomRepository.findById(roomId).orElseThrow(
-                () -> new RuntimeException("no chat room found with id: " + roomId)));
+    public ChatRoom getChatRoom(String roomId) {
+        return chatRoomRepository.findById(roomId).orElseThrow(
+                () -> new RuntimeException("no chat room found with id: " + roomId));
     }
 
+    @Override
     public ChannelTopic getTopic(String roomId) {
         return topics.get(roomId);
+    }
+
+    @Override
+    public void addMember(String roomId, String username) {
+        Member m = memberRepository.findByUsername(username)
+                .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
+        Long id = m.getId();
+        Profile findProfile = profileRepository.findById(id)
+                .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER_PROFILE));
+
+        ChatRoom chatRoom = getChatRoom(roomId);
+        chatRoom.addMember(ChatMemberDto.of(m.getNickname(),findProfile));
     }
 }
 

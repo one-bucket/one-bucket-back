@@ -5,6 +5,7 @@ import com.onebucket.domain.chatManage.domain.ChatRoom;
 import com.onebucket.domain.chatManage.service.ChatRoomService;
 import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.domain.memberManage.service.MemberService;
+import com.onebucket.global.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -39,8 +40,8 @@ import java.util.Optional;
 @Controller
 @RequestMapping("/chat")
 public class ChatRoomController {
-    private final ChatRoomRepository chatRoomRepository;
     private final ChatRoomService chatRoomService;
+    private final SecurityUtils securityUtils;
 
     // 채팅방 리스트 화면
     @GetMapping("/room")
@@ -66,13 +67,15 @@ public class ChatRoomController {
     @GetMapping("/room/enter/{roomId}")
     public String roomDetail(@PathVariable String roomId, Model model) {
         model.addAttribute("roomId", roomId);
+        String username = securityUtils.getCurrentUsername();
+        chatRoomService.addMember(roomId,username);
         return "roomdetail";
     }
 
     // 특정 채팅방 조회
     @GetMapping("/room/{roomId}")
     @ResponseBody
-    public Optional<ChatRoom> roomInfo(@PathVariable String roomId) {
-        return chatRoomRepository.findByRoomId(roomId);
+    public ChatRoom roomInfo(@PathVariable String roomId) {
+        return chatRoomService.getChatRoom(roomId);
     }
 }
