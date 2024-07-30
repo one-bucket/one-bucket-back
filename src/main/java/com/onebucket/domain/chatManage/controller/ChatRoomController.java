@@ -1,10 +1,8 @@
 package com.onebucket.domain.chatManage.controller;
 
-import com.onebucket.domain.chatManage.dao.ChatRoomRepository;
+
 import com.onebucket.domain.chatManage.domain.ChatRoom;
 import com.onebucket.domain.chatManage.service.ChatRoomService;
-import com.onebucket.domain.memberManage.domain.Member;
-import com.onebucket.domain.memberManage.service.MemberService;
 import com.onebucket.global.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
