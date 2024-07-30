@@ -34,6 +34,7 @@ import java.time.LocalDateTime;
  * </pre>
  */
 @Getter
+@Setter
 @Document(collection = "chat")
 public class ChatMessage  {
     public enum MessageType {
@@ -41,7 +42,6 @@ public class ChatMessage  {
     }
 
     private MessageType type;
-    @Setter
     private String message;
 
     private String sender;
