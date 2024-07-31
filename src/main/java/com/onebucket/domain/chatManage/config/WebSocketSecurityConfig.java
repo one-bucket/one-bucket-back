@@ -15,7 +15,10 @@ import org.springframework.security.messaging.access.intercept.MessageMatcherDel
  * <br>date           : 2024-07-24
  * <pre>
  * <span style="color: white;">[description]</span>
- *
+ * Websocket 보안 관련 코드.
+ * "/ws-stomp" 로 오는 메세지는 모두 허용
+ * "/pub", "/sub" 으로 오는 메세지는 모두 인증이 필요하다.
+ * CSRF 비활성화
  * </pre>
  * <pre>
  * <span style="color: white;">usage:</span>

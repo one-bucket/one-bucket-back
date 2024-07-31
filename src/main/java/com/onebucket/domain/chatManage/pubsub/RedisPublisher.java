@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
  * <br>date           : 2024-07-08
  * <pre>
  * <span style="color: white;">[description]</span>
- *
+ * Redis publisher : 특정 topic으로 메세지를 발행한다. topic==null 이면 에러가 발생한다.
  * </pre>
  * <pre>
  * <span style="color: white;">usage:</span>

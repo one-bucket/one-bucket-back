@@ -16,12 +16,14 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
  * <br>date           : 2024-07-08
  * <pre>
  * <span style="color: white;">[description]</span>
- *
+ * Websocket 관련 config 파일이다.
  * </pre>
  * <pre>
  * <span style="color: white;">usage:</span>
  * {@code
- *
+ * public void configureMessageBroker(MessageBrokerRegistry config) : 스프링 내장 메세지 브로커를 사용하며, 각각 구독은 "/sub", 발행은 "/pub"을 사용한다.
+ * public void registerStompEndpoints(StompEndpointRegistry registry) : 채팅은 stomp 을 사용하며, "/ws-stomp" 엔드포인트를 사용한다. 일단 모든 곳에서 오는 요청을 허용한다.
+ * public void configureClientInboundChannel(ChannelRegistration registration) : 들어오는 메세지에 대한 추가적인 보안 설정
  * } </pre>
  * <pre>
  * modified log :

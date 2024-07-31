@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service;
  * <br>date           : 2024-07-08
  * <pre>
  * <span style="color: white;">[description]</span>
- *
+ * 발행한 메세지는 redisTemplate에 존재하는데, 이를 ChatMessage로 변환하고 구독자들에게 메세지를 전달한다.
  * </pre>
  * <pre>
  * <span style="color: white;">usage:</span>
