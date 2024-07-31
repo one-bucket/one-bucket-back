@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -39,7 +40,8 @@ public class ChatRoom extends BaseEntity {
     private String roomId;
     private String name;
 
-    private Set<ChatMemberDto> members;
+    @Builder.Default
+    private Set<ChatMemberDto> members = new HashSet<>();
 
     public void addMember(ChatMemberDto member) {
         members.add(member);

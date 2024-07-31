@@ -72,7 +72,6 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         ChatRoom chatRoom = ChatRoom.builder()
                 .name(name)
                 .roomId(UUID.randomUUID().toString())
-                .members(new HashSet<>())
                 .build();
         chatRoomRepository.save(chatRoom);
         return chatRoom;
