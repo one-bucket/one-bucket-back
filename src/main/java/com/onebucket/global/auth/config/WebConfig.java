@@ -1,4 +1,4 @@
-package com.onebucket.domain.chatManage.config;
+package com.onebucket.global.auth.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
