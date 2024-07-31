@@ -1,6 +1,7 @@
 package com.onebucket.domain.chatManage.domain;
 
 import com.onebucket.domain.memberManage.dto.ChatMemberDto;
+import com.onebucket.global.common.BaseEntity;
 import lombok.Builder;
 import lombok.Getter;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -33,7 +34,7 @@ import java.util.Set;
 @Getter
 @Builder
 @Document(collection = "chatroom")
-public class ChatRoom  {
+public class ChatRoom extends BaseEntity {
 
     private String roomId;
     private String name;
