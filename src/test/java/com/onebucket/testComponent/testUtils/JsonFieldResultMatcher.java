@@ -1,5 +1,6 @@
 package com.onebucket.testComponent.testUtils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onebucket.global.exceptionManage.errorCode.ErrorCode;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
@@ -15,6 +16,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <br>package name   : com.onebucket.testComponent
@@ -111,4 +113,40 @@ public class JsonFieldResultMatcher implements ResultMatcher {
 
         return new JsonFieldResultMatcher(matchers);
     }
+
+    public static ResultMatcher hasKey(List<?> dtos) throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        List<ResultMatcher> matchers = new ArrayList<>();
+
+        // 리스트의 크기를 검증합니다.
+        matchers.add(MockMvcResultMatchers.jsonPath("$.length()").value(dtos.size()));
+
+        for (int i = 0; i < dtos.size(); i++) {
+            Object dto = dtos.get(i);
+
+            @SuppressWarnings("unchecked")
+            Map<String, Object> map = mapper.convertValue(dto, Map.class);
+
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                Object value = entry.getValue();
+
+                if (value != null) {
+                    if (value instanceof LocalDate) {
+                        DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
+                        String formattedDate = ((LocalDate) value).format(formatter);
+                        matchers.add(MockMvcResultMatchers.jsonPath("$[" + i + "]." + entry.getKey()).value(formattedDate));
+                    } else if (value instanceof LocalDateTime) {
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+                        String formattedDateTime = ((LocalDateTime) value).truncatedTo(ChronoUnit.SECONDS).format(formatter);
+                        matchers.add(MockMvcResultMatchers.jsonPath("$[" + i + "]." + entry.getKey()).value(formattedDateTime));
+                    } else {
+                        matchers.add(MockMvcResultMatchers.jsonPath("$[" + i + "]." + entry.getKey()).value(value));
+                    }
+                }
+            }
+        }
+
+        return new JsonFieldResultMatcher(matchers);
+    }
+
 }

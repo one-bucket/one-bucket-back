@@ -71,6 +71,14 @@ public class UniversityServiceImpl implements UniversityService {
     @Override
     public List<UniversityDto> findAllUniversity() {
         List<University> universities = universityRepository.findAll();
+        if (universities.isEmpty()) {
+            UniversityDto defaultDto = UniversityDto.builder()
+                    .name("not insert")
+                    .address("data")
+                    .email("yet")
+                    .build();
+            return List.of(defaultDto);
+        }
         return universities.stream()
                 .map(university -> UniversityDto.builder()
                         .name(university.getName())

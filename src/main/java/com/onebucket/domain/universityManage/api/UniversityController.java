@@ -63,10 +63,10 @@ public class UniversityController {
     }
 
     @PatchMapping("/univs/{name}")
-    public ResponseEntity<SuccessResponseDto> updateUniversityInformation(@PathVariable String name,
+    public ResponseEntity<SuccessResponseDto> updateUniversity(@PathVariable String name,
                                                                           @Valid @RequestBody UpdateUniversityDto dto) {
         universityService.updateUniversity(name,dto);
-        return ResponseEntity.ok(new SuccessResponseDto("success update university information"));
+        return ResponseEntity.ok(new SuccessResponseDto("success update university"));
     }
 
     @DeleteMapping("/univs/{name}")
