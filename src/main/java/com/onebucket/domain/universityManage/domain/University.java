@@ -39,7 +39,7 @@ public class University {
     @Column(unique = true, nullable = false)
     private String name;
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     private String address;
 
     @Column(unique = true, nullable = false)

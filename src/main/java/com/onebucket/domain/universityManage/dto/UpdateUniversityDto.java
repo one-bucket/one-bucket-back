@@ -1,6 +1,6 @@
 package com.onebucket.domain.universityManage.dto;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Email;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -8,7 +8,7 @@ import lombok.Setter;
 /**
  * <br>package name   : com.onebucket.domain.universityManage.dto
  * <br>file name      : UpdateUniversityDto
- * <br>date           : 2024-07-18
+ * <br>date           : 2024-08-01
  * <pre>
  * <span style="color: white;">[description]</span>
  *
@@ -20,16 +20,20 @@ import lombok.Setter;
  * } </pre>
  * <pre>
  * modified log :
- * =======================================================
+ * ====================================================
  * DATE           AUTHOR               NOTE
- * -------------------------------------------------------
- * 2024-07-18        SeungHoon              init create
+ * ----------------------------------------------------
+ * 2024-08-01        jack8              init create
  * </pre>
  */
-@Builder
+
 @Getter
+@Setter
+@Builder
 public class UpdateUniversityDto {
 
     private String address;
+
+    @Email(message = "Email should be valid")
     private String email;
 }

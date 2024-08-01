@@ -2,13 +2,11 @@ package com.onebucket.domain.universityManage.service;
 
 import com.onebucket.domain.universityManage.dao.UniversityRepository;
 import com.onebucket.domain.universityManage.domain.University;
-import com.onebucket.domain.universityManage.dto.CreateUniversityDto;
-import com.onebucket.domain.universityManage.dto.ResponseUniversityDto;
+import com.onebucket.domain.universityManage.dto.UniversityDto;
 import com.onebucket.domain.universityManage.dto.UpdateUniversityDto;
 import com.onebucket.global.exceptionManage.customException.universityManageException.UniversityException;
 import com.onebucket.global.exceptionManage.errorCode.UniversityErrorCode;
 import com.onebucket.global.utils.EntityUtils;
-import com.onebucket.global.utils.UniversityEmailValidator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -43,28 +41,20 @@ import java.util.stream.Collectors;
 public class UniversityServiceImpl implements UniversityService {
 
     private final UniversityRepository universityRepository;
-    private final UniversityEmailValidator universityEmailValidator;
 
     /**
      * 새로운 대학 정보를 만들고 만든 대학 정보를 반환한다. 같은 이름을 가진 대학교는 추가할 수 없음.
-     * @param createUniversityDto
-     * @return University의 id
+     * @param universityDto 생성하고자 하는 대학의 정보를 담는다.
+     * @return University 의 id
      */
     @Override
     @Transactional
-    public Long createUniversity(CreateUniversityDto createUniversityDto) {
-        String name = createUniversityDto.getName();
-        String email = createUniversityDto.getEmail();
-
-        // 대학교 이메일 유효성 검사
-        if (!universityEmailValidator.isValidUniversityEmail(name, email)) {
-            throw new UniversityException(UniversityErrorCode.INVALID_EMAIL, "Invalid university email");
-        }
+    public Long createUniversity(UniversityDto universityDto) {
 
         University university = University.builder()
-                .name(createUniversityDto.getName())
-                .address(createUniversityDto.getAddress())
-                .email(createUniversityDto.getEmail())
+                .name(universityDto.getName())
+                .address(universityDto.getAddress())
+                .email(universityDto.getEmail())
                 .build();
         try {
             universityRepository.save(university);
@@ -79,10 +69,10 @@ public class UniversityServiceImpl implements UniversityService {
      * @return DB에 존재하는 모든 대학 정보 출력
      */
     @Override
-    public List<ResponseUniversityDto> findAllUniversity() {
+    public List<UniversityDto> findAllUniversity() {
         List<University> universities = universityRepository.findAll();
         return universities.stream()
-                .map(university -> ResponseUniversityDto.builder()
+                .map(university -> UniversityDto.builder()
                         .name(university.getName())
                         .address(university.getAddress())
                         .email(university.getEmail())
@@ -91,14 +81,14 @@ public class UniversityServiceImpl implements UniversityService {
     }
 
     /**
-     * @param id
+     * @param name 대학의 Name 을 입력
      * @return 특정 이름을 가진 대학교 정보 출력
      */
     @Override
-    public ResponseUniversityDto getUniversity(Long id) {
-        University university = universityRepository.findById(id)
+    public UniversityDto getUniversity(String name) {
+        University university = universityRepository.findByName(name)
                 .orElseThrow(()-> new UniversityException(UniversityErrorCode.NOT_EXIST_UNIVERSITY));
-        return ResponseUniversityDto.builder()
+        return UniversityDto.builder()
                 .name(university.getName())
                 .address(university.getAddress())
                 .email(university.getEmail())
@@ -107,13 +97,13 @@ public class UniversityServiceImpl implements UniversityService {
 
     /**
      * 대학 정보 업데이트하기.
-     * @param id
-     * @param dto
+     * @param name 대학의 이름
+     * @param dto 업데이트 하고자 하는 필드
      */
     @Override
     @Transactional
-    public void updateUniversity(Long id, UpdateUniversityDto dto) {
-        University university = universityRepository.findById(id)
+    public void updateUniversity(String name, UpdateUniversityDto dto) {
+        University university = universityRepository.findByName(name)
                 .orElseThrow(()->new UniversityException(UniversityErrorCode.NOT_EXIST_UNIVERSITY));
 
         EntityUtils.updateIfNotNull(dto.getAddress(),university::setAddress);
@@ -122,11 +112,11 @@ public class UniversityServiceImpl implements UniversityService {
 
     /**
      * 대학 정보 삭제하기
-     * @param id
+     * @param name 대학의 이름
      */
     @Override
-    public void deleteUniversity(Long id) {
-        University university = universityRepository.findById(id)
+    public void deleteUniversity(String name) {
+        University university = universityRepository.findByName(name)
                 .orElseThrow(()->new UniversityException(UniversityErrorCode.NOT_EXIST_UNIVERSITY));
         universityRepository.delete(university);
     }

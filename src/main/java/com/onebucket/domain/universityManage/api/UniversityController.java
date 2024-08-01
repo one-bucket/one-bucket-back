@@ -2,6 +2,7 @@ package com.onebucket.domain.universityManage.api;
 
 import com.onebucket.domain.universityManage.dto.*;
 import com.onebucket.domain.universityManage.service.UniversityService;
+import com.onebucket.global.utils.SuccessResponseDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -44,32 +45,33 @@ public class UniversityController {
     private final UniversityService universityService;
 
     @PostMapping("/univs")
-    public ResponseEntity<?> createUniversity(@Valid @RequestBody CreateUniversityDto createUniversityDto) {
-        Long id = universityService.createUniversity(createUniversityDto);
-        return ResponseEntity.ok("create success, University id is " + id);
+    public ResponseEntity<SuccessResponseDto> createUniversity(@Valid @RequestBody UniversityDto universityDto) {
+        Long id = universityService.createUniversity(universityDto);
+        return ResponseEntity.ok(new SuccessResponseDto("success create university / id is " + id));
     }
 
     @GetMapping("/univs")
     public ResponseEntity<?> getAllUniversity() {
-        List<ResponseUniversityDto> universities = universityService.findAllUniversity();
+        List<UniversityDto> universities = universityService.findAllUniversity();
         return ResponseEntity.ok(universities);
     }
 
-    @GetMapping("/univs/{id}")
-    public ResponseEntity<?> getUniversity(@PathVariable Long id) {
-        ResponseUniversityDto universityDto = universityService.getUniversity(id);
+    @GetMapping("/univs/{name}")
+    public ResponseEntity<?> getUniversity(@PathVariable String name) {
+        UniversityDto universityDto = universityService.getUniversity(name);
         return ResponseEntity.ok(universityDto);
     }
 
-    @PatchMapping("/univs/{id}")
-    public ResponseEntity<?> updateUniversityEmail(@PathVariable Long id, @Valid @RequestBody UpdateUniversityDto dto) {
-        universityService.updateUniversity(id,dto);
-        return ResponseEntity.ok("update email success");
+    @PatchMapping("/univs/{name}")
+    public ResponseEntity<SuccessResponseDto> updateUniversityInformation(@PathVariable String name,
+                                                                          @Valid @RequestBody UpdateUniversityDto dto) {
+        universityService.updateUniversity(name,dto);
+        return ResponseEntity.ok(new SuccessResponseDto("success update university information"));
     }
 
-    @DeleteMapping("/univs/{id}")
-    public ResponseEntity<?> deleteUniversity(@PathVariable Long id) {
-        universityService.deleteUniversity(id);
-        return ResponseEntity.ok("delete success");
+    @DeleteMapping("/univs/{name}")
+    public ResponseEntity<SuccessResponseDto> deleteUniversity(@PathVariable String name) {
+        universityService.deleteUniversity(name);
+        return ResponseEntity.ok(new SuccessResponseDto("success delete university"));
     }
 }
