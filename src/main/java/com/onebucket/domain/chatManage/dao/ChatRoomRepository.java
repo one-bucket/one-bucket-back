@@ -1,22 +1,10 @@
 package com.onebucket.domain.chatManage.dao;
 
 import com.onebucket.domain.chatManage.domain.ChatRoom;
-import com.onebucket.global.minio.MinioRepository;
-import com.onebucket.global.minio.MinioSaveInfoDto;
-import jakarta.annotation.PostConstruct;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.data.redis.core.HashOperations;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.stereotype.Repository;
 
-import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
-
-import static com.onebucket.domain.chatManage.Const.CHAT_ROOMS;
 
 /**
  * <br>package name   : com.onebucket.domain.chatManage.dao
@@ -40,5 +28,6 @@ import static com.onebucket.domain.chatManage.Const.CHAT_ROOMS;
  * </pre>
  */
 public interface ChatRoomRepository extends MongoRepository<ChatRoom, String> {
-    Optional<ChatRoom> findByRoomId(String id);
+    @NotNull
+    Optional<ChatRoom> findById(@NotNull String id);
 }
