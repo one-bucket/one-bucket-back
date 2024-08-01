@@ -1,4 +1,4 @@
-package com.onebucket.domain.universityManage.controller;
+package com.onebucket.domain.universityManage.api;
 
 import com.onebucket.domain.universityManage.dto.*;
 import com.onebucket.domain.universityManage.service.UniversityService;

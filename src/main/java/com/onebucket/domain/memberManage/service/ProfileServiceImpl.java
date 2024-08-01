@@ -40,6 +40,8 @@ import java.time.LocalDateTime;
  * ----------------------------------------------------
  * 2024-07-03        jack8              init create
  * </pre>
+ *
+ * @tested  true
  */
 
 @Service

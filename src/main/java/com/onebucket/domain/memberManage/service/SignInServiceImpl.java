@@ -56,6 +56,7 @@ public class SignInServiceImpl implements SignInService{
      * @param password password to sign in
      * @return jwt, Bearer [access token] [refresh token]
      * @throws org.springframework.security.core.AuthenticationException when username or password incorrect...
+     * @tested true
      */
     @Override
     public JwtToken signInByUsernameAndPassword(String username, String password) {
@@ -82,12 +83,19 @@ public class SignInServiceImpl implements SignInService{
 
     }
 
+    /**
+     * Authorities 의 값을 넘겨받아 토큰의 유효성을 검증하고, authentication 을 추출하여 반환한다.
+     *
+     * @param headerString http 메시지의 헤더 값
+     * @return 헤더에서 추출한 authentication
+     * @tested true
+     */
     @Override
     public Authentication getAuthenticationAndValidHeader(String headerString) {
 
         if (!(headerString != null && headerString.startsWith("Bearer "))) {
             throw new AuthenticationException(AuthenticationErrorCode.NON_VALID_TOKEN,
-                    "can't access access token while get refresh token");
+                    "can't access access token");
         }
         String accessToken = headerString.substring(7);
         try {

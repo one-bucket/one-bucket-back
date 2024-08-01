@@ -1,7 +1,10 @@
 package com.onebucket.domain.memberManage.service;
 
 import com.onebucket.global.auth.jwtAuth.component.JwtProvider;
+import com.onebucket.global.auth.jwtAuth.component.JwtValidator;
 import com.onebucket.global.auth.jwtAuth.domain.JwtToken;
+import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
+import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,12 +13,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -51,12 +54,15 @@ class SignInServiceTest {
     @Mock
     private JwtProvider jwtProvider;
 
+    @Mock
+    private JwtValidator jwtValidator;
+
     @InjectMocks
     private SignInServiceImpl signInService;
 
 
     @Test
-    @DisplayName("로그인 성공")
+    @DisplayName("signIn - success")
     void testSignInByUsernameAndPassword_success() throws AuthenticationException {
         //given
         String username = "testuser";
@@ -82,21 +88,61 @@ class SignInServiceTest {
     }
 
     @Test
-    @DisplayName("로그인 실패 - 유효하지 않은 값")
-    void testSignInByUsernameAndPassword_fail_invalidValue() throws AuthenticationException {
+    @DisplayName("signIn - fail / invalid user")
+    void testSignInByUsernameAndPassword_fail_invalidValue() {
         //given
         String username = "invaliduser";
         String password = "password";
 
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
-                .thenThrow(new AuthenticationException("invalid credentials") {});
+                .thenThrow(new BadCredentialsException(""));
+
 
         //when & then
-        assertThrows(AuthenticationException.class, () ->
-                signInService.signInByUsernameAndPassword(username, password));
+        assertThatThrownBy(() -> signInService.signInByUsernameAndPassword(username, password))
+                .isInstanceOf(AuthenticationException.class)
+                .extracting("errorCode")
+                .isEqualTo(AuthenticationErrorCode.CREDENTIAL_INVALID);
+
 
         verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
         verify(jwtProvider, never()).generateToken(any(Authentication.class));
+    }
+
+    @Test
+    @DisplayName("getAuthenticationAndValidHeader - success")
+    void testGetAuthenticationAndValidHeader_success() {
+        String headerString = "Bearer access-token";
+        Authentication authentication = mock(Authentication.class);
+        when(jwtValidator.getAuthentication("access-token")).thenReturn(authentication);
+
+
+        Authentication newAuth = signInService.getAuthenticationAndValidHeader(headerString);
+        assertThat(newAuth).isEqualTo(authentication);
+
+    }
+
+    @Test
+    @DisplayName("getAuthenticationAndValidHeader - fail / token invalid")
+    void testAuthenticationAndValidHeader_fail_invalidToken() {
+        String headerString = "invalid-token";
+         assertThatThrownBy(() -> signInService.getAuthenticationAndValidHeader(headerString))
+                 .isInstanceOf(AuthenticationException.class)
+                 .extracting("errorCode")
+                 .isEqualTo(AuthenticationErrorCode.NON_VALID_TOKEN);
+    }
+
+    @Test
+    @DisplayName("getAuthenticationAndValidHeader - fail /  exception while valid token")
+    void testAuthenticationAndValidHeader_fail_validFail() {
+        String headerString = "Bearer invalid-token";
+
+        when(jwtValidator.isTokenValid("invalid-token")).thenThrow(new RuntimeException());
+
+        assertThatThrownBy(() -> signInService.getAuthenticationAndValidHeader(headerString))
+                .isInstanceOf(AuthenticationException.class)
+                .extracting("errorCode")
+                .isEqualTo(AuthenticationErrorCode.NON_VALID_TOKEN);
     }
 
 }

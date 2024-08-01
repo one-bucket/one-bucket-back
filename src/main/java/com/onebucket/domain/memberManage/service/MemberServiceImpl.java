@@ -26,6 +26,8 @@ import java.util.Optional;
  * <span style="color: white;">[description]</span>
  * {@link MemberService}
  * </pre>
+ *
+ * @tested true
  */
 @Service
 @Transactional
