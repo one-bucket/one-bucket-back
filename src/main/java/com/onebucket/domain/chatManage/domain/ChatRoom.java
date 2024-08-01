@@ -2,12 +2,11 @@ package com.onebucket.domain.chatManage.domain;
 
 import com.onebucket.domain.memberManage.dto.ChatMemberDto;
 import com.onebucket.global.common.BaseEntity;
+import jakarta.persistence.Id;
 import lombok.Builder;
 import lombok.Getter;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.io.Serial;
-import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -37,7 +36,8 @@ import java.util.Set;
 @Document(collection = "chatroom")
 public class ChatRoom extends BaseEntity {
 
-    private String roomId;
+    @Id
+    private String id;
     private String name;
 
     @Builder.Default
