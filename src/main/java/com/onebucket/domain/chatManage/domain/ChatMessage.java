@@ -43,4 +43,6 @@ public class ChatMessage extends ChatBaseEntity {
 
     private String sender;
     private String roomId;
+
+    private String imgUrl;
 }
