@@ -1,6 +1,7 @@
 package com.onebucket.domain.chatManage.service;
 
 import com.onebucket.domain.chatManage.dao.ChatRoomRepository;
+import com.onebucket.domain.chatManage.domain.ChatMessage;
 import com.onebucket.domain.chatManage.domain.ChatRoom;
 import com.onebucket.domain.chatManage.pubsub.RedisSubscriber;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
@@ -94,7 +95,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     @Override
     public ChatRoom getChatRoom(String roomId) {
-        return chatRoomRepository.findByRoomId(roomId).orElseThrow(
+        return chatRoomRepository.findById(roomId).orElseThrow(
                 () -> new RuntimeException("no chat room found with id: " + roomId));
     }
 
@@ -113,6 +114,14 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
         ChatRoom chatRoom = getChatRoom(roomId);
         chatRoom.addMember(ChatMemberDto.of(m.getNickname(),findProfile));
+    }
+
+    @Override
+    public void addChatMessage(ChatMessage chatMessage) {
+        ChatRoom chatRoom = chatRoomRepository.findById(chatMessage.getRoomId()).orElseThrow(
+                () -> new RuntimeException("no chat room found with id: " + chatMessage.getRoomId()));
+        chatRoom.getMessages().add(chatMessage);
+        chatRoomRepository.save(chatRoom);
     }
 }
 
