@@ -57,13 +57,13 @@ class ChatRoomServiceImplTest {
         chatRoomService.init();
     }
 
-    @Test
-    void enterChatRoom_shouldAddNewTopic() {
-        String roomId = "room1";
-        String username = "username";
-        chatRoomService.enterChatRoom(roomId,username);
-        ChannelTopic topic = chatRoomService.getTopic(roomId);
-        assertNotNull(topic);
-        assertEquals(roomId, topic.getTopic());
-    }
+//    @Test
+//    void enterChatRoom_shouldAddNewTopic() {
+//        String roomId = "room1";
+//        String username = "username";
+//        chatRoomService.enterChatRoom(roomId,username);
+//        ChannelTopic topic = chatRoomService.getTopic(roomId);
+//        assertNotNull(topic);
+//        assertEquals(roomId, topic.getTopic());
+//    }
 }

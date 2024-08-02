@@ -35,5 +35,4 @@ public interface ChatRoomService {
     ChatRoom getChatRoom(String roomId);
     ChannelTopic getTopic(String roomId);
     void addChatMessage(ChatMessage chatMessage);
-    void addChatRoomMember(String roomId, String username);
 }

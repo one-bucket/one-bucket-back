@@ -1,13 +1,12 @@
 package com.onebucket.domain.chatManage.domain;
 
 import com.onebucket.domain.memberManage.dto.ChatMemberDto;
-import com.onebucket.global.common.ChatBaseEntity;
-import jakarta.persistence.Column;
 import jakarta.persistence.Id;
 import lombok.Builder;
 import lombok.Getter;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -38,11 +37,14 @@ import java.util.concurrent.ConcurrentHashMap;
 @Getter
 @Builder
 @Document(collection = "chatroom")
-public class ChatRoom extends ChatBaseEntity {
+public class ChatRoom  {
 
     @Id
     private String roomId;
     private String name;
+
+    private LocalDateTime createdAt;
+    private String createdBy;
 
     @Builder.Default
     private Set<ChatMemberDto> members = ConcurrentHashMap.newKeySet();

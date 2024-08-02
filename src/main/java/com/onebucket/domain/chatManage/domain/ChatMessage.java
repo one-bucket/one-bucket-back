@@ -1,12 +1,8 @@
 package com.onebucket.domain.chatManage.domain;
 
-import com.onebucket.global.common.ChatBaseEntity;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.mongodb.core.mapping.Document;
-
-import java.awt.*;
-import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
@@ -37,7 +33,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Document(collection = "chat")
-public class ChatMessage extends ChatBaseEntity {
+public class ChatMessage  {
     public enum MessageType {
         ENTER,JOIN,TALK,LEAVE
     }
@@ -49,4 +45,7 @@ public class ChatMessage extends ChatBaseEntity {
     private String roomId;
 
     private String imgUrl;
+
+    private LocalDateTime createdAt;
+    private String createdBy;
 }

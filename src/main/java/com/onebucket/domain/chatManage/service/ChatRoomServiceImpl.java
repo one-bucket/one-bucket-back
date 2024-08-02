@@ -70,6 +70,8 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         ChatRoom chatRoom = ChatRoom.builder()
                 .name(dto.name())
                 .members(dto.members())
+                .createdBy(dto.createdBy())
+                .createdAt(dto.createdAt())
                 .build();
         chatRoomRepository.save(chatRoom);
     }
@@ -107,15 +109,6 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     @Override
     public ChannelTopic getTopic(String roomId) {
         return topics.get(roomId);
-    }
-
-    @Override
-    public void addChatRoomMember(String roomId, String username) {
-        Member m = memberRepository.findByUsername(username)
-                .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
-        ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(
-                () -> new RoomNotFoundException(ChatErrorCode.NOT_EXIST_ROOM));
-        chatRoom.addMember(ChatMemberDto.from(m.getNickname()));
     }
 
     @Override
