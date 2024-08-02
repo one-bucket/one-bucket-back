@@ -1,11 +1,10 @@
 package com.onebucket.domain.chatManage.service;
 
+import com.onebucket.domain.chatManage.domain.ChatMessage;
 import com.onebucket.domain.chatManage.domain.ChatRoom;
 import org.springframework.data.redis.listener.ChannelTopic;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 
 /**
  * <br>package name   : com.onebucket.domain.chatManage.service
@@ -35,4 +34,5 @@ public interface ChatRoomService {
     ChatRoom getChatRoom(String roomId);
     ChannelTopic getTopic(String roomId);
     void addMember(String roomId,String username);
+    void addChatMessage(ChatMessage chatMessage);
 }
