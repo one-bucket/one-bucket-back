@@ -125,7 +125,7 @@ public class MemberRepositoryTest {
     @Test
     @DisplayName("findIdByUsername - fail / unknown user")
     void testFindIdByUsername_fail_unknownUser() {
-        Optional<Long> id = memberRepository.findIdByUsername(username);
+        Optional<Long> id = memberRepository.findIdByUsername("unknownUser");
 
         assertThat(id).isEqualTo(Optional.empty());
     }
