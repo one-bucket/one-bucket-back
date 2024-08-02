@@ -4,7 +4,6 @@ import com.onebucket.domain.chatManage.domain.ChatMessage;
 import com.onebucket.domain.chatManage.pubsub.RedisPublisher;
 import com.onebucket.domain.chatManage.service.ChatMessageService;
 import com.onebucket.domain.chatManage.service.ChatRoomService;
-import com.onebucket.global.utils.ChatLogUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.listener.ChannelTopic;
