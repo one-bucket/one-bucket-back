@@ -6,9 +6,7 @@ import com.onebucket.domain.chatManage.domain.ChatRoom;
 import com.onebucket.domain.chatManage.dto.CreateChatRoomDto;
 import com.onebucket.domain.chatManage.pubsub.RedisSubscriber;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
-import com.onebucket.domain.memberManage.dao.ProfileRepository;
 import com.onebucket.domain.memberManage.domain.Member;
-import com.onebucket.domain.memberManage.domain.Profile;
 import com.onebucket.domain.memberManage.dto.ChatMemberDto;
 import com.onebucket.global.exceptionManage.customException.chatManageException.Exceptions.RoomNotFoundException;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
@@ -68,20 +66,19 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
-    public ChatRoom createChatRoom(CreateChatRoomDto dto) {
+    public void createChatRoom(CreateChatRoomDto dto) {
         ChatRoom chatRoom = ChatRoom.builder()
                 .name(dto.name())
                 .members(dto.members())
                 .build();
         chatRoomRepository.save(chatRoom);
-        return chatRoom;
     }
 
     /**
      * 채팅방 입장 : redis에 topic을 만들고 pub/sub 통신을 하기 위해 리스너를 설정한다.
      */
     @Override
-    public void enterChatRoom(String roomId) {
+    public void enterChatRoom(String roomId,String username) {
         ChannelTopic topic = topics.get(roomId);
         if (topic == null) {
             topic = new ChannelTopic(roomId);
@@ -89,6 +86,11 @@ public class ChatRoomServiceImpl implements ChatRoomService {
             redisMessageListener.addMessageListener(redisSubscriber,topic);
             topics.put(roomId, topic);
         }
+        Member member = memberRepository.findByUsername(username)
+                .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(
+                () -> new RoomNotFoundException(ChatErrorCode.NOT_EXIST_ROOM));
+        chatRoom.addMember(ChatMemberDto.from(member.getNickname()));
     }
 
     @Override
@@ -99,7 +101,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     @Override
     public ChatRoom getChatRoom(String roomId) {
         return chatRoomRepository.findById(roomId).orElseThrow(
-                () -> new RuntimeException("no chat room found with id: " + roomId));
+                () -> new RoomNotFoundException(ChatErrorCode.NOT_EXIST_ROOM));
     }
 
     @Override
@@ -112,7 +114,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         Member m = memberRepository.findByUsername(username)
                 .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
         ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(
-                () -> new RuntimeException("no chat room found with id: " + roomId));
+                () -> new RoomNotFoundException(ChatErrorCode.NOT_EXIST_ROOM));
         chatRoom.addMember(ChatMemberDto.from(m.getNickname()));
     }
 

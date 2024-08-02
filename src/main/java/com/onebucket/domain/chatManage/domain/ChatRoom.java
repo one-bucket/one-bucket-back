@@ -2,6 +2,7 @@ package com.onebucket.domain.chatManage.domain;
 
 import com.onebucket.domain.memberManage.dto.ChatMemberDto;
 import com.onebucket.global.common.ChatBaseEntity;
+import jakarta.persistence.Column;
 import jakarta.persistence.Id;
 import lombok.Builder;
 import lombok.Getter;
@@ -40,7 +41,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ChatRoom extends ChatBaseEntity {
 
     @Id
-    private String id;
+    private String roomId;
     private String name;
 
     @Builder.Default

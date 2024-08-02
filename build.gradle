@@ -63,7 +63,6 @@ dependencies {
     implementation 'org.webjars:stomp-websocket:2.3.3-1'
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
     implementation "org.springframework.security:spring-security-messaging"
-//    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
 
     asciidoctorExt 'org.springframework.restdocs:spring-restdocs-asciidoctor' // (3)
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc' // (4)

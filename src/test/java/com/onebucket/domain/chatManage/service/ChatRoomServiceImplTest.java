@@ -60,8 +60,8 @@ class ChatRoomServiceImplTest {
     @Test
     void enterChatRoom_shouldAddNewTopic() {
         String roomId = "room1";
-
-        chatRoomService.enterChatRoom(roomId);
+        String username = "username";
+        chatRoomService.enterChatRoom(roomId,username);
         ChannelTopic topic = chatRoomService.getTopic(roomId);
         assertNotNull(topic);
         assertEquals(roomId, topic.getTopic());
