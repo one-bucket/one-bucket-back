@@ -11,14 +11,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
-
-import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
-
-import static com.onebucket.domain.chatManage.Const.CHAT_ROOMS;
-
 /**
  * <br>package name   : com.onebucket.domain.chatManage.dao
  * <br>file name      : ChatRoomRepository
