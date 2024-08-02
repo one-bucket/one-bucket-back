@@ -2,8 +2,10 @@ package com.onebucket.domain.chatManage.controller;
 
 
 import com.onebucket.domain.chatManage.domain.ChatRoom;
+import com.onebucket.domain.chatManage.dto.CreateChatRoomDto;
 import com.onebucket.domain.chatManage.service.ChatRoomService;
 import com.onebucket.global.utils.SecurityUtils;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -51,8 +53,8 @@ public class ChatRoomController {
 
     // 채팅방 생성
     @PostMapping("/room")
-    public ResponseEntity<Void> createRoom(@RequestParam String name) {
-        chatRoomService.createChatRoom(name);
+    public ResponseEntity<Void> createRoom(@Valid @RequestBody CreateChatRoomDto dto) {
+        chatRoomService.createChatRoom(dto);
         return ResponseEntity.ok().build();
     }
 
