@@ -1,25 +1,13 @@
 package com.onebucket.global.minio;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.onebucket.domain.chatManage.domain.ChatRoom;
 import io.minio.*;
 import io.minio.errors.*;
-import io.minio.messages.Item;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.multipart.MultipartFile;
-
-import com.onebucket.domain.chatManage.domain.ChatMessage;
-
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * <br>package name   : com.onebucket.global.minio

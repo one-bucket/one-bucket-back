@@ -5,6 +5,10 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.awt.*;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
 /**
  * <br>package name   : com.onebucket.domain.chatManage.domain
  * <br>file name      : ChatMessage

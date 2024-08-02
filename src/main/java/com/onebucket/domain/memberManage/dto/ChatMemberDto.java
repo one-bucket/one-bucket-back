@@ -26,13 +26,9 @@ import java.time.LocalDate;
  * </pre>
  */
 public record ChatMemberDto(
-        String nickname,
-        String gender,
-        int age,
-        String description,
-        LocalDate birth
+        String nickname
 ) {
-    public static ChatMemberDto of(String nickname, Profile p) {
-        return new ChatMemberDto(nickname, p.getGender(), p.getAge(), p.getDescription(), p.getBirth());
+    public static ChatMemberDto from(String nickname) {
+        return new ChatMemberDto(nickname);
     }
 }

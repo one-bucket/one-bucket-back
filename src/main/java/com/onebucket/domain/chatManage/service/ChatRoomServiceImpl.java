@@ -3,6 +3,7 @@ package com.onebucket.domain.chatManage.service;
 import com.onebucket.domain.chatManage.dao.ChatRoomRepository;
 import com.onebucket.domain.chatManage.domain.ChatMessage;
 import com.onebucket.domain.chatManage.domain.ChatRoom;
+import com.onebucket.domain.chatManage.dto.CreateChatRoomDto;
 import com.onebucket.domain.chatManage.pubsub.RedisSubscriber;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.dao.ProfileRepository;
@@ -60,7 +61,6 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     private final RedisSubscriber redisSubscriber;
 
     private final ChatRoomRepository chatRoomRepository;
-    private final ProfileRepository profileRepository;
 
     @PostConstruct
     public void init() {
@@ -68,9 +68,10 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
-    public ChatRoom createChatRoom(String name) {
+    public ChatRoom createChatRoom(CreateChatRoomDto dto) {
         ChatRoom chatRoom = ChatRoom.builder()
-                .name(name)
+                .name(dto.name())
+                .members(dto.members())
                 .build();
         chatRoomRepository.save(chatRoom);
         return chatRoom;
@@ -98,7 +99,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     @Override
     public ChatRoom getChatRoom(String roomId) {
         return chatRoomRepository.findById(roomId).orElseThrow(
-                () -> new RoomNotFoundException(ChatErrorCode.NOT_EXIST_ROOM));
+                () -> new RuntimeException("no chat room found with id: " + roomId));
     }
 
     @Override
@@ -107,15 +108,12 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
-    public void addMember(String roomId, String username) {
+    public void addChatRoomMember(String roomId, String username) {
         Member m = memberRepository.findByUsername(username)
                 .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
-        Long memberId = m.getId();
-        Profile findProfile = profileRepository.findById(memberId)
-                .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER_PROFILE));
-
-        ChatRoom chatRoom = getChatRoom(roomId);
-        chatRoom.addMember(ChatMemberDto.of(m.getNickname(),findProfile));
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(
+                () -> new RuntimeException("no chat room found with id: " + roomId));
+        chatRoom.addMember(ChatMemberDto.from(m.getNickname()));
     }
 
     @Override
