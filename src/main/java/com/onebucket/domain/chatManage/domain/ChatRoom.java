@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * <br>package name   : com.onebucket.domain.chatManage.domain
@@ -41,7 +42,7 @@ public class ChatRoom extends ChatBaseEntity {
     private String name;
 
     @Builder.Default
-    private Set<ChatMemberDto> members = new HashSet<>();
+    private Set<ChatMemberDto> members = ConcurrentHashMap.newKeySet();
 
     public void addMember(ChatMemberDto member) {
         members.add(member);

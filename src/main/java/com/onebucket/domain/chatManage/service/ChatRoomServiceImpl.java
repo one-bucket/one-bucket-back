@@ -18,6 +18,7 @@ import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * <br>package name   : com.onebucket.domain.chatManage.service
@@ -60,7 +61,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     @PostConstruct
     public void init() {
-        topics = new HashMap<>();
+        topics = new ConcurrentHashMap<>();
     }
 
     @Override
