@@ -9,8 +9,10 @@ import com.onebucket.domain.memberManage.dao.ProfileRepository;
 import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.domain.memberManage.domain.Profile;
 import com.onebucket.domain.memberManage.dto.ChatMemberDto;
+import com.onebucket.global.exceptionManage.customException.chatManageException.Exceptions.RoomNotFoundException;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
+import com.onebucket.global.exceptionManage.errorCode.ChatErrorCode;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -96,7 +98,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     @Override
     public ChatRoom getChatRoom(String roomId) {
         return chatRoomRepository.findById(roomId).orElseThrow(
-                () -> new RuntimeException("no chat room found with id: " + roomId));
+                () -> new RoomNotFoundException(ChatErrorCode.NOT_EXIST_ROOM));
     }
 
     @Override
@@ -119,7 +121,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     @Override
     public void addChatMessage(ChatMessage chatMessage) {
         ChatRoom chatRoom = chatRoomRepository.findById(chatMessage.getRoomId()).orElseThrow(
-                () -> new RuntimeException("no chat room found with id: " + chatMessage.getRoomId()));
+                () -> new RoomNotFoundException(ChatErrorCode.NOT_EXIST_ROOM));
         chatRoom.getMessages().add(chatMessage);
         chatRoomRepository.save(chatRoom);
     }
