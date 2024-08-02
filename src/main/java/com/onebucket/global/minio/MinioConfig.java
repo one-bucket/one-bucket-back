@@ -1,6 +1,7 @@
 package com.onebucket.global.minio;
 
 import io.minio.MinioClient;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -28,10 +29,13 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class MinioConfig {
 
+    @Value("${MY_ENDPOINT_URL}")
+    private String endpointUrl;
+
     @Bean
     public MinioClient minioClient() {
         return MinioClient.builder()
-                .endpoint("http://jack8226.ddns.net:3100/")
+                .endpoint(endpointUrl)
                 .credentials("jack8226", "m7128226")
                 .build();
     }
