@@ -1,6 +1,5 @@
 package com.onebucket.global.common;
 
-import com.onebucket.domain.memberManage.domain.Member;
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
@@ -37,7 +36,7 @@ import java.time.LocalDateTime;
 @Getter
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
-public abstract class BaseEntity {
+public abstract class ChatBaseEntity {
 
     @CreatedDate
     @Column(updatable = false)
@@ -45,10 +44,4 @@ public abstract class BaseEntity {
 
     @CreatedBy
     private String createdBy;
-
-    @LastModifiedDate
-    private LocalDateTime updatedAt;
-
-    @LastModifiedBy
-    private String updatedBy;
 }

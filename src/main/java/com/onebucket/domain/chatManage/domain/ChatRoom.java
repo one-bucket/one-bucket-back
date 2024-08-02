@@ -1,7 +1,7 @@
 package com.onebucket.domain.chatManage.domain;
 
 import com.onebucket.domain.memberManage.dto.ChatMemberDto;
-import com.onebucket.global.common.BaseEntity;
+import com.onebucket.global.common.ChatBaseEntity;
 import jakarta.persistence.Id;
 import lombok.Builder;
 import lombok.Getter;
@@ -34,7 +34,7 @@ import java.util.Set;
 @Getter
 @Builder
 @Document(collection = "chatroom")
-public class ChatRoom extends BaseEntity {
+public class ChatRoom extends ChatBaseEntity {
 
     @Id
     private String id;
