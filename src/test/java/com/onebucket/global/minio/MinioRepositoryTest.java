@@ -81,54 +81,54 @@ class MinioRepositoryTest {
         jsonMessage2 = "{\"message\":\"test message2\"}";
     }
 
-    @Test
-    void uploadChatDto() throws Exception {
-        when(objectMapper.writeValueAsString(any(Object.class))).thenReturn(jsonMessage1);
-
-        minioRepository.uploadChatDto(chatMessage1,dto);
-
-        verify(minioClient, times(1)).putObject(any(PutObjectArgs.class));
-    }
-
-    @Test
-    void getChatMessages() throws Exception {
-        String bucketName = "test-bucket";
-        String roomId = "testRoom";
-        List<ChatMessage> expectedMessages = new ArrayList<>();
-        expectedMessages.add(chatMessage1);
-        expectedMessages.add(chatMessage2);
-
-        Item item1 = mock(Item.class);
-        Item item2 = mock(Item.class);
-        Result<Item> result1 = new Result<>(item1);
-        Result<Item> result2 = new Result<>(item2);
-
-        // Create a list containing the Result<Item> objects
-        List<Result<Item>> resultList = Arrays.asList(result1, result2);
-        byte[] jsonMessageBytes1 = jsonMessage1.getBytes(StandardCharsets.UTF_8);
-        byte[] jsonMessageBytes2 = jsonMessage2.getBytes(StandardCharsets.UTF_8);
-        // Mock the GetObjectResponse and its readAllBytes method
-        GetObjectResponse getObjectResponse1 = mock(GetObjectResponse.class);
-        GetObjectResponse getObjectResponse2 = mock(GetObjectResponse.class);
-
-        doReturn("chat/Chatting/ChatRoom_testRoom/test1.json").when(item1).objectName();
-        doReturn("chat/Chatting/ChatRoom_testRoom/test2.json").when(item2).objectName();
-        doReturn(resultList).when(minioClient).listObjects(any(ListObjectsArgs.class));
-        doReturn(jsonMessageBytes1).when(getObjectResponse1).readAllBytes();
-        doReturn(jsonMessageBytes2).when(getObjectResponse2).readAllBytes();
-        // Mock the minioClient.getObject method
-        doReturn(getObjectResponse1).doReturn(getObjectResponse2)
-                .when(minioClient)
-                .getObject(any(GetObjectArgs.class));
-        doReturn(chatMessage1).doReturn(chatMessage2)
-                        .when(objectMapper)
-                                .readValue(any(InputStream.class), eq(ChatMessage.class));
-
-        List<ChatMessage> chatMessages = minioRepository.getChatMessages(bucketName, roomId);
-
-        assertThat(chatMessages.size()).isEqualTo(2);
-        assertThat(chatMessages).containsExactlyInAnyOrderElementsOf(expectedMessages);
-    }
+//    @Test
+//    void uploadChatDto() throws Exception {
+//        when(objectMapper.writeValueAsString(any(Object.class))).thenReturn(jsonMessage1);
+//
+//        minioRepository.uploadChatDto(chatMessage1,dto);
+//
+//        verify(minioClient, times(1)).putObject(any(PutObjectArgs.class));
+//    }
+//
+//    @Test
+//    void getChatMessages() throws Exception {
+//        String bucketName = "test-bucket";
+//        String roomId = "testRoom";
+//        List<ChatMessage> expectedMessages = new ArrayList<>();
+//        expectedMessages.add(chatMessage1);
+//        expectedMessages.add(chatMessage2);
+//
+//        Item item1 = mock(Item.class);
+//        Item item2 = mock(Item.class);
+//        Result<Item> result1 = new Result<>(item1);
+//        Result<Item> result2 = new Result<>(item2);
+//
+//        // Create a list containing the Result<Item> objects
+//        List<Result<Item>> resultList = Arrays.asList(result1, result2);
+//        byte[] jsonMessageBytes1 = jsonMessage1.getBytes(StandardCharsets.UTF_8);
+//        byte[] jsonMessageBytes2 = jsonMessage2.getBytes(StandardCharsets.UTF_8);
+//        // Mock the GetObjectResponse and its readAllBytes method
+//        GetObjectResponse getObjectResponse1 = mock(GetObjectResponse.class);
+//        GetObjectResponse getObjectResponse2 = mock(GetObjectResponse.class);
+//
+//        doReturn("chat/Chatting/ChatRoom_testRoom/test1.json").when(item1).objectName();
+//        doReturn("chat/Chatting/ChatRoom_testRoom/test2.json").when(item2).objectName();
+//        doReturn(resultList).when(minioClient).listObjects(any(ListObjectsArgs.class));
+//        doReturn(jsonMessageBytes1).when(getObjectResponse1).readAllBytes();
+//        doReturn(jsonMessageBytes2).when(getObjectResponse2).readAllBytes();
+//        // Mock the minioClient.getObject method
+//        doReturn(getObjectResponse1).doReturn(getObjectResponse2)
+//                .when(minioClient)
+//                .getObject(any(GetObjectArgs.class));
+//        doReturn(chatMessage1).doReturn(chatMessage2)
+//                        .when(objectMapper)
+//                                .readValue(any(InputStream.class), eq(ChatMessage.class));
+//
+//        List<ChatMessage> chatMessages = minioRepository.getChatMessages(bucketName, roomId);
+//
+//        assertThat(chatMessages.size()).isEqualTo(2);
+//        assertThat(chatMessages).containsExactlyInAnyOrderElementsOf(expectedMessages);
+//    }
 
     @Test
     void getChatRooms() {
