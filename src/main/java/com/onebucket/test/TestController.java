@@ -40,5 +40,4 @@ public class TestController {
         String objectName = minioRepository.uploadFile(file,dto);
         return ResponseEntity.ok("success upload : " + objectName);
     }
-
 }

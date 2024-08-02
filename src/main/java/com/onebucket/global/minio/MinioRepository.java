@@ -2,7 +2,6 @@ package com.onebucket.global.minio;
 
 import io.minio.*;
 import io.minio.errors.MinioException;
-import io.minio.http.Method;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.multipart.MultipartFile;
@@ -10,7 +9,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.concurrent.TimeUnit;
 
 /**
  * <br>package name   : com.onebucket.global.minio
