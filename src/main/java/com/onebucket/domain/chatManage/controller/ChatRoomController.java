@@ -62,6 +62,7 @@ public class ChatRoomController {
     @GetMapping("/room/{roomId}")
     public ResponseEntity<ChatRoom> enterRoom(@PathVariable String roomId) {
         String username = securityUtils.getCurrentUsername();
+        chatRoomService.enterChatRoom(roomId,username);
         chatRoomService.addChatRoomMember(roomId,username);
         ChatRoom response = chatRoomService.getChatRoom(roomId);
         return ResponseEntity.ok(response);

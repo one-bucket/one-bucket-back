@@ -4,6 +4,7 @@ import com.onebucket.domain.chatManage.domain.ChatMessage;
 import com.onebucket.domain.chatManage.pubsub.RedisPublisher;
 import com.onebucket.domain.chatManage.service.ChatMessageService;
 import com.onebucket.domain.chatManage.service.ChatRoomService;
+import com.onebucket.global.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -47,7 +48,6 @@ public class ChatWebSocketController {
     public void message(@Payload ChatMessage chatMessage) throws IOException {
         // 처음 입장 했을 경우(Enter)
         if(ChatMessage.MessageType.ENTER.equals(chatMessage.getType())) {
-            chatRoomService.enterChatRoom(chatMessage.getRoomId());
             chatMessage.setMessage(chatMessage.getSender()+"님이 입장하셨습니다.");
         }
         if(ChatMessage.MessageType.TALK.equals(chatMessage.getType())) {
