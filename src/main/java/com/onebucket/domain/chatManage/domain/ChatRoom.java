@@ -7,7 +7,9 @@ import lombok.Builder;
 import lombok.Getter;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -43,6 +45,9 @@ public class ChatRoom extends ChatBaseEntity {
 
     @Builder.Default
     private Set<ChatMemberDto> members = ConcurrentHashMap.newKeySet();
+
+    @Builder.Default
+    private List<ChatMessage> messages = new ArrayList<>();
 
     public void addMember(ChatMemberDto member) {
         members.add(member);
