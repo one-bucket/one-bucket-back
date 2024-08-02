@@ -7,12 +7,14 @@ import com.onebucket.domain.chatManage.service.ChatRoomService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.listener.ChannelTopic;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.util.List;
@@ -40,40 +42,18 @@ import java.util.List;
  * </pre>
  */
 @RequiredArgsConstructor
-@Controller
+@RestController
 @Slf4j
 public class ChatMessageController {
-    private final RedisPublisher redisPublisher;
-    private final ChatRoomService chatRoomService;
+
     private final ChatMessageService chatMessageService;
 
-    /**
-     * websocket "/pub/chat/message"로 들어오는 메세지를 처리한다.
-     */
-    @MessageMapping("/chat/message")
-    public void message(@Payload ChatMessage chatMessage) throws IOException {
-        // 처음 입장 했을 경우(Enter)
-        if(ChatMessage.MessageType.ENTER.equals(chatMessage.getType())) {
-            chatRoomService.enterChatRoom(chatMessage.getRoomId());
-            chatMessage.setMessage(chatMessage.getSender()+"님이 입장하셨습니다.");
-        }
-        if(ChatMessage.MessageType.TALK.equals(chatMessage.getType())) {
-            chatMessageService.saveMessage(chatMessage);
-        }
-        if(ChatMessage.MessageType.LEAVE.equals(chatMessage.getType())) {
-            chatMessage.setMessage(chatMessage.getSender()+"님이 퇴장하셨습니다.");
-        }
-        // 기존 유저가 입장하는 경우(Join), 아무것도 출력하지않음.
-        // Websocket에 발행된 메세지를 redis로 발행한다.
-        ChannelTopic topic = chatRoomService.getTopic(chatMessage.getRoomId());
-        redisPublisher.publish(topic, chatMessage);
-    }
     /**
      * 특정 채팅방의 모든 메시지를 조회한다.
      */
     @GetMapping("/chat/messages/{roomId}")
-    @ResponseBody
-    public List<ChatMessage> getMessages(@PathVariable String roomId) {
-        return chatMessageService.getChatMessages(roomId);
+    public ResponseEntity<List<ChatMessage>> getMessages(@PathVariable String roomId) {
+        List<ChatMessage> response = chatMessageService.getChatMessages(roomId);
+        return ResponseEntity.ok(response);
     }
 }
