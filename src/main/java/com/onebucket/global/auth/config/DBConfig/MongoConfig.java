@@ -1,7 +1,6 @@
-package com.onebucket.global.auth.config;
+package com.onebucket.global.auth.config.DBConfig;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.MongoDatabaseFactory;
@@ -10,6 +9,7 @@ import org.springframework.data.mongodb.core.convert.DefaultDbRefResolver;
 import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
 import org.springframework.data.mongodb.core.convert.MongoCustomConversions;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
+import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
 /**
  * <br>package name   : com.onebucket.global.auth.config
@@ -34,6 +34,7 @@ import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
  */
 @Configuration
 @RequiredArgsConstructor
+@EnableMongoRepositories(basePackages = "com.onebucket.domain.chatManage.dao")
 public class MongoConfig {
 
     private final MongoMappingContext mongoMappingContext;
