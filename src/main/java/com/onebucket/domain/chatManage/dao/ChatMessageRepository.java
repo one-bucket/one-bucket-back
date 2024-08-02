@@ -38,5 +38,5 @@ import static com.onebucket.domain.chatManage.Const.CHAT_MESSAGE_ORIGIN;
  * </pre>
  */
 public interface ChatMessageRepository extends MongoRepository<ChatMessage, String> {
-    List<ChatMessage> findByRoomIdOrderByUpdateAtDesc(String roomId);
+    List<ChatMessage> findByRoomIdOrderByCreatedAtDesc(String roomId);
 }
