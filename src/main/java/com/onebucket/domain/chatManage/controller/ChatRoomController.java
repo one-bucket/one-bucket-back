@@ -53,9 +53,9 @@ public class ChatRoomController {
 
     // 채팅방 생성
     @PostMapping("/room")
-    public ResponseEntity<ChatRoom> createRoom(@Valid @RequestBody CreateChatRoomDto dto) {
-        ChatRoom response = chatRoomService.createChatRoom(dto);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<Void> createRoom(@Valid @RequestBody CreateChatRoomDto dto) {
+        chatRoomService.createChatRoom(dto);
+        return ResponseEntity.ok().build();
     }
 
     // 채팅방 입장

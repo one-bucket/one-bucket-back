@@ -66,7 +66,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
-    public ChatRoom createChatRoom(CreateChatRoomDto dto) {
+    public void createChatRoom(CreateChatRoomDto dto) {
         ChatRoom chatRoom = ChatRoom.builder()
                 .name(dto.name())
                 .members(dto.members())
@@ -74,7 +74,6 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                 .createdAt(dto.createdAt())
                 .build();
         chatRoomRepository.save(chatRoom);
-        return chatRoom;
     }
 
     /**
