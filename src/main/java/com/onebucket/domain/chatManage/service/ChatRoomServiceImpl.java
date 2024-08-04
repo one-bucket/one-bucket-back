@@ -69,7 +69,6 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     public void createChatRoom(CreateChatRoomDto dto) {
         ChatRoom chatRoom = ChatRoom.builder()
                 .name(dto.name())
-                .members(dto.members())
                 .createdBy(dto.createdBy())
                 .createdAt(dto.createdAt())
                 .build();
@@ -90,9 +89,10 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         }
         Member member = memberRepository.findByUsername(username)
                 .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
-        ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(
+        ChatRoom chatRoom = chatRoomRepository.findByRoomId(roomId).orElseThrow(
                 () -> new RoomNotFoundException(ChatErrorCode.NOT_EXIST_ROOM));
         chatRoom.addMember(ChatMemberDto.from(member.getNickname()));
+        chatRoomRepository.save(chatRoom);
     }
 
     @Override
@@ -102,7 +102,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     @Override
     public ChatRoom getChatRoom(String roomId) {
-        return chatRoomRepository.findById(roomId).orElseThrow(
+        return chatRoomRepository.findByRoomId(roomId).orElseThrow(
                 () -> new RoomNotFoundException(ChatErrorCode.NOT_EXIST_ROOM));
     }
 
@@ -113,9 +113,9 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     @Override
     public void addChatMessage(ChatMessage chatMessage) {
-        ChatRoom chatRoom = chatRoomRepository.findById(chatMessage.getRoomId()).orElseThrow(
+        ChatRoom chatRoom = chatRoomRepository.findByRoomId(chatMessage.getRoomId()).orElseThrow(
                 () -> new RoomNotFoundException(ChatErrorCode.NOT_EXIST_ROOM));
-        chatRoom.getMessages().add(chatMessage);
+        chatRoom.addMessage(chatMessage);
         chatRoomRepository.save(chatRoom);
     }
 }

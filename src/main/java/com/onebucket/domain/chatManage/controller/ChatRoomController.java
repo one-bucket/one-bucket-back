@@ -58,7 +58,7 @@ public class ChatRoomController {
         return ResponseEntity.ok().build();
     }
 
-    // 채팅방 입장
+    // 특정 채팅방에 입장하기
     @GetMapping("/room/{roomId}")
     public ResponseEntity<ChatRoom> enterRoom(@PathVariable String roomId) {
         String username = securityUtils.getCurrentUsername();

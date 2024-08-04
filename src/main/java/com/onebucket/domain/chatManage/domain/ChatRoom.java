@@ -55,4 +55,8 @@ public class ChatRoom  {
     public void addMember(ChatMemberDto member) {
         members.add(member);
     }
+
+    public void addMessage(ChatMessage message) {
+        messages.add(message);
+    }
 }
