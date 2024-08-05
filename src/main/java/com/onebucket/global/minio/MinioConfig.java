@@ -16,7 +16,7 @@ import org.springframework.context.annotation.Configuration;
  * <pre>
  * <span style="color: white;">usage:</span>
  * {@code
- * http://jack8226.ddns.net:3005/으로 현재 서버가 배포되어있어, 나는 이렇게 사용할 예정이다.
+ *
  * } </pre>
  * <pre>
  * modified log :
