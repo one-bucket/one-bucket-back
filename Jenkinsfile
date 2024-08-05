@@ -20,7 +20,7 @@ pipeline {
         SERVER_MYSQL_PASSWORD = "m7128226"
         MONGO_HOST = "192.168.219.101"
         MONGO_DB = "testdb"
-        MINIO_URL = "192.168.219.144:9000"
+        MINIO_URL = "http://192.168.219.144:9000"
 
    }
 

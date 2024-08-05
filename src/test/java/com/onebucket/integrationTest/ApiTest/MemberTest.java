@@ -415,6 +415,7 @@ public class MemberTest extends RestDocsSupportTest {
                         .header("Authorization", getAuthHeader(token))
                         .contentType(MediaType.MULTIPART_FORM_DATA)
                         .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(hasKey(new SuccessResponseDto("success update image")))
                 .andDo(print())
