@@ -6,8 +6,10 @@ import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.domain.memberManage.domain.Profile;
 import com.onebucket.domain.memberManage.dto.ReadProfileDto;
 import com.onebucket.domain.memberManage.dto.UpdateProfileDto;
+import com.onebucket.global.exceptionManage.customException.CommonException;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
+import com.onebucket.global.exceptionManage.errorCode.CommonErrorCode;
 import com.onebucket.global.minio.MinioRepository;
 import com.onebucket.global.minio.MinioSaveInfoDto;
 import com.onebucket.global.utils.EntityUtils;
@@ -167,5 +169,23 @@ public class ProfileServiceImpl implements ProfileService {
         return profileRepository.findById(id).orElseThrow(
                 () -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER_PROFILE)
         );
+    }
+
+    //TODO: don't test yet... also need to delete other image process logic.
+    @Override
+    public String getImageUrl(Long id) {
+
+        MinioSaveInfoDto minioDto = MinioSaveInfoDto.builder()
+                .bucketName(bucketName)
+                .fileName("profile/" + id + "/" + "profile_image")
+                .fileExtension("png")
+                .build();
+
+        try {
+            return minioRepository.getUrl(minioDto);
+        } catch (Exception e) {
+            throw new CommonException(CommonErrorCode.DATA_ACCESS_ERROR);
+        }
+
     }
 }
