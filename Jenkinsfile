@@ -12,11 +12,16 @@ pipeline {
         JENKINS_MYSQL_PASSWORD = "m7128226"
         JENKINS_REDIS_HOST = "172.20.0.4"
 
+
         //main server env
         SERVER_MYSQL_HOST = "192.168.219.101"
         SERVER_REDIS_HOST = "192.168.219.101"
         SERVER_MYSQL_USER = "root"
         SERVER_MYSQL_PASSWORD = "m7128226"
+        MONGO_HOST = "192.168.219.101"
+        MONGO_DB = "testdb"
+        MINIO_URL = "192.168.219.144:9000"
+
    }
 
    stages {
@@ -33,7 +38,10 @@ pipeline {
                     "MYSQL_HOST=${JENKINS_MYSQL_HOST}",
                     "REDIS_HOST=${JENKINS_REDIS_HOST}",
                     "MYSQL_USER=${JENKINS_MYSQL_USER}",
-                    "MYSQL_PASSWORD=${JENKINS_MYSQL_PASSWORD}"
+                    "MYSQL_PASSWORD=${JENKINS_MYSQL_PASSWORD}",
+                    "MONGO_HOST=${MONGO_HOST}",
+                    "MONGO_DB=${MONGO_DB}",
+                    "MINIO_URL=${MINIO_URL}"
                 ]) {
                     sh './gradlew test'
                 }
@@ -86,6 +94,9 @@ pipeline {
                             -e MYSQL_USER=${SERVER_MYSQL_USER} \\
                             -e MYSQL_PASSWORD=${SERVER_MYSQL_PASSWORD} \\
                             -e REDIS_HOST=${SERVER_REDIS_HOST} \\
+                            -e MONGO_HOST=${MONGO_HOST} \\
+                            -e MONGO_DB=${MONGO_DB} \\
+                            -e MINIO_URL=${MINIO_URL} \\
                             ${DOCKER_IMAGE}
                         docker system prune -f
                     << EOF

@@ -29,7 +29,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class MinioConfig {
 
-    @Value("${MY_ENDPOINT_URL}")
+    @Value("${minio.minio_url}")
     private String endpointUrl;
 
     @Bean
