@@ -1,5 +1,6 @@
 package com.onebucket.domain.chatManage.domain;
 
+import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -37,6 +38,9 @@ public class ChatMessage  {
     public enum MessageType {
         ENTER,JOIN,TALK,LEAVE
     }
+
+    @Id
+    private String id;
 
     private MessageType type;
     private String message;
