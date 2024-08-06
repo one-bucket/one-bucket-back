@@ -109,7 +109,7 @@ class ChatRoomControllerTest {
                                 "user1")))
                         .contentType(MediaType.APPLICATION_JSON)
         );
-        resultActions.andExpect(status().isOk());
+        resultActions.andExpect(status().isCreated());
     }
 
     @ParameterizedTest
