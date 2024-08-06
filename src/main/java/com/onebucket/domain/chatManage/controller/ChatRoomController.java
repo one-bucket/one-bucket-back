@@ -70,8 +70,8 @@ public class ChatRoomController {
     }
 
     // 특정 유저가 입장해 있는 채팅방 목록 조회
-    @GetMapping("/room/{nickname}")
-    public ResponseEntity<List<ChatRoom>> getChatRoomsForMember(@PathVariable String nickname) {
+    @GetMapping("/room/user/{nickname}")
+    public ResponseEntity<List<ChatRoom>> getRoomsForMember(@PathVariable String nickname) {
         List<ChatRoom> response = chatRoomService.findByMembersNickname(nickname);
         return ResponseEntity.ok(response);
     }
