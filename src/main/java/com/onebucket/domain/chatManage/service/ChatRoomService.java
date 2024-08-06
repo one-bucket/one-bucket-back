@@ -29,10 +29,11 @@ import java.util.List;
  * </pre>
  */
 public interface ChatRoomService {
-    void createChatRoom(CreateChatRoomDto createChatRoomDto);
+    String createChatRoom(CreateChatRoomDto createChatRoomDto);
     void enterChatRoom(String roomId,String username);
     List<ChatRoom> getChatRooms();
     ChatRoom getChatRoom(String roomId);
     ChannelTopic getTopic(String roomId);
     void addChatMessage(ChatMessage chatMessage);
+    List<ChatRoom> findByMembersNickname(String nickname);
 }
