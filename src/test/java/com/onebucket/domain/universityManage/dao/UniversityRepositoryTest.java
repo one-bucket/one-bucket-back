@@ -2,12 +2,16 @@ package com.onebucket.domain.universityManage.dao;
 
 import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.domain.universityManage.domain.University;
+import com.onebucket.global.exceptionManage.customException.universityManageException.UniversityException;
+import com.onebucket.global.exceptionManage.errorCode.UniversityErrorCode;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -48,21 +52,23 @@ class UniversityRepositoryTest {
                 .address("서울시 마포구")
                 .email("@hongik.ac.kr")
                 .build();
+        universityRepository.save(university);
     }
 
     @Test
-    @DisplayName("학교 찾기 성공 - id로 찾기")
-    void getUniversityById() {
-        universityRepository.save(university);
-        boolean present = universityRepository.findById(university.getId()).isPresent();
-        assertThat(present).isTrue();
+    @DisplayName("학교 찾기 성공")
+    void getUniversityByName_success() {
+        University university = universityRepository.findByName("홍익대학교")
+                .orElseThrow(()-> new UniversityException(UniversityErrorCode.NOT_EXIST_UNIVERSITY));
+
+        assertThat(university.getName()).isEqualTo("홍익대학교");
+        assertThat(university.getAddress()).isEqualTo("서울시 마포구");
+        assertThat(university.getEmail()).isEqualTo("@hongik.ac.kr");
     }
 
     @Test
-    @DisplayName("학교 찾기  - 없는 학교임")
-    void CantGetUniversityById() {
-        universityRepository.save(university);
-        boolean present = universityRepository.findById(-1L).isPresent();
-        assertThat(present).isFalse();
+    @DisplayName("학교 찾기 실패 - 해당하는 이름이 없음.")
+    void getUniversityByName_fail() {
+        assertThat(universityRepository.findByName("서울대학교")).isEqualTo(Optional.empty());
     }
 }
