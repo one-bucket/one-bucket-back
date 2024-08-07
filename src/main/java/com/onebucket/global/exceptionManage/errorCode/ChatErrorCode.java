@@ -36,6 +36,7 @@ public enum ChatErrorCode implements ErrorCode {
     INVALID_JSON_FORMAT("3005", HttpStatus.BAD_REQUEST, "Invalid JSON format"),
     INTERNAL_ERROR("3006", HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error"),
     SAVE_LOG_FAILED("3007", HttpStatus.INTERNAL_SERVER_ERROR, "Save log failed"),
+    CHAT_IMAGE_ERROR("3008", HttpStatus.INTERNAL_SERVER_ERROR, "Save image failed"),
     ;
 
     private final String code;

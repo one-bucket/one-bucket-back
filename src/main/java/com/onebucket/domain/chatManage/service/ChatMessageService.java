@@ -1,6 +1,7 @@
 package com.onebucket.domain.chatManage.service;
 
 import com.onebucket.domain.chatManage.domain.ChatMessage;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -28,4 +29,5 @@ import java.util.List;
 public interface ChatMessageService {
     void saveMessage(ChatMessage chatMessage);
     List<ChatMessage> getChatMessages(String roomId);
+    String uploadChatImage(MultipartFile file, String username);
 }
