@@ -1,14 +1,19 @@
 package com.onebucket.domain.boardManage.service;
 
-import com.onebucket.domain.boardManage.dao.CommentRepository;
+import com.onebucket.domain.boardManage.dao.BoardRepository;
 import com.onebucket.domain.boardManage.dao.PostRepository;
 import com.onebucket.domain.boardManage.dto.CreatePostDto;
+import com.onebucket.domain.boardManage.entity.Board;
 import com.onebucket.domain.boardManage.entity.Comment;
 import com.onebucket.domain.boardManage.entity.post.Post;
+import com.onebucket.domain.memberManage.dao.MemberRepository;
+import com.onebucket.domain.memberManage.domain.Member;
+import com.onebucket.global.exceptionManage.customException.boardManageException.BoardManageException;
 import com.onebucket.global.exceptionManage.customException.boardManageException.UserBoardException;
+import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
+import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.BoardErrorCode;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.io.output.AppendableOutputStream;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -41,16 +46,25 @@ import org.springframework.transaction.annotation.Transactional;
 public class PostServiceImpl implements PostService {
 
     private final PostRepository postRepository;
+    private final BoardRepository boardRepository;
+    private final MemberRepository memberRepository;
 
 
     @Override
     @Transactional
-    public void createPost(CreatePostDto createPostDto) {
+    public void createPost(String username, CreatePostDto dto) {
+
+        Board board = boardRepository.findById(Long.parseLong(dto.getBoard())).orElseThrow(() ->
+                new BoardManageException(BoardErrorCode.UNKNOWN_BOARD));
+        Member member = memberRepository.findByUsername(username).orElseThrow(() ->
+                new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
+
+
         Post post = Post.builder()
-                .board(createPostDto.getBoard())
-                .title(createPostDto.getTitle())
-                .text(createPostDto.getText())
-                .author(createPostDto.getAuthor())
+                .board(board)
+                .title(dto.getTitle())
+                .text(dto.getText())
+                .author(member)
                 .build();
 
         postRepository.save(post);

@@ -5,7 +5,6 @@ import com.onebucket.domain.boardManage.entity.Comment;
 import com.onebucket.domain.boardManage.entity.post.Post;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * <br>package name   : com.onebucket.domain.boardManage.service
@@ -29,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
  * </pre>
  */
 public interface PostService {
-    void createPost(CreatePostDto createPostDto);
+    void createPost(String username, CreatePostDto dto);
 
     void addCommentToPost(Long postId, Comment comment);
 

@@ -25,4 +25,5 @@ import com.onebucket.domain.boardManage.dto.CreateBoardDto;
  */
 public interface BoardService {
     void createBoard(CreateBoardDto createBoardDto);
+    boolean isValidBoard(String username, String boardId);
 }

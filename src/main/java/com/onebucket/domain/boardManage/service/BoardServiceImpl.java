@@ -4,12 +4,19 @@ import com.onebucket.domain.boardManage.dao.BoardRepository;
 import com.onebucket.domain.boardManage.dto.CreateBoardDto;
 import com.onebucket.domain.boardManage.entity.Board;
 import com.onebucket.domain.boardManage.entity.BoardType;
+import com.onebucket.domain.memberManage.dao.MemberRepository;
+import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.domain.universityManage.domain.University;
 import com.onebucket.global.exceptionManage.customException.boardManageException.AdminManageBoardException;
+import com.onebucket.global.exceptionManage.customException.boardManageException.BoardManageException;
+import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
+import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.BoardErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 /**
  * <br>package name   : com.onebucket.domain.boardManage
@@ -38,6 +45,7 @@ import org.springframework.stereotype.Service;
 public class BoardServiceImpl implements BoardService {
 
     private final BoardRepository boardRepository;
+    private final MemberRepository memberRepository;
 
     @Override
     public void createBoard(CreateBoardDto createBoardDto) {
@@ -53,6 +61,20 @@ public class BoardServiceImpl implements BoardService {
         }catch (DataIntegrityViolationException e) {
             throw new AdminManageBoardException(BoardErrorCode.DUPLICATE_BOARD);
         }
+
+    }
+
+    @Override
+    public boolean isValidBoard(String username, String boardId) {
+        Member member = memberRepository.findByUsername(username).orElseThrow(() ->
+                new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
+
+        String userUniv = member.getUniversity().getName();
+        String boardUniv = boardRepository.findById(Long.parseLong(boardId)).orElseThrow(() ->
+                new BoardManageException(BoardErrorCode.UNKNOWN_BOARD))
+                .getUniversity().getName();
+
+        return userUniv.equals(boardUniv);
 
     }
 }
