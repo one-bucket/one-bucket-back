@@ -6,14 +6,12 @@ import com.onebucket.global.exceptionManage.customException.chatManageException.
 import com.onebucket.global.exceptionManage.errorCode.ChatErrorCode;
 import com.onebucket.global.minio.MinioRepository;
 import com.onebucket.global.minio.MinioSaveInfoDto;
-import io.minio.errors.MinioException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -73,7 +71,7 @@ public class ChatMessageServiceImpl implements ChatMessageService {
         try {
             String address = minioRepository.uploadFile(file, dto);
             return endpointUrl + "/" + address;
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             throw new ChatManageException(ChatErrorCode.CHAT_IMAGE_ERROR);
         }
     }
