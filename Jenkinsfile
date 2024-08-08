@@ -20,6 +20,8 @@ pipeline {
         SERVER_MYSQL_PASSWORD = "m7128226"
         MONGO_HOST = "192.168.219.101"
         MONGO_DB = "testdb"
+        MONGO_USER = "springUser"
+        MONGO_PWD = "ezAcEOvxX0"
         MINIO_URL = "http://192.168.219.144:9000"
 
    }
@@ -41,7 +43,9 @@ pipeline {
                     "MYSQL_PASSWORD=${JENKINS_MYSQL_PASSWORD}",
                     "MONGO_HOST=${MONGO_HOST}",
                     "MONGO_DB=${MONGO_DB}",
-                    "MINIO_URL=${MINIO_URL}"
+                    "MINIO_URL=${MINIO_URL}",
+                    "MONGO_USER=${MONGO_USER}",
+                    "MONGO_PWD=${MONGO_PWD}"
                 ]) {
                     sh './gradlew test'
                 }
@@ -97,6 +101,8 @@ pipeline {
                             -e MONGO_HOST=${MONGO_HOST} \\
                             -e MONGO_DB=${MONGO_DB} \\
                             -e MINIO_URL=${MINIO_URL} \\
+                            -e MONGO_USER=${MONGO_USER} \\
+                            -e MONGO_PWD=${MONGO_PWD} \\
                             ${DOCKER_IMAGE}
                         docker system prune -f
                     << EOF
