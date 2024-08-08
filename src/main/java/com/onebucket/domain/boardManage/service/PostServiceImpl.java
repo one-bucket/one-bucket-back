@@ -2,7 +2,8 @@ package com.onebucket.domain.boardManage.service;
 
 import com.onebucket.domain.boardManage.dao.BoardRepository;
 import com.onebucket.domain.boardManage.dao.PostRepository;
-import com.onebucket.domain.boardManage.dto.CreatePostDto;
+import com.onebucket.domain.boardManage.dto.internal.CreatePostDto;
+import com.onebucket.domain.boardManage.dto.internal.DeletePostDto;
 import com.onebucket.domain.boardManage.entity.Board;
 import com.onebucket.domain.boardManage.entity.Comment;
 import com.onebucket.domain.boardManage.entity.post.Post;
@@ -11,8 +12,10 @@ import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.global.exceptionManage.customException.boardManageException.BoardManageException;
 import com.onebucket.global.exceptionManage.customException.boardManageException.UserBoardException;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
+import com.onebucket.global.exceptionManage.customException.universityManageException.UniversityException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.BoardErrorCode;
+import com.onebucket.global.exceptionManage.errorCode.UniversityErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -52,23 +55,51 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public void createPost(String username, CreatePostDto dto) {
+    public Long createPost(CreatePostDto dto) {
 
-        Board board = boardRepository.findById(Long.parseLong(dto.getBoard())).orElseThrow(() ->
-                new BoardManageException(BoardErrorCode.UNKNOWN_BOARD));
-        Member member = memberRepository.findByUsername(username).orElseThrow(() ->
-                new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
+        Board board = findBoard(dto.getBoardId());
+        String boardUniv = board.getUniversity().getName();
 
+        Member member = findMember(dto.getUsername());
+        String memberUniv = member.getUniversity().getName();
 
-        Post post = Post.builder()
-                .board(board)
-                .title(dto.getTitle())
-                .text(dto.getText())
-                .author(member)
-                .build();
+        if(memberUniv.equals("null")) {
+            throw new UniversityException(UniversityErrorCode.NOT_EXIST_UNIVERSITY,
+                    "expected university exist, but was not");
+        }
 
-        postRepository.save(post);
+        if(boardUniv.equals(memberUniv)) {
+
+            Post post = Post.builder()
+                    .board(board)
+                    .title(dto.getTitle())
+                    .text(dto.getText())
+                    .author(member)
+                    .build();
+
+            return postRepository.save(post).getId();
+        } else {
+            throw new UniversityException(UniversityErrorCode.NOT_EXIST_UNIVERSITY,
+                     "expected correct university, but was not");
+        }
     }
+
+    @Override
+    @Transactional
+    public void deletePost(DeletePostDto dto) {
+        Post findPost = findPost(dto.getId());
+
+        String author = findPost.getAuthor().getUsername();
+
+        if(author.equals(dto.getUsername())) {
+            postRepository.delete(findPost);
+        } else {
+            throw new AuthenticationException(AuthenticationErrorCode.UNAUTHORIZED_ACCESS,
+                    "you are not allowed to edit this post");
+        }
+    }
+
+
 
     @Override
     @Transactional
@@ -92,6 +123,21 @@ public class PostServiceImpl implements PostService {
     @Transactional(readOnly = true)
     public Page<Post> getPosts(Pageable pageable) {
         return postRepository.findAll(pageable);
+    }
+
+    private Board findBoard(Long id) {
+        return boardRepository.findById(id).orElseThrow(() ->
+                new BoardManageException(BoardErrorCode.UNKNOWN_BOARD));
+    }
+
+    private Member findMember(String username) {
+        return memberRepository.findByUsername(username).orElseThrow(() ->
+                new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
+    }
+
+    private Post findPost(Long id) {
+        return postRepository.findById(id).orElseThrow(() ->
+                new BoardManageException(BoardErrorCode.UNKNOWN_POST));
     }
 
 }

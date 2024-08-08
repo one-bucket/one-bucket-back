@@ -1,6 +1,7 @@
 package com.onebucket.domain.boardManage.service;
 
-import com.onebucket.domain.boardManage.dto.CreatePostDto;
+import com.onebucket.domain.boardManage.dto.internal.CreatePostDto;
+import com.onebucket.domain.boardManage.dto.internal.DeletePostDto;
 import com.onebucket.domain.boardManage.entity.Comment;
 import com.onebucket.domain.boardManage.entity.post.Post;
 import org.springframework.data.domain.Page;
@@ -28,7 +29,8 @@ import org.springframework.data.domain.Pageable;
  * </pre>
  */
 public interface PostService {
-    void createPost(String username, CreatePostDto dto);
+    Long createPost(CreatePostDto dto);
+    void deletePost(DeletePostDto dto);
 
     void addCommentToPost(Long postId, Comment comment);
 

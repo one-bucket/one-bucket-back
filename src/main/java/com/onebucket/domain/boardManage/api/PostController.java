@@ -1,19 +1,18 @@
 package com.onebucket.domain.boardManage.api;
 
-import com.onebucket.domain.boardManage.dto.CreatePostDto;
+import com.onebucket.domain.boardManage.dto.internal.CreatePostDto;
+import com.onebucket.domain.boardManage.dto.internal.DeletePostDto;
+import com.onebucket.domain.boardManage.dto.request.RequestCreatePostDto;
 import com.onebucket.domain.boardManage.entity.post.Post;
 import com.onebucket.domain.boardManage.service.BoardService;
 import com.onebucket.domain.boardManage.service.PostService;
 import com.onebucket.global.utils.SecurityUtils;
-import com.onebucket.global.utils.SuccessResponseDto;
+import com.onebucket.global.utils.SuccessResponseWithIdDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * <br>package name   : com.onebucket.domain.boardManage.api
@@ -51,13 +50,31 @@ public class PostController {
     }
 
     @PostMapping
-    public ResponseEntity<SuccessResponseDto> createPost(CreatePostDto dto) {
+    public ResponseEntity<SuccessResponseWithIdDto> createPost(RequestCreatePostDto dto) {
         String username = securityUtils.getCurrentUsername();
 
-        if(boardService.isValidBoard(username, dto.getBoard())) {
+        CreatePostDto createPostDto = CreatePostDto.builder()
+                .boardId(dto.getBoardId())
+                .text(dto.getText())
+                .title(dto.getTitle())
+                .username(username)
+                .build();
 
-        }
+        Long savedId = postService.createPost(createPostDto);
+        return ResponseEntity.ok(new SuccessResponseWithIdDto("success create post", savedId));
+    }
 
-        return ResponseEntity.ok(new SuccessResponseDto("load"));
+    @DeleteMapping("/{id}")
+    public ResponseEntity<SuccessResponseWithIdDto> deletePost(@PathVariable Long id) {
+        String username = securityUtils.getCurrentUsername();
+
+        DeletePostDto deletePostDto = DeletePostDto.builder()
+                .id(id)
+                .username(username)
+                .build();
+
+        postService.deletePost(deletePostDto);
+
+        return ResponseEntity.ok(new SuccessResponseWithIdDto("success delete post", id));
     }
 }

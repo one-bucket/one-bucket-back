@@ -5,9 +5,13 @@ import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.domain.memberManage.dto.CreateMemberRequestDto;
 import com.onebucket.domain.memberManage.dto.NicknameRequestDto;
 import com.onebucket.domain.memberManage.dto.ReadMemberInfoDto;
+import com.onebucket.domain.memberManage.dto.internal.SetUniversityDto;
+import com.onebucket.domain.universityManage.dao.UniversityRepository;
 import com.onebucket.domain.universityManage.domain.University;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
+import com.onebucket.global.exceptionManage.customException.universityManageException.UniversityException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
+import com.onebucket.global.exceptionManage.errorCode.UniversityErrorCode;
 import com.onebucket.global.utils.RandomStringUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +40,7 @@ public class MemberServiceImpl implements MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final RandomStringUtils randomStringUtils;
+    private final UniversityRepository universityRepository;
 
 
     /**
@@ -48,10 +53,13 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public Long createMember(CreateMemberRequestDto createMemberRequestDto) {
 
+
+
         Member member = Member.builder()
                 .username(createMemberRequestDto.getUsername())
                 .password(passwordEncoder.encode(createMemberRequestDto.getPassword()))
                 .nickname(createMemberRequestDto.getNickname())
+                .university(saveNullUniv())
                 .build();
         try {
             Member newMember = memberRepository.save(member);
@@ -140,6 +148,34 @@ public class MemberServiceImpl implements MemberService {
                 .orElse(university);
     }
 
+    @Transactional
+    @Override
+    public void setUniversity(SetUniversityDto dto) {
+        Member member = memberRepository.findByUsername(dto.getUsername())
+                .orElseThrow(()-> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
 
+        University university = universityRepository.findByName(dto.getUniversity()).orElseThrow(() ->
+                new UniversityException(UniversityErrorCode.NOT_EXIST_UNIVERSITY));
+
+        member.setUniversity(university);
+        memberRepository.save(member);
+    }
+
+
+    private University saveNullUniv() {
+
+        Optional<University> university = universityRepository.findByName("null");
+        if(university.isPresent()) {
+            return university.get();
+        } else {
+            University newUniv = University.builder()
+                    .name("null")
+                    .email("null")
+                    .address("null")
+                    .build();
+            return universityRepository.save(newUniv);
+
+        }
+    }
 
 }
