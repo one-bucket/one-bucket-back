@@ -74,7 +74,7 @@ class ChatRoomServiceImplTest {
 
     public CreateChatRoomDto getRoomDto() {
         return CreateChatRoomDto.of(
-                "room1", LocalDateTime.now(),"user1"
+                "room1", LocalDateTime.now(),"user1", new HashSet<>()
         );
     }
 
