@@ -1,8 +1,4 @@
-package com.onebucket.domain.memberManage.dto;
-
-import com.onebucket.domain.memberManage.domain.Profile;
-
-import java.time.LocalDate;
+package com.onebucket.domain.chatManage.dto;
 
 /**
  * <br>package name   : com.onebucket.domain.memberManage.dto

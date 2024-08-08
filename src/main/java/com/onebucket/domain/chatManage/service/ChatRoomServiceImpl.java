@@ -7,7 +7,7 @@ import com.onebucket.domain.chatManage.dto.CreateChatRoomDto;
 import com.onebucket.domain.chatManage.pubsub.RedisSubscriber;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
-import com.onebucket.domain.memberManage.dto.ChatMemberDto;
+import com.onebucket.domain.chatManage.dto.ChatMemberDto;
 import com.onebucket.global.exceptionManage.customException.chatManageException.Exceptions.RoomNotFoundException;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
@@ -66,13 +66,14 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
-    public void createChatRoom(CreateChatRoomDto dto) {
+    public String createChatRoom(CreateChatRoomDto dto) {
         ChatRoom chatRoom = ChatRoom.builder()
                 .name(dto.name())
                 .createdBy(dto.createdBy())
                 .createdAt(dto.createdAt())
                 .build();
-        chatRoomRepository.save(chatRoom);
+        ChatRoom savedChatRoom = chatRoomRepository.save(chatRoom);
+        return savedChatRoom.getRoomId();
     }
 
     /**
@@ -117,6 +118,13 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                 () -> new RoomNotFoundException(ChatErrorCode.NOT_EXIST_ROOM));
         chatRoom.addMessage(chatMessage);
         chatRoomRepository.save(chatRoom);
+    }
+
+    @Override
+    public List<ChatRoom> findByMembersNickname(String nickname) {
+        return memberRepository.existsByNickname(nickname)
+                ? chatRoomRepository.findByMembersNickname(nickname)
+                : Collections.emptyList();
     }
 }
 

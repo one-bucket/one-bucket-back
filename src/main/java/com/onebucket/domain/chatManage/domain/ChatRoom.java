@@ -1,6 +1,6 @@
 package com.onebucket.domain.chatManage.domain;
 
-import com.onebucket.domain.memberManage.dto.ChatMemberDto;
+import com.onebucket.domain.chatManage.dto.ChatMemberDto;
 import jakarta.persistence.Id;
 import lombok.Builder;
 import lombok.Getter;
@@ -8,7 +8,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;

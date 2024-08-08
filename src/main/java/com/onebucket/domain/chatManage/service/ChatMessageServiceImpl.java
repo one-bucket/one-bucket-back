@@ -2,9 +2,15 @@ package com.onebucket.domain.chatManage.service;
 
 import com.onebucket.domain.chatManage.dao.ChatMessageRepository;
 import com.onebucket.domain.chatManage.domain.ChatMessage;
+import com.onebucket.global.exceptionManage.customException.chatManageException.ChatManageException;
+import com.onebucket.global.exceptionManage.errorCode.ChatErrorCode;
+import com.onebucket.global.minio.MinioRepository;
+import com.onebucket.global.minio.MinioSaveInfoDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -34,6 +40,13 @@ import java.util.List;
 public class ChatMessageServiceImpl implements ChatMessageService {
 
     private final ChatMessageRepository chatMessageRepository;
+    private final MinioRepository minioRepository;
+
+    @Value("${minio.bucketName}")
+    private String bucketName;
+
+    @Value("${minio.minio_url}")
+    private String endpointUrl;
 
     @Override
     public void saveMessage(ChatMessage chatMessage) {
@@ -44,5 +57,22 @@ public class ChatMessageServiceImpl implements ChatMessageService {
     @Transactional(readOnly = true)
     public List<ChatMessage> getChatMessages(String roomId) {
         return chatMessageRepository.findByRoomIdOrderByCreatedAtDesc(roomId);
+    }
+
+    @Override
+    public String uploadChatImage(MultipartFile file, String username) {
+        String fileName = "/chat/" + username + "/" + file.getOriginalFilename();
+
+        MinioSaveInfoDto dto = MinioSaveInfoDto.builder()
+                .bucketName(bucketName)
+                .fileName(fileName)
+                .fileExtension("png")
+                .build();
+        try {
+            String address = minioRepository.uploadFile(file, dto);
+            return endpointUrl + "/" + address;
+        } catch (RuntimeException e) {
+            throw new ChatManageException(ChatErrorCode.CHAT_IMAGE_ERROR);
+        }
     }
 }

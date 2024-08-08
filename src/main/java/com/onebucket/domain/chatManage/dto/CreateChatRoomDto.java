@@ -1,9 +1,8 @@
 package com.onebucket.domain.chatManage.dto;
 
-import com.onebucket.domain.memberManage.dto.ChatMemberDto;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -29,8 +28,13 @@ import java.util.Set;
  * 2024-08-01        SeungHoon              init create
  * </pre>
  */
-public record CreateChatRoomDto(@NotBlank String name, @NotNull LocalDateTime createdAt, @NotBlank String createdBy) {
-    public static CreateChatRoomDto of(String name, LocalDateTime createdAt, String createdBy) {
-        return new CreateChatRoomDto(name, createdAt, createdBy);
+public record CreateChatRoomDto(
+        @NotBlank String name,
+        @NotNull LocalDateTime createdAt,
+        @NotBlank String createdBy,
+        @NotNull @Size(min = 1) Set<@NotNull ChatMemberDto> members) {
+
+    public static CreateChatRoomDto of(String name, LocalDateTime createdAt, String createdBy, Set<ChatMemberDto> members) {
+        return new CreateChatRoomDto(name, createdAt, createdBy, members);
     }
 }

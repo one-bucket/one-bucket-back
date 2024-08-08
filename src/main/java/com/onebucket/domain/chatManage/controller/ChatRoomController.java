@@ -13,6 +13,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,7 +45,7 @@ public class ChatRoomController {
     private final ChatRoomService chatRoomService;
     private final SecurityUtils securityUtils;
 
-    // 모든 채팅방 목록 반환
+    // 모든 채팅방 목록 조회
     @GetMapping("/rooms")
     public ResponseEntity<List<ChatRoom>> getRooms() {
         List<ChatRoom> response = chatRoomService.getChatRooms();
@@ -54,8 +55,9 @@ public class ChatRoomController {
     // 채팅방 생성
     @PostMapping("/room")
     public ResponseEntity<Void> createRoom(@Valid @RequestBody CreateChatRoomDto dto) {
-        chatRoomService.createChatRoom(dto);
-        return ResponseEntity.ok().build();
+        String roomId = chatRoomService.createChatRoom(dto);
+        URI location = URI.create(String.format("/chat/room/%s", roomId));
+        return ResponseEntity.created(location).build();
     }
 
     // 특정 채팅방에 입장하기
@@ -64,6 +66,13 @@ public class ChatRoomController {
         String username = securityUtils.getCurrentUsername();
         chatRoomService.enterChatRoom(roomId,username);
         ChatRoom response = chatRoomService.getChatRoom(roomId);
+        return ResponseEntity.ok(response);
+    }
+
+    // 특정 유저가 입장해 있는 채팅방 목록 조회
+    @GetMapping("/room/user/{nickname}")
+    public ResponseEntity<List<ChatRoom>> getRoomsForMember(@PathVariable String nickname) {
+        List<ChatRoom> response = chatRoomService.findByMembersNickname(nickname);
         return ResponseEntity.ok(response);
     }
 }

@@ -67,14 +67,14 @@ class ChatRoomServiceImplTest {
     private RedisMessageListenerContainer redisMessageListener;
 
     @Mock
-    private RedisSubscriber redisSubscriber;
+    private ChatRoom mockChatRoom;
 
     @InjectMocks
     private ChatRoomServiceImpl chatRoomService;
 
     public CreateChatRoomDto getRoomDto() {
         return CreateChatRoomDto.of(
-                "room1", LocalDateTime.now(),"user1"
+                "room1", LocalDateTime.now(),"user1", new HashSet<>()
         );
     }
 
@@ -95,7 +95,10 @@ class ChatRoomServiceImplTest {
     @DisplayName("채팅방 만들기 성공")
     void createChatRoom_success() {
         CreateChatRoomDto dto = getRoomDto();
+        when(chatRoomRepository.save(any(ChatRoom.class))).thenReturn(mockChatRoom);
+
         chatRoomService.createChatRoom(dto);
+
         verify(chatRoomRepository, times(1)).save(any(ChatRoom.class));
     }
 

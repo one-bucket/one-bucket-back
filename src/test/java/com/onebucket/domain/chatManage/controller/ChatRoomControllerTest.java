@@ -3,6 +3,7 @@ package com.onebucket.domain.chatManage.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.onebucket.domain.chatManage.domain.ChatRoom;
+import com.onebucket.domain.chatManage.dto.ChatMemberDto;
 import com.onebucket.domain.chatManage.dto.CreateChatRoomDto;
 import com.onebucket.domain.chatManage.service.ChatRoomService;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
@@ -26,6 +27,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static com.onebucket.testComponent.testUtils.JsonFieldResultMatcher.hasKey;
@@ -100,16 +103,20 @@ class ChatRoomControllerTest {
     @DisplayName("채팅방 생성 성공")
     void getRoom_success() throws Exception {
         final String url = "/chat/room";
-
+        Set<ChatMemberDto> members = new HashSet<>();
+        members.add(ChatMemberDto.from("user1"));
         final ResultActions resultActions = mockMvc.perform(
                 post(url)
                         .content(objectMapper.writeValueAsString(CreateChatRoomDto.of(
                                 "room1",
                                 LocalDateTime.of(2024, 1, 1, 12, 0),
-                                "user1")))
+                                "user1",
+                                members
+                                )
+                        ))
                         .contentType(MediaType.APPLICATION_JSON)
         );
-        resultActions.andExpect(status().isOk());
+        resultActions.andExpect(status().isCreated());
     }
 
     @ParameterizedTest
@@ -166,9 +173,10 @@ class ChatRoomControllerTest {
     static Stream<CreateChatRoomDto> provideInvalidChatRoomDtos() {
         LocalDateTime time = LocalDateTime.of(2024, 1, 1, 12, 0);
         return Stream.of(
-                CreateChatRoomDto.of(null, time, "user1"),  // name is null
-                CreateChatRoomDto.of("room1", null, "user1"),  // createdAt is null
-                CreateChatRoomDto.of("room1",  time, null)   // createdBy is null
+                CreateChatRoomDto.of(null, time, "user1",new HashSet<>()),  // name is null
+                CreateChatRoomDto.of("room1", null, "user1",new HashSet<>()),  // createdAt is null
+                CreateChatRoomDto.of("room1",  time, null,new HashSet<>()), // createdBy is null
+                CreateChatRoomDto.of("room1",time,"user1",null)
         );
     }
 
