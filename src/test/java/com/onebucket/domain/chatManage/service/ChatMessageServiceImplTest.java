@@ -50,8 +50,6 @@ class ChatMessageServiceImplTest {
     @InjectMocks
     private ChatMessageServiceImpl chatMessageService;
 
-
-
     @Test
     @DisplayName("채팅 이미지 업로드 성공")
     void uploadChatImage_success() {
@@ -63,8 +61,6 @@ class ChatMessageServiceImplTest {
         MockMultipartFile file = new MockMultipartFile("file", "test.png", "image/png", "some-image-content".getBytes());
         String expectedAddress = bucketName + "/" + "chat/" + username + "/test.png";
         String expectedUrl = endpointUrl + "/" + expectedAddress;
-
-        // Set the endpoint URL using ReflectionTestUtils
         ReflectionTestUtils.setField(chatMessageService, "endpointUrl", endpointUrl);
 
         // when
