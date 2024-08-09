@@ -1,7 +1,7 @@
 package com.onebucket.domain.chatManage.domain;
 
 import com.onebucket.domain.chatManage.dto.ChatMemberDto;
-import jakarta.persistence.Id;
+import org.springframework.data.annotation.Id;
 import lombok.Builder;
 import lombok.Getter;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * <br>package name   : com.onebucket.domain.chatManage.domain
@@ -34,7 +33,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * </pre>
  */
 @Getter
-@Builder
 @Document(collection = "chatroom")
 public class ChatRoom  {
 
@@ -45,12 +43,18 @@ public class ChatRoom  {
     private LocalDateTime createdAt;
     private String createdBy;
 
-    @Builder.Default
-    private Set<ChatMemberDto> members = ConcurrentHashMap.newKeySet();
+    private Set<ChatMemberDto> members;
 
-    @Builder.Default
-    private List<ChatMessage> messages = new ArrayList<>();
+    private List<ChatMessage> messages;
 
+    @Builder
+    public ChatRoom(String name, LocalDateTime createdAt, String createdBy, Set<ChatMemberDto> members) {
+        this.name = name;
+        this.createdAt = createdAt;
+        this.createdBy = createdBy;
+        this.members = members;
+        this.messages = new ArrayList<>();
+    }
     public void addMember(ChatMemberDto member) {
         members.add(member);
     }

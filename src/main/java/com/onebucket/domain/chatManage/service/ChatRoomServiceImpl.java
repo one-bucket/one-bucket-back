@@ -71,6 +71,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                 .name(dto.name())
                 .createdBy(dto.createdBy())
                 .createdAt(dto.createdAt())
+                .members(dto.members())
                 .build();
         ChatRoom savedChatRoom = chatRoomRepository.save(chatRoom);
         return savedChatRoom.getRoomId();

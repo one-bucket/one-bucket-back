@@ -187,10 +187,7 @@ class ChatRoomServiceImplTest {
         String roomId = "room1";
         ChatMessage mockChatMessage = mock(ChatMessage.class);
         // mock 객체가 아니라서 doReturn 사용하지 않는다.
-        ChatRoom chatRoom = ChatRoom.builder()
-                .roomId(roomId)
-                .messages(new ArrayList<>())
-                .build();
+        ChatRoom chatRoom = ChatRoom.builder().build();
         when(mockChatMessage.getRoomId()).thenReturn(roomId);
         doReturn(Optional.of(chatRoom)).when(chatRoomRepository).findByRoomId(roomId);
 
@@ -224,8 +221,6 @@ class ChatRoomServiceImplTest {
         when(mockChatMessage.getRoomId()).thenReturn(roomId);
 
         ChatRoom chatRoom = ChatRoom.builder()
-                .roomId(roomId)
-                .messages(new ArrayList<>())
                 .build();
 
         doReturn(Optional.of(chatRoom)).when(chatRoomRepository).findByRoomId(roomId);
