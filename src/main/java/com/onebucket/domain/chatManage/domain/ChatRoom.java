@@ -1,6 +1,7 @@
 package com.onebucket.domain.chatManage.domain;
 
 import com.onebucket.domain.chatManage.dto.ChatMemberDto;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import lombok.Builder;
 import lombok.Getter;
@@ -34,6 +35,7 @@ import java.util.Set;
  */
 @Getter
 @Document(collection = "chatroom")
+@NoArgsConstructor
 public class ChatRoom  {
 
     @Id
