@@ -1,6 +1,11 @@
 package com.onebucket.domain.boardManage.service;
 
-import com.onebucket.domain.boardManage.dto.CreateBoardDto;
+
+import com.onebucket.domain.boardManage.dto.internal.CreateBoardDto;
+import com.onebucket.domain.boardManage.dto.internal.CreateBoardTypeDto;
+import com.onebucket.domain.boardManage.dto.internal.CreateBoardsDto;
+
+import java.util.List;
 
 /**
  * <br>package name   : com.onebucket.domain.boardManage.service
@@ -24,6 +29,10 @@ import com.onebucket.domain.boardManage.dto.CreateBoardDto;
  * </pre>
  */
 public interface BoardService {
-    void createBoard(CreateBoardDto createBoardDto);
+    Long createBoard(CreateBoardDto dto);
+
+    List<CreateBoardsDto> createBoards();
     boolean isValidBoard(String username, String boardId);
+
+    void createBoardType(CreateBoardTypeDto dto);
 }

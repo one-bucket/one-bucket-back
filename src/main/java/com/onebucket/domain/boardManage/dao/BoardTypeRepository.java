@@ -2,7 +2,11 @@ package com.onebucket.domain.boardManage.dao;
 
 import com.onebucket.domain.boardManage.entity.BoardType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
 
 /**
  * <br>package name   : com.onebucket.domain.boardManage.dao
@@ -27,4 +31,11 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface BoardTypeRepository extends JpaRepository<BoardType, Long> {
+    Optional<BoardType> findByName(String name);
+
+    @Query("""
+            SELECT bt.id
+            FROM BoardType bt
+       """)
+    List<Long> findAllBoardTypeIds();
 }

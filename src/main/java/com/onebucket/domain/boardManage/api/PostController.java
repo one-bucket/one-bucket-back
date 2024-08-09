@@ -8,6 +8,7 @@ import com.onebucket.domain.boardManage.service.BoardService;
 import com.onebucket.domain.boardManage.service.PostService;
 import com.onebucket.global.utils.SecurityUtils;
 import com.onebucket.global.utils.SuccessResponseWithIdDto;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -50,7 +51,7 @@ public class PostController {
     }
 
     @PostMapping
-    public ResponseEntity<SuccessResponseWithIdDto> createPost(RequestCreatePostDto dto) {
+    public ResponseEntity<SuccessResponseWithIdDto> createPost(@RequestBody @Valid RequestCreatePostDto dto) {
         String username = securityUtils.getCurrentUsername();
 
         CreatePostDto createPostDto = CreatePostDto.builder()
