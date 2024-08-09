@@ -61,7 +61,7 @@ public class ChatMessageServiceImpl implements ChatMessageService {
 
     @Override
     public String uploadChatImage(MultipartFile file, String username) {
-        String fileName = "/chat/" + username + "/" + file.getOriginalFilename();
+        String fileName = "chat/" + username + "/" + file.getOriginalFilename();
 
         MinioSaveInfoDto dto = MinioSaveInfoDto.builder()
                 .bucketName(bucketName)
