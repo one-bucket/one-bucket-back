@@ -66,7 +66,7 @@ class ChatMessageControllerTest {
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         mockMvc = MockMvcBuilders.standaloneSetup(chatMessageController)
-                .setControllerAdvice(new BaseExceptionHandler(), new DataExceptionHandler(), new ChatExceptionHandler())
+                .setControllerAdvice(new ChatExceptionHandler())
                 .build();
     }
 

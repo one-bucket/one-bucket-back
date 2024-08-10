@@ -49,21 +49,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ChatRoomServiceImpl implements ChatRoomService {
 
     private final MemberRepository memberRepository;
-    // 채팅방의 대화 메세지를 발행하기 위한 redis topic 정보.
-    // 서버별로 채팅방에 매치되는 topic 정보를 Map에 넣어서 roomId로 찾을 수 있게 한다.
-    private Map<String, ChannelTopic> topics;
-
-    // 채팅방(topic)에 발행되는 메세지를 처리할 Listener
-    private final RedisMessageListenerContainer redisMessageListener;
-    // 구독 처리 서비스
-    private final RedisSubscriber redisSubscriber;
 
     private final ChatRoomRepository chatRoomRepository;
 
-    @PostConstruct
-    public void init() {
-        topics = new ConcurrentHashMap<>();
-    }
 
     @Override
     public String createChatRoom(CreateChatRoomDto dto) {
@@ -77,18 +65,8 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         return savedChatRoom.getRoomId();
     }
 
-    /**
-     * 채팅방 입장 : redis에 topic을 만들고 pub/sub 통신을 하기 위해 리스너를 설정한다.
-     */
     @Override
     public void enterChatRoom(String roomId,String username) {
-        ChannelTopic topic = topics.get(roomId);
-        if (topic == null) {
-            topic = new ChannelTopic(roomId);
-            log.info("topic: {}", topic);
-            redisMessageListener.addMessageListener(redisSubscriber,topic);
-            topics.put(roomId, topic);
-        }
         Member member = memberRepository.findByUsername(username)
                 .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
         ChatRoom chatRoom = chatRoomRepository.findByRoomId(roomId).orElseThrow(
@@ -106,11 +84,6 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     public ChatRoom getChatRoom(String roomId) {
         return chatRoomRepository.findByRoomId(roomId).orElseThrow(
                 () -> new RoomNotFoundException(ChatErrorCode.NOT_EXIST_ROOM));
-    }
-
-    @Override
-    public ChannelTopic getTopic(String roomId) {
-        return topics.get(roomId);
     }
 
     @Override

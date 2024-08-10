@@ -27,7 +27,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.*;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -78,19 +78,6 @@ class ChatRoomServiceImplTest {
         );
     }
 
-    public CreateMemberRequestDto getMemberDto() {
-        return CreateMemberRequestDto.builder()
-                .nickname("han")
-                .build();
-    }
-
-    @BeforeEach
-    void init() {
-        Map<String, ChannelTopic> topics = new ConcurrentHashMap<>();
-        ReflectionTestUtils.setField(chatRoomService, "topics", topics);
-        ReflectionTestUtils.setField(chatRoomService, "redisMessageListener", redisMessageListener);
-    }
-
     @Test
     @DisplayName("채팅방 만들기 성공")
     void createChatRoom_success() {
@@ -114,16 +101,14 @@ class ChatRoomServiceImplTest {
 
         chatRoomService.enterChatRoom(roomId,username);
 
-        // verify를 사용하여 메서드 호출 횟수 검증
         verify(chatRoomRepository, times(1)).findByRoomId(roomId);
         verify(memberRepository, times(1)).findByUsername(username);
         verify(chatRoomRepository,times(1)).save(any(ChatRoom.class));
     }
 
-
     @Test
     @DisplayName("채팅방 입장 실패 - 존재하지 않는 유저")
-    void testEnterChatRoom_UnknownUser() {
+    void EnterChatRoom_fail_UnknownUser() {
         String roomId = "room1";
         String username = "user1";
 
@@ -136,7 +121,7 @@ class ChatRoomServiceImplTest {
 
     @Test
     @DisplayName("채팅방 입장 실패 - 존재하지 않는 채팅방")
-    void testEnterChatRoom_RoomNotFound() {
+    void EnterChatRoom_fail_RoomNotFound() {
         String roomId = "room1";
         String username = "user1";
         Member mockMember = mock(Member.class);

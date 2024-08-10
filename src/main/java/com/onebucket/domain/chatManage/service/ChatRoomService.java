@@ -33,7 +33,6 @@ public interface ChatRoomService {
     void enterChatRoom(String roomId,String username);
     List<ChatRoom> getChatRooms();
     ChatRoom getChatRoom(String roomId);
-    ChannelTopic getTopic(String roomId);
     void addChatMessage(ChatMessage chatMessage);
     List<ChatRoom> findByMembersNickname(String nickname);
 }
