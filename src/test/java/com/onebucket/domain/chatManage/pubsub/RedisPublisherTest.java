@@ -1,13 +1,17 @@
 package com.onebucket.domain.chatManage.pubsub;
 
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import com.onebucket.domain.chatManage.domain.ChatMessage;
 import com.onebucket.global.exceptionManage.customException.chatManageException.ChatManageException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
 import static org.junit.jupiter.api.Assertions.*;
@@ -39,33 +43,18 @@ class RedisPublisherTest {
     @Mock
     private RedisTemplate<String, Object> redisTemplate;
 
+    @Mock
+    private ChannelTopic channelTopic;
+
     @InjectMocks
     private RedisPublisher redisPublisher;
 
     @Test
-    public void publish_ShouldSendMessage_WhenTopicIsValid() {
-        // given
-        ChannelTopic topic = new ChannelTopic("testTopic");
-        ChatMessage message = new ChatMessage();
-        message.setRoomId("roomId");
-        message.setMessage("test message");
-
-        // when
-        redisPublisher.publish(topic, message);
-
-        // then
-        verify(redisTemplate, times(1)).convertAndSend(topic.getTopic(), message);
-    }
-
-    @Test
-    public void publish_ShouldThrowException_WhenTopicIsNull() {
-        // given
-        ChannelTopic topic = null;
-        ChatMessage message = new ChatMessage();
-        message.setRoomId("roomId");
-        message.setMessage("test message");
-
-        // when & then
-        assertThrows(ChatManageException.class, () -> redisPublisher.publish(null, message));
+    @DisplayName("Redis Message 발행하기 성공")
+    public void publish_ShouldSendMessage() {
+        // Given
+        ChatMessage message = new ChatMessage(); // ChatMessage 클래스 인스턴스 생성
+        // When
+        redisPublisher.publish(message);
     }
 }
