@@ -1,13 +1,14 @@
 package com.onebucket.domain.boardManage.dto.internal;
 
+import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
+import org.springframework.data.domain.Pageable;
+
 
 /**
  * <br>package name   : com.onebucket.domain.boardManage.dto.internal
- * <br>file name      : CreateBoardType
- * <br>date           : 2024-08-09
+ * <br>file name      : GetBoardDto
+ * <br>date           : 2024-08-14
  * <pre>
  * <span style="color: white;">[description]</span>
  *
@@ -22,14 +23,12 @@ import lombok.experimental.SuperBuilder;
  * ====================================================
  * DATE           AUTHOR               NOTE
  * ----------------------------------------------------
- * 2024-08-09        jack8              init create
+ * 2024-08-14        jack8              init create
  * </pre>
  */
-
-@SuperBuilder
+@Builder
 @Getter
-@NoArgsConstructor
-public class CreateBoardTypeDto {
-    private String name;
-    private String description;
+public class GetBoardDto {
+    private Long boardId;
+    private Pageable pageable;
 }

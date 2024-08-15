@@ -61,7 +61,7 @@ public class BoardServiceImpl implements BoardService {
     @Override
     public Long createBoard(CreateBoardDto dto) {
 
-        University university = universityRepository.findByName(dto.getName()).orElseThrow(() ->
+        University university = universityRepository.findByName(dto.getUniversity()).orElseThrow(() ->
                 new UniversityManageException(UniversityErrorCode.NOT_EXIST_UNIVERSITY));
 
         BoardType boardType = boardTypeRepository.findByName(dto.getBoardType()).orElseThrow(() ->

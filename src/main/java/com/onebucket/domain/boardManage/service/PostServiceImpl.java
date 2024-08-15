@@ -4,6 +4,7 @@ import com.onebucket.domain.boardManage.dao.BoardRepository;
 import com.onebucket.domain.boardManage.dao.PostRepository;
 import com.onebucket.domain.boardManage.dto.internal.CreatePostDto;
 import com.onebucket.domain.boardManage.dto.internal.DeletePostDto;
+import com.onebucket.domain.boardManage.dto.internal.GetBoardDto;
 import com.onebucket.domain.boardManage.entity.Board;
 import com.onebucket.domain.boardManage.entity.Comment;
 import com.onebucket.domain.boardManage.entity.post.Post;
@@ -18,9 +19,9 @@ import com.onebucket.global.exceptionManage.errorCode.BoardErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.UniversityErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 
 /**
  * <br>package name   : com.onebucket.domain.boardManage.service
@@ -58,17 +59,17 @@ public class PostServiceImpl implements PostService {
     public Long createPost(CreatePostDto dto) {
 
         Board board = findBoard(dto.getBoardId());
-        String boardUniv = board.getUniversity().getName();
+        Long boardUnivId = board.getUniversity().getId();
 
         Member member = findMember(dto.getUsername());
-        String memberUniv = member.getUniversity().getName();
+        Long memberUnivId = member.getUniversity().getId();
 
-        if(memberUniv.equals("null")) {
+        if(memberUnivId == null) {
             throw new UniversityException(UniversityErrorCode.NOT_EXIST_UNIVERSITY,
                     "expected university exist, but was not");
         }
 
-        if(boardUniv.equals(memberUniv)) {
+        if(memberUnivId.equals(boardUnivId)) {
 
             Post post = Post.builder()
                     .board(board)
@@ -119,10 +120,11 @@ public class PostServiceImpl implements PostService {
         postRepository.save(post);
     }
 
+
     @Override
     @Transactional(readOnly = true)
-    public Page<Post> getPosts(Pageable pageable) {
-        return postRepository.findAll(pageable);
+    public Page<Post> getPostsByBoard(GetBoardDto dto) {
+        return postRepository.findByBoardId(dto.getBoardId(), dto.getPageable());
     }
 
     private Board findBoard(Long id) {

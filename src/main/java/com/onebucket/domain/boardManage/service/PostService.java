@@ -2,10 +2,10 @@ package com.onebucket.domain.boardManage.service;
 
 import com.onebucket.domain.boardManage.dto.internal.CreatePostDto;
 import com.onebucket.domain.boardManage.dto.internal.DeletePostDto;
+import com.onebucket.domain.boardManage.dto.internal.GetBoardDto;
 import com.onebucket.domain.boardManage.entity.Comment;
 import com.onebucket.domain.boardManage.entity.post.Post;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 /**
  * <br>package name   : com.onebucket.domain.boardManage.service
@@ -36,5 +36,5 @@ public interface PostService {
 
     void deleteCommentFromPost(Long postId, Comment comment);
 
-    Page<Post> getPosts(Pageable pageable);
+    Page<Post> getPostsByBoard(GetBoardDto dto);
 }

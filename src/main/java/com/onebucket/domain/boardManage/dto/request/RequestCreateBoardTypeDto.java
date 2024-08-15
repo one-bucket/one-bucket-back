@@ -2,6 +2,7 @@ package com.onebucket.domain.boardManage.dto.request;
 
 import com.onebucket.domain.boardManage.dto.internal.CreateBoardTypeDto;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 /**
@@ -28,6 +29,7 @@ import lombok.experimental.SuperBuilder;
 
 @SuperBuilder
 @Getter
+@NoArgsConstructor
 public class RequestCreateBoardTypeDto extends CreateBoardTypeDto {
 
 }

@@ -2,6 +2,7 @@ package com.onebucket.domain.boardManage.api;
 
 import com.onebucket.domain.boardManage.dto.internal.CreatePostDto;
 import com.onebucket.domain.boardManage.dto.internal.DeletePostDto;
+import com.onebucket.domain.boardManage.dto.internal.GetBoardDto;
 import com.onebucket.domain.boardManage.dto.request.RequestCreatePostDto;
 import com.onebucket.domain.boardManage.entity.post.Post;
 import com.onebucket.domain.boardManage.service.BoardService;
@@ -45,9 +46,19 @@ public class PostController {
     private final BoardService boardService;
     private final SecurityUtils securityUtils;
 
-    @GetMapping
-    public ResponseEntity<Page<Post>> getPosts(Pageable pageable) {
-        return ResponseEntity.ok(postService.getPosts(pageable));
+    @GetMapping("/{boardId}")
+    public ResponseEntity<Page<Post>> getPostsByBoard(@PathVariable Long boardId, Pageable pageable) {
+        String username = securityUtils.getCurrentUsername();
+
+        securityUtils.isUserUniversityMatchingBoard(username, boardId);
+
+        GetBoardDto getBoardDto = GetBoardDto.builder()
+                .boardId(boardId)
+                .pageable(pageable)
+                .build();
+
+        Page<Post> posts = postService.getPostsByBoard(getBoardDto);
+        return ResponseEntity.ok(posts);
     }
 
     @PostMapping

@@ -1,6 +1,7 @@
 package com.onebucket.domain.boardManage.dto.parents;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 /**
@@ -26,6 +27,7 @@ import lombok.experimental.SuperBuilder;
  */
 @Getter
 @SuperBuilder
+@NoArgsConstructor
 public abstract class  PostDto {
 
     private Long boardId;

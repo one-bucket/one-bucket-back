@@ -1,7 +1,15 @@
 package com.onebucket.global.utils;
 
+import com.onebucket.domain.boardManage.dao.BoardRepository;
+import com.onebucket.domain.boardManage.entity.Board;
+import com.onebucket.domain.memberManage.dao.MemberRepository;
+import com.onebucket.domain.memberManage.domain.Member;
+import com.onebucket.global.exceptionManage.customException.boardManageException.BoardManageException;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
+import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.MemberManageException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
+import com.onebucket.global.exceptionManage.errorCode.BoardErrorCode;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -18,6 +26,7 @@ import org.springframework.stereotype.Component;
  * <span style="color: white;">usage:</span>
  * {@code
  * String username = securityUtils.getCurrentUsername();
+ *
  * } </pre>
  * <pre>
  * modified log :
@@ -28,7 +37,10 @@ import org.springframework.stereotype.Component;
  * </pre>
  */
 @Component
+@RequiredArgsConstructor
 public class SecurityUtils {
+    private final MemberRepository memberRepository;
+    private final BoardRepository boardRepository;
 
     public String getCurrentUsername() {
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -38,5 +50,29 @@ public class SecurityUtils {
                     "Not exist Authentication in ContextHolder");
         }
         return authentication.getName();
+    }
+
+    public void isUserUniversityMatchingBoard(String username, Long boardId) {
+        Board board = boardRepository.findById(boardId).orElseThrow(() ->
+                new BoardManageException(BoardErrorCode.UNKNOWN_BOARD));
+
+        isUserUniversityMatchingBoard(username, board);
+    }
+
+    public void isUserUniversityMatchingBoard(String username, Board board) {
+        Long boardUnivId = board.getUniversity().getId();
+
+        Member member = memberRepository.findByUsername(username).orElseThrow(() ->
+                new MemberManageException(AuthenticationErrorCode.UNKNOWN_USER,
+                        "can't find member while matching university"));
+
+        Long memberUnivId = member.getUniversity().getId();
+
+        if(boardUnivId.equals(memberUnivId)) {
+            return;
+        } else {
+            throw new AuthenticationException(AuthenticationErrorCode.INVALID_SUBMIT);
+        }
+
     }
 }

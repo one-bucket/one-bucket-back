@@ -2,6 +2,7 @@ package com.onebucket.domain.boardManage.dto.internal;
 
 import com.onebucket.domain.boardManage.dto.parents.PostDto;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 /**
@@ -21,6 +22,7 @@ import lombok.experimental.SuperBuilder;
 
 @Getter
 @SuperBuilder
+@NoArgsConstructor
 public class CreatePostDto extends PostDto {
     private String username;
 }
