@@ -77,17 +77,22 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     @Override
     @Transactional
     public void addChatMembers(String roomId, String username) {
+        if (chatRoomRepository.findByRoomId(roomId).isEmpty()) {
+            throw new RoomNotFoundException(ChatErrorCode.NOT_EXIST_ROOM);
+        }
+
         Member member = memberRepository.findByUsername(username)
                 .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
 
-        Query query = new Query(Criteria.where("roomId").is(roomId));
-        Update update = new Update().addToSet("members", ChatMemberDto.from(member.getNickname()));
+        try {
+            Query query = new Query(Criteria.where("roomId").is(roomId));
+            Update update = new Update().addToSet("members", ChatMemberDto.from(member.getNickname()));
 
-        ChatRoom updatedChatRoom = mongoTemplate.findAndModify(query, update,
-                FindAndModifyOptions.options().returnNew(true), ChatRoom.class);
-
-        if (updatedChatRoom == null) {
-            throw new RoomNotFoundException(ChatErrorCode.NOT_EXIST_ROOM);
+            mongoTemplate.findAndModify(query, update,
+                    FindAndModifyOptions.options().returnNew(true), ChatRoom.class);
+        } catch (CommonException e) {
+            // MongoDB 예외나 다른 예외 처리
+            throw new CommonException(CommonErrorCode.DATA_ACCESS_ERROR);
         }
     }
 
@@ -105,7 +110,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     @Override
     @Transactional
     public void addChatMessages(ChatMessage chatMessage) {
-        if (chatMessage.getRoomId() == null) {
+        if (chatRoomRepository.findByRoomId(chatMessage.getRoomId()).isEmpty()) {
             throw new RoomNotFoundException(ChatErrorCode.NOT_EXIST_ROOM);
         }
 
@@ -117,14 +122,9 @@ public class ChatRoomServiceImpl implements ChatRoomService {
             Update update = new Update().push("messages", chatMessage);
 
             // findAndModify를 사용하여 원자적으로 메시지를 추가하고, 업데이트된 채팅방을 반환
-            ChatRoom updatedChatRoom = mongoTemplate.findAndModify(query, update,
+            mongoTemplate.findAndModify(query, update,
                     FindAndModifyOptions.options().returnNew(true), ChatRoom.class);
-
-            // 업데이트된 채팅방이 없으면 (즉, 채팅방이 존재하지 않으면) 예외 던짐
-            if (updatedChatRoom == null) {
-                throw new RoomNotFoundException(ChatErrorCode.NOT_EXIST_ROOM);
-            }
-        } catch (Exception e) {
+        } catch (CommonException e) {
             // MongoDB 예외나 다른 예외 처리
             throw new CommonException(CommonErrorCode.DATA_ACCESS_ERROR);
         }
