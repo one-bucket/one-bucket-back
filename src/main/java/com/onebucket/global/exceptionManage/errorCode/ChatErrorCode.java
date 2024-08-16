@@ -29,14 +29,13 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum ChatErrorCode implements ErrorCode {
 
-    NOT_EXIST_TOPIC("3001",HttpStatus.NOT_FOUND,"Can't find topic"),
-    NOT_EXIST_ROOM("3002",HttpStatus.NOT_FOUND,"Can't find ChatRoom"),
-    NOT_EXIST_Directory("3003",HttpStatus.NOT_FOUND,"Can't find directory"),
-    MESSAGING_ERROR("3004", HttpStatus.INTERNAL_SERVER_ERROR, "Fail to send message"),
-    INVALID_JSON_FORMAT("3005", HttpStatus.BAD_REQUEST, "Invalid JSON format"),
-    INTERNAL_ERROR("3006", HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error"),
-    SAVE_LOG_FAILED("3007", HttpStatus.INTERNAL_SERVER_ERROR, "Save log failed"),
-    CHAT_IMAGE_ERROR("3008", HttpStatus.INTERNAL_SERVER_ERROR, "Save image failed"),
+    NOT_EXIST_ROOM("3000",HttpStatus.NOT_FOUND,"Can't find ChatRoom"),
+    MESSAGING_ERROR("3001", HttpStatus.INTERNAL_SERVER_ERROR, "Fail to send message"),
+    INVALID_JSON_FORMAT("3002", HttpStatus.BAD_REQUEST, "Invalid JSON format"),
+    CHAT_IMAGE_ERROR("3003", HttpStatus.INTERNAL_SERVER_ERROR, "Save image failed"),
+    CHAT_ROOM_FULL("3004", HttpStatus.BAD_REQUEST, "Chat room has reached the maximum number of members"),
+    NO_CHAT_ROOMS("3005", HttpStatus.BAD_REQUEST, "No chat rooms found"),
+    INTERNAL_ERROR("3099", HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error"),
     ;
 
     private final String code;
