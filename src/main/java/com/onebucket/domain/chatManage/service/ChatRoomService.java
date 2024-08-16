@@ -3,7 +3,6 @@ package com.onebucket.domain.chatManage.service;
 import com.onebucket.domain.chatManage.domain.ChatMessage;
 import com.onebucket.domain.chatManage.domain.ChatRoom;
 import com.onebucket.domain.chatManage.dto.CreateChatRoomDto;
-import org.springframework.data.redis.listener.ChannelTopic;
 
 import java.util.List;
 
@@ -30,9 +29,9 @@ import java.util.List;
  */
 public interface ChatRoomService {
     String createChatRoom(CreateChatRoomDto createChatRoomDto);
-    void enterChatRoom(String roomId,String username);
+    void addChatMembers(String roomId, String username);
     List<ChatRoom> getChatRooms();
     ChatRoom getChatRoom(String roomId);
-    void addChatMessage(ChatMessage chatMessage);
+    void addChatMessages(ChatMessage chatMessage);
     List<ChatRoom> findByMembersNickname(String nickname);
 }

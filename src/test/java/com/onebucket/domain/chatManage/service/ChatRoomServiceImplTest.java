@@ -18,11 +18,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.data.redis.listener.ChannelTopic;
@@ -68,7 +70,7 @@ class ChatRoomServiceImplTest {
     private MemberRepository memberRepository;
 
     @Mock
-    private RedisMessageListenerContainer redisMessageListener;
+    private ChatMessage mockChatMessage;
 
     @Mock
     private ChatRoom mockChatRoom;
@@ -81,7 +83,7 @@ class ChatRoomServiceImplTest {
 
     public CreateChatRoomDto getRoomDto() {
         return CreateChatRoomDto.of(
-                "room1", LocalDateTime.now(),"user1", new HashSet<>()
+                "room1", LocalDateTime.now(),"user1", new HashSet<>(),10
         );
     }
 
@@ -98,28 +100,30 @@ class ChatRoomServiceImplTest {
 
     @Test
     @DisplayName("채팅방 입장 성공")
-    void enterChatRoom_success() {
+    void addChatMembers_success() {
         String roomId = "room1";
         String username = "user1";
         Member mockMember = mock(Member.class);
         doReturn(Optional.of(mockMember)).when(memberRepository).findByUsername(username);
-        doReturn(mockChatRoom).when(mongoTemplate).findAndModify(any(Query.class), any(Update.class), any(FindAndModifyOptions.class), eq(ChatRoom.class));
+        when(mongoTemplate.findAndModify(any(Query.class), any(Update.class),
+                any(FindAndModifyOptions.class), eq(ChatRoom.class)))
+                .thenReturn(mockChatRoom);
 
-        chatRoomService.enterChatRoom(roomId,username);
+        chatRoomService.addChatMembers(roomId,username);
 
-        verify(chatRoomRepository, times(1)).findByRoomId(roomId);
         verify(memberRepository, times(1)).findByUsername(username);
-        verify(chatRoomRepository,times(1)).save(any(ChatRoom.class));
+        verify(mongoTemplate,times(1)).findAndModify(any(Query.class), any(Update.class),
+                any(FindAndModifyOptions.class), eq(ChatRoom.class));
     }
 
     @Test
     @DisplayName("채팅방 입장 실패 - 존재하지 않는 유저")
-    void EnterChatRoom_fail_UnknownUser() {
+    void addChatMembers_fail_UnknownUser() {
         String roomId = "room1";
         String username = "user1";
 
         AuthenticationException exception = assertThrows(AuthenticationException.class, () -> {
-            chatRoomService.enterChatRoom(roomId, username);
+            chatRoomService.addChatMembers(roomId, username);
         });
 
         assertEquals(AuthenticationErrorCode.UNKNOWN_USER, exception.getErrorCode());
@@ -127,14 +131,17 @@ class ChatRoomServiceImplTest {
 
     @Test
     @DisplayName("채팅방 입장 실패 - 존재하지 않는 채팅방")
-    void EnterChatRoom_fail_RoomNotFound() {
+    void addChatMembers_fail_RoomNotFound() {
         String roomId = "room1";
         String username = "user1";
         Member mockMember = mock(Member.class);
         doReturn(Optional.of(mockMember)).when(memberRepository).findByUsername(username);
+        when(mongoTemplate.findAndModify(any(Query.class), any(Update.class),
+                any(FindAndModifyOptions.class), eq(ChatRoom.class)))
+                .thenReturn(null);
 
         RoomNotFoundException exception = assertThrows(RoomNotFoundException.class, () -> {
-            chatRoomService.enterChatRoom(roomId, username);
+            chatRoomService.addChatMembers(roomId, username);
         });
 
         assertEquals(ChatErrorCode.NOT_EXIST_ROOM, exception.getErrorCode());
@@ -173,47 +180,46 @@ class ChatRoomServiceImplTest {
 
     @Test
     @DisplayName("채팅 추가 성공")
-    void addChatMessage_success() {
-        CreateChatRoomDto dto = getRoomDto();
-        when(chatRoomRepository.save(any(ChatRoom.class))).thenReturn(mockChatRoom);
-        chatRoomService.createChatRoom(dto);
+    void addChatMessages_success() {
+        when(mockChatMessage.getRoomId()).thenReturn("room1");
+        when(mongoTemplate.findAndModify(any(Query.class), any(Update.class),
+                any(FindAndModifyOptions.class), eq(ChatRoom.class)))
+                .thenReturn(mockChatRoom);
 
-        ChatMessage chatMessage = new ChatMessage();
-        when(chatMessage.getRoomId()).thenReturn("room1");
-        // 실제 메서드 호출
-        chatRoomService.addChatMessage(chatMessage);
+        chatRoomService.addChatMessages(mockChatMessage);
 
-        // Assertions: 메시지가 mockChatRoom에 추가되었는지 확인
-        assertThat(mockChatRoom.getMessages()).contains(chatMessage);
+        ArgumentCaptor<Query> queryCaptor = ArgumentCaptor.forClass(Query.class);
+        ArgumentCaptor<Update> updateCaptor = ArgumentCaptor.forClass(Update.class);
+
+        // 검증
+        verify(mongoTemplate).findAndModify(queryCaptor.capture(), updateCaptor.capture(),
+                any(FindAndModifyOptions.class), eq(ChatRoom.class));
+
+        Update capturedUpdate = updateCaptor.getValue();
+        // 검증
+        assertThat(capturedUpdate.getUpdateObject().containsKey("$push")).isTrue();
     }
 
     @Test
     @DisplayName("채팅 추가 실패 - 채팅이 null 값임")
-    void addChatMessage_fail() {
-        assertThrows(NullPointerException.class, () -> chatRoomService.addChatMessage(null));
+    void addChatMessages_fail() {
+        assertThrows(NullPointerException.class, () -> chatRoomService.addChatMessages(null));
     }
 
     @Test
     @DisplayName("채팅 추가 실패 - 메세지에 roomId가 없음")
-    void addChatMessage_fail_nullRoomId() {
-        ChatMessage mockChatMessage = mock(ChatMessage.class);
+    void addChatMessages_fail_nullRoomId() {
         when(mockChatMessage.getRoomId()).thenReturn(null);
-
-        assertThrows(RoomNotFoundException.class, () -> chatRoomService.addChatMessage(mockChatMessage));
+        assertThrows(RoomNotFoundException.class, () -> chatRoomService.addChatMessages(mockChatMessage));
     }
 
     @Test
     @DisplayName("채팅 추가 실패 - 데이터베이스 저장 문제 발생")
-    void addChatMessage_fail_databaseSaveFailure() {
-        String roomId = "room1";
-        ChatMessage mockChatMessage = mock(ChatMessage.class);
-        when(mockChatMessage.getRoomId()).thenReturn(roomId);
-
-        ChatRoom chatRoom = ChatRoom.builder()
-                .build();
-
-        doReturn(Optional.of(chatRoom)).when(chatRoomRepository).findByRoomId(roomId);
-        doThrow(new CommonException(CommonErrorCode.DATA_ACCESS_ERROR)).when(chatRoomRepository).save(chatRoom);
-        assertThrows(CommonException.class, () -> chatRoomService.addChatMessage(mockChatMessage));
+    void addChatMessages_fail_databaseSaveFailure() {
+        when(mockChatMessage.getRoomId()).thenReturn("room1");
+        when(mongoTemplate.findAndModify(any(Query.class), any(Update.class),
+                any(FindAndModifyOptions.class), eq(ChatRoom.class)))
+                .thenThrow(new CommonException(CommonErrorCode.DATA_ACCESS_ERROR));
+        assertThrows(CommonException.class, () -> chatRoomService.addChatMessages(mockChatMessage));
     }
 }

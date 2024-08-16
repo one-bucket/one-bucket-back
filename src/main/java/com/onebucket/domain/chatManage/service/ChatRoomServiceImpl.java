@@ -8,10 +8,12 @@ import com.onebucket.domain.chatManage.pubsub.RedisSubscriber;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.domain.chatManage.dto.ChatMemberDto;
+import com.onebucket.global.exceptionManage.customException.CommonException;
 import com.onebucket.global.exceptionManage.customException.chatManageException.Exceptions.RoomNotFoundException;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.ChatErrorCode;
+import com.onebucket.global.exceptionManage.errorCode.CommonErrorCode;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -60,7 +62,6 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     private final MongoTemplate mongoTemplate;
 
-
     @Override
     public String createChatRoom(CreateChatRoomDto dto) {
         ChatRoom chatRoom = ChatRoom.builder()
@@ -75,7 +76,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     @Override
     @Transactional
-    public void enterChatRoom(String roomId, String username) {
+    public void addChatMembers(String roomId, String username) {
         Member member = memberRepository.findByUsername(username)
                 .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
 
@@ -103,21 +104,32 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     @Override
     @Transactional
-    public void addChatMessage(ChatMessage chatMessage) {
-        // Find the chat room by roomId
-        Query query = new Query(Criteria.where("roomId").is(chatMessage.getRoomId()));
-
-        // Update the chat room by adding the message to the messages list
-        Update update = new Update().push("messages", chatMessage);
-
-        // Perform the atomic findAndModify operation
-        ChatRoom updatedChatRoom = mongoTemplate.findAndModify(query, update,
-                FindAndModifyOptions.options().returnNew(true), ChatRoom.class);
-
-        if (updatedChatRoom == null) {
+    public void addChatMessages(ChatMessage chatMessage) {
+        if (chatMessage.getRoomId() == null) {
             throw new RoomNotFoundException(ChatErrorCode.NOT_EXIST_ROOM);
         }
+
+        try {
+            // 채팅방을 찾고, 존재하지 않으면 예외를 던짐
+            Query query = new Query(Criteria.where("roomId").is(chatMessage.getRoomId()));
+
+            // 채팅 메시지를 추가하는 업데이트 정의
+            Update update = new Update().push("messages", chatMessage);
+
+            // findAndModify를 사용하여 원자적으로 메시지를 추가하고, 업데이트된 채팅방을 반환
+            ChatRoom updatedChatRoom = mongoTemplate.findAndModify(query, update,
+                    FindAndModifyOptions.options().returnNew(true), ChatRoom.class);
+
+            // 업데이트된 채팅방이 없으면 (즉, 채팅방이 존재하지 않으면) 예외 던짐
+            if (updatedChatRoom == null) {
+                throw new RoomNotFoundException(ChatErrorCode.NOT_EXIST_ROOM);
+            }
+        } catch (Exception e) {
+            // MongoDB 예외나 다른 예외 처리
+            throw new CommonException(CommonErrorCode.DATA_ACCESS_ERROR);
+        }
     }
+
 
     @Override
     public List<ChatRoom> findByMembersNickname(String nickname) {
