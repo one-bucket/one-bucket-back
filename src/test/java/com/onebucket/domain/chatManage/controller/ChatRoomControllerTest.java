@@ -111,7 +111,8 @@ class ChatRoomControllerTest {
                                 "room1",
                                 LocalDateTime.of(2024, 1, 1, 12, 0),
                                 "user1",
-                                members
+                                members,
+                                10
                                 )
                         ))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -173,10 +174,11 @@ class ChatRoomControllerTest {
     static Stream<CreateChatRoomDto> provideInvalidChatRoomDtos() {
         LocalDateTime time = LocalDateTime.of(2024, 1, 1, 12, 0);
         return Stream.of(
-                CreateChatRoomDto.of(null, time, "user1",new HashSet<>()),  // name is null
-                CreateChatRoomDto.of("room1", null, "user1",new HashSet<>()),  // createdAt is null
-                CreateChatRoomDto.of("room1",  time, null,new HashSet<>()), // createdBy is null
-                CreateChatRoomDto.of("room1",time,"user1",null)
+                CreateChatRoomDto.of(null, time, "user1",new HashSet<>(),10),  // name is null
+                CreateChatRoomDto.of("room1", null, "user1",new HashSet<>(),10),  // createdAt is null
+                CreateChatRoomDto.of("room1",  time, null,new HashSet<>(),10), // createdBy is null
+                CreateChatRoomDto.of("room1",time,"user1",null,10),
+                CreateChatRoomDto.of("room1",time,"user1",new HashSet<>(),null)
         );
     }
 

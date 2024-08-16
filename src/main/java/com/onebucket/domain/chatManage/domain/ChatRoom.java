@@ -1,6 +1,8 @@
 package com.onebucket.domain.chatManage.domain;
 
 import com.onebucket.domain.chatManage.dto.ChatMemberDto;
+import com.onebucket.global.exceptionManage.customException.chatManageException.Exceptions.ChatRoomFullException;
+import com.onebucket.global.exceptionManage.errorCode.ChatErrorCode;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import lombok.Builder;
@@ -49,14 +51,19 @@ public class ChatRoom  {
 
     private List<ChatMessage> messages;
 
+    private int maxMembers;
+
+    // 테스트에서만 사용. 추후 로직을 다듬을 수 있다면 삭제하는 거로.
     @Builder
-    public ChatRoom(String name, LocalDateTime createdAt, String createdBy, Set<ChatMemberDto> members) {
+    public ChatRoom(String name, LocalDateTime createdAt, String createdBy, Set<ChatMemberDto> members, int maxMembers) {
         this.name = name;
         this.createdAt = createdAt;
         this.createdBy = createdBy;
         this.members = members;
         this.messages = new ArrayList<>();
+        this.maxMembers = maxMembers;
     }
+
     public void addMember(ChatMemberDto member) {
         members.add(member);
     }

@@ -8,14 +8,11 @@ import com.onebucket.global.utils.SecurityUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 
 import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * <br>package name   : com.onebucket.domain.chatManage.controller
@@ -64,7 +61,7 @@ public class ChatRoomController {
     @GetMapping("/room/{roomId}")
     public ResponseEntity<ChatRoom> enterRoom(@PathVariable String roomId) {
         String username = securityUtils.getCurrentUsername();
-        chatRoomService.enterChatRoom(roomId,username);
+        chatRoomService.addChatMembers(roomId,username);
         ChatRoom response = chatRoomService.getChatRoom(roomId);
         return ResponseEntity.ok(response);
     }

@@ -4,9 +4,7 @@ import com.onebucket.domain.chatManage.domain.ChatMessage;
 import com.onebucket.domain.chatManage.pubsub.RedisPublisher;
 import com.onebucket.domain.chatManage.service.ChatMessageService;
 import com.onebucket.domain.chatManage.service.ChatRoomService;
-import com.onebucket.global.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Controller;
@@ -52,7 +50,7 @@ public class ChatWebSocketController {
         }
         if(ChatMessage.MessageType.TALK.equals(chatMessage.getType())) {
             chatMessageService.saveMessage(chatMessage);
-            chatRoomService.addChatMessage(chatMessage);
+            chatRoomService.addChatMessages(chatMessage);
         }
         if(ChatMessage.MessageType.LEAVE.equals(chatMessage.getType())) {
             chatMessage.setMessage(chatMessage.getSender()+"님이 퇴장하셨습니다.");
