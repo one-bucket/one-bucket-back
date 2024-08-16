@@ -21,6 +21,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.mongodb.core.FindAndModifyOptions;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -69,6 +73,9 @@ class ChatRoomServiceImplTest {
     @Mock
     private ChatRoom mockChatRoom;
 
+    @Mock
+    private MongoTemplate mongoTemplate;
+
     @InjectMocks
     private ChatRoomServiceImpl chatRoomService;
 
@@ -95,9 +102,8 @@ class ChatRoomServiceImplTest {
         String roomId = "room1";
         String username = "user1";
         Member mockMember = mock(Member.class);
-        ChatRoom mockChatRoom = mock(ChatRoom.class);
         doReturn(Optional.of(mockMember)).when(memberRepository).findByUsername(username);
-        doReturn(Optional.of(mockChatRoom)).when(chatRoomRepository).findByRoomId(roomId);
+        doReturn(mockChatRoom).when(mongoTemplate).findAndModify(any(Query.class), any(Update.class), any(FindAndModifyOptions.class), eq(ChatRoom.class));
 
         chatRoomService.enterChatRoom(roomId,username);
 
@@ -150,7 +156,6 @@ class ChatRoomServiceImplTest {
     @DisplayName("특정 채팅방 조회 성공")
     void getChatRoom_success() {
         String roomId = "room1";
-        ChatRoom mockChatRoom = mock(ChatRoom.class);
         doReturn(Optional.of(mockChatRoom)).when(chatRoomRepository).findByRoomId(roomId);
 
         assertThat(chatRoomService.getChatRoom(roomId)).isEqualTo(mockChatRoom);
@@ -169,18 +174,17 @@ class ChatRoomServiceImplTest {
     @Test
     @DisplayName("채팅 추가 성공")
     void addChatMessage_success() {
-        String roomId = "room1";
-        ChatMessage mockChatMessage = mock(ChatMessage.class);
-        // mock 객체가 아니라서 doReturn 사용하지 않는다.
-        ChatRoom chatRoom = ChatRoom.builder().build();
-        when(mockChatMessage.getRoomId()).thenReturn(roomId);
-        doReturn(Optional.of(chatRoom)).when(chatRoomRepository).findByRoomId(roomId);
+        CreateChatRoomDto dto = getRoomDto();
+        when(chatRoomRepository.save(any(ChatRoom.class))).thenReturn(mockChatRoom);
+        chatRoomService.createChatRoom(dto);
 
-        chatRoomService.addChatMessage(mockChatMessage);
+        ChatMessage chatMessage = new ChatMessage();
+        when(chatMessage.getRoomId()).thenReturn("room1");
+        // 실제 메서드 호출
+        chatRoomService.addChatMessage(chatMessage);
 
-        verify(chatRoomRepository, times(1)).findByRoomId(roomId);
-        verify(chatRoomRepository, times(1)).save(chatRoom);
-        assertTrue(chatRoom.getMessages().contains(mockChatMessage));
+        // Assertions: 메시지가 mockChatRoom에 추가되었는지 확인
+        assertThat(mockChatRoom.getMessages()).contains(chatMessage);
     }
 
     @Test

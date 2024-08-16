@@ -15,9 +15,15 @@ import com.onebucket.global.exceptionManage.errorCode.ChatErrorCode;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.mongodb.core.FindAndModifyOptions;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -52,6 +58,8 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     private final ChatRoomRepository chatRoomRepository;
 
+    private final MongoTemplate mongoTemplate;
+
 
     @Override
     public String createChatRoom(CreateChatRoomDto dto) {
@@ -66,13 +74,20 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
-    public void enterChatRoom(String roomId,String username) {
+    @Transactional
+    public void enterChatRoom(String roomId, String username) {
         Member member = memberRepository.findByUsername(username)
                 .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
-        ChatRoom chatRoom = chatRoomRepository.findByRoomId(roomId).orElseThrow(
-                () -> new RoomNotFoundException(ChatErrorCode.NOT_EXIST_ROOM));
-        chatRoom.addMember(ChatMemberDto.from(member.getNickname()));
-        chatRoomRepository.save(chatRoom);
+
+        Query query = new Query(Criteria.where("roomId").is(roomId));
+        Update update = new Update().addToSet("members", ChatMemberDto.from(member.getNickname()));
+
+        ChatRoom updatedChatRoom = mongoTemplate.findAndModify(query, update,
+                FindAndModifyOptions.options().returnNew(true), ChatRoom.class);
+
+        if (updatedChatRoom == null) {
+            throw new RoomNotFoundException(ChatErrorCode.NOT_EXIST_ROOM);
+        }
     }
 
     @Override
@@ -87,11 +102,21 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
+    @Transactional
     public void addChatMessage(ChatMessage chatMessage) {
-        ChatRoom chatRoom = chatRoomRepository.findByRoomId(chatMessage.getRoomId()).orElseThrow(
-                () -> new RoomNotFoundException(ChatErrorCode.NOT_EXIST_ROOM));
-        chatRoom.addMessage(chatMessage);
-        chatRoomRepository.save(chatRoom);
+        // Find the chat room by roomId
+        Query query = new Query(Criteria.where("roomId").is(chatMessage.getRoomId()));
+
+        // Update the chat room by adding the message to the messages list
+        Update update = new Update().push("messages", chatMessage);
+
+        // Perform the atomic findAndModify operation
+        ChatRoom updatedChatRoom = mongoTemplate.findAndModify(query, update,
+                FindAndModifyOptions.options().returnNew(true), ChatRoom.class);
+
+        if (updatedChatRoom == null) {
+            throw new RoomNotFoundException(ChatErrorCode.NOT_EXIST_ROOM);
+        }
     }
 
     @Override
