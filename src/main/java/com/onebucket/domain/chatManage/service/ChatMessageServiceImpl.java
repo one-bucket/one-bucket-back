@@ -1,8 +1,11 @@
 package com.onebucket.domain.chatManage.service;
 
 import com.onebucket.domain.chatManage.dao.ChatMessageRepository;
+import com.onebucket.domain.chatManage.dao.ChatRoomRepository;
 import com.onebucket.domain.chatManage.domain.ChatMessage;
+import com.onebucket.domain.chatManage.domain.ChatRoom;
 import com.onebucket.global.exceptionManage.customException.chatManageException.ChatManageException;
+import com.onebucket.global.exceptionManage.customException.chatManageException.Exceptions.ChatRoomException;
 import com.onebucket.global.exceptionManage.errorCode.ChatErrorCode;
 import com.onebucket.global.minio.MinioRepository;
 import com.onebucket.global.minio.MinioSaveInfoDto;
@@ -40,6 +43,7 @@ import java.util.List;
 public class ChatMessageServiceImpl implements ChatMessageService {
 
     private final ChatMessageRepository chatMessageRepository;
+    private final ChatRoomRepository chatRoomRepository;
     private final MinioRepository minioRepository;
 
     @Value("${minio.bucketName}")
@@ -48,15 +52,17 @@ public class ChatMessageServiceImpl implements ChatMessageService {
     @Value("${minio.minio_url}")
     private String endpointUrl;
 
-    @Override
-    public void saveMessage(ChatMessage chatMessage) {
-        chatMessageRepository.save(chatMessage);
-    }
+//    @Override
+//    public void saveMessage(ChatMessage chatMessage) {
+//        chatMessageRepository.save(chatMessage);
+//    }
 
     @Override
     @Transactional(readOnly = true)
     public List<ChatMessage> getChatMessages(String roomId) {
-        return chatMessageRepository.findByRoomIdOrderByCreatedAtDesc(roomId);
+        ChatRoom chatRoom = chatRoomRepository.findByRoomId(roomId)
+                .orElseThrow(() -> new ChatRoomException(ChatErrorCode.NO_CHAT_ROOMS));
+        return chatRoom.getMessages();
     }
 
     @Override

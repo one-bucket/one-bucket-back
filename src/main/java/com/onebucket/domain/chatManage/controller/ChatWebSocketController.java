@@ -49,7 +49,7 @@ public class ChatWebSocketController {
             chatMessage.setMessage(chatMessage.getSender()+"님이 입장하셨습니다.");
         }
         if(ChatMessage.MessageType.TALK.equals(chatMessage.getType())) {
-            chatMessageService.saveMessage(chatMessage);
+            // chatMessageService.saveMessage(chatMessage);
             chatRoomService.addChatMessages(chatMessage);
         }
         if(ChatMessage.MessageType.LEAVE.equals(chatMessage.getType())) {

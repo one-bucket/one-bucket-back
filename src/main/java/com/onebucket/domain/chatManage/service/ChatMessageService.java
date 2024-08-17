@@ -27,7 +27,7 @@ import java.util.List;
  * </pre>
  */
 public interface ChatMessageService {
-    void saveMessage(ChatMessage chatMessage);
+    // void saveMessage(ChatMessage chatMessage);
     List<ChatMessage> getChatMessages(String roomId);
     String uploadChatImage(MultipartFile file, String username);
 }
