@@ -1,7 +1,6 @@
 package com.onebucket.domain.chatManage.dao;
 
 import com.onebucket.domain.chatManage.domain.ChatRoom;
-import com.onebucket.global.exceptionManage.customException.chatManageException.Exceptions.RoomNotFoundException;
 import com.onebucket.global.exceptionManage.errorCode.ChatErrorCode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
