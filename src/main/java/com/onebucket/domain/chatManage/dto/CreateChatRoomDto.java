@@ -40,9 +40,6 @@ public record CreateChatRoomDto(
         ) {
 
     public static CreateChatRoomDto of(String name, LocalDateTime createdAt, String createdBy, Set<ChatMemberDto> members, Integer maxMembers) {
-        if (members == null || members.size() > maxMembers) {
-            throw new ChatRoomException(ChatErrorCode.MAX_MEMBERS_EXCEEDED,"Max members exceeded");
-        }
         return new CreateChatRoomDto(name, createdAt, createdBy, members, maxMembers);
     }
 }

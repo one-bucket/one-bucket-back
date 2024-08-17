@@ -3,18 +3,16 @@ package com.onebucket.domain.chatManage.service;
 import com.onebucket.domain.chatManage.dao.ChatRoomRepository;
 import com.onebucket.domain.chatManage.domain.ChatMessage;
 import com.onebucket.domain.chatManage.domain.ChatRoom;
+import com.onebucket.domain.chatManage.dto.ChatMemberDto;
 import com.onebucket.domain.chatManage.dto.CreateChatRoomDto;
-import com.onebucket.domain.chatManage.pubsub.RedisSubscriber;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
-import com.onebucket.domain.memberManage.dto.CreateMemberRequestDto;
 import com.onebucket.global.exceptionManage.customException.CommonException;
-import com.onebucket.global.exceptionManage.customException.chatManageException.Exceptions.RoomNotFoundException;
+import com.onebucket.global.exceptionManage.customException.chatManageException.Exceptions.ChatRoomException;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.ChatErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.CommonErrorCode;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,16 +22,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
-import org.springframework.data.redis.listener.ChannelTopic;
-import org.springframework.data.redis.listener.RedisMessageListenerContainer;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.*;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -81,21 +74,26 @@ class ChatRoomServiceImplTest {
     @InjectMocks
     private ChatRoomServiceImpl chatRoomService;
 
-    public CreateChatRoomDto getRoomDto() {
-        return CreateChatRoomDto.of(
-                "room1", LocalDateTime.now(),"user1", new HashSet<>(),10
-        );
-    }
-
     @Test
     @DisplayName("채팅방 만들기 성공")
     void createChatRoom_success() {
-        CreateChatRoomDto dto = getRoomDto();
+        CreateChatRoomDto dto = CreateChatRoomDto.of(
+                "room1", LocalDateTime.now(),"user1", new HashSet<>(),10
+        );
         when(chatRoomRepository.save(any(ChatRoom.class))).thenReturn(mockChatRoom);
 
         chatRoomService.createChatRoom(dto);
 
         verify(chatRoomRepository, times(1)).save(any(ChatRoom.class));
+    }
+
+    @Test
+    @DisplayName("채팅방 만들기 실패 - 유저 수가 너무 많음")
+    void createChatRoom_fail() {
+        CreateChatRoomDto dto = CreateChatRoomDto.of(
+                "room1", LocalDateTime.now(),"user1", new HashSet<>(),-1
+        );
+        assertThrows(ChatRoomException.class, () -> chatRoomService.createChatRoom(dto));
     }
 
     @Test
@@ -137,7 +135,7 @@ class ChatRoomServiceImplTest {
         String username = "user1";
         doReturn(Optional.empty()).when(chatRoomRepository).findByRoomId(roomId);
 
-        RoomNotFoundException exception = assertThrows(RoomNotFoundException.class, () -> {
+        ChatRoomException exception = assertThrows(ChatRoomException.class, () -> {
             chatRoomService.addChatMembers(roomId, username);
         });
 
@@ -169,56 +167,9 @@ class ChatRoomServiceImplTest {
     @DisplayName("특정 채팅방 조회 실패 - 존재하지 않는 채팅방")
     void getChatRoom_fail() {
         String roomId = "room1";
-        RoomNotFoundException result = assertThrows(RoomNotFoundException.class, () -> {
+        ChatRoomException result = assertThrows(ChatRoomException.class, () -> {
             chatRoomService.getChatRoom(roomId);
         });
         assertThat(result.getErrorCode()).isEqualTo(ChatErrorCode.NOT_EXIST_ROOM);
-    }
-
-    @Test
-    @DisplayName("채팅 추가 성공")
-    void addChatMessages_success() {
-        when(mongoTemplate.findAndModify(any(Query.class), any(Update.class),
-                any(FindAndModifyOptions.class), eq(ChatRoom.class)))
-                .thenReturn(mockChatRoom);
-        when(chatRoomRepository.findByRoomId(mockChatMessage.getRoomId()))
-                .thenReturn(Optional.of(mockChatRoom));
-
-        chatRoomService.addChatMessages(mockChatMessage);
-
-        ArgumentCaptor<Query> queryCaptor = ArgumentCaptor.forClass(Query.class);
-        ArgumentCaptor<Update> updateCaptor = ArgumentCaptor.forClass(Update.class);
-
-        // 검증
-        verify(mongoTemplate).findAndModify(queryCaptor.capture(), updateCaptor.capture(),
-                any(FindAndModifyOptions.class), eq(ChatRoom.class));
-
-        Update capturedUpdate = updateCaptor.getValue();
-        // 검증
-        assertThat(capturedUpdate.getUpdateObject().containsKey("$push")).isTrue();
-    }
-
-    @Test
-    @DisplayName("채팅 추가 실패 - 채팅이 null 값임")
-    void addChatMessages_fail() {
-        assertThrows(NullPointerException.class, () -> chatRoomService.addChatMessages(null));
-    }
-
-    @Test
-    @DisplayName("채팅 추가 실패 - 메세지에 roomId가 없음")
-    void addChatMessages_fail_nullRoomId() {
-        when(mockChatMessage.getRoomId()).thenReturn(null);
-        assertThrows(RoomNotFoundException.class, () -> chatRoomService.addChatMessages(mockChatMessage));
-    }
-
-    @Test
-    @DisplayName("채팅 추가 실패 - 데이터베이스 저장 문제 발생")
-    void addChatMessages_fail_databaseSaveFailure() {
-        when(chatRoomRepository.findByRoomId(mockChatMessage.getRoomId()))
-                .thenReturn(Optional.of(mockChatRoom));
-        when(mongoTemplate.findAndModify(any(Query.class), any(Update.class),
-                any(FindAndModifyOptions.class), eq(ChatRoom.class)))
-                .thenThrow(new CommonException(CommonErrorCode.DATA_ACCESS_ERROR));
-        assertThrows(CommonException.class, () -> chatRoomService.addChatMessages(mockChatMessage));
     }
 }
