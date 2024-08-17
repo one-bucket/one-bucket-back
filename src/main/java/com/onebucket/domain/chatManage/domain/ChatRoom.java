@@ -1,8 +1,6 @@
 package com.onebucket.domain.chatManage.domain;
 
 import com.onebucket.domain.chatManage.dto.ChatMemberDto;
-import com.onebucket.global.exceptionManage.customException.chatManageException.Exceptions.ChatRoomFullException;
-import com.onebucket.global.exceptionManage.errorCode.ChatErrorCode;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import lombok.Builder;
@@ -62,13 +60,5 @@ public class ChatRoom  {
         this.members = members;
         this.messages = new ArrayList<>();
         this.maxMembers = maxMembers;
-    }
-
-    public void addMember(ChatMemberDto member) {
-        members.add(member);
-    }
-
-    public void addMessage(ChatMessage message) {
-        messages.add(message);
     }
 }
