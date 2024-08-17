@@ -35,6 +35,8 @@ public enum ChatErrorCode implements ErrorCode {
     CHAT_IMAGE_ERROR("3003", HttpStatus.INTERNAL_SERVER_ERROR, "Save image failed"),
     CHAT_ROOM_FULL("3004", HttpStatus.BAD_REQUEST, "Chat room has reached the maximum number of members"),
     NO_CHAT_ROOMS("3005", HttpStatus.BAD_REQUEST, "No chat rooms found"),
+    MAX_MEMBERS_EXCEEDED("3006", HttpStatus.BAD_REQUEST, "Max members exceeded"),
+
     INTERNAL_ERROR("3099", HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error"),
     ;
 

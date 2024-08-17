@@ -5,9 +5,9 @@ import com.onebucket.global.exceptionManage.errorCode.ChatErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.ErrorCode;
 
 /**
- * <br>package name   : com.onebucket.global.exceptionManage.customException.chatManageException.Exceptions
- * <br>file name      : ChatRoomFullException
- * <br>date           : 2024-08-12
+ * <br>package name   : com.onebucket.global.exceptionManage.customException.chatManageException
+ * <br>file name      : RoomNotFoundException
+ * <br>date           : 2024-07-08
  * <pre>
  * <span style="color: white;">[description]</span>
  *
@@ -22,11 +22,11 @@ import com.onebucket.global.exceptionManage.errorCode.ErrorCode;
  * =======================================================
  * DATE           AUTHOR               NOTE
  * -------------------------------------------------------
- * 2024-08-12        SeungHoon              init create
+ * 2024-07-08        SeungHoon              init create
  * </pre>
  */
-public class ChatRoomFullException extends ChatManageException {
-    public ChatRoomFullException(ChatErrorCode chatErrorCode) {super(chatErrorCode);}
+public class ChatRoomException extends ChatManageException {
+    public ChatRoomException(ChatErrorCode chatErrorCode) {super(chatErrorCode);}
 
-    public ChatRoomFullException(ErrorCode errorCode, String message) {super(errorCode,message);}
+    public ChatRoomException(ErrorCode errorCode, String message) {super(errorCode,message);}
 }

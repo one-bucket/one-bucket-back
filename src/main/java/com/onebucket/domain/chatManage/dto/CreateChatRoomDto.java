@@ -1,5 +1,7 @@
 package com.onebucket.domain.chatManage.dto;
 
+import com.onebucket.global.exceptionManage.customException.chatManageException.Exceptions.ChatRoomException;
+import com.onebucket.global.exceptionManage.errorCode.ChatErrorCode;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -38,6 +40,9 @@ public record CreateChatRoomDto(
         ) {
 
     public static CreateChatRoomDto of(String name, LocalDateTime createdAt, String createdBy, Set<ChatMemberDto> members, Integer maxMembers) {
+        if (members == null || members.size() > maxMembers) {
+            throw new ChatRoomException(ChatErrorCode.MAX_MEMBERS_EXCEEDED,"Max members exceeded");
+        }
         return new CreateChatRoomDto(name, createdAt, createdBy, members, maxMembers);
     }
 }
