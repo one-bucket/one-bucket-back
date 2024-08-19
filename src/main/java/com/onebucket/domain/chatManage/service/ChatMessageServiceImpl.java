@@ -61,7 +61,7 @@ public class ChatMessageServiceImpl implements ChatMessageService {
     @Transactional(readOnly = true)
     public List<ChatMessage> getChatMessages(String roomId) {
         ChatRoom chatRoom = chatRoomRepository.findByRoomId(roomId)
-                .orElseThrow(() -> new ChatRoomException(ChatErrorCode.NO_CHAT_ROOMS));
+                .orElseThrow(() -> new ChatRoomException(ChatErrorCode.NOT_EXIST_ROOM));
         return chatRoom.getMessages();
     }
 

@@ -34,12 +34,14 @@ public enum ChatErrorCode implements ErrorCode {
     INVALID_JSON_FORMAT("3002", HttpStatus.BAD_REQUEST, "Invalid JSON format"),
     CHAT_IMAGE_ERROR("3003", HttpStatus.INTERNAL_SERVER_ERROR, "Save image failed"),
     CHAT_ROOM_FULL("3004", HttpStatus.BAD_REQUEST, "Chat room has reached the maximum number of members"),
-    NO_CHAT_ROOMS("3005", HttpStatus.BAD_REQUEST, "No chat rooms found"),
-    MAX_MEMBERS_EXCEEDED("3006", HttpStatus.BAD_REQUEST, "Max members exceeded"),
+    MAX_MEMBERS_EXCEEDED("3005", HttpStatus.BAD_REQUEST, "Max members exceeded"),
+    USER_NOT_CREATOR("3006", HttpStatus.BAD_REQUEST, "User is not creator"),
+    USER_NOT_IN_ROOM("3007", HttpStatus.BAD_REQUEST, "User is not in room"),
+
 
     INTERNAL_ERROR("3099", HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error"),
-    ;
 
+    ;
     private final String code;
     private final HttpStatus httpStatus;
     private final String message;
