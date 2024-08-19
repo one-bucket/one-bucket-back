@@ -29,7 +29,8 @@ import java.util.List;
  */
 public interface ChatRoomService {
     String createChatRoom(CreateChatRoomDto createChatRoomDto);
-    void addChatMembers(String roomId, String username);
+    ChatRoom addChatMembers(String roomId, String username);
+    ChatRoom removeChatMember(String roomId, String username);
     List<ChatRoom> getChatRooms();
     ChatRoom getChatRoom(String roomId);
     void addChatMessages(ChatMessage chatMessage);

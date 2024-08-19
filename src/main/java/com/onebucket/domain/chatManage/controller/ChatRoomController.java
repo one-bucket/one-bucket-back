@@ -61,8 +61,14 @@ public class ChatRoomController {
     @GetMapping("/room/{roomId}")
     public ResponseEntity<ChatRoom> enterRoom(@PathVariable String roomId) {
         String username = securityUtils.getCurrentUsername();
-        chatRoomService.addChatMembers(roomId,username);
-        ChatRoom response = chatRoomService.getChatRoom(roomId);
+        ChatRoom response = chatRoomService.addChatMembers(roomId, username);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/room/{roomId}")
+    public ResponseEntity<ChatRoom> leaveRoom(@PathVariable String roomId) {
+        String username = securityUtils.getCurrentUsername();
+        ChatRoom response = chatRoomService.removeChatMember(roomId, username);
         return ResponseEntity.ok(response);
     }
 
