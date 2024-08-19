@@ -9,6 +9,7 @@ import com.onebucket.domain.chatManage.service.ChatRoomService;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import com.onebucket.global.exceptionManage.exceptionHandler.BaseExceptionHandler;
+import com.onebucket.global.exceptionManage.exceptionHandler.ChatExceptionHandler;
 import com.onebucket.global.exceptionManage.exceptionHandler.DataExceptionHandler;
 import com.onebucket.global.utils.SecurityUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -78,7 +79,7 @@ class ChatRoomControllerTest {
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         mockMvc = MockMvcBuilders.standaloneSetup(chatRoomController)
-                .setControllerAdvice(new BaseExceptionHandler(), new DataExceptionHandler())
+                .setControllerAdvice(new BaseExceptionHandler(), new DataExceptionHandler(),new ChatExceptionHandler())
                 .build();
     }
 
@@ -140,12 +141,11 @@ class ChatRoomControllerTest {
     void enterRoom_success() throws Exception {
         String username = "user1";
         String roomId = "room1";
-        final String url = "/chat/room/" + roomId;
+        final String url = "/chat/room/" + roomId + "/enter";
         doReturn(username).when(securityUtils).getCurrentUsername();
-        doReturn(ChatRoom.builder().build()).when(chatRoomService).getChatRoom(roomId);
 
         final ResultActions resultActions = mockMvc.perform(
-                get(url)
+                post(url)
         );
 
         resultActions.andExpect(status().isOk());
@@ -160,10 +160,76 @@ class ChatRoomControllerTest {
         when(securityUtils.getCurrentUsername()).thenThrow(exception);
 
         String roomId = "room1";
+        final String url = "/chat/room/" + roomId + "/enter";
+
+        final ResultActions resultActions = mockMvc.perform(
+                post(url)
+        );
+
+        resultActions.andExpect(hasStatus(code))
+                .andExpect(hasKey(code, internalMessage));
+    }
+
+    @Test
+    @DisplayName("채팅방에서 나가기 성공")
+    void leaveRoom_success() throws Exception {
+        String username = "user1";
+        String roomId = "room1";
+        final String url = "/chat/room/" + roomId + "/leave";
+        doReturn(username).when(securityUtils).getCurrentUsername();
+
+        final ResultActions resultActions = mockMvc.perform(
+                delete(url)
+        );
+
+        resultActions.andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("채팅방에서 나가기 실패 - not exist authentication in token while getCurrentUsername")
+    void leaveRoom_fail() throws Exception {
+        String internalMessage = "Not exist authentication in ContextHolder";
+        AuthenticationErrorCode code = AuthenticationErrorCode.NON_EXIST_AUTHENTICATION;
+        AuthenticationException exception = new AuthenticationException(code, internalMessage);
+        when(securityUtils.getCurrentUsername()).thenThrow(exception);
+        String roomId = "room1";
+        final String url = "/chat/room/" + roomId + "/leave";
+
+        final ResultActions resultActions = mockMvc.perform(
+                delete(url)
+        );
+
+        resultActions.andExpect(hasStatus(code))
+                .andExpect(hasKey(code, internalMessage));
+    }
+
+    @Test
+    @DisplayName("채팅방 삭제 성공")
+    void deleteRoom_success() throws Exception {
+        String roomId = "room1";
+        String username = "user1";
+        doReturn(username).when(securityUtils).getCurrentUsername();
+
+        final String url = "/chat/room/" + roomId;
+        final ResultActions resultActions = mockMvc.perform(
+                delete(url)
+        );
+
+        resultActions.andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("채팅방 삭제 실패 - not exist authentication in token while getCurrentUsername")
+    void deleteRoom_fail() throws Exception {
+        String internalMessage = "Not exist authentication in ContextHolder";
+        AuthenticationErrorCode code = AuthenticationErrorCode.NON_EXIST_AUTHENTICATION;
+        AuthenticationException exception = new AuthenticationException(code, internalMessage);
+        when(securityUtils.getCurrentUsername()).thenThrow(exception);
+        String roomId = "room1";
         final String url = "/chat/room/" + roomId;
 
         final ResultActions resultActions = mockMvc.perform(
-                get(url)
+                delete(url)
         );
 
         resultActions.andExpect(hasStatus(code))

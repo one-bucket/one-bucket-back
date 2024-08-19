@@ -82,7 +82,8 @@ public class ChatRoomController {
 
     @DeleteMapping("/room/{roomId}")
     public ResponseEntity<Void> deleteRoom(@PathVariable String roomId) {
-        chatRoomService.deleteChatRoom(roomId);
+        String username = securityUtils.getCurrentUsername();
+        chatRoomService.deleteChatRoom(roomId,username);
         return ResponseEntity.ok().build();
     }
 }
