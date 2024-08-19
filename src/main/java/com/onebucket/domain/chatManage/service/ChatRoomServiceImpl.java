@@ -62,12 +62,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         if(dto.members().size() > dto.maxMembers()) {
             throw new ChatRoomException(ChatErrorCode.MAX_MEMBERS_EXCEEDED,"채팅방 인원수가 너무 많습니다.");
         }
-        ChatRoom chatRoom = ChatRoom.builder()
-                .name(dto.name())
-                .createdBy(dto.createdBy())
-                .createdAt(dto.createdAt())
-                .members(dto.members())
-                .build();
+        ChatRoom chatRoom = ChatRoom.create(dto);
         ChatRoom savedChatRoom = chatRoomRepository.save(chatRoom);
         return savedChatRoom.getRoomId();
     }
@@ -133,6 +128,12 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         return memberRepository.existsByNickname(nickname)
                 ? chatRoomRepository.findByMembersNickname(nickname)
                 : Collections.emptyList();
+    }
+
+    @Override
+    public void deleteChatRoom(String roomId) {
+        Query query = new Query(Criteria.where("roomId").is(roomId));
+        mongoTemplate.remove(query, ChatRoom.class);
     }
 }
 

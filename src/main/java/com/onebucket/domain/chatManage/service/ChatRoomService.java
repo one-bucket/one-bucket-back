@@ -34,4 +34,5 @@ public interface ChatRoomService {
     ChatRoom getChatRoom(String roomId);
     void addChatMessages(ChatMessage chatMessage);
     List<ChatRoom> findByMembersNickname(String nickname);
+    void deleteChatRoom(String roomId);
 }

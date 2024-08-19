@@ -72,4 +72,10 @@ public class ChatRoomController {
         List<ChatRoom> response = chatRoomService.findByMembersNickname(nickname);
         return ResponseEntity.ok(response);
     }
+
+    @DeleteMapping("/room/{roomId}")
+    public ResponseEntity<Void> deleteRoom(@PathVariable String roomId) {
+        chatRoomService.deleteChatRoom(roomId);
+        return ResponseEntity.ok().build();
+    }
 }
