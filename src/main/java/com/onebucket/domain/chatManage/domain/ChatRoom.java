@@ -1,6 +1,7 @@
 package com.onebucket.domain.chatManage.domain;
 
 import com.onebucket.domain.chatManage.dto.ChatMemberDto;
+import com.onebucket.domain.chatManage.dto.CreateChatRoomDto;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import lombok.Builder;
@@ -51,7 +52,6 @@ public class ChatRoom  {
 
     private int maxMembers;
 
-    // 테스트에서만 사용. 추후 로직을 다듬을 수 있다면 삭제하는 거로.
     @Builder
     public ChatRoom(String name, LocalDateTime createdAt, String createdBy, Set<ChatMemberDto> members, int maxMembers) {
         this.name = name;
@@ -60,5 +60,14 @@ public class ChatRoom  {
         this.members = members;
         this.messages = new ArrayList<>();
         this.maxMembers = maxMembers;
+    }
+
+    public static ChatRoom create(CreateChatRoomDto dto) {
+        return ChatRoom.builder()
+                .name(dto.name())
+                .createdBy(dto.createdBy())
+                .createdAt(dto.createdAt())
+                .members(dto.members())
+                .build();
     }
 }
