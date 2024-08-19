@@ -59,9 +59,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     @Override
     public String createChatRoom(CreateChatRoomDto dto) {
-        if(dto.members().size() > dto.maxMembers()) {
-            throw new ChatRoomException(ChatErrorCode.MAX_MEMBERS_EXCEEDED,"채팅방 인원수가 너무 많습니다.");
-        }
+        validateCreateChatRoom(dto);
         ChatRoom chatRoom = ChatRoom.create(dto);
         ChatRoom savedChatRoom = chatRoomRepository.save(chatRoom);
         return savedChatRoom.getRoomId();
@@ -79,9 +77,8 @@ public class ChatRoomServiceImpl implements ChatRoomService {
             Query query = new Query(Criteria.where("roomId").is(roomId));
             Update update = new Update().addToSet("members", ChatMemberDto.from(member.getNickname()));
 
-            ChatRoom chatRoom = mongoTemplate.findAndModify(query, update,
+            return mongoTemplate.findAndModify(query, update,
                     FindAndModifyOptions.options().returnNew(true), ChatRoom.class);
-            return chatRoom;
         } catch (CommonException e) {
             // MongoDB 예외나 다른 예외 처리
             throw new CommonException(CommonErrorCode.DATA_ACCESS_ERROR);
@@ -103,10 +100,9 @@ public class ChatRoomServiceImpl implements ChatRoomService {
             Update update = new Update().pull("members", ChatMemberDto.from(member.getNickname()));
 
             // findAndModify로 members에서 해당 유저를 제거
-            ChatRoom chatRoom = mongoTemplate.findAndModify(query, update,
-                    FindAndModifyOptions.options().returnNew(true), ChatRoom.class);
 
-            return chatRoom;
+            return mongoTemplate.findAndModify(query, update,
+                    FindAndModifyOptions.options().returnNew(true), ChatRoom.class);
         } catch (CommonException e) {
             // MongoDB 예외나 다른 예외 처리
             throw new CommonException(CommonErrorCode.DATA_ACCESS_ERROR);
@@ -127,9 +123,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     @Override
     @Transactional
     public void addChatMessages(ChatMessage chatMessage) {
-        if (chatRoomRepository.findByRoomId(chatMessage.getRoomId()).isEmpty()) {
-            throw new ChatRoomException(ChatErrorCode.NOT_EXIST_ROOM);
-        }
+        validateChatRoomExists(chatMessage.getRoomId());
 
         try {
             // 채팅방을 찾고, 존재하지 않으면 예외를 던짐
@@ -165,6 +159,13 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         if (chatRoomRepository.findByRoomId(roomId).isEmpty()) {
             throw new ChatRoomException(ChatErrorCode.NOT_EXIST_ROOM, "존재하지 않는 채팅방입니다.");
         }
+    }
+
+    private static void validateCreateChatRoom(CreateChatRoomDto dto) {
+        if(dto.members().size() > dto.maxMembers()) {
+            throw new ChatRoomException(ChatErrorCode.MAX_MEMBERS_EXCEEDED,"채팅방 인원수가 너무 많습니다.");
+        }
+        // 채팅방을 만든 사람이 유저 목록에 없거나.. 이런 예외 상황도 처리를 해줘야 할까?
     }
 }
 

@@ -58,14 +58,15 @@ public class ChatRoomController {
     }
 
     // 특정 채팅방에 입장하기
-    @GetMapping("/room/{roomId}")
+    @PostMapping("/room/{roomId}/enter")
     public ResponseEntity<ChatRoom> enterRoom(@PathVariable String roomId) {
         String username = securityUtils.getCurrentUsername();
         ChatRoom response = chatRoomService.addChatMembers(roomId, username);
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/room/{roomId}")
+    // 특정 채팅방에서 나가기
+    @DeleteMapping("/room/{roomId}/leave")
     public ResponseEntity<ChatRoom> leaveRoom(@PathVariable String roomId) {
         String username = securityUtils.getCurrentUsername();
         ChatRoom response = chatRoomService.removeChatMember(roomId, username);
