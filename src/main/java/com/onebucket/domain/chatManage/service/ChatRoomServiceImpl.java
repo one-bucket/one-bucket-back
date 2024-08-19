@@ -13,6 +13,7 @@ import com.onebucket.global.exceptionManage.customException.memberManageExceptoi
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.ChatErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.CommonErrorCode;
+import com.onebucket.global.utils.ChatRoomValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
@@ -57,9 +58,11 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     private final MongoTemplate mongoTemplate;
 
+    private final ChatRoomValidator chatRoomValidator;
+
     @Override
     public String createChatRoom(CreateChatRoomDto dto) {
-        validateCreateChatRoom(dto);
+        chatRoomValidator.validateCreateChatRoom(dto);
         ChatRoom chatRoom = ChatRoom.create(dto);
         ChatRoom savedChatRoom = chatRoomRepository.save(chatRoom);
         return savedChatRoom.getRoomId();
@@ -68,7 +71,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     @Override
     @Transactional
     public ChatRoom addChatMembers(String roomId, String username) {
-        validateChatRoomExists(roomId);
+        chatRoomValidator.validateChatRoomExists(roomId);
 
         Member member = memberRepository.findByUsername(username)
                 .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
@@ -88,11 +91,14 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     @Override
     @Transactional
     public ChatRoom removeChatMember(String roomId, String username) {
-        validateChatRoomExists(roomId);
+        ChatRoom chatRoom = chatRoomRepository.findByRoomId(roomId)
+                .orElseThrow(() -> new ChatRoomException(ChatErrorCode.NOT_EXIST_ROOM));
 
         // 유저 존재 여부 확인
         Member member = memberRepository.findByUsername(username)
                 .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
+
+        chatRoomValidator.validateMemberInChatRoom(chatRoom,member);
 
         try {
             // Query를 통해 roomId와 일치하는 채팅방을 찾고, members 배열에서 해당 유저를 제거
@@ -123,7 +129,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     @Override
     @Transactional
     public void addChatMessages(ChatMessage chatMessage) {
-        validateChatRoomExists(chatMessage.getRoomId());
+        chatRoomValidator.validateChatRoomExists(chatMessage.getRoomId());
 
         try {
             // 채팅방을 찾고, 존재하지 않으면 예외를 던짐
@@ -150,22 +156,18 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
-    public void deleteChatRoom(String roomId) {
-        Query query = new Query(Criteria.where("roomId").is(roomId));
+    public void deleteChatRoom(String roomId,String username) {
+        chatRoomValidator.validateChatRoomExists(roomId);
+
+        ChatRoom chatRoom = chatRoomRepository.findByRoomId(roomId).orElseThrow(
+                () -> new ChatRoomException(ChatErrorCode.NOT_EXIST_ROOM));
+
+        chatRoomValidator.validateChatRoomCreator(username,chatRoom.getCreatedBy());
+
+        Query query = new Query(Criteria.where("roomId").is(roomId)
+                .and("createdBy").is(username));
+
         mongoTemplate.remove(query, ChatRoom.class);
-    }
-
-    private void validateChatRoomExists(String roomId) {
-        if (chatRoomRepository.findByRoomId(roomId).isEmpty()) {
-            throw new ChatRoomException(ChatErrorCode.NOT_EXIST_ROOM, "존재하지 않는 채팅방입니다.");
-        }
-    }
-
-    private static void validateCreateChatRoom(CreateChatRoomDto dto) {
-        if(dto.members().size() > dto.maxMembers()) {
-            throw new ChatRoomException(ChatErrorCode.MAX_MEMBERS_EXCEEDED,"채팅방 인원수가 너무 많습니다.");
-        }
-        // 채팅방을 만든 사람이 유저 목록에 없거나.. 이런 예외 상황도 처리를 해줘야 할까?
     }
 }
 
