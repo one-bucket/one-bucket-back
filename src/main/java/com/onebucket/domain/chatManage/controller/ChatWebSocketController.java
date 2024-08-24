@@ -17,7 +17,7 @@ import java.io.IOException;
  * <br>date           : 2024-08-02
  * <pre>
  * <span style="color: white;">[description]</span>
- *
+ * ChatMessage 객체에 roomId을 포함시켜서 MessageMapping 경로를 단순하게 만들었다.
  * </pre>
  * <pre>
  * <span style="color: white;">usage:</span>

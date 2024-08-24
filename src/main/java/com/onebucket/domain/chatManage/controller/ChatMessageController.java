@@ -58,7 +58,7 @@ public class ChatMessageController {
      * @param file 저장할 이미지
      * @return file 접근 경로
      */
-    @PostMapping("/files")
+    @PostMapping("/messages/files")
     public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
         String username = securityUtils.getCurrentUsername();
         String response = chatMessageService.uploadChatImage(file,username);
