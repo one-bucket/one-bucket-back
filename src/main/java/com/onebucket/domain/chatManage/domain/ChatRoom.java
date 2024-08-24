@@ -68,6 +68,7 @@ public class ChatRoom  {
                 .createdBy(dto.createdBy())
                 .createdAt(dto.createdAt())
                 .members(dto.members())
+                .maxMembers(dto.maxMembers())
                 .build();
     }
 }

@@ -157,15 +157,18 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     @Override
     public void deleteChatRoom(String roomId,String username) {
-        chatRoomValidator.validateChatRoomExists(roomId);
-
         ChatRoom chatRoom = chatRoomRepository.findByRoomId(roomId).orElseThrow(
                 () -> new ChatRoomException(ChatErrorCode.NOT_EXIST_ROOM));
+        Member member = memberRepository.findByUsername(username).orElseThrow(
+                () -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER)
+        );
 
-        chatRoomValidator.validateChatRoomCreator(username,chatRoom.getCreatedBy());
+        String nickname = member.getNickname();
+        String creator = chatRoom.getCreatedBy();
+        chatRoomValidator.validateChatRoomCreator(nickname,creator);
 
         Query query = new Query(Criteria.where("roomId").is(roomId)
-                .and("createdBy").is(username));
+                .and("createdBy").is(nickname));
 
         mongoTemplate.remove(query, ChatRoom.class);
     }

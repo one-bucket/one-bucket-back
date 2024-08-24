@@ -5,6 +5,7 @@ import com.onebucket.domain.chatManage.domain.ChatRoom;
 import com.onebucket.domain.chatManage.dto.CreateChatRoomDto;
 import com.onebucket.domain.chatManage.service.ChatRoomService;
 import com.onebucket.global.utils.SecurityUtils;
+import com.onebucket.global.utils.SuccessResponseDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -80,10 +81,11 @@ public class ChatRoomController {
         return ResponseEntity.ok(response);
     }
 
+    // 채팅방 삭제하기
     @DeleteMapping("/room/{roomId}")
-    public ResponseEntity<Void> deleteRoom(@PathVariable String roomId) {
+    public ResponseEntity<SuccessResponseDto> deleteRoom(@PathVariable String roomId) {
         String username = securityUtils.getCurrentUsername();
         chatRoomService.deleteChatRoom(roomId,username);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(new SuccessResponseDto("Delete Success!"));
     }
 }
