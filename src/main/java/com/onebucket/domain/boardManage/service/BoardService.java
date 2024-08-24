@@ -1,9 +1,9 @@
 package com.onebucket.domain.boardManage.service;
 
 
-import com.onebucket.domain.boardManage.dto.internal.CreateBoardDto;
-import com.onebucket.domain.boardManage.dto.internal.CreateBoardTypeDto;
-import com.onebucket.domain.boardManage.dto.internal.CreateBoardsDto;
+import com.onebucket.domain.boardManage.dto.internal.board.CreateBoardDto;
+import com.onebucket.domain.boardManage.dto.internal.board.CreateBoardTypeDto;
+import com.onebucket.domain.boardManage.dto.internal.board.CreateBoardsDto;
 
 import java.util.List;
 

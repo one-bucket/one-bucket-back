@@ -3,6 +3,7 @@ package com.onebucket.global.utils;
 import org.springframework.stereotype.Component;
 
 import java.security.SecureRandom;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * <br>package name   : com.onebucket.global.utils
@@ -31,6 +32,7 @@ import java.security.SecureRandom;
 @Component
 public class RandomStringUtils {
 
+    private final AtomicInteger counter = new AtomicInteger(0);
     public int generateRandomNum(int length) {
         SecureRandom random = new SecureRandom();
         int upperLimit =(int) Math.pow(10, length);
@@ -84,6 +86,16 @@ public class RandomStringUtils {
             sb.append(characters.charAt(index));
         }
         return sb.toString();
+    }
+
+    public Long generateId(Long prefix) {
+        long currentTimeMillis = System.currentTimeMillis();
+
+        int uniqueCounter = counter.getAndIncrement() % 10000;
+
+        String idString = String.format("%d%d%04d", prefix, currentTimeMillis, uniqueCounter);
+
+        return Long.parseLong(idString);
     }
 
 }

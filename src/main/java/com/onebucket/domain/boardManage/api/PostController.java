@@ -1,11 +1,9 @@
 package com.onebucket.domain.boardManage.api;
 
-import com.onebucket.domain.boardManage.dto.internal.CreatePostDto;
-import com.onebucket.domain.boardManage.dto.internal.DeletePostDto;
-import com.onebucket.domain.boardManage.dto.internal.GetBoardDto;
+import com.onebucket.domain.boardManage.dto.internal.board.GetBoardDto;
+import com.onebucket.domain.boardManage.dto.internal.post.*;
 import com.onebucket.domain.boardManage.dto.request.RequestCreatePostDto;
-import com.onebucket.domain.boardManage.entity.post.Post;
-import com.onebucket.domain.boardManage.service.BoardService;
+import com.onebucket.domain.boardManage.dto.response.ResponsePostDto;
 import com.onebucket.domain.boardManage.service.PostService;
 import com.onebucket.global.utils.SecurityUtils;
 import com.onebucket.global.utils.SuccessResponseWithIdDto;
@@ -43,11 +41,10 @@ import org.springframework.web.bind.annotation.*;
 public class PostController {
 
     private final PostService postService;
-    private final BoardService boardService;
     private final SecurityUtils securityUtils;
 
-    @GetMapping("/{boardId}")
-    public ResponseEntity<Page<Post>> getPostsByBoard(@PathVariable Long boardId, Pageable pageable) {
+    @GetMapping("/list/{boardId}")
+    public ResponseEntity<Page<PostThumbnailDto>> getPostsByBoard(@PathVariable Long boardId, Pageable pageable) {
         String username = securityUtils.getCurrentUsername();
 
         securityUtils.isUserUniversityMatchingBoard(username, boardId);
@@ -57,36 +54,60 @@ public class PostController {
                 .pageable(pageable)
                 .build();
 
-        Page<Post> posts = postService.getPostsByBoard(getBoardDto);
+        // dto 분리 일부로 안함
+        Page<PostThumbnailDto> posts = postService.getPostsByBoard(getBoardDto);
         return ResponseEntity.ok(posts);
+    }
+
+    @GetMapping("/{postId}")
+    public ResponseEntity<PostInfoDto> getPostById(@PathVariable Long postId) {
+        String username = securityUtils.getCurrentUsername();
+        GetPostDto getPostDto = GetPostDto.builder()
+                .postId(postId)
+                .username(username)
+                .build();
+
+        PostInfoDto postInfoDto = postService.getPost(getPostDto);
+        ResponsePostDto response = ResponsePostDto.builder()
+                .postId(postInfoDto.getPostId())
+                .boardId(postInfoDto.getBoardId())
+                .authorNickname(postInfoDto.getAuthorNickname())
+                .createdDate(postInfoDto.getCreatedDate())
+                .modifiedDate(postInfoDto.getModifiedDate())
+                .comments(postInfoDto.getComments())
+                .build();
+
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping
     public ResponseEntity<SuccessResponseWithIdDto> createPost(@RequestBody @Valid RequestCreatePostDto dto) {
         String username = securityUtils.getCurrentUsername();
+        Long univId = securityUtils.getUnivId(username);
 
         CreatePostDto createPostDto = CreatePostDto.builder()
                 .boardId(dto.getBoardId())
                 .text(dto.getText())
                 .title(dto.getTitle())
                 .username(username)
+                .univId(univId)
                 .build();
 
         Long savedId = postService.createPost(createPostDto);
         return ResponseEntity.ok(new SuccessResponseWithIdDto("success create post", savedId));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<SuccessResponseWithIdDto> deletePost(@PathVariable Long id) {
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<SuccessResponseWithIdDto> deletePost(@PathVariable Long postId) {
         String username = securityUtils.getCurrentUsername();
 
         DeletePostDto deletePostDto = DeletePostDto.builder()
-                .id(id)
+                .id(postId)
                 .username(username)
                 .build();
 
         postService.deletePost(deletePostDto);
 
-        return ResponseEntity.ok(new SuccessResponseWithIdDto("success delete post", id));
+        return ResponseEntity.ok(new SuccessResponseWithIdDto("success delete post", postId));
     }
 }

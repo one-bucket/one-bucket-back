@@ -1,12 +1,11 @@
-package com.onebucket.domain.boardManage.dto.internal;
+package com.onebucket.domain.boardManage.dto.internal.board;
 
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
 /**
  * <br>package name   : com.onebucket.domain.boardManage.dto.internal
- * <br>file name      : BoardIdsDto
+ * <br>file name      : CreatesboardDto
  * <br>date           : 2024-08-09
  * <pre>
  * <span style="color: white;">[description]</span>
@@ -25,12 +24,11 @@ import lombok.Setter;
  * 2024-08-09        jack8              init create
  * </pre>
  */
-
-@AllArgsConstructor
-@Setter
+@Builder
 @Getter
-public class BoardIdsDto {
-
-    private Long universityId;
-    private Long boardTypeId;
+public class CreateBoardsDto {
+    private Long id;
+    private String boardName;
+    private String university;
+    private String boardType;
 }

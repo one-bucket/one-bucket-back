@@ -1,4 +1,4 @@
-package com.onebucket.domain.boardManage.dto.internal;
+package com.onebucket.domain.boardManage.dto.internal.post;
 
 import com.onebucket.domain.boardManage.dto.parents.PostDto;
 import lombok.Getter;
@@ -25,4 +25,5 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 public class CreatePostDto extends PostDto {
     private String username;
+    private Long univId;
 }

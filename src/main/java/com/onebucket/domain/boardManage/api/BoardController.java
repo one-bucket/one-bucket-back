@@ -1,8 +1,8 @@
 package com.onebucket.domain.boardManage.api;
 
-import com.onebucket.domain.boardManage.dto.internal.CreateBoardDto;
-import com.onebucket.domain.boardManage.dto.internal.CreateBoardTypeDto;
-import com.onebucket.domain.boardManage.dto.internal.CreateBoardsDto;
+import com.onebucket.domain.boardManage.dto.internal.board.CreateBoardDto;
+import com.onebucket.domain.boardManage.dto.internal.board.CreateBoardTypeDto;
+import com.onebucket.domain.boardManage.dto.internal.board.CreateBoardsDto;
 import com.onebucket.domain.boardManage.dto.request.RequestCreateBoardDto;
 import com.onebucket.domain.boardManage.dto.request.RequestCreateBoardTypeDto;
 import com.onebucket.domain.boardManage.dto.response.ResponseCreateBoardsDto;

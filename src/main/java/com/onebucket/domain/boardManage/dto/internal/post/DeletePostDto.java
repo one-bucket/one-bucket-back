@@ -1,4 +1,4 @@
-package com.onebucket.domain.boardManage.dto.internal;
+package com.onebucket.domain.boardManage.dto.internal.post;
 
 import lombok.Builder;
 import lombok.Getter;

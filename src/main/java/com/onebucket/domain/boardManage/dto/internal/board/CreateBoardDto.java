@@ -1,13 +1,11 @@
-package com.onebucket.domain.boardManage.dto.request;
+package com.onebucket.domain.boardManage.dto.internal.board;
 
-import com.onebucket.domain.boardManage.dto.internal.board.CreateBoardTypeDto;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 /**
- * <br>package name   : com.onebucket.domain.boardManage.dto.request
- * <br>file name      : RequestCreateBoardTypeDto
+ * <br>package name   : com.onebucket.domain.boardManage.dto.internal
+ * <br>file name      : CreateBoardDto
  * <br>date           : 2024-08-09
  * <pre>
  * <span style="color: white;">[description]</span>
@@ -27,9 +25,11 @@ import lombok.experimental.SuperBuilder;
  * </pre>
  */
 
-@SuperBuilder
+@Builder
 @Getter
-@NoArgsConstructor
-public class RequestCreateBoardTypeDto extends CreateBoardTypeDto {
-
+public class CreateBoardDto {
+    private String name;
+    private String university;
+    private String boardType;
+    private String description;
 }

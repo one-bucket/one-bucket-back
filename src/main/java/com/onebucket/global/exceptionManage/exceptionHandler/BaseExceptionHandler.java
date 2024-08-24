@@ -3,6 +3,7 @@ package com.onebucket.global.exceptionManage.exceptionHandler;
 import com.onebucket.global.exceptionManage.ErrorResponse;
 import com.onebucket.global.exceptionManage.customException.BaseCustomException;
 import com.onebucket.global.exceptionManage.customException.CommonException;
+import com.onebucket.global.exceptionManage.customException.boardManageException.BoardManageException;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.ResponseEntity;
@@ -34,7 +35,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class BaseExceptionHandler {
 
-    @ExceptionHandler({AuthenticationException.class, CommonException.class})
+    @ExceptionHandler({AuthenticationException.class, CommonException.class, BoardManageException.class})
     public ResponseEntity<ErrorResponse> handleException(BaseCustomException ex) {
         ErrorResponse errorResponse = new ErrorResponse(ex.getErrorCode(), ex.getMessage());
         return new ResponseEntity<>(errorResponse, ex.getErrorCode().getHttpStatus());

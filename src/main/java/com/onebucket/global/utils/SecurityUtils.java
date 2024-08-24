@@ -75,4 +75,37 @@ public class SecurityUtils {
         }
 
     }
+
+    public void isUserUniversityMatchingBoard(Long univId, Long boardId) {
+        Long boardUnivId = boardRepository.findById(boardId).orElseThrow(() ->
+                new BoardManageException(BoardErrorCode.UNKNOWN_BOARD)).getUniversity().getId();
+
+        if(univId.equals(boardUnivId)) {
+            return;
+        } else {
+            throw new AuthenticationException(AuthenticationErrorCode.INVALID_SUBMIT);
+        }
+    }
+
+    public void isUserUniversityMatchingBoard(Long univId, Board board) {
+        Long boardUnivId = board.getUniversity().getId();
+
+        if(univId.equals(boardUnivId)) {
+            return;
+        } else {
+            throw new AuthenticationException(AuthenticationErrorCode.INVALID_SUBMIT);
+        }
+    }
+
+    public Long getUnivId(String username) {
+        return memberRepository.findByUsername(username).orElseThrow(() ->
+                new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER))
+                .getUniversity().getId();
+
+    }
+
+    public Member getMember(String username) {
+        return memberRepository.findByUsername(username).orElseThrow(() ->
+                new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
+    }
 }

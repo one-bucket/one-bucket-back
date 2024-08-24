@@ -1,12 +1,13 @@
-package com.onebucket.domain.boardManage.dto.internal;
+package com.onebucket.domain.boardManage.dto.internal.comment;
 
-import lombok.Builder;
+import com.onebucket.domain.boardManage.dto.parents.CommentDto;
 import lombok.Getter;
+import lombok.experimental.SuperBuilder;
 
 /**
  * <br>package name   : com.onebucket.domain.boardManage.dto.internal
- * <br>file name      : CreatesboardDto
- * <br>date           : 2024-08-09
+ * <br>file name      : CreateCommentDto
+ * <br>date           : 2024-08-15
  * <pre>
  * <span style="color: white;">[description]</span>
  *
@@ -21,14 +22,13 @@ import lombok.Getter;
  * ====================================================
  * DATE           AUTHOR               NOTE
  * ----------------------------------------------------
- * 2024-08-09        jack8              init create
+ * 2024-08-15        jack8              init create
  * </pre>
  */
-@Builder
+
+@SuperBuilder
 @Getter
-public class CreateBoardsDto {
-    private Long id;
-    private String boardName;
-    private String university;
-    private String boardType;
+public class CreateCommentDto extends CommentDto {
+    private Long parentCommentId;
+    private String username;
 }

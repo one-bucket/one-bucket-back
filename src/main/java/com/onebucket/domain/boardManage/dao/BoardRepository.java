@@ -1,6 +1,6 @@
 package com.onebucket.domain.boardManage.dao;
 
-import com.onebucket.domain.boardManage.dto.internal.BoardIdsDto;
+import com.onebucket.domain.boardManage.dto.internal.board.BoardIdsDto;
 import com.onebucket.domain.boardManage.entity.Board;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -33,7 +33,7 @@ import java.util.List;
 @Repository
 public interface BoardRepository extends JpaRepository<Board, Long> {
 
-    @Query("SELECT new com.onebucket.domain.boardManage.dto.internal.BoardIdsDto(b.university.id, b.boardType.id) FROM Board b")
+    @Query("SELECT new com.onebucket.domain.boardManage.dto.internal.board.BoardIdsDto(b.university.id, b.boardType.id) FROM Board b")
     List<BoardIdsDto> findAllBoardUniversityAndBoardTypeIds();
 
 }
