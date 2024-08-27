@@ -61,22 +61,6 @@ public class ChatRoomController {
         return ResponseEntity.created(location).build();
     }
 
-    // 특정 채팅방에 입장하기
-    @PostMapping("/room/{roomId}/enter")
-    public ResponseEntity<ChatRoom> enterRoom(@PathVariable String roomId) {
-        String username = securityUtils.getCurrentUsername();
-        ChatRoom response = chatRoomService.addChatMembers(roomId, username);
-        return ResponseEntity.ok(response);
-    }
-
-    // 특정 채팅방에서 나가기
-    @DeleteMapping("/room/{roomId}/leave")
-    public ResponseEntity<ChatRoom> leaveRoom(@PathVariable String roomId) {
-        String username = securityUtils.getCurrentUsername();
-        ChatRoom response = chatRoomService.removeChatMember(roomId, username);
-        return ResponseEntity.ok(response);
-    }
-
     // 특정 유저가 입장해 있는 채팅방 목록 조회
     @GetMapping("/room/user/{nickname}")
     public ResponseEntity<List<ChatRoom>> getRoomsForMember(@PathVariable String nickname) {
