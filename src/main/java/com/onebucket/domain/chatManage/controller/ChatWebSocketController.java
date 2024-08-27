@@ -1,8 +1,9 @@
 package com.onebucket.domain.chatManage.controller;
 
 import com.onebucket.domain.chatManage.domain.ChatMessage;
+import com.onebucket.domain.chatManage.domain.MessageType;
+import com.onebucket.domain.chatManage.dto.ChatMessageDto;
 import com.onebucket.domain.chatManage.pubsub.RedisPublisher;
-import com.onebucket.domain.chatManage.service.ChatMessageService;
 import com.onebucket.domain.chatManage.service.ChatRoomService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -37,7 +38,6 @@ import java.io.IOException;
 public class ChatWebSocketController {
     private final RedisPublisher redisPublisher;
     private final ChatRoomService chatRoomService;
-    private final ChatMessageService chatMessageService;
 
     /**
      * websocket "/pub/chat/message"로 들어오는 메세지를 처리한다.
@@ -45,17 +45,24 @@ public class ChatWebSocketController {
     @MessageMapping("/chat/message")
     public void message(@Payload ChatMessage chatMessage) throws IOException {
         // 처음 입장 했을 경우(Enter)
-        if(ChatMessage.MessageType.ENTER.equals(chatMessage.getType())) {
+        if(MessageType.ENTER.equals(chatMessage.getType())) {
             chatMessage.setMessage(chatMessage.getSender()+"님이 입장하셨습니다.");
+            chatRoomService.addChatMembers(chatMessage.getRoomId(), chatMessage.getSender());
         }
-        if(ChatMessage.MessageType.TALK.equals(chatMessage.getType())) {
-            // chatMessageService.saveMessage(chatMessage);
+        if(MessageType.JOIN.equals(chatMessage.getType())) {
             chatRoomService.addChatMessages(chatMessage);
         }
-        if(ChatMessage.MessageType.LEAVE.equals(chatMessage.getType())) {
+        if(MessageType.LEAVE.equals(chatMessage.getType())) {
             chatMessage.setMessage(chatMessage.getSender()+"님이 퇴장하셨습니다.");
+            chatRoomService.removeChatMember(chatMessage.getRoomId(), chatMessage.getSender());
         }
+        // ChatMessage -> Dto 변환
+        ChatMessageDto chatMessageDto = Mapper(chatMessage);
         // 기존 유저가 입장하는 경우(Join), 아무것도 출력하지않음.
-        redisPublisher.publish(chatMessage);
+        redisPublisher.publish(chatMessageDto);
+    }
+
+    private static ChatMessageDto Mapper(ChatMessage chatMessage) {
+        return ChatMessageDto.from(chatMessage);
     }
 }

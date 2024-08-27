@@ -1,6 +1,7 @@
 package com.onebucket.domain.chatManage.pubsub;
 
 import com.onebucket.domain.chatManage.domain.ChatMessage;
+import com.onebucket.domain.chatManage.dto.ChatMessageDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
@@ -32,7 +33,7 @@ import org.springframework.stereotype.Service;
 public class RedisPublisher {
     private final RedisTemplate<String, Object> redisTemplate;
     private final ChannelTopic channelTopic;
-    public void publish(ChatMessage message) {
+    public void publish(ChatMessageDto message) {
         redisTemplate.convertAndSend(channelTopic.getTopic(), message);
     }
 }
