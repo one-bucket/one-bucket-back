@@ -70,15 +70,16 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     @Override
     @Transactional
-    public ChatRoom addChatMembers(String roomId, String username) {
+    public ChatRoom addChatMembers(String roomId, String nickname) {
         chatRoomValidator.validateChatRoomExists(roomId);
 
-        Member member = memberRepository.findByUsername(username)
-                .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
+        if(!memberRepository.existsByNickname(nickname)) {
+            throw new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER);
+        }
 
         try {
             Query query = new Query(Criteria.where("roomId").is(roomId));
-            Update update = new Update().addToSet("members", ChatMemberDto.from(member.getNickname()));
+            Update update = new Update().addToSet("members", ChatMemberDto.from(nickname));
 
             return mongoTemplate.findAndModify(query, update,
                     FindAndModifyOptions.options().returnNew(true), ChatRoom.class);
@@ -90,20 +91,21 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     @Override
     @Transactional
-    public ChatRoom removeChatMember(String roomId, String username) {
+    public ChatRoom removeChatMember(String roomId, String nickname) {
         ChatRoom chatRoom = chatRoomRepository.findByRoomId(roomId)
                 .orElseThrow(() -> new ChatRoomException(ChatErrorCode.NOT_EXIST_ROOM));
 
         // 유저 존재 여부 확인
-        Member member = memberRepository.findByUsername(username)
-                .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
+        if(!memberRepository.existsByNickname(nickname)) {
+            throw new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER);
+        }
 
-        chatRoomValidator.validateMemberInChatRoom(chatRoom,member);
+        chatRoomValidator.validateMemberInChatRoom(chatRoom,nickname);
 
         try {
             // Query를 통해 roomId와 일치하는 채팅방을 찾고, members 배열에서 해당 유저를 제거
             Query query = new Query(Criteria.where("roomId").is(roomId));
-            Update update = new Update().pull("members", ChatMemberDto.from(member.getNickname()));
+            Update update = new Update().pull("members", ChatMemberDto.from(nickname));
 
             // findAndModify로 members에서 해당 유저를 제거
 
@@ -160,8 +162,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         ChatRoom chatRoom = chatRoomRepository.findByRoomId(roomId).orElseThrow(
                 () -> new ChatRoomException(ChatErrorCode.NOT_EXIST_ROOM));
         Member member = memberRepository.findByUsername(username).orElseThrow(
-                () -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER)
-        );
+                () -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
 
         String nickname = member.getNickname();
         String creator = chatRoom.getCreatedBy();

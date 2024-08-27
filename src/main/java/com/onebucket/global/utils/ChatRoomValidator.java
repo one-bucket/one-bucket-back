@@ -42,8 +42,8 @@ public class ChatRoomValidator {
         }
     }
 
-    public void validateChatRoomCreator(String username, String createdBy) {
-        if (!username.equals(createdBy)) {
+    public void validateChatRoomCreator(String nickname, String createdBy) {
+        if (!nickname.equals(createdBy)) {
             throw new ChatRoomException(ChatErrorCode.USER_NOT_CREATOR);
         }
     }
@@ -55,9 +55,9 @@ public class ChatRoomValidator {
         // 추가적인 유효성 검사 로직 필요시 여기에 추가
     }
 
-    public void validateMemberInChatRoom(ChatRoom chatRoom, Member member) {
+    public void validateMemberInChatRoom(ChatRoom chatRoom, String nickname) {
         boolean isMember = chatRoom.getMembers().stream()
-                .anyMatch(memberDto -> memberDto.nickname().equals(member.getNickname()));
+                .anyMatch(memberDto -> memberDto.nickname().equals(nickname));
 
         if (!isMember) {
             throw new ChatRoomException(ChatErrorCode.USER_NOT_IN_ROOM, "해당 유저는 이 채팅방의 멤버가 아닙니다.");
