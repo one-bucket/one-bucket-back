@@ -1,9 +1,16 @@
 package com.onebucket.domain.chatManage.service;
 
+import com.onebucket.domain.chatManage.dao.ChatMessageRepository;
+import com.onebucket.domain.chatManage.dao.ChatRoomRepository;
+import com.onebucket.domain.chatManage.domain.ChatMessage;
+import com.onebucket.domain.chatManage.domain.ChatRoom;
 import com.onebucket.global.exceptionManage.customException.chatManageException.ChatManageException;
+import com.onebucket.global.exceptionManage.customException.chatManageException.Exceptions.ChatRoomException;
 import com.onebucket.global.exceptionManage.errorCode.ChatErrorCode;
 import com.onebucket.global.minio.MinioRepository;
 import com.onebucket.global.minio.MinioSaveInfoDto;
+import io.minio.errors.MinioException;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,6 +20,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
@@ -47,9 +57,29 @@ class ChatMessageServiceImplTest {
     @Mock
     private MinioRepository minioRepository;
 
+    @Mock
+    private ChatRoomRepository chatRoomRepository;
+
     @InjectMocks
     private ChatMessageServiceImpl chatMessageService;
 
+    @Test
+    @DisplayName("채팅 가져오기 성공")
+    void getChatMessage_success(){
+        String roomId = "roomId";
+        doReturn(Optional.of(ChatRoom.builder().build())).when(chatRoomRepository).findByRoomId(roomId);
+        chatMessageService.getChatMessages(roomId);
+    }
+
+    @Test
+    @DisplayName("채팅 가져오기 실패 - 존재하지 않는 채팅방임")
+    void getChatMessage_fail(){
+        String roomId = "roomId";
+        doThrow(new ChatRoomException(ChatErrorCode.NOT_EXIST_ROOM)).when(chatRoomRepository).findByRoomId(roomId);
+        ChatRoomException exception = assertThrows(ChatRoomException.class,
+                () -> chatMessageService.getChatMessages(roomId));
+        assertEquals(ChatErrorCode.NOT_EXIST_ROOM, exception.getErrorCode());
+    }
     @Test
     @DisplayName("채팅 이미지 업로드 성공")
     void uploadChatImage_success() {
