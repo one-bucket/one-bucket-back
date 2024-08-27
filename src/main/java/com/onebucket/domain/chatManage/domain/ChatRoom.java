@@ -1,7 +1,8 @@
 package com.onebucket.domain.chatManage.domain;
 
-import com.onebucket.domain.chatManage.dto.ChatMemberDto;
-import com.onebucket.domain.chatManage.dto.CreateChatRoomDto;
+import com.onebucket.domain.chatManage.dto.chatroom.ChatMemberDto;
+import com.onebucket.domain.chatManage.dto.chatmessage.ChatMessageDto;
+import com.onebucket.domain.chatManage.dto.chatroom.CreateChatRoomDto;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import lombok.Builder;
@@ -48,7 +49,7 @@ public class ChatRoom  {
 
     private Set<ChatMemberDto> members;
 
-    private List<ChatMessage> messages;
+    private List<ChatMessageDto> messages;
 
     private int maxMembers;
 

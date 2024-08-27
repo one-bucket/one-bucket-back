@@ -2,7 +2,7 @@ package com.onebucket.domain.chatManage.pubsub;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.onebucket.domain.chatManage.domain.ChatMessage;
+import com.onebucket.domain.chatManage.dto.chatmessage.ChatMessageDto;
 import com.onebucket.global.exceptionManage.customException.chatManageException.ChatManageException;
 import com.onebucket.global.exceptionManage.errorCode.ChatErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -53,11 +53,11 @@ public class RedisSubscriber implements MessageListener {
             // redis에서 발행된 메세지를 받아 역직렬화
             String publishMessage =  redisTemplate.getStringSerializer().deserialize(message.getBody());
             // ChatMessage 객체로 매핑
-            ChatMessage roomMessage = objectMapper.readValue(publishMessage, ChatMessage.class);
-            log.info("Redis Subscribe Channel : {}", roomMessage.getRoomId());
+            ChatMessageDto roomMessage = objectMapper.readValue(publishMessage, ChatMessageDto.class);
+            log.info("Redis Subscribe Channel : {}", roomMessage.roomId());
             log.info("Redis SUB Message : {}", publishMessage);
             // Websocket 구독자들에게 채팅 메세지 send
-            messagingTemplate.convertAndSend("/sub/chat/room/"+roomMessage.getRoomId(),roomMessage);
+            messagingTemplate.convertAndSend("/sub/chat/room/"+roomMessage.roomId(),roomMessage);
         } catch (JsonProcessingException e) {
             // JSON 파싱 오류 처리
             log.error("Failed to parse JSON message: {}", e.getMessage());

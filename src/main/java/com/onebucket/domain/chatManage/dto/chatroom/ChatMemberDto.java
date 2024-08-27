@@ -1,4 +1,6 @@
-package com.onebucket.domain.chatManage.dto;
+package com.onebucket.domain.chatManage.dto.chatroom;
+
+import jakarta.validation.constraints.NotBlank;
 
 /**
  * <br>package name   : com.onebucket.domain.memberManage.dto
@@ -22,7 +24,7 @@ package com.onebucket.domain.chatManage.dto;
  * </pre>
  */
 public record ChatMemberDto(
-        String nickname
+        @NotBlank String nickname
 ) {
     public static ChatMemberDto from(String nickname) {
         return new ChatMemberDto(nickname);

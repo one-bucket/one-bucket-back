@@ -2,8 +2,7 @@ package com.onebucket.global.utils;
 
 import com.onebucket.domain.chatManage.dao.ChatRoomRepository;
 import com.onebucket.domain.chatManage.domain.ChatRoom;
-import com.onebucket.domain.chatManage.dto.CreateChatRoomDto;
-import com.onebucket.domain.memberManage.domain.Member;
+import com.onebucket.domain.chatManage.dto.chatroom.CreateChatRoomDto;
 import com.onebucket.global.exceptionManage.customException.chatManageException.Exceptions.ChatRoomException;
 import com.onebucket.global.exceptionManage.errorCode.ChatErrorCode;
 import lombok.RequiredArgsConstructor;

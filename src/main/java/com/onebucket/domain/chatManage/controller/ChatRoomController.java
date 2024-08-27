@@ -1,8 +1,10 @@
 package com.onebucket.domain.chatManage.controller;
 
 
+import com.onebucket.domain.chatManage.domain.ChatMessage;
 import com.onebucket.domain.chatManage.domain.ChatRoom;
-import com.onebucket.domain.chatManage.dto.CreateChatRoomDto;
+import com.onebucket.domain.chatManage.dto.chatmessage.ChatMessageDto;
+import com.onebucket.domain.chatManage.dto.chatroom.CreateChatRoomDto;
 import com.onebucket.domain.chatManage.service.ChatRoomService;
 import com.onebucket.global.utils.SecurityUtils;
 import com.onebucket.global.utils.SuccessResponseDto;
@@ -10,6 +12,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 
 import java.net.URI;
@@ -87,5 +90,27 @@ public class ChatRoomController {
         String username = securityUtils.getCurrentUsername();
         chatRoomService.deleteChatRoom(roomId,username);
         return ResponseEntity.ok(new SuccessResponseDto("Delete Success!"));
+    }
+
+    // ----------------------------------- 채팅 ------------------------------------------------ //
+    @GetMapping("/messages/{roomId}")
+    public ResponseEntity<List<ChatMessage>> getMessages(@PathVariable String roomId) {
+        List<ChatMessageDto> messagesList = chatRoomService.getChatMessages(roomId);
+        List<ChatMessage> response = messagesList.stream()
+                .map(requestDto -> new ChatMessage(
+                        requestDto.type(),
+                        requestDto.message(),
+                        requestDto.sender(),
+                        requestDto.roomId(),
+                        requestDto.imgUrl()))
+                .toList();
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/messages/files")
+    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
+        String username = securityUtils.getCurrentUsername();
+        String response = chatRoomService.uploadChatImage(file,username);
+        return ResponseEntity.ok(response);
     }
 }

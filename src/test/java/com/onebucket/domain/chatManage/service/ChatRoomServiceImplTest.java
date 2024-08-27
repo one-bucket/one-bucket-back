@@ -2,8 +2,8 @@ package com.onebucket.domain.chatManage.service;
 
 import com.onebucket.domain.chatManage.dao.ChatRoomRepository;
 import com.onebucket.domain.chatManage.domain.ChatRoom;
-import com.onebucket.domain.chatManage.dto.ChatMemberDto;
-import com.onebucket.domain.chatManage.dto.CreateChatRoomDto;
+import com.onebucket.domain.chatManage.dto.chatroom.ChatMemberDto;
+import com.onebucket.domain.chatManage.dto.chatroom.CreateChatRoomDto;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.global.exceptionManage.customException.CommonException;
@@ -13,6 +13,8 @@ import com.onebucket.global.exceptionManage.customException.memberManageExceptoi
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.ChatErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.CommonErrorCode;
+import com.onebucket.global.minio.MinioRepository;
+import com.onebucket.global.minio.MinioSaveInfoDto;
 import com.onebucket.global.utils.ChatRoomValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -25,6 +27,9 @@ import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -74,6 +79,9 @@ class ChatRoomServiceImplTest {
 
     @Mock
     private ChatRoomValidator chatRoomValidator;
+
+    @Mock
+    private MinioRepository minioRepository;
 
     @InjectMocks
     private ChatRoomServiceImpl chatRoomService;
@@ -330,5 +338,59 @@ class ChatRoomServiceImplTest {
         });
 
         assertThat(result.getErrorCode()).isEqualTo(CommonErrorCode.DATA_ACCESS_ERROR);
+    }
+
+    @Test
+    @DisplayName("채팅 가져오기 성공")
+    void getChatMessage_success(){
+        String roomId = "roomId";
+        doReturn(Optional.of(ChatRoom.builder().build())).when(chatRoomRepository).findByRoomId(roomId);
+        chatRoomService.getChatMessages(roomId);
+    }
+
+    @Test
+    @DisplayName("채팅 가져오기 실패 - 존재하지 않는 채팅방임")
+    void getChatMessage_fail(){
+        String roomId = "roomId";
+        doThrow(new ChatRoomException(ChatErrorCode.NOT_EXIST_ROOM)).when(chatRoomRepository).findByRoomId(roomId);
+        ChatRoomException exception = assertThrows(ChatRoomException.class,
+                () -> chatRoomService.getChatMessages(roomId));
+        assertEquals(ChatErrorCode.NOT_EXIST_ROOM, exception.getErrorCode());
+    }
+    @Test
+    @DisplayName("채팅 이미지 업로드 성공")
+    void uploadChatImage_success() {
+        // given
+        String username = "testuser";
+        String endpointUrl = "https://minio-endpoint.com";
+        String bucketName = "bucket-name";
+
+        MockMultipartFile file = new MockMultipartFile("file", "test.png", "image/png", "some-image-content".getBytes());
+        String expectedAddress = bucketName + "/" + "chat/" + username + "/test.png";
+        String expectedUrl = endpointUrl + "/" + expectedAddress;
+        ReflectionTestUtils.setField(chatRoomService, "endpointUrl", endpointUrl);
+
+        // when
+        when(minioRepository.uploadFile(any(MultipartFile.class), any(MinioSaveInfoDto.class)))
+                .thenReturn(expectedAddress);
+
+        String actualUrl = chatRoomService.uploadChatImage(file, username);
+
+        // then
+        assertEquals(expectedUrl, actualUrl);
+        verify(minioRepository, times(1)).uploadFile(eq(file), any(MinioSaveInfoDto.class));
+    }
+
+    @Test
+    @DisplayName("채팅 이미지 업로드 실패 - minio save 실패")
+    void uploadChatImage_fail() {
+        MockMultipartFile file = new MockMultipartFile("file", "test.png", "image/png", "some-image-content".getBytes());
+        doThrow(new RuntimeException("error occur : message")).when(minioRepository)
+                .uploadFile(any(MultipartFile.class), any(MinioSaveInfoDto.class));
+
+        assertThatThrownBy(() -> chatRoomService.uploadChatImage(file,"testuser"))
+                .isInstanceOf(ChatManageException.class)
+                .extracting("errorCode")
+                .isEqualTo(ChatErrorCode.CHAT_IMAGE_ERROR);
     }
 }

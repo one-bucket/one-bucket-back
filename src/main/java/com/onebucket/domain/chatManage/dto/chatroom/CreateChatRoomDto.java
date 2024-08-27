@@ -1,7 +1,5 @@
-package com.onebucket.domain.chatManage.dto;
+package com.onebucket.domain.chatManage.dto.chatroom;
 
-import com.onebucket.global.exceptionManage.customException.chatManageException.Exceptions.ChatRoomException;
-import com.onebucket.global.exceptionManage.errorCode.ChatErrorCode;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

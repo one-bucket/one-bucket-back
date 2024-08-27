@@ -1,21 +1,25 @@
 package com.onebucket.domain.chatManage.service;
 
 import com.onebucket.domain.chatManage.dao.ChatRoomRepository;
-import com.onebucket.domain.chatManage.domain.ChatMessage;
 import com.onebucket.domain.chatManage.domain.ChatRoom;
-import com.onebucket.domain.chatManage.dto.CreateChatRoomDto;
+import com.onebucket.domain.chatManage.dto.chatmessage.ChatMessageDto;
+import com.onebucket.domain.chatManage.dto.chatroom.CreateChatRoomDto;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
-import com.onebucket.domain.chatManage.dto.ChatMemberDto;
+import com.onebucket.domain.chatManage.dto.chatroom.ChatMemberDto;
 import com.onebucket.global.exceptionManage.customException.CommonException;
+import com.onebucket.global.exceptionManage.customException.chatManageException.ChatManageException;
 import com.onebucket.global.exceptionManage.customException.chatManageException.Exceptions.ChatRoomException;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.ChatErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.CommonErrorCode;
+import com.onebucket.global.minio.MinioRepository;
+import com.onebucket.global.minio.MinioSaveInfoDto;
 import com.onebucket.global.utils.ChatRoomValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -23,6 +27,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
 
@@ -59,6 +64,14 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     private final MongoTemplate mongoTemplate;
 
     private final ChatRoomValidator chatRoomValidator;
+
+    private final MinioRepository minioRepository;
+
+    @Value("${minio.bucketName}")
+    private String bucketName;
+
+    @Value("${minio.minio_url}")
+    private String endpointUrl;
 
     @Override
     public String createChatRoom(CreateChatRoomDto dto) {
@@ -108,7 +121,6 @@ public class ChatRoomServiceImpl implements ChatRoomService {
             Update update = new Update().pull("members", ChatMemberDto.from(nickname));
 
             // findAndModify로 members에서 해당 유저를 제거
-
             return mongoTemplate.findAndModify(query, update,
                     FindAndModifyOptions.options().returnNew(true), ChatRoom.class);
         } catch (CommonException e) {
@@ -130,12 +142,12 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     @Override
     @Transactional
-    public void addChatMessages(ChatMessage chatMessage) {
-        chatRoomValidator.validateChatRoomExists(chatMessage.getRoomId());
+    public void addChatMessages(ChatMessageDto chatMessage) {
+        chatRoomValidator.validateChatRoomExists(chatMessage.roomId());
 
         try {
             // 채팅방을 찾고, 존재하지 않으면 예외를 던짐
-            Query query = new Query(Criteria.where("roomId").is(chatMessage.getRoomId()));
+            Query query = new Query(Criteria.where("roomId").is(chatMessage.roomId()));
 
             // 채팅 메시지를 추가하는 업데이트 정의
             Update update = new Update().push("messages", chatMessage);
@@ -172,6 +184,31 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                 .and("createdBy").is(nickname));
 
         mongoTemplate.remove(query, ChatRoom.class);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ChatMessageDto> getChatMessages(String roomId) {
+        ChatRoom chatRoom = chatRoomRepository.findByRoomId(roomId)
+                .orElseThrow(() -> new ChatRoomException(ChatErrorCode.NOT_EXIST_ROOM));
+        return chatRoom.getMessages();
+    }
+
+    @Override
+    public String uploadChatImage(MultipartFile file, String username) {
+        String fileName = "chat/" + username + "/" + file.getOriginalFilename();
+
+        MinioSaveInfoDto dto = MinioSaveInfoDto.builder()
+                .bucketName(bucketName)
+                .fileName(fileName)
+                .fileExtension("png")
+                .build();
+        try {
+            String address = minioRepository.uploadFile(file, dto);
+            return endpointUrl + "/" + address;
+        } catch (RuntimeException e) {
+            throw new ChatManageException(ChatErrorCode.CHAT_IMAGE_ERROR);
+        }
     }
 }
 
