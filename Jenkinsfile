@@ -82,7 +82,7 @@ pipeline {
                     // Start SSH agent and add the key
                     sh """
                     eval \$(ssh-agent -s)
-                    ssh-add /var/jenkins_home/.ssh/id_rsa
+                    ssh-add /var/jenkins_home/.ssh/id_rsa.pub
                     """
 
                     // Transfer Docker image to server2
