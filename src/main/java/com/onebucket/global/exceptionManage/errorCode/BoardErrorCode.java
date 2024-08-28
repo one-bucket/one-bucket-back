@@ -34,7 +34,11 @@ public enum BoardErrorCode implements ErrorCode {
 
 
     DUPLICATE_BOARD_TYPE("2100", HttpStatus.CONFLICT, "duplicate board type name"),
-    DUPLICATE_BOARD("2101", HttpStatus.CONFLICT, "duplicate board");
+    DUPLICATE_BOARD("2101", HttpStatus.CONFLICT, "duplicate board"),
+    UNKNOWN_BOARD("2102", HttpStatus.BAD_REQUEST, "unknown board"),
+    UNKNOWN_COMMENT("2013", HttpStatus.BAD_REQUEST, "unknown comment"),
+
+    UNKNOWN_BOARD_TYPE("2104", HttpStatus.BAD_REQUEST, "unknown board type");
 
 
     private final String code;

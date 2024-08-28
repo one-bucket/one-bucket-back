@@ -46,7 +46,9 @@ public enum AuthenticationErrorCode implements ErrorCode{
     DISABLED_ACCOUNT("1102", HttpStatus.FORBIDDEN, "account disabled"),
     EXPIRED_ACCOUNT("1103", HttpStatus.FORBIDDEN, "account expired"),
     CREDENTIAL_EXPIRED_ACCOUNT("1104", HttpStatus.FORBIDDEN, "account credential expired"),
-    INTERNAL_AUTHENTICATION_ERROR("1199", HttpStatus.INTERNAL_SERVER_ERROR, "error while authentication service")
+    INTERNAL_AUTHENTICATION_ERROR("1199", HttpStatus.INTERNAL_SERVER_ERROR, "error while authentication service"),
+
+    UNAUTHORIZED_ACCESS("1200", HttpStatus.FORBIDDEN, "not allowed access")
 
 
     ;

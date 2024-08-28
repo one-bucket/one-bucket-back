@@ -3,6 +3,7 @@ package com.onebucket.domain.memberManage.service;
 import com.onebucket.domain.memberManage.dto.CreateMemberRequestDto;
 import com.onebucket.domain.memberManage.dto.NicknameRequestDto;
 import com.onebucket.domain.memberManage.dto.ReadMemberInfoDto;
+import com.onebucket.domain.memberManage.dto.internal.SetUniversityDto;
 import com.onebucket.domain.universityManage.domain.University;
 
 /**
@@ -38,6 +39,8 @@ public interface MemberService {
     Long usernameToId(String username);
     String changePassword(String username);
     String changePassword(String username, String newPassword);
+
+    void setUniversity(SetUniversityDto dto);
 
     String idToNickname(Long id);
     University usernameToUniversity(String username);

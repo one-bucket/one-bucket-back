@@ -1,9 +1,11 @@
 package com.onebucket.domain.universityManage.dao;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import com.onebucket.domain.universityManage.domain.University;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -30,4 +32,7 @@ import java.util.Optional;
 @Repository
 public interface UniversityRepository extends JpaRepository<University, Long> {
     Optional<University> findByName(String name);
+
+    @Query("SELECT uv.id FROM University uv")
+    List<Long> findAllUniversityIds();
 }

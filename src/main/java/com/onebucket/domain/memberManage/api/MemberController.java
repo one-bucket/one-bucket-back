@@ -3,6 +3,8 @@ package com.onebucket.domain.memberManage.api;
 import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.domain.memberManage.domain.Profile;
 import com.onebucket.domain.memberManage.dto.*;
+import com.onebucket.domain.memberManage.dto.internal.SetUniversityDto;
+import com.onebucket.domain.memberManage.dto.request.RequestSetUnivDto;
 import com.onebucket.domain.memberManage.service.MemberService;
 import com.onebucket.domain.memberManage.service.ProfileService;
 import com.onebucket.global.utils.SecurityUtils;
@@ -209,6 +211,20 @@ public class MemberController {
         String url = profileService.getImageUrl(id);
 
         return ResponseEntity.ok(new SuccessResponseDto(url));
+    }
+
+
+    //TODO :  권한 문제 해결하기
+    @PostMapping("/member/univ")
+    public ResponseEntity<SuccessResponseDto> setMemberUniv(@Valid @RequestBody RequestSetUnivDto dto) {
+        String username = securityUtils.getCurrentUsername();
+        SetUniversityDto setUniversityDto = SetUniversityDto.builder()
+                .username(username)
+                .university(dto.getUniversity())
+                .build();
+
+        memberService.setUniversity(setUniversityDto);
+        return ResponseEntity.ok(new SuccessResponseDto("success set university"));
     }
 
 

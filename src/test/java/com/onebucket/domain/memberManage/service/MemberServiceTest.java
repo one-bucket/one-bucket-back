@@ -12,6 +12,7 @@ import static org.mockito.Mockito.*;
 
 import com.onebucket.domain.memberManage.dto.NicknameRequestDto;
 import com.onebucket.domain.memberManage.dto.ReadMemberInfoDto;
+import com.onebucket.domain.universityManage.dao.UniversityRepository;
 import com.onebucket.domain.universityManage.domain.University;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
@@ -32,6 +33,9 @@ import java.util.Optional;
 public class MemberServiceTest {
     @Mock
     private MemberRepository memberRepository;
+
+    @Mock
+    private UniversityRepository universityRepository;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -56,6 +60,12 @@ public class MemberServiceTest {
                 .build();
     }
 
+    private final University nullUniversity = University.builder()
+            .address("null")
+            .email("null")
+            .name("null")
+            .build();
+
     @BeforeEach
     void setUp() {
 
@@ -71,6 +81,7 @@ public class MemberServiceTest {
         when(passwordEncoder.encode(anyString())).thenReturn("password");
         when(memberRepository.save(any(Member.class))).thenReturn(mockMember);
         when(mockMember.getId()).thenReturn(1L);
+        when(universityRepository.findByName("null")).thenReturn(Optional.of(nullUniversity));
 
         //when
         Long id = memberService.createMember(dto);
@@ -87,6 +98,7 @@ public class MemberServiceTest {
         CreateMemberRequestDto dto = getDto();
 
         when(passwordEncoder.encode(anyString())).thenReturn("password");
+        when(universityRepository.findByName("null")).thenReturn(Optional.of(nullUniversity));
         doThrow(DataIntegrityViolationException.class).when(memberRepository).save(any(Member.class));
 
 

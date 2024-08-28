@@ -1,15 +1,14 @@
-package com.onebucket.domain.boardManage.entity;
+package com.onebucket.domain.memberManage.dto.internal;
 
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
- * <br>package name   : com.onebucket.domain.boardManage.entity
- * <br>file name      : BoardType
- * <br>date           : 2024-07-18
+ * <br>package name   : com.onebucket.domain.memberManage.dto.internal
+ * <br>file name      : setUniversity
+ * <br>date           : 2024-08-08
  * <pre>
  * <span style="color: white;">[description]</span>
  *
@@ -24,23 +23,15 @@ import lombok.NoArgsConstructor;
  * ====================================================
  * DATE           AUTHOR               NOTE
  * ----------------------------------------------------
- * 2024-07-18        jack8              init create
+ * 2024-08-08        jack8              init create
  * </pre>
  */
 
-@Entity
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Getter
-public class BoardType {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    private String name;
-
-    @Column(columnDefinition = "TEXT")
-    private String description;
+public class SetUniversityDto {
+    String username;
+    String university;
 }
