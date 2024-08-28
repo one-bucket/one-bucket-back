@@ -90,10 +90,10 @@ pipeline {
                     // Deploy the new Docker image on server2
                     sh """
                     ssh -i /var/jenkins_home/.ssh/id_rsa ${SERVER_USER}@${SERVER_IP} << 'EOF'
-                        sudo docker load -i /tmp/${DOCKER_IMAGE_FILE}
-                        sudo docker stop one-bucket-container || true
-                        sudo docker rm one-bucket-container || true
-                        sudo docker run -d --name one-bucket-container -p 8080:8080 \\
+                        docker load -i /tmp/${DOCKER_IMAGE_FILE}
+                        docker stop one-bucket-container || true
+                        docker rm one-bucket-container || true
+                        docker run -d --name one-bucket-container -p 8080:8080 \\
                             -e MYSQL_HOST=${SERVER_MYSQL_HOST} \\
                             -e MYSQL_USER=${SERVER_MYSQL_USER} \\
                             -e MYSQL_PASSWORD=${SERVER_MYSQL_PASSWORD} \\
@@ -104,7 +104,7 @@ pipeline {
                             -e MONGO_USER=${MONGO_USER} \\
                             -e MONGO_PWD=${MONGO_PWD} \\
                             ${DOCKER_IMAGE}
-                        sudo docker system prune -f
+                        docker system prune -f
                     << EOF
                     """
                 }
