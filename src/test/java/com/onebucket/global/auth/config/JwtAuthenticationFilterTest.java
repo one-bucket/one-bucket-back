@@ -1,6 +1,5 @@
 package com.onebucket.global.auth.config;
 
-import com.onebucket.domain.boardManage.service.BoardService;
 import com.onebucket.domain.memberManage.service.MemberService;
 import com.onebucket.global.auth.jwtAuth.component.JwtValidator;
 import com.onebucket.testComponent.testController.AuthTestController;
@@ -17,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -56,7 +54,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(controllers = AuthTestController.class)
 @ExtendWith(MockitoExtension.class)
 @Import({SecurityConfig.class, JwtAuthenticationFilter.class})
-@MockBean(JpaMetamodelMappingContext.class)
 class JwtAuthenticationFilterTest {
     @Autowired
     private MockMvc mockMvc;
@@ -66,12 +63,6 @@ class JwtAuthenticationFilterTest {
 
     @MockBean
     private MemberService memberService;
-
-    @MockBean
-    private BoardService boardService;
-
-
-
 
 
     @Test

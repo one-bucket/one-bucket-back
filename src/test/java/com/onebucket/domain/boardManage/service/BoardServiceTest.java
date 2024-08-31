@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -67,6 +68,7 @@ class BoardServiceTest {
     private BoardServiceImpl boardService;
 
     private final Board savedBoard = Board.builder()
+            .id(100L)
             .boardType(mockBoardType)
             .university(mockUniversity)
             .name("name")
@@ -88,7 +90,8 @@ class BoardServiceTest {
                 .description("description")
                 .build();
 
-        boardService
+        Long id = boardService.createBoard(dto);
+        assertThat(id).isEqualTo(100L);
     }
 
 
