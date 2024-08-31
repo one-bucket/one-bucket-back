@@ -44,6 +44,7 @@ import java.util.List;
 @EntityListeners(AuditingEntityListener.class)
 public class Comment {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

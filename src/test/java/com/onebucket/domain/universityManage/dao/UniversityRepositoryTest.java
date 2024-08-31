@@ -71,4 +71,6 @@ class UniversityRepositoryTest {
     void getUniversityByName_fail() {
         assertThat(universityRepository.findByName("서울대학교")).isEqualTo(Optional.empty());
     }
+
+
 }
