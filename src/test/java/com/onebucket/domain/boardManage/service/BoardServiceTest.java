@@ -2,12 +2,18 @@ package com.onebucket.domain.boardManage.service;
 
 import com.onebucket.domain.boardManage.dao.BoardRepository;
 import com.onebucket.domain.boardManage.dao.BoardTypeRepository;
+import com.onebucket.domain.boardManage.dto.internal.board.BoardIdsDto;
 import com.onebucket.domain.boardManage.dto.internal.board.CreateBoardDto;
 import com.onebucket.domain.boardManage.entity.Board;
 import com.onebucket.domain.boardManage.entity.BoardType;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.universityManage.dao.UniversityRepository;
 import com.onebucket.domain.universityManage.domain.University;
+import com.onebucket.global.exceptionManage.customException.boardManageException.AdminManageBoardException;
+import com.onebucket.global.exceptionManage.customException.boardManageException.BoardManageException;
+import com.onebucket.global.exceptionManage.customException.universityManageException.UniversityManageException;
+import com.onebucket.global.exceptionManage.errorCode.BoardErrorCode;
+import com.onebucket.global.exceptionManage.errorCode.UniversityErrorCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,14 +21,18 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 
 /**
@@ -75,6 +85,13 @@ class BoardServiceTest {
             .description("description")
             .build();
 
+    private final CreateBoardDto createBoardDto = CreateBoardDto.builder()
+            .boardType("board type")
+            .university("university")
+            .name("name")
+            .description("description")
+            .build();
+
 
     @Test
     @DisplayName("createBoard - success")
@@ -83,16 +100,94 @@ class BoardServiceTest {
         when(boardTypeRepository.findByName(anyString())).thenReturn(Optional.of(mockBoardType));
         when(boardRepository.save(any(Board.class))).thenReturn(savedBoard);
 
-        CreateBoardDto dto = CreateBoardDto.builder()
-                .boardType("board type")
-                .university("university")
-                .name("name")
-                .description("description")
-                .build();
 
-        Long id = boardService.createBoard(dto);
+        Long id = boardService.createBoard(createBoardDto);
         assertThat(id).isEqualTo(100L);
     }
+
+    @Test
+    @DisplayName("createBoard - fail / unknown university")
+    void testCreateBoard_fail_unknownUniv() {
+        when(universityRepository.findByName(anyString())).thenReturn(Optional.empty());
+
+
+
+        assertThatThrownBy(() -> boardService.createBoard(createBoardDto))
+                .isInstanceOf(UniversityManageException.class)
+                .extracting("errorCode")
+                .isEqualTo(UniversityErrorCode.NOT_EXIST_UNIVERSITY);
+        verify(boardTypeRepository, never()).findByName(anyString());
+    }
+
+    @Test
+    @DisplayName("createBoard - fail / unknown boardType")
+    void testCreateBoard_fail_unknownBoardType() {
+        when(universityRepository.findByName(anyString())).thenReturn(Optional.of(mockUniversity));
+        when(boardTypeRepository.findByName(anyString())).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> boardService.createBoard(createBoardDto))
+                .isInstanceOf(BoardManageException.class)
+                .hasMessageContaining("should add board type first")
+                .extracting("errorCode")
+                .isEqualTo(BoardErrorCode.UNKNOWN_BOARD_TYPE);
+
+        verify(boardRepository, never()).save(any(Board.class));
+    }
+
+    @Test
+    @DisplayName("createBoard - fail / duplicate board")
+    void testCreateBoard_fail_duplicateBoard() {
+        when(universityRepository.findByName(anyString())).thenReturn(Optional.of(mockUniversity));
+        when(boardTypeRepository.findByName(anyString())).thenReturn(Optional.of(mockBoardType));
+
+        when(boardRepository.save(any(Board.class))).thenThrow(DataIntegrityViolationException.class);
+
+        assertThatThrownBy(() -> boardService.createBoard(createBoardDto))
+                .isInstanceOf(AdminManageBoardException.class)
+                .extracting("errorCode")
+                .isEqualTo(BoardErrorCode.DUPLICATE_BOARD);
+    }
+
+    @Test
+    @DisplayName("createBoards - success")
+    void testCreateBoards_success() {
+        List<Long> boardTypeIds = new ArrayList<>() {
+            {
+                for(Long i = 101L; i <= 110L; i++) {
+                    add(i);
+                }
+            }
+        };
+
+        List<Long> universityIds = new ArrayList<>() {
+            {
+                for(Long i = 101L; i <= 110L; i++) {
+                    add(i);
+                }
+            }
+        };
+
+        List<BoardIdsDto> boardIdsDtos = new ArrayList<>() {
+            {
+                for(Long i = 101L; i <= 103L; i++) {
+                    for(Long j = 101L; j <= 104L; j++) {
+                        BoardIdsDto boardIdsDto = BoardIdsDto.builder()
+                                .boardTypeId(i)
+                                .universityId(j)
+                                .build();
+                        add(boardIdsDto);
+                    }
+
+                }
+            }
+        };
+
+        when(boardTypeRepository.findAllBoardTypeIds()).thenReturn(boardTypeIds);
+
+
+    }
+
+
 
 
 
