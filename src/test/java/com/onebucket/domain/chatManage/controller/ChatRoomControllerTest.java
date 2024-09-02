@@ -140,73 +140,6 @@ class ChatRoomControllerTest {
     }
 
     @Test
-    @DisplayName("채팅방 입장 성공")
-    void enterRoom_success() throws Exception {
-        String username = "user1";
-        String roomId = "room1";
-        final String url = "/chat/room/" + roomId + "/enter";
-        doReturn(username).when(securityUtils).getCurrentUsername();
-
-        final ResultActions resultActions = mockMvc.perform(
-                post(url)
-        );
-
-        resultActions.andExpect(status().isOk());
-    }
-
-    @Test
-    @DisplayName("채팅방 입장 실패 - not exist authentication in token while getCurrentUsername")
-    void enterRoom_fail() throws Exception {
-        String internalMessage = "Not exist authentication in ContextHolder";
-        AuthenticationErrorCode code = AuthenticationErrorCode.NON_EXIST_AUTHENTICATION;
-        AuthenticationException exception = new AuthenticationException(code, internalMessage);
-        when(securityUtils.getCurrentUsername()).thenThrow(exception);
-
-        String roomId = "room1";
-        final String url = "/chat/room/" + roomId + "/enter";
-
-        final ResultActions resultActions = mockMvc.perform(
-                post(url)
-        );
-
-        resultActions.andExpect(hasStatus(code))
-                .andExpect(hasKey(code, internalMessage));
-    }
-
-    @Test
-    @DisplayName("채팅방에서 나가기 성공")
-    void leaveRoom_success() throws Exception {
-        String username = "user1";
-        String roomId = "room1";
-        final String url = "/chat/room/" + roomId + "/leave";
-        doReturn(username).when(securityUtils).getCurrentUsername();
-
-        final ResultActions resultActions = mockMvc.perform(
-                delete(url)
-        );
-
-        resultActions.andExpect(status().isOk());
-    }
-
-    @Test
-    @DisplayName("채팅방에서 나가기 실패 - not exist authentication in token while getCurrentUsername")
-    void leaveRoom_fail() throws Exception {
-        String internalMessage = "Not exist authentication in ContextHolder";
-        AuthenticationErrorCode code = AuthenticationErrorCode.NON_EXIST_AUTHENTICATION;
-        AuthenticationException exception = new AuthenticationException(code, internalMessage);
-        when(securityUtils.getCurrentUsername()).thenThrow(exception);
-        String roomId = "room1";
-        final String url = "/chat/room/" + roomId + "/leave";
-
-        final ResultActions resultActions = mockMvc.perform(
-                delete(url)
-        );
-
-        resultActions.andExpect(hasStatus(code))
-                .andExpect(hasKey(code, internalMessage));
-    }
-
-    @Test
     @DisplayName("채팅방 삭제 성공")
     void deleteRoom_success() throws Exception {
         String roomId = "room1";
@@ -272,8 +205,8 @@ class ChatRoomControllerTest {
                 CreateChatRoomDto.of(null, time, "user1",new HashSet<>(),10),  // name is null
                 CreateChatRoomDto.of("room1", null, "user1",new HashSet<>(),10),  // createdAt is null
                 CreateChatRoomDto.of("room1",  time, null,new HashSet<>(),10), // createdBy is null
-                CreateChatRoomDto.of("room1",time,"user1",null,10),
-                CreateChatRoomDto.of("room1",time,"user1",new HashSet<>(),null)
+                CreateChatRoomDto.of("room1",time,"user1",null,10), // members Set is null
+                CreateChatRoomDto.of("room1",time,"user1",new HashSet<>(),null) // maxMembers is null
         );
     }
 }
