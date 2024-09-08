@@ -60,7 +60,7 @@ public class PostController {
     }
 
     @GetMapping("/{postId}")
-    public ResponseEntity<PostInfoDto> getPostById(@PathVariable Long postId) {
+    public ResponseEntity<ResponsePostDto> getPostById(@PathVariable Long postId) {
         String username = securityUtils.getCurrentUsername();
         GetPostDto getPostDto = GetPostDto.builder()
                 .postId(postId)
@@ -75,6 +75,8 @@ public class PostController {
                 .createdDate(postInfoDto.getCreatedDate())
                 .modifiedDate(postInfoDto.getModifiedDate())
                 .comments(postInfoDto.getComments())
+                .title(postInfoDto.getTitle())
+                .text(postInfoDto.getText())
                 .build();
 
         return ResponseEntity.ok(response);
