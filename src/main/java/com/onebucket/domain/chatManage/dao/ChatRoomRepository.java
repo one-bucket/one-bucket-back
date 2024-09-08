@@ -29,7 +29,6 @@ import java.util.Optional;
  * </pre>
  */
 public interface ChatRoomRepository extends MongoRepository<ChatRoom, String> {
-    @NotNull
     Optional<ChatRoom> findByRoomId(@NotNull String id);
 
     @Query("{ 'members.nickname': ?0 }")

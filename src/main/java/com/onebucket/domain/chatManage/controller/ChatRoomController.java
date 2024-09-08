@@ -1,21 +1,22 @@
 package com.onebucket.domain.chatManage.controller;
 
 
+import com.onebucket.domain.chatManage.domain.ChatMessage;
 import com.onebucket.domain.chatManage.domain.ChatRoom;
-import com.onebucket.domain.chatManage.dto.CreateChatRoomDto;
+import com.onebucket.domain.chatManage.dto.chatmessage.ChatMessageDto;
+import com.onebucket.domain.chatManage.dto.chatroom.CreateChatRoomDto;
 import com.onebucket.domain.chatManage.service.ChatRoomService;
 import com.onebucket.global.utils.SecurityUtils;
+import com.onebucket.global.utils.SuccessResponseDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 
 import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * <br>package name   : com.onebucket.domain.chatManage.controller
@@ -60,19 +61,40 @@ public class ChatRoomController {
         return ResponseEntity.created(location).build();
     }
 
-    // 특정 채팅방에 입장하기
-    @GetMapping("/room/{roomId}")
-    public ResponseEntity<ChatRoom> enterRoom(@PathVariable String roomId) {
-        String username = securityUtils.getCurrentUsername();
-        chatRoomService.enterChatRoom(roomId,username);
-        ChatRoom response = chatRoomService.getChatRoom(roomId);
-        return ResponseEntity.ok(response);
-    }
-
     // 특정 유저가 입장해 있는 채팅방 목록 조회
     @GetMapping("/room/user/{nickname}")
     public ResponseEntity<List<ChatRoom>> getRoomsForMember(@PathVariable String nickname) {
         List<ChatRoom> response = chatRoomService.findByMembersNickname(nickname);
+        return ResponseEntity.ok(response);
+    }
+
+    // 채팅방 삭제하기
+    @DeleteMapping("/room/{roomId}")
+    public ResponseEntity<SuccessResponseDto> deleteRoom(@PathVariable String roomId) {
+        String username = securityUtils.getCurrentUsername();
+        chatRoomService.deleteChatRoom(roomId,username);
+        return ResponseEntity.ok(new SuccessResponseDto("Delete Success!"));
+    }
+
+    // ----------------------------------- 채팅 ------------------------------------------------ //
+    @GetMapping("/messages/{roomId}")
+    public ResponseEntity<List<ChatMessage>> getMessages(@PathVariable String roomId) {
+        List<ChatMessageDto> messagesList = chatRoomService.getChatMessages(roomId);
+        List<ChatMessage> response = messagesList.stream()
+                .map(requestDto -> new ChatMessage(
+                        requestDto.type(),
+                        requestDto.message(),
+                        requestDto.sender(),
+                        requestDto.roomId(),
+                        requestDto.imgUrl()))
+                .toList();
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/messages/files")
+    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
+        String username = securityUtils.getCurrentUsername();
+        String response = chatRoomService.uploadChatImage(file,username);
         return ResponseEntity.ok(response);
     }
 }

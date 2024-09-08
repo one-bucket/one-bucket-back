@@ -1,7 +1,10 @@
 package com.onebucket.domain.chatManage.domain;
 
-import com.onebucket.domain.chatManage.dto.ChatMemberDto;
-import jakarta.persistence.Id;
+import com.onebucket.domain.chatManage.dto.chatroom.ChatMemberDto;
+import com.onebucket.domain.chatManage.dto.chatmessage.ChatMessageDto;
+import com.onebucket.domain.chatManage.dto.chatroom.CreateChatRoomDto;
+import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
 import lombok.Builder;
 import lombok.Getter;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -10,7 +13,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * <br>package name   : com.onebucket.domain.chatManage.domain
@@ -34,8 +36,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * </pre>
  */
 @Getter
-@Builder
 @Document(collection = "chatroom")
+@NoArgsConstructor
 public class ChatRoom  {
 
     @Id
@@ -45,17 +47,29 @@ public class ChatRoom  {
     private LocalDateTime createdAt;
     private String createdBy;
 
-    @Builder.Default
-    private Set<ChatMemberDto> members = ConcurrentHashMap.newKeySet();
+    private Set<ChatMemberDto> members;
 
-    @Builder.Default
-    private List<ChatMessage> messages = new ArrayList<>();
+    private List<ChatMessageDto> messages;
 
-    public void addMember(ChatMemberDto member) {
-        members.add(member);
+    private int maxMembers;
+
+    @Builder
+    public ChatRoom(String name, LocalDateTime createdAt, String createdBy, Set<ChatMemberDto> members, int maxMembers) {
+        this.name = name;
+        this.createdAt = createdAt;
+        this.createdBy = createdBy;
+        this.members = members;
+        this.messages = new ArrayList<>();
+        this.maxMembers = maxMembers;
     }
 
-    public void addMessage(ChatMessage message) {
-        messages.add(message);
+    public static ChatRoom create(CreateChatRoomDto dto) {
+        return ChatRoom.builder()
+                .name(dto.name())
+                .createdBy(dto.createdBy())
+                .createdAt(dto.createdAt())
+                .members(dto.members())
+                .maxMembers(dto.maxMembers())
+                .build();
     }
 }

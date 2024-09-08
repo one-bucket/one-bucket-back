@@ -25,8 +25,8 @@ import com.onebucket.global.exceptionManage.errorCode.ErrorCode;
  * 2024-07-08        SeungHoon              init create
  * </pre>
  */
-public class RoomNotFoundException extends ChatManageException {
-    public RoomNotFoundException(ChatErrorCode chatErrorCode) {super(chatErrorCode);}
+public class ChatRoomException extends ChatManageException {
+    public ChatRoomException(ChatErrorCode chatErrorCode) {super(chatErrorCode);}
 
-    public RoomNotFoundException(ErrorCode errorCode,String message) {super(errorCode,message);}
+    public ChatRoomException(ErrorCode errorCode, String message) {super(errorCode,message);}
 }

@@ -3,12 +3,16 @@ package com.onebucket.domain.chatManage.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.onebucket.domain.chatManage.domain.ChatRoom;
-import com.onebucket.domain.chatManage.dto.ChatMemberDto;
-import com.onebucket.domain.chatManage.dto.CreateChatRoomDto;
+import com.onebucket.domain.chatManage.dto.chatmessage.ChatMessageDto;
+import com.onebucket.domain.chatManage.dto.chatroom.ChatMemberDto;
+import com.onebucket.domain.chatManage.dto.chatroom.CreateChatRoomDto;
 import com.onebucket.domain.chatManage.service.ChatRoomService;
+import com.onebucket.global.exceptionManage.customException.chatManageException.ChatManageException;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
+import com.onebucket.global.exceptionManage.errorCode.ChatErrorCode;
 import com.onebucket.global.exceptionManage.exceptionHandler.BaseExceptionHandler;
+import com.onebucket.global.exceptionManage.exceptionHandler.ChatExceptionHandler;
 import com.onebucket.global.exceptionManage.exceptionHandler.DataExceptionHandler;
 import com.onebucket.global.utils.SecurityUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,6 +30,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -33,8 +38,7 @@ import java.util.stream.Stream;
 
 import static com.onebucket.testComponent.testUtils.JsonFieldResultMatcher.hasKey;
 import static com.onebucket.testComponent.testUtils.JsonFieldResultMatcher.hasStatus;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -78,7 +82,7 @@ class ChatRoomControllerTest {
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         mockMvc = MockMvcBuilders.standaloneSetup(chatRoomController)
-                .setControllerAdvice(new BaseExceptionHandler(), new DataExceptionHandler())
+                .setControllerAdvice(new BaseExceptionHandler(), new DataExceptionHandler(),new ChatExceptionHandler())
                 .build();
     }
 
@@ -111,7 +115,8 @@ class ChatRoomControllerTest {
                                 "room1",
                                 LocalDateTime.of(2024, 1, 1, 12, 0),
                                 "user1",
-                                members
+                                members,
+                                10
                                 )
                         ))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -135,57 +140,73 @@ class ChatRoomControllerTest {
     }
 
     @Test
-    @DisplayName("채팅방 입장 성공")
-    void enterRoom_success() throws Exception {
-        String username = "user1";
+    @DisplayName("채팅방 삭제 성공")
+    void deleteRoom_success() throws Exception {
         String roomId = "room1";
-        final String url = "/chat/room/" + roomId;
+        String username = "user1";
         doReturn(username).when(securityUtils).getCurrentUsername();
-        doReturn(ChatRoom.builder().build()).when(chatRoomService).getChatRoom(roomId);
 
+        final String url = "/chat/room/" + roomId;
         final ResultActions resultActions = mockMvc.perform(
-                get(url)
+                delete(url)
         );
 
         resultActions.andExpect(status().isOk());
     }
 
     @Test
-    @DisplayName("채팅방 입장 실패 - not exist authentication in token while getCurrentUsername")
-    void enterRoom_fail() throws Exception {
+    @DisplayName("채팅방 삭제 실패 - not exist authentication in token while getCurrentUsername")
+    void deleteRoom_fail() throws Exception {
         String internalMessage = "Not exist authentication in ContextHolder";
         AuthenticationErrorCode code = AuthenticationErrorCode.NON_EXIST_AUTHENTICATION;
         AuthenticationException exception = new AuthenticationException(code, internalMessage);
         when(securityUtils.getCurrentUsername()).thenThrow(exception);
-
         String roomId = "room1";
         final String url = "/chat/room/" + roomId;
 
         final ResultActions resultActions = mockMvc.perform(
-                get(url)
+                delete(url)
         );
 
         resultActions.andExpect(hasStatus(code))
                 .andExpect(hasKey(code, internalMessage));
     }
 
+    @Test
+    @DisplayName("채팅방 메세지 불러오기 성공")
+    void getChatMessage_success() throws Exception {
+        String roomId = "room1";
+        doReturn(new ArrayList<ChatMessageDto>()).when(chatRoomService).getChatMessages(roomId);
+        String url = "/chat/messages/" + roomId;
+        final ResultActions resultActions = mockMvc.perform(
+                get(url)
+        );
+        resultActions.andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("채팅방 메세지 불러오기 실패 - 서비스 예외 발생")
+    void getMessages_fail_serviceException() throws Exception {
+        final String roomId = "roomId";
+        doThrow(new ChatManageException(ChatErrorCode.INTERNAL_ERROR)).when(chatRoomService).getChatMessages(roomId);
+
+        final String url = "/chat/messages/" + roomId;
+
+        final ResultActions resultActions = mockMvc.perform(
+                get(url)
+        );
+
+        resultActions.andExpect(hasStatus(ChatErrorCode.INTERNAL_ERROR));
+    }
 
     static Stream<CreateChatRoomDto> provideInvalidChatRoomDtos() {
         LocalDateTime time = LocalDateTime.of(2024, 1, 1, 12, 0);
         return Stream.of(
-                CreateChatRoomDto.of(null, time, "user1",new HashSet<>()),  // name is null
-                CreateChatRoomDto.of("room1", null, "user1",new HashSet<>()),  // createdAt is null
-                CreateChatRoomDto.of("room1",  time, null,new HashSet<>()), // createdBy is null
-                CreateChatRoomDto.of("room1",time,"user1",null)
+                CreateChatRoomDto.of(null, time, "user1",new HashSet<>(),10),  // name is null
+                CreateChatRoomDto.of("room1", null, "user1",new HashSet<>(),10),  // createdAt is null
+                CreateChatRoomDto.of("room1",  time, null,new HashSet<>(),10), // createdBy is null
+                CreateChatRoomDto.of("room1",time,"user1",null,10), // members Set is null
+                CreateChatRoomDto.of("room1",time,"user1",new HashSet<>(),null) // maxMembers is null
         );
     }
-
-
-
-
-
-
-
-
-
 }

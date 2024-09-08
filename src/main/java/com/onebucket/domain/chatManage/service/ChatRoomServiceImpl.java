@@ -1,26 +1,35 @@
 package com.onebucket.domain.chatManage.service;
 
 import com.onebucket.domain.chatManage.dao.ChatRoomRepository;
-import com.onebucket.domain.chatManage.domain.ChatMessage;
 import com.onebucket.domain.chatManage.domain.ChatRoom;
-import com.onebucket.domain.chatManage.dto.CreateChatRoomDto;
-import com.onebucket.domain.chatManage.pubsub.RedisSubscriber;
+import com.onebucket.domain.chatManage.dto.chatmessage.ChatMessageDto;
+import com.onebucket.domain.chatManage.dto.chatroom.CreateChatRoomDto;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
-import com.onebucket.domain.chatManage.dto.ChatMemberDto;
-import com.onebucket.global.exceptionManage.customException.chatManageException.Exceptions.RoomNotFoundException;
+import com.onebucket.domain.chatManage.dto.chatroom.ChatMemberDto;
+import com.onebucket.global.exceptionManage.customException.CommonException;
+import com.onebucket.global.exceptionManage.customException.chatManageException.ChatManageException;
+import com.onebucket.global.exceptionManage.customException.chatManageException.Exceptions.ChatRoomException;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.ChatErrorCode;
-import jakarta.annotation.PostConstruct;
+import com.onebucket.global.exceptionManage.errorCode.CommonErrorCode;
+import com.onebucket.global.minio.MinioRepository;
+import com.onebucket.global.minio.MinioSaveInfoDto;
+import com.onebucket.global.utils.ChatRoomValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.listener.ChannelTopic;
-import org.springframework.data.redis.listener.RedisMessageListenerContainer;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.mongodb.core.FindAndModifyOptions;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * <br>package name   : com.onebucket.domain.chatManage.service
@@ -49,51 +58,75 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ChatRoomServiceImpl implements ChatRoomService {
 
     private final MemberRepository memberRepository;
-    // 채팅방의 대화 메세지를 발행하기 위한 redis topic 정보.
-    // 서버별로 채팅방에 매치되는 topic 정보를 Map에 넣어서 roomId로 찾을 수 있게 한다.
-    private Map<String, ChannelTopic> topics;
-
-    // 채팅방(topic)에 발행되는 메세지를 처리할 Listener
-    private final RedisMessageListenerContainer redisMessageListener;
-    // 구독 처리 서비스
-    private final RedisSubscriber redisSubscriber;
 
     private final ChatRoomRepository chatRoomRepository;
 
-    @PostConstruct
-    public void init() {
-        topics = new ConcurrentHashMap<>();
-    }
+    private final MongoTemplate mongoTemplate;
+
+    private final ChatRoomValidator chatRoomValidator;
+
+    private final MinioRepository minioRepository;
+
+    @Value("${minio.bucketName}")
+    private String bucketName;
+
+    @Value("${minio.minio_url}")
+    private String endpointUrl;
 
     @Override
     public String createChatRoom(CreateChatRoomDto dto) {
-        ChatRoom chatRoom = ChatRoom.builder()
-                .name(dto.name())
-                .createdBy(dto.createdBy())
-                .createdAt(dto.createdAt())
-                .build();
+        chatRoomValidator.validateCreateChatRoom(dto);
+        ChatRoom chatRoom = ChatRoom.create(dto);
         ChatRoom savedChatRoom = chatRoomRepository.save(chatRoom);
         return savedChatRoom.getRoomId();
     }
 
-    /**
-     * 채팅방 입장 : redis에 topic을 만들고 pub/sub 통신을 하기 위해 리스너를 설정한다.
-     */
     @Override
-    public void enterChatRoom(String roomId,String username) {
-        ChannelTopic topic = topics.get(roomId);
-        if (topic == null) {
-            topic = new ChannelTopic(roomId);
-            log.info("topic: {}", topic);
-            redisMessageListener.addMessageListener(redisSubscriber,topic);
-            topics.put(roomId, topic);
+    @Transactional
+    public ChatRoom addChatMembers(String roomId, String nickname) {
+        chatRoomValidator.validateChatRoomExists(roomId);
+
+        if(!memberRepository.existsByNickname(nickname)) {
+            throw new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER);
         }
-        Member member = memberRepository.findByUsername(username)
-                .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
-        ChatRoom chatRoom = chatRoomRepository.findByRoomId(roomId).orElseThrow(
-                () -> new RoomNotFoundException(ChatErrorCode.NOT_EXIST_ROOM));
-        chatRoom.addMember(ChatMemberDto.from(member.getNickname()));
-        chatRoomRepository.save(chatRoom);
+
+        try {
+            Query query = new Query(Criteria.where("roomId").is(roomId));
+            Update update = new Update().addToSet("members", ChatMemberDto.from(nickname));
+
+            return mongoTemplate.findAndModify(query, update,
+                    FindAndModifyOptions.options().returnNew(true), ChatRoom.class);
+        } catch (CommonException e) {
+            // MongoDB 예외나 다른 예외 처리
+            throw new CommonException(CommonErrorCode.DATA_ACCESS_ERROR);
+        }
+    }
+
+    @Override
+    @Transactional
+    public ChatRoom removeChatMember(String roomId, String nickname) {
+        ChatRoom chatRoom = chatRoomRepository.findByRoomId(roomId)
+                .orElseThrow(() -> new ChatRoomException(ChatErrorCode.NOT_EXIST_ROOM));
+
+        // 유저 존재 여부 확인
+        if(!memberRepository.existsByNickname(nickname)) {
+            throw new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER);
+        }
+
+        chatRoomValidator.validateMemberInChatRoom(chatRoom,nickname);
+
+        try {
+            // Query를 통해 roomId와 일치하는 채팅방을 찾고, members 배열에서 해당 유저를 제거
+            Query query = new Query(Criteria.where("roomId").is(roomId));
+            Update update = new Update().pull("members", ChatMemberDto.from(nickname));
+
+            // findAndModify로 members에서 해당 유저를 제거
+            return mongoTemplate.findAndModify(query, update,
+                    FindAndModifyOptions.options().returnNew(true), ChatRoom.class);
+        } catch (CommonException e) {
+            // MongoDB 예외나 다른 예외 처리
+            throw new CommonException(CommonErrorCode.DATA_ACCESS_ERROR);
+        }
     }
 
     @Override
@@ -104,27 +137,78 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     @Override
     public ChatRoom getChatRoom(String roomId) {
         return chatRoomRepository.findByRoomId(roomId).orElseThrow(
-                () -> new RoomNotFoundException(ChatErrorCode.NOT_EXIST_ROOM));
+                () -> new ChatRoomException(ChatErrorCode.NOT_EXIST_ROOM,"존재하지 않는 채팅방입니다."));
     }
 
     @Override
-    public ChannelTopic getTopic(String roomId) {
-        return topics.get(roomId);
+    @Transactional
+    public void addChatMessages(ChatMessageDto chatMessage) {
+        chatRoomValidator.validateChatRoomExists(chatMessage.roomId());
+
+        try {
+            // 채팅방을 찾고, 존재하지 않으면 예외를 던짐
+            Query query = new Query(Criteria.where("roomId").is(chatMessage.roomId()));
+
+            // 채팅 메시지를 추가하는 업데이트 정의
+            Update update = new Update().push("messages", chatMessage);
+
+            // findAndModify를 사용하여 원자적으로 메시지를 추가하고, 업데이트된 채팅방을 반환
+            mongoTemplate.findAndModify(query, update,
+                    FindAndModifyOptions.options().returnNew(true), ChatRoom.class);
+        } catch (CommonException e) {
+            // MongoDB 예외나 다른 예외 처리
+            throw new CommonException(CommonErrorCode.DATA_ACCESS_ERROR);
+        }
     }
 
-    @Override
-    public void addChatMessage(ChatMessage chatMessage) {
-        ChatRoom chatRoom = chatRoomRepository.findByRoomId(chatMessage.getRoomId()).orElseThrow(
-                () -> new RoomNotFoundException(ChatErrorCode.NOT_EXIST_ROOM));
-        chatRoom.addMessage(chatMessage);
-        chatRoomRepository.save(chatRoom);
-    }
 
     @Override
     public List<ChatRoom> findByMembersNickname(String nickname) {
         return memberRepository.existsByNickname(nickname)
                 ? chatRoomRepository.findByMembersNickname(nickname)
                 : Collections.emptyList();
+    }
+
+    @Override
+    public void deleteChatRoom(String roomId,String username) {
+        ChatRoom chatRoom = chatRoomRepository.findByRoomId(roomId).orElseThrow(
+                () -> new ChatRoomException(ChatErrorCode.NOT_EXIST_ROOM));
+        Member member = memberRepository.findByUsername(username).orElseThrow(
+                () -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
+
+        String nickname = member.getNickname();
+        String creator = chatRoom.getCreatedBy();
+        chatRoomValidator.validateChatRoomCreator(nickname,creator);
+
+        Query query = new Query(Criteria.where("roomId").is(roomId)
+                .and("createdBy").is(nickname));
+
+        mongoTemplate.remove(query, ChatRoom.class);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ChatMessageDto> getChatMessages(String roomId) {
+        ChatRoom chatRoom = chatRoomRepository.findByRoomId(roomId)
+                .orElseThrow(() -> new ChatRoomException(ChatErrorCode.NOT_EXIST_ROOM));
+        return chatRoom.getMessages();
+    }
+
+    @Override
+    public String uploadChatImage(MultipartFile file, String username) {
+        String fileName = "chat/" + username + "/" + file.getOriginalFilename();
+
+        MinioSaveInfoDto dto = MinioSaveInfoDto.builder()
+                .bucketName(bucketName)
+                .fileName(fileName)
+                .fileExtension("png")
+                .build();
+        try {
+            String address = minioRepository.uploadFile(file, dto);
+            return endpointUrl + "/" + address;
+        } catch (RuntimeException e) {
+            throw new ChatManageException(ChatErrorCode.CHAT_IMAGE_ERROR);
+        }
     }
 }
 

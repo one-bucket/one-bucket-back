@@ -1,9 +1,9 @@
 package com.onebucket.domain.chatManage.service;
 
-import com.onebucket.domain.chatManage.domain.ChatMessage;
 import com.onebucket.domain.chatManage.domain.ChatRoom;
-import com.onebucket.domain.chatManage.dto.CreateChatRoomDto;
-import org.springframework.data.redis.listener.ChannelTopic;
+import com.onebucket.domain.chatManage.dto.chatmessage.ChatMessageDto;
+import com.onebucket.domain.chatManage.dto.chatroom.CreateChatRoomDto;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -29,11 +29,17 @@ import java.util.List;
  * </pre>
  */
 public interface ChatRoomService {
+    // 채팅방 로직
     String createChatRoom(CreateChatRoomDto createChatRoomDto);
-    void enterChatRoom(String roomId,String username);
+    ChatRoom addChatMembers(String roomId, String nickname);
+    ChatRoom removeChatMember(String roomId, String nickname);
     List<ChatRoom> getChatRooms();
     ChatRoom getChatRoom(String roomId);
-    ChannelTopic getTopic(String roomId);
-    void addChatMessage(ChatMessage chatMessage);
+    void addChatMessages(ChatMessageDto chatMessage);
     List<ChatRoom> findByMembersNickname(String nickname);
+    void deleteChatRoom(String roomId,String username);
+
+    // 채팅 메세지 로직
+    List<ChatMessageDto> getChatMessages(String roomId);
+    String uploadChatImage(MultipartFile file, String username);
 }

@@ -1,5 +1,6 @@
-package com.onebucket.domain.chatManage.dto;
+package com.onebucket.domain.chatManage.dto.chatroom;
 
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -32,9 +33,11 @@ public record CreateChatRoomDto(
         @NotBlank String name,
         @NotNull LocalDateTime createdAt,
         @NotBlank String createdBy,
-        @NotNull @Size(min = 1) Set<@NotNull ChatMemberDto> members) {
+        @NotNull @Size(min = 1) Set<@NotNull ChatMemberDto> members,
+        @NotNull @Min(1) Integer maxMembers
+        ) {
 
-    public static CreateChatRoomDto of(String name, LocalDateTime createdAt, String createdBy, Set<ChatMemberDto> members) {
-        return new CreateChatRoomDto(name, createdAt, createdBy, members);
+    public static CreateChatRoomDto of(String name, LocalDateTime createdAt, String createdBy, Set<ChatMemberDto> members, Integer maxMembers) {
+        return new CreateChatRoomDto(name, createdAt, createdBy, members, maxMembers);
     }
 }

@@ -1,19 +1,21 @@
 package com.onebucket.domain.chatManage.service;
 
 import com.onebucket.domain.chatManage.dao.ChatRoomRepository;
-import com.onebucket.domain.chatManage.domain.ChatMessage;
 import com.onebucket.domain.chatManage.domain.ChatRoom;
-import com.onebucket.domain.chatManage.dto.CreateChatRoomDto;
-import com.onebucket.domain.chatManage.pubsub.RedisSubscriber;
+import com.onebucket.domain.chatManage.dto.chatroom.ChatMemberDto;
+import com.onebucket.domain.chatManage.dto.chatroom.CreateChatRoomDto;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
-import com.onebucket.domain.memberManage.dto.CreateMemberRequestDto;
 import com.onebucket.global.exceptionManage.customException.CommonException;
-import com.onebucket.global.exceptionManage.customException.chatManageException.Exceptions.RoomNotFoundException;
+import com.onebucket.global.exceptionManage.customException.chatManageException.ChatManageException;
+import com.onebucket.global.exceptionManage.customException.chatManageException.Exceptions.ChatRoomException;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.ChatErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.CommonErrorCode;
+import com.onebucket.global.minio.MinioRepository;
+import com.onebucket.global.minio.MinioSaveInfoDto;
+import com.onebucket.global.utils.ChatRoomValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,13 +23,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.redis.listener.ChannelTopic;
-import org.springframework.data.redis.listener.RedisMessageListenerContainer;
+import org.springframework.data.mongodb.core.FindAndModifyOptions;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -64,89 +69,164 @@ class ChatRoomServiceImplTest {
     private MemberRepository memberRepository;
 
     @Mock
-    private RedisMessageListenerContainer redisMessageListener;
+    private Member mockMember;
 
     @Mock
     private ChatRoom mockChatRoom;
 
+    @Mock
+    private MongoTemplate mongoTemplate;
+
+    @Mock
+    private ChatRoomValidator chatRoomValidator;
+
+    @Mock
+    private MinioRepository minioRepository;
+
     @InjectMocks
     private ChatRoomServiceImpl chatRoomService;
 
-    public CreateChatRoomDto getRoomDto() {
-        return CreateChatRoomDto.of(
-                "room1", LocalDateTime.now(),"user1", new HashSet<>()
-        );
-    }
-
-    public CreateMemberRequestDto getMemberDto() {
-        return CreateMemberRequestDto.builder()
-                .nickname("han")
-                .build();
-    }
-
+    private ChatRoom chatRoom;
+    private CreateChatRoomDto dto;
     @BeforeEach
-    void init() {
-        Map<String, ChannelTopic> topics = new ConcurrentHashMap<>();
-        ReflectionTestUtils.setField(chatRoomService, "topics", topics);
-        ReflectionTestUtils.setField(chatRoomService, "redisMessageListener", redisMessageListener);
+    void setUp() {
+        ChatMemberDto dto1 = ChatMemberDto.from("han");
+        ChatMemberDto dto2 = ChatMemberDto.from("Lee");
+        Set<ChatMemberDto> members = new HashSet<>();
+        members.add(dto1);
+        members.add(dto2);
+        dto = CreateChatRoomDto.of(
+                "room1", LocalDateTime.now(),"user1", members,10
+        );
+        chatRoom = ChatRoom.create(dto);
     }
 
     @Test
     @DisplayName("채팅방 만들기 성공")
     void createChatRoom_success() {
-        CreateChatRoomDto dto = getRoomDto();
         when(chatRoomRepository.save(any(ChatRoom.class))).thenReturn(mockChatRoom);
-
+        when(mockChatRoom.getRoomId()).thenReturn("room1");
         chatRoomService.createChatRoom(dto);
 
         verify(chatRoomRepository, times(1)).save(any(ChatRoom.class));
     }
 
     @Test
-    @DisplayName("채팅방 입장 성공")
-    void enterChatRoom_success() {
-        String roomId = "room1";
-        String username = "user1";
-        Member mockMember = mock(Member.class);
-        ChatRoom mockChatRoom = mock(ChatRoom.class);
-        doReturn(Optional.of(mockMember)).when(memberRepository).findByUsername(username);
-        doReturn(Optional.of(mockChatRoom)).when(chatRoomRepository).findByRoomId(roomId);
+    @DisplayName("채팅방 만들기 실패 - 유저 수가 너무 많음")
+    void createChatRoom_fail() {
+        CreateChatRoomDto dto = CreateChatRoomDto.of(
+                "room1", LocalDateTime.now(),"user1", new HashSet<>(),-1
+        );
+        doThrow(new ChatRoomException(ChatErrorCode.MAX_MEMBERS_EXCEEDED, "채팅방 인원수가 너무 많습니다."))
+                .when(chatRoomValidator).validateCreateChatRoom(any(CreateChatRoomDto.class));
 
-        chatRoomService.enterChatRoom(roomId,username);
-
-        // verify를 사용하여 메서드 호출 횟수 검증
-        verify(chatRoomRepository, times(1)).findByRoomId(roomId);
-        verify(memberRepository, times(1)).findByUsername(username);
-        verify(chatRoomRepository,times(1)).save(any(ChatRoom.class));
+        assertThrows(ChatRoomException.class, () -> chatRoomService.createChatRoom(dto));
     }
 
+    @Test
+    @DisplayName("채팅방 유저 추가 성공")
+    void addChatMembers_success() {
+        String roomId = "room1";
+        String nickname = "nickname1";
+        Member member = Member.builder().nickname(nickname).build();
+        doReturn(true).when(memberRepository).existsByNickname(nickname);
+        when(mongoTemplate.findAndModify(any(Query.class), any(Update.class),
+                any(FindAndModifyOptions.class), eq(ChatRoom.class)))
+                .thenReturn(chatRoom);
+
+        chatRoomService.addChatMembers(roomId,nickname);
+
+        verify(mongoTemplate,times(1)).findAndModify(any(Query.class), any(Update.class),
+                any(FindAndModifyOptions.class), eq(ChatRoom.class));
+    }
 
     @Test
-    @DisplayName("채팅방 입장 실패 - 존재하지 않는 유저")
-    void testEnterChatRoom_UnknownUser() {
+    @DisplayName("채팅방 유저 추가 실패 - 존재하지 않는 유저")
+    void addChatMembers_fail_UnknownUser() {
         String roomId = "room1";
-        String username = "user1";
-
+        String nickname = "nickname1";
         AuthenticationException exception = assertThrows(AuthenticationException.class, () -> {
-            chatRoomService.enterChatRoom(roomId, username);
+            chatRoomService.addChatMembers(roomId, nickname);
         });
 
         assertEquals(AuthenticationErrorCode.UNKNOWN_USER, exception.getErrorCode());
     }
 
     @Test
-    @DisplayName("채팅방 입장 실패 - 존재하지 않는 채팅방")
-    void testEnterChatRoom_RoomNotFound() {
+    @DisplayName("채팅방 유저 추가 실패 - 존재하지 않는 채팅방")
+    void addChatMembers_fail_RoomNotFound() {
         String roomId = "room1";
-        String username = "user1";
-        Member mockMember = mock(Member.class);
-        doReturn(Optional.of(mockMember)).when(memberRepository).findByUsername(username);
+        String nickname = "nickname1";
+        doThrow(new ChatRoomException(ChatErrorCode.NOT_EXIST_ROOM, "존재하지 않는 채팅방입니다."))
+                .when(chatRoomValidator).validateChatRoomExists(roomId);
 
-        RoomNotFoundException exception = assertThrows(RoomNotFoundException.class, () -> {
-            chatRoomService.enterChatRoom(roomId, username);
+        ChatRoomException exception = assertThrows(ChatRoomException.class, () -> {
+            chatRoomService.addChatMembers(roomId, nickname);
         });
 
         assertEquals(ChatErrorCode.NOT_EXIST_ROOM, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("채팅방에서 나가기 성공")
+    void removeChatMembers_success() {
+        String roomId = "room1";
+        String nickname = "han";
+        doReturn(Optional.of(chatRoom)).when(chatRoomRepository).findByRoomId(roomId);
+        doReturn(true).when(memberRepository).existsByNickname(nickname);
+        when(mongoTemplate.findAndModify(any(Query.class), any(Update.class),
+                any(FindAndModifyOptions.class), eq(ChatRoom.class)))
+                .thenReturn(chatRoom);
+
+        chatRoomService.removeChatMember(roomId,nickname);
+
+        verify(mongoTemplate,times(1)).findAndModify(any(Query.class), any(Update.class),
+                any(FindAndModifyOptions.class), eq(ChatRoom.class));
+    }
+
+    @Test
+    @DisplayName("채팅방에서 나가기 실패 - 존재하지 않는 채팅방")
+    void removeChatMembers_fail_ChatRoomNotFound() {
+        String roomId = "room1";
+        String username = "user1";
+        doReturn(Optional.empty()).when(chatRoomRepository).findByRoomId(roomId);
+
+        ChatRoomException exception = assertThrows(ChatRoomException.class, () -> {
+            chatRoomService.removeChatMember(roomId, username);
+        });
+
+        assertEquals(ChatErrorCode.NOT_EXIST_ROOM, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("채팅방에서 나가기 실패 - 존재하지 않는 유저")
+    void removeChatMembers_fail_UnknownUser() {
+        String roomId = "room1";
+        String username = "user1";
+        doReturn(Optional.of(chatRoom)).when(chatRoomRepository).findByRoomId(roomId);
+        AuthenticationException exception = assertThrows(AuthenticationException.class, () -> {
+            chatRoomService.removeChatMember(roomId, username);
+        });
+
+        assertEquals(AuthenticationErrorCode.UNKNOWN_USER, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("채팅방에서 나가기 실패 - 채팅방에 속하지 않은 유저")
+    void removeChatMembers_fail_UserNotInChatRoom() {
+        String roomId = "room1";
+        String nickname = "notExistName";
+        // 유저와 채팅방이 모두 존재하지만, 유저가 채팅방에 속하지 않은 경우
+        doReturn(Optional.of(chatRoom)).when(chatRoomRepository).findByRoomId(roomId);
+        doReturn(true).when(memberRepository).existsByNickname(nickname);
+        doThrow(new ChatRoomException(ChatErrorCode.USER_NOT_IN_ROOM, "해당 유저는 이 채팅방의 멤버가 아닙니다."))
+                .when(chatRoomValidator).validateMemberInChatRoom(chatRoom,nickname);
+
+        ChatRoomException exception = assertThrows(ChatRoomException.class, () -> {
+            chatRoomService.removeChatMember(roomId, nickname);
+        });
+
+        assertEquals(ChatErrorCode.USER_NOT_IN_ROOM, exception.getErrorCode());
     }
 
     @Test
@@ -165,71 +245,152 @@ class ChatRoomServiceImplTest {
     @DisplayName("특정 채팅방 조회 성공")
     void getChatRoom_success() {
         String roomId = "room1";
-        ChatRoom mockChatRoom = mock(ChatRoom.class);
-        doReturn(Optional.of(mockChatRoom)).when(chatRoomRepository).findByRoomId(roomId);
+        doReturn(Optional.of(chatRoom)).when(chatRoomRepository).findByRoomId(roomId);
 
-        assertThat(chatRoomService.getChatRoom(roomId)).isEqualTo(mockChatRoom);
+        assertThat(chatRoomService.getChatRoom(roomId)).isEqualTo(chatRoom);
     }
 
     @Test
     @DisplayName("특정 채팅방 조회 실패 - 존재하지 않는 채팅방")
     void getChatRoom_fail() {
         String roomId = "room1";
-        RoomNotFoundException result = assertThrows(RoomNotFoundException.class, () -> {
+        ChatRoomException result = assertThrows(ChatRoomException.class, () -> {
             chatRoomService.getChatRoom(roomId);
         });
         assertThat(result.getErrorCode()).isEqualTo(ChatErrorCode.NOT_EXIST_ROOM);
     }
 
     @Test
-    @DisplayName("채팅 추가 성공")
-    void addChatMessage_success() {
+    @DisplayName("채팅방 삭제 성공")
+    void deleteChatRoom_success() {
         String roomId = "room1";
-        ChatMessage mockChatMessage = mock(ChatMessage.class);
-        // mock 객체가 아니라서 doReturn 사용하지 않는다.
-        ChatRoom chatRoom = ChatRoom.builder()
-                .roomId(roomId)
-                .messages(new ArrayList<>())
-                .build();
-        when(mockChatMessage.getRoomId()).thenReturn(roomId);
+        String username = "user1";
         doReturn(Optional.of(chatRoom)).when(chatRoomRepository).findByRoomId(roomId);
+        doReturn(Optional.of(mockMember)).when(memberRepository).findByUsername(username);
 
-        chatRoomService.addChatMessage(mockChatMessage);
-
-        verify(chatRoomRepository, times(1)).findByRoomId(roomId);
-        verify(chatRoomRepository, times(1)).save(chatRoom);
-        assertTrue(chatRoom.getMessages().contains(mockChatMessage));
+        chatRoomService.deleteChatRoom(roomId,username);
     }
 
     @Test
-    @DisplayName("채팅 추가 실패 - 채팅이 null 값임")
-    void addChatMessage_fail() {
-        assertThrows(NullPointerException.class, () -> chatRoomService.addChatMessage(null));
-    }
-
-    @Test
-    @DisplayName("채팅 추가 실패 - 메세지에 roomId가 없음")
-    void addChatMessage_fail_nullRoomId() {
-        ChatMessage mockChatMessage = mock(ChatMessage.class);
-        when(mockChatMessage.getRoomId()).thenReturn(null);
-
-        assertThrows(RoomNotFoundException.class, () -> chatRoomService.addChatMessage(mockChatMessage));
-    }
-
-    @Test
-    @DisplayName("채팅 추가 실패 - 데이터베이스 저장 문제 발생")
-    void addChatMessage_fail_databaseSaveFailure() {
+    @DisplayName("채팅방 삭제 실패 - 존재하지 않는 채팅방임")
+    void removeChatMember_chatRoomDoesNotExist() {
         String roomId = "room1";
-        ChatMessage mockChatMessage = mock(ChatMessage.class);
-        when(mockChatMessage.getRoomId()).thenReturn(roomId);
+        String username = "user1";
 
-        ChatRoom chatRoom = ChatRoom.builder()
-                .roomId(roomId)
-                .messages(new ArrayList<>())
-                .build();
+        when(chatRoomRepository.findByRoomId(roomId)).thenReturn(Optional.empty());
 
-        doReturn(Optional.of(chatRoom)).when(chatRoomRepository).findByRoomId(roomId);
-        doThrow(new CommonException(CommonErrorCode.DATA_ACCESS_ERROR)).when(chatRoomRepository).save(chatRoom);
-        assertThrows(CommonException.class, () -> chatRoomService.addChatMessage(mockChatMessage));
+        ChatRoomException result = assertThrows(ChatRoomException.class, () -> {
+            chatRoomService.deleteChatRoom(roomId, username);
+        });
+
+        assertThat(result.getErrorCode()).isEqualTo(ChatErrorCode.NOT_EXIST_ROOM);
+    }
+
+    @Test
+    @DisplayName("채팅방 삭제 실패 - 존재하지 않는 유저임")
+    void removeChatMember_fail_userDoesNotExist() {
+        String roomId = "room1";
+        String username = "user1";
+
+        when(chatRoomRepository.findByRoomId(roomId)).thenReturn(Optional.of(chatRoom));
+
+        AuthenticationException result = assertThrows(AuthenticationException.class, () -> {
+            chatRoomService.deleteChatRoom(roomId, username);
+        });
+
+        assertThat(result.getErrorCode()).isEqualTo(AuthenticationErrorCode.UNKNOWN_USER);
+    }
+
+    @Test
+    @DisplayName("채팅방 삭제 실패 - 채팅방에 없는 유저임")
+    void removeChatMember_fail_userNotInChatRoom() {
+        String roomId = "room1";
+        String username = "user1";
+        String failNickname = "fail";
+        String creator = "user1";
+        when(chatRoomRepository.findByRoomId(roomId)).thenReturn(Optional.of(mockChatRoom));
+        when(memberRepository.findByUsername(username)).thenReturn(Optional.of(mockMember));
+        when(mockMember.getNickname()).thenReturn(failNickname);
+        when(mockChatRoom.getCreatedBy()).thenReturn(creator);
+        doThrow(new ChatManageException(ChatErrorCode.USER_NOT_IN_ROOM)).when(chatRoomValidator)
+                .validateChatRoomCreator(failNickname,creator);
+
+        ChatManageException result = assertThrows(ChatManageException.class, () -> {
+            chatRoomService.deleteChatRoom(roomId, username);
+        });
+
+        assertThat(result.getErrorCode()).isEqualTo(ChatErrorCode.USER_NOT_IN_ROOM);
+    }
+
+    @Test
+    @DisplayName("채팅방 삭제 실패 - Data Access Error")
+    void removeChatMember_dataAccessError() {
+        String roomId = "room1";
+        String username = "user1";
+        when(chatRoomRepository.findByRoomId(roomId)).thenReturn(Optional.of(chatRoom));
+        when(memberRepository.findByUsername(username)).thenReturn(Optional.of(mockMember));
+
+        when(mongoTemplate.remove(any(Query.class),eq(ChatRoom.class)))
+                .thenThrow(new CommonException(CommonErrorCode.DATA_ACCESS_ERROR));
+
+        CommonException result = assertThrows(CommonException.class, () -> {
+            chatRoomService.deleteChatRoom(roomId, username);
+        });
+
+        assertThat(result.getErrorCode()).isEqualTo(CommonErrorCode.DATA_ACCESS_ERROR);
+    }
+
+    @Test
+    @DisplayName("채팅 가져오기 성공")
+    void getChatMessage_success(){
+        String roomId = "roomId";
+        doReturn(Optional.of(ChatRoom.builder().build())).when(chatRoomRepository).findByRoomId(roomId);
+        chatRoomService.getChatMessages(roomId);
+    }
+
+    @Test
+    @DisplayName("채팅 가져오기 실패 - 존재하지 않는 채팅방임")
+    void getChatMessage_fail(){
+        String roomId = "roomId";
+        doThrow(new ChatRoomException(ChatErrorCode.NOT_EXIST_ROOM)).when(chatRoomRepository).findByRoomId(roomId);
+        ChatRoomException exception = assertThrows(ChatRoomException.class,
+                () -> chatRoomService.getChatMessages(roomId));
+        assertEquals(ChatErrorCode.NOT_EXIST_ROOM, exception.getErrorCode());
+    }
+    @Test
+    @DisplayName("채팅 이미지 업로드 성공")
+    void uploadChatImage_success() {
+        // given
+        String username = "testuser";
+        String endpointUrl = "https://minio-endpoint.com";
+        String bucketName = "bucket-name";
+
+        MockMultipartFile file = new MockMultipartFile("file", "test.png", "image/png", "some-image-content".getBytes());
+        String expectedAddress = bucketName + "/" + "chat/" + username + "/test.png";
+        String expectedUrl = endpointUrl + "/" + expectedAddress;
+        ReflectionTestUtils.setField(chatRoomService, "endpointUrl", endpointUrl);
+
+        // when
+        when(minioRepository.uploadFile(any(MultipartFile.class), any(MinioSaveInfoDto.class)))
+                .thenReturn(expectedAddress);
+
+        String actualUrl = chatRoomService.uploadChatImage(file, username);
+
+        // then
+        assertEquals(expectedUrl, actualUrl);
+        verify(minioRepository, times(1)).uploadFile(eq(file), any(MinioSaveInfoDto.class));
+    }
+
+    @Test
+    @DisplayName("채팅 이미지 업로드 실패 - minio save 실패")
+    void uploadChatImage_fail() {
+        MockMultipartFile file = new MockMultipartFile("file", "test.png", "image/png", "some-image-content".getBytes());
+        doThrow(new RuntimeException("error occur : message")).when(minioRepository)
+                .uploadFile(any(MultipartFile.class), any(MinioSaveInfoDto.class));
+
+        assertThatThrownBy(() -> chatRoomService.uploadChatImage(file,"testuser"))
+                .isInstanceOf(ChatManageException.class)
+                .extracting("errorCode")
+                .isEqualTo(ChatErrorCode.CHAT_IMAGE_ERROR);
     }
 }

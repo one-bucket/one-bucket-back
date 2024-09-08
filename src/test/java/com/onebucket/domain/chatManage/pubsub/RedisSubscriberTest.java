@@ -3,6 +3,7 @@ package com.onebucket.domain.chatManage.pubsub;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onebucket.domain.chatManage.domain.ChatMessage;
+import com.onebucket.domain.chatManage.dto.chatmessage.ChatMessageDto;
 import com.onebucket.global.exceptionManage.customException.chatManageException.ChatManageException;
 import com.onebucket.global.exceptionManage.errorCode.ChatErrorCode;
 import org.junit.jupiter.api.DisplayName;
@@ -71,7 +72,7 @@ class RedisSubscriberTest {
         ChatMessage chatMessage = new ChatMessage();
         chatMessage.setRoomId("roomId");
         chatMessage.setMessage("test message");
-
+        ChatMessageDto messageDto = ChatMessageDto.from(chatMessage);
         String publishMessage = "serialized message";
         byte[] messageBody = publishMessage.getBytes(StandardCharsets.UTF_8);
         Message message = mock(Message.class);
@@ -79,13 +80,13 @@ class RedisSubscriberTest {
         when(message.getBody()).thenReturn(messageBody);
         when(redisTemplate.getStringSerializer()).thenReturn(redisSerializer);
         when(redisSerializer.deserialize(messageBody)).thenReturn(publishMessage);
-        when(objectMapper.readValue(publishMessage, ChatMessage.class)).thenReturn(chatMessage);
+        when(objectMapper.readValue(publishMessage, ChatMessageDto.class)).thenReturn(messageDto);
 
         // when
         redisSubscriber.onMessage(message, null);
 
         // then
-        verify(messagingTemplate, times(1)).convertAndSend("/sub/chat/room/" + chatMessage.getRoomId(), chatMessage);
+        verify(messagingTemplate, times(1)).convertAndSend("/sub/chat/room/" + messageDto.roomId(), messageDto);
     }
 
     @Test
@@ -99,7 +100,7 @@ class RedisSubscriberTest {
         when(message.getBody()).thenReturn(messageBody);
         when(redisTemplate.getStringSerializer()).thenReturn(redisSerializer);
         when(redisSerializer.deserialize(messageBody)).thenReturn(publishMessage);
-        when(objectMapper.readValue(publishMessage, ChatMessage.class)).thenThrow(new JsonProcessingException("Invalid JSON") {});
+        when(objectMapper.readValue(publishMessage, ChatMessageDto.class)).thenThrow(new JsonProcessingException("Invalid JSON") {});
 
         // when & then
         ChatManageException exception = assertThrows(ChatManageException.class, () -> {
@@ -117,7 +118,7 @@ class RedisSubscriberTest {
         ChatMessage chatMessage = new ChatMessage();
         chatMessage.setRoomId("roomId");
         chatMessage.setMessage("test message");
-
+        ChatMessageDto messageDto = ChatMessageDto.from(chatMessage);
         String publishMessage = "doing messaging error";
         byte[] messageBody = publishMessage.getBytes(StandardCharsets.UTF_8);
         Message message = mock(Message.class);
@@ -125,8 +126,8 @@ class RedisSubscriberTest {
         when(message.getBody()).thenReturn(messageBody);
         when(redisTemplate.getStringSerializer()).thenReturn(redisSerializer);
         when(redisSerializer.deserialize(messageBody)).thenReturn(publishMessage);
-        when(objectMapper.readValue(publishMessage, ChatMessage.class)).thenReturn(chatMessage);
-        doThrow(new MessagingException("test exception")).when(messagingTemplate).convertAndSend(anyString(), any(ChatMessage.class));
+        when(objectMapper.readValue(publishMessage, ChatMessageDto.class)).thenReturn(messageDto);
+        doThrow(new MessagingException("test exception")).when(messagingTemplate).convertAndSend(anyString(), any(ChatMessageDto.class));
 
         // when & then
         ChatManageException exception = assertThrows(ChatManageException.class, () -> {
