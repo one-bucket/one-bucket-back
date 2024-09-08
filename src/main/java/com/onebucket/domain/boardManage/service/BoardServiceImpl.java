@@ -81,6 +81,10 @@ public class BoardServiceImpl implements BoardService {
         }
     }
 
+    /*TODO : maybe, need to change logic that create new Board.
+       Too many search transaction on university and board type by same entity.
+       Need to add caching method or algorithm.
+     */
     @Override
     @Transactional
     public List<CreateBoardsDto> createBoards() {
@@ -98,12 +102,14 @@ public class BoardServiceImpl implements BoardService {
 
         for(BoardIdsDto dto : savedBoardData) {
             Long key = generateCombinationKey(dto.getUniversityId(), dto.getBoardTypeId());
+
             setOfAll.add(key);
         }
 
         for(Long universityId : universityIds) {
             for(Long boardTypeId : boardTypeIds) {
                 Long key = generateCombinationKey(universityId, boardTypeId);
+
                 if(!setOfAll.contains(key)) {
                     University university = universityRepository.findById(universityId).orElseThrow(() ->
                             new UniversityManageException(UniversityErrorCode.NOT_EXIST_UNIVERSITY));
@@ -122,19 +128,24 @@ public class BoardServiceImpl implements BoardService {
             }
         }
 
-        List<Board> savedBoard = boardRepository.saveAll(boardsToSave);
-        for(Board board : savedBoard) {
-            CreateBoardsDto boardInfo = CreateBoardsDto.builder()
-                    .id(board.getId())
-                    .boardName(board.getName())
-                    .boardType(board.getBoardType().getName())
-                    .university(board.getUniversity().getName())
-                    .build();
+        try {
+            List<Board> savedBoard = boardRepository.saveAll(boardsToSave);
+            for (Board board : savedBoard) {
+                CreateBoardsDto boardInfo = CreateBoardsDto.builder()
+                        .id(board.getId())
+                        .boardName(board.getName())
+                        .boardType(board.getBoardType().getName())
+                        .university(board.getUniversity().getName())
+                        .build();
 
-            savedInfo.add(boardInfo);
+                savedInfo.add(boardInfo);
+            }
+
+            return savedInfo;
+        } catch(DataIntegrityViolationException e) {
+            throw new BoardManageException(BoardErrorCode.DUPLICATE_BOARD);
         }
 
-        return savedInfo;
     }
 
     @Override
