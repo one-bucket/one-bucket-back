@@ -2,7 +2,6 @@ package com.onebucket.connectionTest;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
@@ -29,7 +28,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * 2024-08-12        SeungHoon              init create
  * </pre>
  */
-@DataMongoTest
+
+@SpringBootTest
 public class MongoConnectTest {
 
     @Autowired
@@ -49,7 +49,9 @@ public class MongoConnectTest {
         assertEquals(document.getValue(), retrievedDocument.getValue());
     }
 
+
     static class TestDocument {
+
         private String id;
         private String value;
 
