@@ -138,14 +138,15 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public University usernameToUniversity(String username) {
-        University university = University.builder()
-                .name("null")
-                .email("null")
-                .address("null")
-                .build();
-        return Optional.ofNullable(memberRepository.findByUsername(username)
+
+        University university = Optional.ofNullable(memberRepository.findByUsername(username)
                 .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER)).getUniversity())
-                .orElse(university);
+                .orElseThrow(() -> new UniversityException(UniversityErrorCode.NOT_EXIST_UNIVERSITY));
+
+        if(university.getName().equals("null")) {
+            throw new UniversityException(UniversityErrorCode.NOT_EXIST_UNIVERSITY);
+        }
+        return university;
     }
 
     @Transactional
