@@ -26,5 +26,5 @@ import lombok.experimental.SuperBuilder;
  */
 
 @SuperBuilder
-public class ResponseBoardListDto extends BoardIdAndNameDto {
+public class ResponseBoardIdAndNameDto extends BoardIdAndNameDto {
 }

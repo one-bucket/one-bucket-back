@@ -1,6 +1,7 @@
 package com.onebucket.domain.boardManage.api;
 
 import com.onebucket.domain.boardManage.dto.internal.board.BoardIdAndNameDto;
+import com.onebucket.domain.boardManage.dto.response.ResponseBoardIdAndNameDto;
 import com.onebucket.domain.boardManage.service.BoardService;
 import com.onebucket.domain.memberManage.service.MemberService;
 import com.onebucket.global.utils.SecurityUtils;
@@ -44,9 +45,22 @@ public class BoardController {
     private final SecurityUtils securityUtils;
 
     @GetMapping("/list")
-    public ResponseEntity<List<BoardIdAndNameDto>> getBoardList() {
+    public ResponseEntity<List<ResponseBoardIdAndNameDto>> getBoardList() {
         String username = securityUtils.getCurrentUsername();
         Long univId = memberService.usernameToUniversity(username).getId();
 
+        List<BoardIdAndNameDto> boardLists = boardService.getBoardList(univId);
+
+        List<ResponseBoardIdAndNameDto> results = boardLists.stream().map(this::convertToResponseDto).toList();
+
+        return ResponseEntity.ok(results);
+
+    }
+
+    private ResponseBoardIdAndNameDto convertToResponseDto(BoardIdAndNameDto dto) {
+        return ResponseBoardIdAndNameDto.builder()
+                .id(dto.getId())
+                .name(dto.getName())
+                .build();
     }
 }
