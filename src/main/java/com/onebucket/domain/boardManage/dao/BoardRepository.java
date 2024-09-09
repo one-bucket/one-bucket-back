@@ -33,7 +33,7 @@ import java.util.List;
 @Repository
 public interface BoardRepository extends JpaRepository<Board, Long> {
 
-    @Query("SELECT new com.onebucket.domain.boardManage.dto.internal.board.BoardIdsDto(b.university.id, b.boardType.id) FROM Board b")
+    @Query("SELECT DISTINCT new com.onebucket.domain.boardManage.dto.internal.board.BoardIdsDto(b.university.id, b.boardType.id) FROM Board b")
     List<BoardIdsDto> findAllBoardUniversityAndBoardTypeIds();
 
 }

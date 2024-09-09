@@ -47,7 +47,7 @@ public class Board {
     private University university;
 
     @ManyToOne
-    @JoinColumn(name = "board_type_id")
+    @JoinColumn(name = "board_type_id", nullable = false)
     private BoardType boardType;
 
     private String name;

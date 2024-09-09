@@ -58,7 +58,6 @@ public class PostServiceImpl implements PostService {
     private final BoardRepository boardRepository;
     private final MemberRepository memberRepository;
     private final SecurityUtils securityUtils;
-    private final RandomStringUtils randomStringUtils;
     private final CommentRepository commentRepository;
 
 
@@ -72,18 +71,17 @@ public class PostServiceImpl implements PostService {
 
         securityUtils.isUserUniversityMatchingBoard(univId, board);
 
-        Long postId = randomStringUtils.generateId(univId);
+
 
         Post post = Post.builder()
-                .id(postId)
                 .author(member)
                 .title(dto.getTitle())
                 .text(dto.getText())
                 .board(board)
                 .build();
-        postRepository.save(post);
+        Post savedPost = postRepository.save(post);
 
-        return postId;
+        return savedPost.getId();
     }
 
     @Override
@@ -114,9 +112,8 @@ public class PostServiceImpl implements PostService {
 
 
 
-        Long id = randomStringUtils.generateId(1L);
+
         Comment comment = Comment.builder()
-                .id(id)
                 .author(member)
                 .text(dto.getText())
                 .isModified(false)

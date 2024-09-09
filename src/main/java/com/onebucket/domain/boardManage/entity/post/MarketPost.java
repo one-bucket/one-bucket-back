@@ -1,8 +1,11 @@
 package com.onebucket.domain.boardManage.entity.post;
 
+import jakarta.persistence.DiscriminatorColumn;
+import jakarta.persistence.DiscriminatorType;
 import jakarta.persistence.Entity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 /**
  * <br>package name   : com.onebucket.domain.boardManage.entity
@@ -29,7 +32,10 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor
+@SuperBuilder
 public class MarketPost extends Post {
+
+
 
     private String item;
     private int joins;
