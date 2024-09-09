@@ -148,6 +148,45 @@ class BoardServiceTest {
                 .isEqualTo(BoardErrorCode.DUPLICATE_BOARD);
     }
 
+    @Test
+    @DisplayName("createBoards - success")
+    void testCreateBoards_success() {
+        List<Long> boardTypeIds = new ArrayList<>() {
+            {
+                for(Long i = 101L; i <= 110L; i++) {
+                    add(i);
+                }
+            }
+        };
+
+        List<Long> universityIds = new ArrayList<>() {
+            {
+                for(Long i = 101L; i <= 110L; i++) {
+                    add(i);
+                }
+            }
+        };
+
+        List<BoardIdsDto> boardIdsDtos = new ArrayList<>() {
+            {
+                for(Long i = 101L; i <= 103L; i++) {
+                    for(Long j = 101L; j <= 104L; j++) {
+                        BoardIdsDto boardIdsDto = BoardIdsDto.builder()
+                                .boardTypeId(i)
+                                .universityId(j)
+                                .build();
+                        add(boardIdsDto);
+                    }
+
+                }
+            }
+        };
+
+        when(boardTypeRepository.findAllBoardTypeIds()).thenReturn(boardTypeIds);
+
+
+    }
+
 
 
 
