@@ -14,24 +14,14 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * packageName : <span style="color: orange;">com.onebucket.domain.boardManage.api</span> <br>
- * name : <span style="color: orange;">BoardController</span> <br>
- * <p>
- * <span style="color: white;">[description]</span>
- * </p>
- * see Also: <br>
- *
+ * <br>package name   : com.onebucket.domain.boardManage.api
+ * <br>file name      : BoardController
+ * <br>date           : 2024-09-09
  * <pre>
- * code usage:
- * {@code
- *
- * }
- * modified log:
- * ==========================================================
- * DATE          Author           Note
- * ----------------------------------------------------------
- * 9/9/24        isanghyeog         first create
- *
+ * <span style="color: white;">[description]</span>
+ * admin이 아닌 사용자 시점에서 사용되는 API에 대한 컨트롤러이다. 구현된 코드는 다음과 같다.
+ * GET /board/list
+ *    -> List<{@link ResponseBoardIdAndNameDto}>
  * </pre>
  */
 
@@ -44,6 +34,13 @@ public class BoardController {
     private final MemberService memberService;
     private final SecurityUtils securityUtils;
 
+
+    /**
+     * 현재 사용자가 접근 가능한 board 의 list를 반환한다. 사용자의 대학 정보를 기반으로 해당하는 board를 가져온다.
+     *
+     * @tested true
+     * @return List of name and id of board
+     */
     @GetMapping("/list")
     public ResponseEntity<List<ResponseBoardIdAndNameDto>> getBoardList() {
         String username = securityUtils.getCurrentUsername();
