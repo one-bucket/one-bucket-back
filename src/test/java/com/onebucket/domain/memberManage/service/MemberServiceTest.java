@@ -344,6 +344,7 @@ public class MemberServiceTest {
         String username = "username";
         when(memberRepository.findByUsername(username)).thenReturn(Optional.of(mockMember));
         when(mockMember.getUniversity()).thenReturn(mockUniversity);
+        when(mockUniversity.getName()).thenReturn("name");
 
         University result = memberService.usernameToUniversity(username);
 
