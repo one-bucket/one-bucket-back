@@ -4,6 +4,8 @@ import com.onebucket.domain.paymentManage.domain.Payment;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * <br>package name   : com.onebucket.domain.paymentManage.dao
  * <br>file name      : PaymentRepository
@@ -27,5 +29,5 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
-    Payment findByMember(Long memberId);
+    List<Payment> findByBuyerId(Long buyerId);
 }

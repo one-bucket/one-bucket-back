@@ -13,6 +13,8 @@ import com.onebucket.global.exceptionManage.customException.memberManageExceptoi
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.yaml.snakeyaml.error.Mark;
 
 import java.util.List;
 
@@ -45,6 +47,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final MarketPostRepository marketPostRepository;
 
     @Override
+    @Transactional
     public Long createPayment(CreatePaymentDto dto) {
         Member member = memberRepository.findByUsername(dto.username())
                 .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
@@ -57,7 +60,17 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public List<ResponsePaymentDto> getMemberPayment() {
-        List<Payment> lists = paymentRepository
+    @Transactional(readOnly = true)
+    public List<ResponsePaymentDto> getMemberPayment(String username) {
+        Member member = memberRepository.findByUsername(username)
+                .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
+        Long buyerId = member.getId();
+        List<Payment> paymentList = paymentRepository.findByBuyerId(buyerId);
+        return paymentList.stream()
+                .map(payment -> {
+                    MarketPost marketPost = payment.getMarketPost();
+                    return ResponsePaymentDto.of(marketPost,payment);
+                })
+                .toList();
     }
 }

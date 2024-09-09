@@ -1,5 +1,8 @@
 package com.onebucket.domain.paymentManage.dto.response;
 
+import com.onebucket.domain.boardManage.entity.post.MarketPost;
+import com.onebucket.domain.paymentManage.domain.Payment;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -31,4 +34,7 @@ public record ResponsePaymentDto(
         BigDecimal amount,
         LocalDateTime createdAt
 ) {
+    public static ResponsePaymentDto of(MarketPost marketPost, Payment payment) {
+        return new ResponsePaymentDto(payment.getBuyer().getNickname(), marketPost.getTitle(), marketPost.getItem(), payment.getAmount(),payment.getCreatedAt());
+    }
 }

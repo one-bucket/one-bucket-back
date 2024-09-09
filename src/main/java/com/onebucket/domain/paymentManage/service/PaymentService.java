@@ -30,5 +30,5 @@ import java.util.List;
  */
 public interface PaymentService {
     Long createPayment(CreatePaymentDto dto);
-    List<ResponsePaymentDto> getMemberPayment();
+    List<ResponsePaymentDto> getMemberPayment(String username);
 }

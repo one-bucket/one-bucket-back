@@ -7,9 +7,12 @@ import com.onebucket.domain.paymentManage.service.PaymentService;
 import com.onebucket.global.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * <br>package name   : com.onebucket.domain.paymentManage.controller
@@ -44,5 +47,12 @@ public class PaymentController {
         CreatePaymentDto dto = CreatePaymentDto.of(username,request);
         Long id = paymentService.createPayment(dto);
         return ResponseEntity.ok(id);
+    }
+
+    @GetMapping("/payments")
+    public ResponseEntity<List<ResponsePaymentDto>> getMemberPayments() {
+        String username = securityUtils.getCurrentUsername();
+        List<ResponsePaymentDto> response = paymentService.getMemberPayment(username);
+        return ResponseEntity.ok(response);
     }
 }

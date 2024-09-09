@@ -48,7 +48,7 @@ public class Payment {
     private Member buyer;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "market_post_id")  // 외래 키 설정
+    @JoinColumn(name = "market_post_id")
     private MarketPost marketPost;  // 어떤 판매글에 대한 결제인지
 
     @Column(scale = 2)  // 소수점 이하 두 자리까지 허용
