@@ -1,5 +1,7 @@
 package com.onebucket.domain.boardManage.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -29,8 +31,18 @@ import lombok.Getter;
 @Builder
 public class RequestCreateBoardDto {
 
+    @NotBlank
+    @Size(min = 3, max = 10, message = "name of board must be over 3 under 10")
     private String name;
+
+    @NotBlank
+    @Size(min = 3, max = 10, message = "name of university must be over 3 under 10")
     private String university;
+
+    @NotBlank
+    @Size(min = 3, max = 10, message = "name of board type must be over 3 under 10")
     private String boardType;
+
+
     private String description;
 }
