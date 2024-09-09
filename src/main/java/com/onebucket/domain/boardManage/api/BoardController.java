@@ -1,45 +1,36 @@
 package com.onebucket.domain.boardManage.api;
 
-import com.onebucket.domain.boardManage.dto.internal.board.CreateBoardDto;
-import com.onebucket.domain.boardManage.dto.internal.board.CreateBoardTypeDto;
-import com.onebucket.domain.boardManage.dto.internal.board.CreateBoardsDto;
-import com.onebucket.domain.boardManage.dto.request.RequestCreateBoardDto;
-import com.onebucket.domain.boardManage.dto.request.RequestCreateBoardTypeDto;
-import com.onebucket.domain.boardManage.dto.response.ResponseCreateBoardsDto;
+import com.onebucket.domain.boardManage.dto.internal.board.BoardIdAndNameDto;
 import com.onebucket.domain.boardManage.service.BoardService;
-import com.onebucket.global.utils.SuccessResponseDto;
-import com.onebucket.global.utils.SuccessResponseWithIdDto;
-import jakarta.validation.Valid;
+import com.onebucket.domain.memberManage.service.MemberService;
+import com.onebucket.global.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
- * <br>package name   : com.onebucket.domain.boardManage.api
- * <br>file name      : BoardController
- * <br>date           : 2024-08-08
- * <pre>
+ * packageName : <span style="color: orange;">com.onebucket.domain.boardManage.api</span> <br>
+ * name : <span style="color: orange;">BoardController</span> <br>
+ * <p>
  * <span style="color: white;">[description]</span>
+ * </p>
+ * see Also: <br>
  *
- * </pre>
  * <pre>
- * <span style="color: white;">usage:</span>
+ * code usage:
  * {@code
  *
- * } </pre>
- * <pre>
- * modified log :
- * ====================================================
- * DATE           AUTHOR               NOTE
- * ----------------------------------------------------
- * 2024-08-08        jack8              init create
+ * }
+ * modified log:
+ * ==========================================================
+ * DATE          Author           Note
+ * ----------------------------------------------------------
+ * 9/9/24        isanghyeog         first create
+ *
  * </pre>
  */
 
@@ -49,51 +40,13 @@ import java.util.List;
 public class BoardController {
 
     private final BoardService boardService;
+    private final MemberService memberService;
+    private final SecurityUtils securityUtils;
 
-    @PostMapping("/create")
-    ResponseEntity<SuccessResponseWithIdDto> createBoard(@RequestBody @Valid RequestCreateBoardDto dto) {
-        CreateBoardDto createBoardDto = CreateBoardDto.builder()
-                .name(dto.getName())
-                .boardType(dto.getBoardType())
-                .university(dto.getUniversity())
-                .description(dto.getDescription())
-                .build();
+    @GetMapping("/list")
+    public ResponseEntity<List<BoardIdAndNameDto>> getBoardList() {
+        String username = securityUtils.getCurrentUsername();
+        Long univId = memberService.usernameToUniversity(username).getId();
 
-        Long id = boardService.createBoard(createBoardDto);
-
-        return ResponseEntity.ok(new SuccessResponseWithIdDto("success create board", id));
     }
-
-    @PostMapping("/creates")
-    ResponseEntity<List<ResponseCreateBoardsDto>> createBoards() {
-        List<CreateBoardsDto> results = boardService.createBoards();
-
-        List<ResponseCreateBoardsDto> responses = Collections.synchronizedList(new ArrayList<>());
-
-        for(CreateBoardsDto result : results) {
-            ResponseCreateBoardsDto response = ResponseCreateBoardsDto.builder()
-                    .id(result.getId())
-                    .boardName(result.getBoardName())
-                    .boardType(result.getBoardType())
-                    .university(result.getUniversity())
-                    .build();
-
-            responses.add(response);
-        }
-
-        return ResponseEntity.ok(responses);
-    }
-
-    @PostMapping("/type")
-    ResponseEntity<SuccessResponseDto> createBoardType(@RequestBody @Valid RequestCreateBoardTypeDto dto) {
-        CreateBoardTypeDto createBoardTypeDto = CreateBoardTypeDto.builder()
-                .name(dto.getName())
-                .description(dto.getDescription())
-                .build();
-
-        boardService.createBoardType(createBoardTypeDto);
-
-        return ResponseEntity.ok(new SuccessResponseDto("success create board type"));
-    }
-
 }

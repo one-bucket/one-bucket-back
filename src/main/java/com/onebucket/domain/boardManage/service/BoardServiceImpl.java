@@ -2,10 +2,7 @@ package com.onebucket.domain.boardManage.service;
 
 import com.onebucket.domain.boardManage.dao.BoardRepository;
 import com.onebucket.domain.boardManage.dao.BoardTypeRepository;
-import com.onebucket.domain.boardManage.dto.internal.board.BoardIdsDto;
-import com.onebucket.domain.boardManage.dto.internal.board.CreateBoardDto;
-import com.onebucket.domain.boardManage.dto.internal.board.CreateBoardTypeDto;
-import com.onebucket.domain.boardManage.dto.internal.board.CreateBoardsDto;
+import com.onebucket.domain.boardManage.dto.internal.board.*;
 import com.onebucket.domain.boardManage.entity.Board;
 import com.onebucket.domain.boardManage.entity.BoardType;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
@@ -174,6 +171,11 @@ public class BoardServiceImpl implements BoardService {
         } catch(DataIntegrityViolationException e) {
             throw new AdminManageBoardException(BoardErrorCode.DUPLICATE_BOARD_TYPE);
         }
+    }
+
+    @Override
+    public List<BoardIdAndNameDto>getBoardList(Long univId) {
+        return boardRepository.findBoardIdAndNameByUniversityId(univId);
     }
 
     private Long generateCombinationKey(Long universityId, Long boardTypeId) {
