@@ -1,8 +1,6 @@
 package com.onebucket.domain.memberManage.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -51,4 +49,7 @@ public class Profile {
     private boolean isBasicImage;
 
     private String imageUrl;
+
+    @OneToOne(mappedBy = "profile",fetch = FetchType.LAZY)
+    private Wallet wallet;
 }

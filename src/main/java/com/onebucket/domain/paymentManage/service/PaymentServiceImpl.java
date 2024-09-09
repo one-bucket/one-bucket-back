@@ -9,12 +9,10 @@ import com.onebucket.domain.paymentManage.domain.Payment;
 import com.onebucket.domain.paymentManage.dto.internal.CreatePaymentDto;
 import com.onebucket.domain.paymentManage.dto.response.ResponsePaymentDto;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
-import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.MemberManageException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.yaml.snakeyaml.error.Mark;
 
 import java.util.List;
 
