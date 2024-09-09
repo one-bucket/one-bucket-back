@@ -38,4 +38,6 @@ public interface PostService {
     Page<PostThumbnailDto> getPostsByBoard(GetBoardDto dto);
 
     PostInfoDto getPost(GetPostDto dto);
+
+    void increaseViewCount(Long userId, Long postId);
 }

@@ -5,6 +5,7 @@ import com.onebucket.domain.boardManage.dto.internal.post.*;
 import com.onebucket.domain.boardManage.dto.request.RequestCreatePostDto;
 import com.onebucket.domain.boardManage.dto.response.ResponsePostDto;
 import com.onebucket.domain.boardManage.service.PostService;
+import com.onebucket.domain.memberManage.service.MemberService;
 import com.onebucket.global.utils.SecurityUtils;
 import com.onebucket.global.utils.SuccessResponseWithIdDto;
 import jakarta.validation.Valid;
@@ -13,6 +14,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 
 /**
  * <br>package name   : com.onebucket.domain.boardManage.api
@@ -42,6 +45,7 @@ public class PostController {
 
     private final PostService postService;
     private final SecurityUtils securityUtils;
+    private final MemberService memberService;
 
     @GetMapping("/list/{boardId}")
     public ResponseEntity<Page<PostThumbnailDto>> getPostsByBoard(@PathVariable Long boardId, Pageable pageable) {
@@ -62,6 +66,8 @@ public class PostController {
     @GetMapping("/{postId}")
     public ResponseEntity<ResponsePostDto> getPostById(@PathVariable Long postId) {
         String username = securityUtils.getCurrentUsername();
+        Long userid = memberService.usernameToId(username);
+
         GetPostDto getPostDto = GetPostDto.builder()
                 .postId(postId)
                 .username(username)
@@ -78,6 +84,8 @@ public class PostController {
                 .title(postInfoDto.getTitle())
                 .text(postInfoDto.getText())
                 .build();
+
+        postService.increaseViewCount(userid, postId);
 
         return ResponseEntity.ok(response);
     }

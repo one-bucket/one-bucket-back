@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * <br>package name   : com.onebucket.global.redis
  * <br>file name      : RedisService
@@ -64,5 +66,26 @@ public class RedisRepository {
     // TODO: test case 작성
     public boolean isTokenExists(String key) {
         return Boolean.TRUE.equals(stringRedisTemplate.hasKey(key));
+    }
+
+    // post 의 view 관리를 위한 sorted set 로직 추가
+    public void addToSortedSet(String key, String value, double score) {
+        stringRedisTemplate.opsForZSet().add(key, value, score);
+    }
+
+    // Sorted Set에서 범위 내의 값 삭제
+    public void removeRangeFromSortedSet(String key, long start, long end) {
+        stringRedisTemplate.opsForZSet().removeRange(key, start, end);
+    }
+
+    // Sorted Set의 크기 확인
+    public Long getSortedSetSize(String key) {
+        return stringRedisTemplate.opsForZSet().size(key);
+    }
+    public void setExpire(String key, long timeout) {
+        stringRedisTemplate.expire(key, timeout, TimeUnit.HOURS);
+    }
+    public Long getRank(String key, String value) {
+        return stringRedisTemplate.opsForZSet().rank(key, value);
     }
 }

@@ -17,10 +17,11 @@ import com.onebucket.global.exceptionManage.customException.boardManageException
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.BoardErrorCode;
-import com.onebucket.global.utils.RandomStringUtils;
+import com.onebucket.global.redis.RedisRepository;
 import com.onebucket.global.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,6 +60,7 @@ public class PostServiceImpl implements PostService {
     private final MemberRepository memberRepository;
     private final SecurityUtils securityUtils;
     private final CommentRepository commentRepository;
+    private final RedisRepository redisRepository;
 
 
     @Override
@@ -154,19 +156,15 @@ public class PostServiceImpl implements PostService {
     @Transactional(readOnly = true)
     public Page<PostThumbnailDto> getPostsByBoard(GetBoardDto dto) {
         return postRepository.findByBoardId(dto.getBoardId(), dto.getPageable())
-                .map(post -> {
-
-                    return PostThumbnailDto.builder()
-                            .postId(post.getId())
-                            .boardId(post.getBoard().getId())
-                            .authorNickname(post.getAuthor().getNickname())
-                            .title(post.getTitle())
-                            .text(post.getText())
-                            .createdDate(post.getCreatedDate())
-                            .modifiedDate(post.getModifiedDate())
-                            .build();
-
-                });
+                .map(post -> PostThumbnailDto.builder()
+                        .postId(post.getId())
+                        .boardId(post.getBoard().getId())
+                        .authorNickname(post.getAuthor().getNickname())
+                        .title(post.getTitle())
+                        .text(post.getText())
+                        .createdDate(post.getCreatedDate())
+                        .modifiedDate(post.getModifiedDate())
+                        .build());
     }
 
     @Override
@@ -195,6 +193,39 @@ public class PostServiceImpl implements PostService {
                 .modifiedDate(post.getModifiedDate())
                 .comments(comments)
                 .build();
+    }
+
+    @Override
+    public void increaseViewCount(Long userId, Long postId) {
+        int MAX_SIZE = 300;
+        int EXPIRE_HOURS = 4;
+
+        String sortedSetKey = "views:" + userId;
+
+        String postKey = String.valueOf(postId);
+
+        Long rank = redisRepository.getRank(sortedSetKey, postKey);
+
+        if(rank == null) {
+            postRepository.increaseView(postId);
+
+            long currentSeconds = System.currentTimeMillis() / 1000;
+            double score = currentSeconds % 999999;
+
+            redisRepository.addToSortedSet(sortedSetKey, postKey, score);
+
+            Long size = redisRepository.getSortedSetSize(sortedSetKey);
+
+            if(size != null && size > MAX_SIZE) {
+                redisRepository.removeRangeFromSortedSet(sortedSetKey, 0, size - MAX_SIZE - 1);
+            }
+
+            redisRepository.setExpire(sortedSetKey, EXPIRE_HOURS);
+        } else {
+            redisRepository.setExpire(sortedSetKey, EXPIRE_HOURS);
+        }
+
+
     }
 
 
