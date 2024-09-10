@@ -1,5 +1,6 @@
 package com.onebucket.domain.WalletManage.service;
 
+import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.dao.ProfileRepository;
 import com.onebucket.domain.WalletManage.dao.WalletRepository;
 import com.onebucket.domain.memberManage.domain.Profile;
@@ -41,6 +42,22 @@ import java.math.BigDecimal;
 public class WalletServiceImpl implements WalletService {
     private final WalletRepository walletRepository;
     private final ProfileRepository profileRepository;
+    private final MemberRepository memberRepository;
+
+    @Override
+    @Transactional
+    public void createInitWallet(Long id) {
+        Profile profile = profileRepository.findProfileWithWalletById(id)
+                .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER_PROFILE));
+        Wallet wallet = Wallet.create(profile);
+        try {
+            walletRepository.save(wallet);
+        } catch (DataAccessException e) {
+            throw new WalletManageException(WalletErrorCode.DATA_ACCESS_ERROR);
+        } catch (Exception e) {
+            throw new WalletManageException(WalletErrorCode.INTERNAL_ERROR);
+        }
+    }
 
     @Override
     @Transactional
@@ -72,10 +89,18 @@ public class WalletServiceImpl implements WalletService {
         }
     }
 
+    @Override
+    public BigDecimal getBalance(String username) {
+        Long id = usernameToId(username);
+        Wallet wallet = walletRepository.findById(id).orElseThrow(
+                () -> new WalletManageException(WalletErrorCode.WALLET_NOT_FOUND));
+        return wallet.getBalance();
+    }
+
     // 공통 로직을 처리하는 메서드
     private Wallet findWalletAndValidate(RequestBalanceDto dto) {
         validateAmount(dto);  // 금액 검증
-        Profile profile = profileRepository.findProfileWithWalletById(dto.profileId())
+        Profile profile = profileRepository.findProfileWithWalletById(dto.memberId())
                 .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER_PROFILE));
         return profile.getWallet();
     }
@@ -91,4 +116,8 @@ public class WalletServiceImpl implements WalletService {
         }
     }
 
+    private Long usernameToId(String username) {
+        return memberRepository.findIdByUsername(username)
+                .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
+    }
 }

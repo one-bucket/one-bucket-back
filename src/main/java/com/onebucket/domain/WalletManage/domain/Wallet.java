@@ -2,10 +2,7 @@ package com.onebucket.domain.WalletManage.domain;
 
 import com.onebucket.domain.memberManage.domain.Profile;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 
@@ -33,11 +30,11 @@ import java.math.BigDecimal;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
 public class Wallet {
 
+    // member, profile과 같은 id를 사용함.
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(nullable = false, updatable = false)
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
@@ -61,6 +58,17 @@ public class Wallet {
      */
     public void deductBalance(BigDecimal amount) {
         this.balance = this.balance.subtract(amount);
+    }
+
+    @Builder(access = AccessLevel.PRIVATE)
+    public Wallet(Long id, Profile profile, BigDecimal balance) {
+        this.id = id;
+        this.profile = profile;
+        this.balance = balance;
+    }
+
+    public static Wallet create(Profile profile) {
+        return Wallet.builder().id(profile.getId()).profile(profile).balance(BigDecimal.ZERO).build();
     }
 }
 

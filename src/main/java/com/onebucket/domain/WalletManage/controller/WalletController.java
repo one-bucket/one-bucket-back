@@ -3,12 +3,10 @@ package com.onebucket.domain.WalletManage.controller;
 import com.onebucket.domain.WalletManage.dto.RequestAddBalanceDto;
 import com.onebucket.domain.WalletManage.dto.RequestDeductBalanceDto;
 import com.onebucket.domain.WalletManage.service.WalletService;
+import com.onebucket.global.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 
@@ -38,16 +36,23 @@ import java.math.BigDecimal;
 @RequestMapping("/wallet")
 public class WalletController {
     private final WalletService walletService;
-
+    private final SecurityUtils securityUtils;
     @PostMapping("/charge")
-    public ResponseEntity<BigDecimal> charge(@RequestBody RequestAddBalanceDto dto) {
+    public ResponseEntity<BigDecimal> chargeMoney(@RequestBody RequestAddBalanceDto dto) {
         BigDecimal response = walletService.addBalance(dto);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/deduct")
-    public ResponseEntity<BigDecimal> deduct(@RequestBody RequestDeductBalanceDto dto) {
+    public ResponseEntity<BigDecimal> deductMoney(@RequestBody RequestDeductBalanceDto dto) {
         BigDecimal response = walletService.deductBalance(dto);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping
+    public ResponseEntity<BigDecimal> getMoney() {
+        String username = securityUtils.getCurrentUsername();
+        BigDecimal response = walletService.getBalance(username);
         return ResponseEntity.ok(response);
     }
 }

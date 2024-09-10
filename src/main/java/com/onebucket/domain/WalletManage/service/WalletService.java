@@ -26,6 +26,10 @@ import java.math.BigDecimal;
  * </pre>
  */
 public interface WalletService {
+    void createInitWallet(Long id);
+
     BigDecimal addBalance(RequestBalanceDto dto);
     BigDecimal deductBalance(RequestBalanceDto dto);
+
+    BigDecimal getBalance(String username);
 }
