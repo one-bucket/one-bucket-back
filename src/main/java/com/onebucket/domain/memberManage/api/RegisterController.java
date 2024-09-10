@@ -1,5 +1,6 @@
 package com.onebucket.domain.memberManage.api;
 
+import com.onebucket.domain.WalletManage.service.WalletService;
 import com.onebucket.domain.memberManage.dto.CreateMemberRequestDto;
 import com.onebucket.domain.memberManage.service.MemberService;
 import com.onebucket.domain.memberManage.service.ProfileService;
@@ -39,7 +40,7 @@ public class RegisterController {
 
     private final MemberService memberService;
     private final ProfileService profileService;
-
+    private final WalletService walletService;
     /**
      * 기본적으로 입력된 정보를 이용해 Member 엔티티를 생성하고, 이를 기반으로 초기 Profile 엔티티를 생성한다.
      *
@@ -51,6 +52,7 @@ public class RegisterController {
     public ResponseEntity<?> register (@Valid @RequestBody CreateMemberRequestDto dto) {
         Long id = memberService.createMember(dto);
         profileService.createInitProfile(id);
+        walletService.createInitWallet(id);
         return ResponseEntity.ok(new SuccessResponseDto("success register"));
     }
 
