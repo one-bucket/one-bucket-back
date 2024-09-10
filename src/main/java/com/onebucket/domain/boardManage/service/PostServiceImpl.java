@@ -21,7 +21,6 @@ import com.onebucket.global.redis.RedisRepository;
 import com.onebucket.global.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -68,12 +67,15 @@ public class PostServiceImpl implements PostService {
     public Long createPost(CreatePostDto dto) {
         Long univId = dto.getUnivId();
         Long boardId = dto.getBoardId();
-        Member member = securityUtils.getMember(dto.getUsername());
+        Member member = memberRepository.findByUsername(dto.getUsername())
+                .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER,
+                        "can't find member while create post"));
         Board board = findBoard(boardId);
 
-        securityUtils.isUserUniversityMatchingBoard(univId, board);
-
-
+        if(!isUserMatchingBoard(univId, board)) {
+            throw new AuthenticationException(AuthenticationErrorCode.INVALID_SUBMIT,
+                    "can't access because of invalid university");
+        }
 
         Post post = Post.builder()
                 .author(member)
@@ -239,6 +241,12 @@ public class PostServiceImpl implements PostService {
     private Post findPost(Long id) {
         return postRepository.findById(id).orElseThrow(() ->
                 new BoardManageException(BoardErrorCode.UNKNOWN_POST));
+    }
+
+    private boolean isUserMatchingBoard(Long univId, Board board) {
+        return univId.equals(board.getUniversity().getId());
+
+
     }
 
     private GetCommentDto convertToGetCommentDto(Comment comment) {
