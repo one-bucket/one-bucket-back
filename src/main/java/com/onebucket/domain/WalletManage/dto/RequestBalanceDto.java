@@ -25,5 +25,5 @@ import java.math.BigDecimal;
  */
 public interface RequestBalanceDto {
     BigDecimal amount();
-    Long profileId();
+    Long memberId();
 }

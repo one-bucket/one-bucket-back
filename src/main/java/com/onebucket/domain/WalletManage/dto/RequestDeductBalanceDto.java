@@ -25,7 +25,7 @@ import java.math.BigDecimal;
  */
 public class RequestDeductBalanceDto implements RequestBalanceDto{
     private BigDecimal amount;
-    private Long profileId;
+    private Long memberId;
 
     @Override
     public BigDecimal amount() {
@@ -33,7 +33,7 @@ public class RequestDeductBalanceDto implements RequestBalanceDto{
     }
 
     @Override
-    public Long profileId() {
-        return profileId;
+    public Long memberId() {
+        return memberId;
     }
 }
