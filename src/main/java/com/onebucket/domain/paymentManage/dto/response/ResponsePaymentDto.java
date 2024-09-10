@@ -32,7 +32,7 @@ public record ResponsePaymentDto(
         String postName,
         String itemName,
         BigDecimal amount,
-        LocalDateTime createdAt
+        LocalDateTime postCreatedAt
 ) {
     public static ResponsePaymentDto of(MarketPost marketPost, Payment payment) {
         return new ResponsePaymentDto(payment.getBuyer().getNickname(), marketPost.getTitle(), marketPost.getItem(), payment.getAmount(),payment.getCreatedAt());

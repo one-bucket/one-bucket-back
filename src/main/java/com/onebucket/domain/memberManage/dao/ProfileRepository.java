@@ -20,9 +20,6 @@ import java.util.Optional;
 
 @Repository
 public interface ProfileRepository extends JpaRepository<Profile, Long> {
-    boolean existsById(Long id);
-
     @Query("SELECT p FROM Profile p JOIN FETCH p.wallet WHERE p.id = :id")
     Optional<Profile> findProfileWithWalletById(@Param("id") Long id);
-
 }

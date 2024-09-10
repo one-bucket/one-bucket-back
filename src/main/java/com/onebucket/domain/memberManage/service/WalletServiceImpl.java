@@ -4,17 +4,15 @@ import com.onebucket.domain.memberManage.dao.ProfileRepository;
 import com.onebucket.domain.memberManage.dao.WalletRepository;
 import com.onebucket.domain.memberManage.domain.Profile;
 import com.onebucket.domain.memberManage.domain.Wallet;
-import com.onebucket.domain.memberManage.dto.request.RequestAddBalanceDto;
 import com.onebucket.domain.memberManage.dto.request.RequestBalanceDto;
-import com.onebucket.domain.memberManage.dto.request.RequestDeductBalanceDto;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
-import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.MemberManageException;
+import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.WalletManageException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.WalletErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.math.BigDecimal;
 
 /**
@@ -46,35 +44,51 @@ public class WalletServiceImpl implements WalletService {
 
     @Override
     @Transactional
-    public void addBalance(RequestAddBalanceDto dto) {
-        validateAmount(dto);
-        Profile profile = profileRepository.findProfileWithWalletById(dto.getProfileId()).orElseThrow(
-                () -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER_PROFILE));
-        Wallet wallet = profile.getWallet();
-        wallet.addBalance(dto.amount());
+    public BigDecimal addBalance(RequestBalanceDto dto) {
+        Wallet wallet = findWalletAndValidate(dto);
+        wallet.addBalance(dto.amount()); // 잔액 추가
+        try {
+            walletRepository.save(wallet);
+            return wallet.getBalance();
+        } catch (DataAccessException e) {
+            throw new WalletManageException(WalletErrorCode.DATA_ACCESS_ERROR);
+        } catch (Exception e) {
+            throw new WalletManageException(WalletErrorCode.INTERNAL_ERROR);
+        }
     }
 
-    /**
-     * 중복되는 로직을 합칠 수 있는지 좀 더 고민해보자. dto 자체를 수정해야 될지도 모른다.
-     * @param dto
-     */
     @Override
     @Transactional
-    public void deductBalance(RequestDeductBalanceDto dto) {
-        validateAmount(dto);
-        Profile profile = profileRepository.findProfileWithWalletById(dto.getProfileId()).orElseThrow(
-                () -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER_PROFILE));
-        Wallet wallet = profile.getWallet();
-        wallet.deductBalance(dto.amount());
+    public BigDecimal deductBalance(RequestBalanceDto dto) {
+        Wallet wallet = findWalletAndValidate(dto);
+        wallet.deductBalance(dto.amount()); // 잔액 추가
+        try {
+            walletRepository.save(wallet);
+            return wallet.getBalance();
+        } catch (DataAccessException e) {
+            throw new WalletManageException(WalletErrorCode.DATA_ACCESS_ERROR);
+        } catch (Exception e) {
+            throw new WalletManageException(WalletErrorCode.INTERNAL_ERROR);
+        }
     }
 
+    // 공통 로직을 처리하는 메서드
+    private Wallet findWalletAndValidate(RequestBalanceDto dto) {
+        validateAmount(dto);  // 금액 검증
+        Profile profile = profileRepository.findProfileWithWalletById(dto.profileId())
+                .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER_PROFILE));
+        return profile.getWallet();
+    }
+
+    // 금액 검증 로직
     private void validateAmount(RequestBalanceDto dto) {
         BigDecimal amount = dto.amount();
         if(amount == null) {
-            throw new MemberManageException(WalletErrorCode.AMOUNT_CANNOT_BE_NULL);
+            throw new WalletManageException(WalletErrorCode.AMOUNT_CANNOT_BE_NULL);
         }
         if(amount.compareTo(BigDecimal.ZERO) < 0) {
-            throw new MemberManageException(WalletErrorCode.AMOUNT_MUST_BE_POSITIVE);
+            throw new WalletManageException(WalletErrorCode.AMOUNT_MUST_BE_POSITIVE);
         }
     }
+
 }

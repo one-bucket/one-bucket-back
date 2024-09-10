@@ -2,7 +2,10 @@ package com.onebucket.domain.memberManage.service;
 
 import com.onebucket.domain.memberManage.domain.Wallet;
 import com.onebucket.domain.memberManage.dto.request.RequestAddBalanceDto;
+import com.onebucket.domain.memberManage.dto.request.RequestBalanceDto;
 import com.onebucket.domain.memberManage.dto.request.RequestDeductBalanceDto;
+
+import java.math.BigDecimal;
 
 /**
  * <br>package name   : com.onebucket.domain.memberManage.service
@@ -26,6 +29,6 @@ import com.onebucket.domain.memberManage.dto.request.RequestDeductBalanceDto;
  * </pre>
  */
 public interface WalletService {
-    void addBalance(RequestAddBalanceDto dto);
-    void deductBalance(RequestDeductBalanceDto dto);
+    BigDecimal addBalance(RequestBalanceDto dto);
+    BigDecimal deductBalance(RequestBalanceDto dto);
 }

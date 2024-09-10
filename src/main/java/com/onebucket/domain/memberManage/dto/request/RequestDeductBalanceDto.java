@@ -27,12 +27,15 @@ import java.math.BigDecimal;
  */
 public class RequestDeductBalanceDto implements RequestBalanceDto{
     private BigDecimal amount;
-
-    @Getter
     private Long profileId;
 
     @Override
     public BigDecimal amount() {
         return amount;
+    }
+
+    @Override
+    public Long profileId() {
+        return profileId;
     }
 }
