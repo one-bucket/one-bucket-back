@@ -1,5 +1,6 @@
-package com.onebucket.domain.memberManage.domain;
+package com.onebucket.domain.WalletManage.domain;
 
+import com.onebucket.domain.memberManage.domain.Profile;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

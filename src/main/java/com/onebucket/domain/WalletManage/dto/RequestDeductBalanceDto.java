@@ -1,12 +1,10 @@
-package com.onebucket.domain.memberManage.dto.request;
-
-import lombok.Getter;
+package com.onebucket.domain.WalletManage.dto;
 
 import java.math.BigDecimal;
 
 /**
  * <br>package name   : com.onebucket.domain.memberManage.dto.request
- * <br>file name      : RequestAddBalance
+ * <br>file name      : RequestDeductBalanceDto
  * <br>date           : 2024-09-09
  * <pre>
  * <span style="color: white;">[description]</span>
@@ -25,7 +23,7 @@ import java.math.BigDecimal;
  * 2024-09-09        SeungHoon              init create
  * </pre>
  */
-public class RequestAddBalanceDto implements RequestBalanceDto {
+public class RequestDeductBalanceDto implements RequestBalanceDto{
     private BigDecimal amount;
     private Long profileId;
 
