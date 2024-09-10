@@ -35,4 +35,6 @@ public class PostThumbnailDto extends PostDto {
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
 
+    private Long views;
+
 }

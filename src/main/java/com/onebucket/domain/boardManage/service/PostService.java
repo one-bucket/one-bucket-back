@@ -39,5 +39,5 @@ public interface PostService {
 
     PostInfoDto getPost(GetPostDto dto);
 
-    void increaseViewCount(Long userId, Long postId);
+    void increaseViewCount(PostAuthorDto dto);
 }

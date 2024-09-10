@@ -15,8 +15,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
-
 /**
  * <br>package name   : com.onebucket.domain.boardManage.api
  * <br>file name      : PostController
@@ -66,7 +64,6 @@ public class PostController {
     @GetMapping("/{postId}")
     public ResponseEntity<ResponsePostDto> getPostById(@PathVariable Long postId) {
         String username = securityUtils.getCurrentUsername();
-        Long userid = memberService.usernameToId(username);
 
         GetPostDto getPostDto = GetPostDto.builder()
                 .postId(postId)
@@ -85,7 +82,11 @@ public class PostController {
                 .text(postInfoDto.getText())
                 .build();
 
-        postService.increaseViewCount(userid, postId);
+        PostAuthorDto postAuthorDto = PostAuthorDto.builder()
+                .postId(postId)
+                .username(username)
+                .build();
+        postService.increaseViewCount(postAuthorDto);
 
         return ResponseEntity.ok(response);
     }
@@ -110,10 +111,11 @@ public class PostController {
     @DeleteMapping("/{postId}")
     public ResponseEntity<SuccessResponseWithIdDto> deletePost(@PathVariable Long postId) {
         String username = securityUtils.getCurrentUsername();
+        Long userId = memberService.usernameToId(username);
 
         DeletePostDto deletePostDto = DeletePostDto.builder()
                 .id(postId)
-                .username(username)
+                .memberId(userId)
                 .build();
 
         postService.deletePost(deletePostDto);

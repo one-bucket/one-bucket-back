@@ -4,6 +4,7 @@ import com.onebucket.domain.boardManage.entity.post.Post;
 import com.onebucket.domain.memberManage.domain.Member;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -74,6 +75,9 @@ public class Comment {
     private LocalDateTime modifiedDate;
 
     private boolean isModified;
+
+    @ColumnDefault("0")
+    private int layer;
 
     public void addReply(Comment comment) {
         comment.setPost(this.getPost());

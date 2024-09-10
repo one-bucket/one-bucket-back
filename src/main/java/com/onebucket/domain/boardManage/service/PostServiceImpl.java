@@ -34,20 +34,16 @@ import java.util.stream.Collectors;
  * <br>date           : 2024-07-18
  * <pre>
  * <span style="color: white;">[description]</span>
- *
+ * post 에 대한 service layer. CRUD 및 조회수 증가를 포함하고 있다.
  * </pre>
  * <pre>
  * <span style="color: white;">usage:</span>
- * {@code
- *
- * } </pre>
- * <pre>
- * modified log :
- * ====================================================
- * DATE           AUTHOR               NOTE
- * ----------------------------------------------------
- * 2024-07-18        jack8              init create
- * </pre>
+ * @see PostRepository
+ * @see BoardRepository
+ * @see MemberRepository
+ * @see SecurityUtils
+ * @see CommentRepository
+ * @see RedisRepository
  */
 
 @RequiredArgsConstructor
@@ -62,6 +58,12 @@ public class PostServiceImpl implements PostService {
     private final RedisRepository redisRepository;
 
 
+    /**
+     * 사용자의 정보와 게시글 정보를 받아 저장한다. 이 과정에서 해당 유저가 board에 접근할 권한이 있는지 확인한다.
+     * @tested true
+     * @param dto - username, board, title, text
+     * @return id of saved post
+     */
     @Override
     @Transactional
     public Long createPost(CreatePostDto dto) {
@@ -72,6 +74,7 @@ public class PostServiceImpl implements PostService {
                         "can't find member while create post"));
         Board board = findBoard(boardId);
 
+        //권한 정보 확인
         if(!isUserMatchingBoard(univId, board)) {
             throw new AuthenticationException(AuthenticationErrorCode.INVALID_SUBMIT,
                     "can't access because of invalid university");
@@ -83,19 +86,29 @@ public class PostServiceImpl implements PostService {
                 .text(dto.getText())
                 .board(board)
                 .build();
+
         Post savedPost = postRepository.save(post);
 
         return savedPost.getId();
     }
 
+    /**
+     * 사용자의 id와 post의 id를 받아서 post 의 author과 사용자와 일치하는지 확인한다. 이후 삭제한다.
+     * 만약 사용자가 서비스 탈퇴로 존재하지 않으면 예외를 뱉는다.
+     * @param dto - memberId, postId
+     */
     @Override
     @Transactional
     public void deletePost(DeletePostDto dto) {
         Post findPost = findPost(dto.getId());
 
-        String author = findPost.getAuthor().getUsername();
 
-        if(author.equals(dto.getUsername())) {
+        Member author = findPost.getAuthor();
+        if(author == null) {
+            throw new BoardManageException(BoardErrorCode.I_AM_AN_APPLE_PIE, "maybe, author is null");
+        }
+        Long authorId = author.getId();
+        if(authorId.equals(dto.getMemberId())) {
             postRepository.delete(findPost);
         } else {
             throw new AuthenticationException(AuthenticationErrorCode.UNAUTHORIZED_ACCESS,
@@ -104,7 +117,14 @@ public class PostServiceImpl implements PostService {
     }
 
 
-
+    /**
+     * post에 comment를 추가하는 메서드. 매개변수의 parentComment의 경우, 대댓글에서 상위 댓글의 id이며
+     * 해당 comment 자체를 Comment 테이블에 추가하고, parentComment에 List로 추가한다.
+     * 이후 대대댓글인지에 대한 여부를 확인하고 맞으면 오류를 반환한다(최대 대댓글 까지만 허용된다)
+     *
+     * @tested true
+     * @param dto text, postId, parentCommentId, username
+     */
     @Override
     @Transactional
     public void addCommentToPost(CreateCommentDto dto) {
@@ -113,9 +133,6 @@ public class PostServiceImpl implements PostService {
 
         Member member = memberRepository.findByUsername(dto.getUsername()).orElseThrow(() ->
                 new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
-
-
-
 
         Comment comment = Comment.builder()
                 .author(member)
@@ -130,6 +147,10 @@ public class PostServiceImpl implements PostService {
                     .findFirst()
                     .orElseThrow(() -> new UserBoardException(BoardErrorCode.UNKNOWN_COMMENT));
 
+            if(parentComment.getLayer() != 0) {
+                throw new BoardManageException(BoardErrorCode.COMMENT_LAYER_OVERHEAD);
+            }
+            comment.setLayer(1);
             comment.setParentComment(parentComment);
             parentComment.addReply(comment);
             commentRepository.save(parentComment); // Save the parent with the new reply
@@ -138,12 +159,11 @@ public class PostServiceImpl implements PostService {
             post.addComment(comment);
             postRepository.save(post);
         }
-
-        // Save the new comment (only if it's not already managed by Hibernate)
-        commentRepository.save(comment);
     }
 
 
+
+    //TODO: 매개변수를 DTO로 변경  ,  만약 reply가 있다면 삭제가 아닌 빈 comment로 만들어야함.
     @Override
     @Transactional
     public void deleteCommentFromPost(Long postId, Comment comment) {
@@ -154,6 +174,7 @@ public class PostServiceImpl implements PostService {
     }
 
 
+    //TODO: 조회수 말고도 좋아요, 댓글 수 카운트를 반환해야됨. 해당 로직이 완성되면 리펙토링 해야됨.
     @Override
     @Transactional(readOnly = true)
     public Page<PostThumbnailDto> getPostsByBoard(GetBoardDto dto) {
@@ -166,8 +187,10 @@ public class PostServiceImpl implements PostService {
                         .text(post.getText())
                         .createdDate(post.getCreatedDate())
                         .modifiedDate(post.getModifiedDate())
+                        .views(post.getViews())
                         .build());
     }
+
 
     @Override
     @Transactional(readOnly = true)
@@ -198,10 +221,14 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public void increaseViewCount(Long userId, Long postId) {
+    @Transactional
+    public void increaseViewCount(PostAuthorDto dto) {
         int MAX_SIZE = 300;
         int EXPIRE_HOURS = 4;
 
+        Long userId = memberRepository.findByUsername(dto.getUsername()).orElseThrow(() ->
+                new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER)).getId();
+        Long postId = dto.getPostId();
         String sortedSetKey = "views:" + userId;
 
         String postKey = String.valueOf(postId);

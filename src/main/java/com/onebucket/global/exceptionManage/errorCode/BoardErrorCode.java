@@ -31,6 +31,7 @@ import org.springframework.http.HttpStatus;
 public enum BoardErrorCode implements ErrorCode {
 
     UNKNOWN_POST("2000", HttpStatus.NOT_FOUND, "unknown post "),
+    COMMENT_LAYER_OVERHEAD("2001", HttpStatus.BAD_REQUEST, "no re-reply comment"),
 
 
     DUPLICATE_BOARD_TYPE("2100", HttpStatus.CONFLICT, "duplicate board type name"),
@@ -38,7 +39,9 @@ public enum BoardErrorCode implements ErrorCode {
     UNKNOWN_BOARD("2102", HttpStatus.BAD_REQUEST, "unknown board"),
     UNKNOWN_COMMENT("2013", HttpStatus.BAD_REQUEST, "unknown comment"),
 
-    UNKNOWN_BOARD_TYPE("2104", HttpStatus.BAD_REQUEST, "unknown board type");
+    UNKNOWN_BOARD_TYPE("2104", HttpStatus.BAD_REQUEST, "unknown board type"),
+
+    I_AM_AN_APPLE_PIE("2999", HttpStatus.INTERNAL_SERVER_ERROR, "something went wrong in server");
 
 
     private final String code;

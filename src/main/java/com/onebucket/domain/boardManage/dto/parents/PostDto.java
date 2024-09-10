@@ -15,15 +15,10 @@ import lombok.experimental.SuperBuilder;
  * <pre>
  * <span style="color: white;">usage:</span>
  * {@code
- *
+ *     private Long boardId;
+ *     private String title;
+ *     private String text;
  * } </pre>
- * <pre>
- * modified log :
- * ====================================================
- * DATE           AUTHOR               NOTE
- * ----------------------------------------------------
- * 2024-08-08        jack8              init create
- * </pre>
  */
 @Getter
 @SuperBuilder
