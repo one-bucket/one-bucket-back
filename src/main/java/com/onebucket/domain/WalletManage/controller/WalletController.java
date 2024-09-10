@@ -1,8 +1,8 @@
-package com.onebucket.domain.memberManage.api;
+package com.onebucket.domain.WalletManage.controller;
 
-import com.onebucket.domain.memberManage.dto.request.RequestAddBalanceDto;
-import com.onebucket.domain.memberManage.dto.request.RequestDeductBalanceDto;
-import com.onebucket.domain.memberManage.service.WalletService;
+import com.onebucket.domain.WalletManage.dto.RequestAddBalanceDto;
+import com.onebucket.domain.WalletManage.dto.RequestDeductBalanceDto;
+import com.onebucket.domain.WalletManage.service.WalletService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

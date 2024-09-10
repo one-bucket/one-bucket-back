@@ -1,10 +1,10 @@
-package com.onebucket.domain.memberManage.service;
+package com.onebucket.domain.WalletManage.service;
 
 import com.onebucket.domain.memberManage.dao.ProfileRepository;
-import com.onebucket.domain.memberManage.dao.WalletRepository;
+import com.onebucket.domain.WalletManage.dao.WalletRepository;
 import com.onebucket.domain.memberManage.domain.Profile;
-import com.onebucket.domain.memberManage.domain.Wallet;
-import com.onebucket.domain.memberManage.dto.request.RequestBalanceDto;
+import com.onebucket.domain.WalletManage.domain.Wallet;
+import com.onebucket.domain.WalletManage.dto.RequestBalanceDto;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.WalletManageException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
