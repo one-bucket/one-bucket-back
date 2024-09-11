@@ -9,9 +9,9 @@ import java.time.LocalDateTime;
 import java.util.Set;
 
 /**
- * <br>package name   : com.onebucket.domain.chatManage
- * <br>file name      : CreateChatRoomDto
- * <br>date           : 2024-08-01
+ * <br>package name   : com.onebucket.domain.chatManage.dto.chatroom
+ * <br>file name      : RequestCreateChatRoomDto
+ * <br>date           : 2024-09-11
  * <pre>
  * <span style="color: white;">[description]</span>
  *
@@ -26,18 +26,13 @@ import java.util.Set;
  * =======================================================
  * DATE           AUTHOR               NOTE
  * -------------------------------------------------------
- * 2024-08-01        SeungHoon              init create
+ * 2024-09-11        SeungHoon              init create
  * </pre>
  */
-public record CreateChatRoomDto(
-        String name,
-        LocalDateTime createdAt,
-        String createdBy,
-        Set<ChatMemberDto> members,
-        Integer maxMembers
-        ) {
-
-    public static CreateChatRoomDto of(RequestCreateChatRoomDto dto) {
-        return new CreateChatRoomDto(dto.name(),LocalDateTime.now(),dto.createdBy(),dto.members(),dto.maxMembers());
-    }
+public record RequestCreateChatRoomDto (
+        @NotBlank String name,
+        @NotBlank String createdBy,
+        @NotNull @Size(min = 1) Set<@NotNull ChatMemberDto> members,
+        @NotNull @Min(1) Integer maxMembers
+) {
 }

@@ -5,6 +5,8 @@ import com.onebucket.domain.chatManage.domain.ChatMessage;
 import com.onebucket.domain.chatManage.domain.ChatRoom;
 import com.onebucket.domain.chatManage.dto.chatmessage.ChatMessageDto;
 import com.onebucket.domain.chatManage.dto.chatroom.CreateChatRoomDto;
+import com.onebucket.domain.chatManage.dto.chatroom.RequestCreateChatRoomDto;
+import com.onebucket.domain.chatManage.dto.chatroom.ResponseChatRoomListDto;
 import com.onebucket.domain.chatManage.service.ChatRoomService;
 import com.onebucket.global.utils.SecurityUtils;
 import com.onebucket.global.utils.SuccessResponseDto;
@@ -48,23 +50,24 @@ public class ChatRoomController {
 
     // 모든 채팅방 목록 조회
     @GetMapping("/rooms")
-    public ResponseEntity<List<ChatRoom>> getRooms() {
-        List<ChatRoom> response = chatRoomService.getChatRooms();
+    public ResponseEntity<List<ResponseChatRoomListDto>> getRooms() {
+        List<ResponseChatRoomListDto> response = chatRoomService.getChatRooms();
         return ResponseEntity.ok(response);
     }
 
     // 채팅방 생성
     @PostMapping("/room")
-    public ResponseEntity<Void> createRoom(@Valid @RequestBody CreateChatRoomDto dto) {
-        String roomId = chatRoomService.createChatRoom(dto);
+    public ResponseEntity<Void> createRoom(@Valid @RequestBody RequestCreateChatRoomDto dto) {
+        CreateChatRoomDto createChatRoomDto = CreateChatRoomDto.of(dto);
+        String roomId = chatRoomService.createChatRoom(createChatRoomDto);
         URI location = URI.create(String.format("/chat/room/%s", roomId));
         return ResponseEntity.created(location).build();
     }
 
     // 특정 유저가 입장해 있는 채팅방 목록 조회
     @GetMapping("/room/user/{nickname}")
-    public ResponseEntity<List<ChatRoom>> getRoomsForMember(@PathVariable String nickname) {
-        List<ChatRoom> response = chatRoomService.findByMembersNickname(nickname);
+    public ResponseEntity<List<ResponseChatRoomListDto>> getRoomsForMember(@PathVariable String nickname) {
+        List<ResponseChatRoomListDto> response = chatRoomService.findByMembersNickname(nickname);
         return ResponseEntity.ok(response);
     }
 

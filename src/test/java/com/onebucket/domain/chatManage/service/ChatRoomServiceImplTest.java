@@ -4,6 +4,8 @@ import com.onebucket.domain.chatManage.dao.ChatRoomRepository;
 import com.onebucket.domain.chatManage.domain.ChatRoom;
 import com.onebucket.domain.chatManage.dto.chatroom.ChatMemberDto;
 import com.onebucket.domain.chatManage.dto.chatroom.CreateChatRoomDto;
+import com.onebucket.domain.chatManage.dto.chatroom.RequestCreateChatRoomDto;
+import com.onebucket.domain.chatManage.dto.chatroom.ResponseChatRoomListDto;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.global.exceptionManage.customException.CommonException;
@@ -95,9 +97,8 @@ class ChatRoomServiceImplTest {
         Set<ChatMemberDto> members = new HashSet<>();
         members.add(dto1);
         members.add(dto2);
-        dto = CreateChatRoomDto.of(
-                "room1", LocalDateTime.now(),"user1", members,10
-        );
+        RequestCreateChatRoomDto requestCreateChatRoomDto = new RequestCreateChatRoomDto("room1","user1",members,10);
+        dto = CreateChatRoomDto.of(requestCreateChatRoomDto);
         chatRoom = ChatRoom.create(dto);
     }
 
@@ -114,9 +115,8 @@ class ChatRoomServiceImplTest {
     @Test
     @DisplayName("채팅방 만들기 실패 - 유저 수가 너무 많음")
     void createChatRoom_fail() {
-        CreateChatRoomDto dto = CreateChatRoomDto.of(
-                "room1", LocalDateTime.now(),"user1", new HashSet<>(),-1
-        );
+        RequestCreateChatRoomDto requestCreateChatRoomDto = new RequestCreateChatRoomDto("room1","user1",new HashSet<>(),1);
+        CreateChatRoomDto dto = CreateChatRoomDto.of(requestCreateChatRoomDto);
         doThrow(new ChatRoomException(ChatErrorCode.MAX_MEMBERS_EXCEEDED, "채팅방 인원수가 너무 많습니다."))
                 .when(chatRoomValidator).validateCreateChatRoom(any(CreateChatRoomDto.class));
 
@@ -233,33 +233,13 @@ class ChatRoomServiceImplTest {
     @DisplayName("채팅방 목록 조회 성공")
     void getChatRooms_success() {
         doReturn(Arrays.asList(
-                ChatRoom.builder(),
-                ChatRoom.builder(),
-                ChatRoom.builder()
+                ChatRoom.builder().build(),
+                ChatRoom.builder().build(),
+                ChatRoom.builder().build()
         )).when(chatRoomRepository).findAll();
-        final List<ChatRoom> chatRooms = chatRoomService.getChatRooms();
+        final List<ResponseChatRoomListDto> chatRooms = chatRoomService.getChatRooms();
         assertThat(chatRooms).hasSize(3);
     }
-
-    @Test
-    @DisplayName("특정 채팅방 조회 성공")
-    void getChatRoom_success() {
-        String roomId = "room1";
-        doReturn(Optional.of(chatRoom)).when(chatRoomRepository).findByRoomId(roomId);
-
-        assertThat(chatRoomService.getChatRoom(roomId)).isEqualTo(chatRoom);
-    }
-
-    @Test
-    @DisplayName("특정 채팅방 조회 실패 - 존재하지 않는 채팅방")
-    void getChatRoom_fail() {
-        String roomId = "room1";
-        ChatRoomException result = assertThrows(ChatRoomException.class, () -> {
-            chatRoomService.getChatRoom(roomId);
-        });
-        assertThat(result.getErrorCode()).isEqualTo(ChatErrorCode.NOT_EXIST_ROOM);
-    }
-
     @Test
     @DisplayName("채팅방 삭제 성공")
     void deleteChatRoom_success() {

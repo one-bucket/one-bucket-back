@@ -6,6 +6,8 @@ import com.onebucket.domain.chatManage.domain.ChatRoom;
 import com.onebucket.domain.chatManage.dto.chatmessage.ChatMessageDto;
 import com.onebucket.domain.chatManage.dto.chatroom.ChatMemberDto;
 import com.onebucket.domain.chatManage.dto.chatroom.CreateChatRoomDto;
+import com.onebucket.domain.chatManage.dto.chatroom.RequestCreateChatRoomDto;
+import com.onebucket.domain.chatManage.dto.chatroom.ResponseChatRoomListDto;
 import com.onebucket.domain.chatManage.service.ChatRoomService;
 import com.onebucket.global.exceptionManage.customException.chatManageException.ChatManageException;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
@@ -30,10 +32,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static com.onebucket.testComponent.testUtils.JsonFieldResultMatcher.hasKey;
@@ -91,11 +90,7 @@ class ChatRoomControllerTest {
     void getRooms_success() throws Exception {
         final String url = "/chat/rooms";
         doReturn(
-                Arrays.asList(
-                        ChatRoom.builder().build(),
-                        ChatRoom.builder().build(),
-                        ChatRoom.builder().build()
-                )
+                Collections.emptyList()
         ).when(chatRoomService).getChatRooms();
         final ResultActions resultActions = mockMvc.perform(
                 get(url)
@@ -111,14 +106,7 @@ class ChatRoomControllerTest {
         members.add(ChatMemberDto.from("user1"));
         final ResultActions resultActions = mockMvc.perform(
                 post(url)
-                        .content(objectMapper.writeValueAsString(CreateChatRoomDto.of(
-                                "room1",
-                                LocalDateTime.of(2024, 1, 1, 12, 0),
-                                "user1",
-                                members,
-                                10
-                                )
-                        ))
+                        .content(objectMapper.writeValueAsString(new RequestCreateChatRoomDto("room1","user1",members,10)))
                         .contentType(MediaType.APPLICATION_JSON)
         );
         resultActions.andExpect(status().isCreated());
@@ -127,12 +115,12 @@ class ChatRoomControllerTest {
     @ParameterizedTest
     @MethodSource("provideInvalidChatRoomDtos")
     @DisplayName("채팅방 생성 실패 - 입력 값에 null이 있음")
-    void createRoom_fail(CreateChatRoomDto createChatRoomDto) throws Exception {
+    void createRoom_fail(RequestCreateChatRoomDto requestCreateChatRoomDto) throws Exception {
         final String url = "/chat/room";
 
         final ResultActions resultActions = mockMvc.perform(
                 post(url)
-                        .content(objectMapper.writeValueAsString(createChatRoomDto))
+                        .content(objectMapper.writeValueAsString(requestCreateChatRoomDto))
                         .contentType(MediaType.APPLICATION_JSON)
         );
 
@@ -199,14 +187,13 @@ class ChatRoomControllerTest {
         resultActions.andExpect(hasStatus(ChatErrorCode.INTERNAL_ERROR));
     }
 
-    static Stream<CreateChatRoomDto> provideInvalidChatRoomDtos() {
+    static Stream<RequestCreateChatRoomDto> provideInvalidChatRoomDtos() {
         LocalDateTime time = LocalDateTime.of(2024, 1, 1, 12, 0);
         return Stream.of(
-                CreateChatRoomDto.of(null, time, "user1",new HashSet<>(),10),  // name is null
-                CreateChatRoomDto.of("room1", null, "user1",new HashSet<>(),10),  // createdAt is null
-                CreateChatRoomDto.of("room1",  time, null,new HashSet<>(),10), // createdBy is null
-                CreateChatRoomDto.of("room1",time,"user1",null,10), // members Set is null
-                CreateChatRoomDto.of("room1",time,"user1",new HashSet<>(),null) // maxMembers is null
+                    new RequestCreateChatRoomDto(null,"user1",new HashSet<>(),10),  // name is null
+                    new RequestCreateChatRoomDto("room1",null,new HashSet<>(),10),  // createdBy is null
+                    new RequestCreateChatRoomDto("room1","user1",null,10), // members is null
+                    new RequestCreateChatRoomDto("room1","user1",new HashSet<>(),null) // maxMembers Set is null
         );
     }
 }

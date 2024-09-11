@@ -4,6 +4,7 @@ import com.onebucket.domain.chatManage.dao.ChatRoomRepository;
 import com.onebucket.domain.chatManage.domain.ChatRoom;
 import com.onebucket.domain.chatManage.dto.chatmessage.ChatMessageDto;
 import com.onebucket.domain.chatManage.dto.chatroom.CreateChatRoomDto;
+import com.onebucket.domain.chatManage.dto.chatroom.ResponseChatRoomListDto;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.domain.chatManage.dto.chatroom.ChatMemberDto;
@@ -130,14 +131,11 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
-    public List<ChatRoom> getChatRooms() {
-        return chatRoomRepository.findAll();
-    }
-
-    @Override
-    public ChatRoom getChatRoom(String roomId) {
-        return chatRoomRepository.findByRoomId(roomId).orElseThrow(
-                () -> new ChatRoomException(ChatErrorCode.NOT_EXIST_ROOM,"존재하지 않는 채팅방입니다."));
+    public List<ResponseChatRoomListDto> getChatRooms() {
+        List<ChatRoom> chatRooms = chatRoomRepository.findAll();
+        return chatRooms.stream()
+                .map(ResponseChatRoomListDto::from)
+                .toList();
     }
 
     @Override
@@ -163,10 +161,14 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
 
     @Override
-    public List<ChatRoom> findByMembersNickname(String nickname) {
-        return memberRepository.existsByNickname(nickname)
-                ? chatRoomRepository.findByMembersNickname(nickname)
-                : Collections.emptyList();
+    public List<ResponseChatRoomListDto> findByMembersNickname(String nickname) {
+        if (!memberRepository.existsByNickname(nickname)){
+            return Collections.emptyList();
+        }
+        List<ChatRoom> chatRooms = chatRoomRepository.findByMembersNickname(nickname);
+        return chatRooms.stream()
+                .map(ResponseChatRoomListDto::from)
+                .toList();
     }
 
     @Override

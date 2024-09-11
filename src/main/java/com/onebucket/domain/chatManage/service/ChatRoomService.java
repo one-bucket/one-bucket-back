@@ -3,6 +3,7 @@ package com.onebucket.domain.chatManage.service;
 import com.onebucket.domain.chatManage.domain.ChatRoom;
 import com.onebucket.domain.chatManage.dto.chatmessage.ChatMessageDto;
 import com.onebucket.domain.chatManage.dto.chatroom.CreateChatRoomDto;
+import com.onebucket.domain.chatManage.dto.chatroom.ResponseChatRoomListDto;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -33,10 +34,9 @@ public interface ChatRoomService {
     String createChatRoom(CreateChatRoomDto createChatRoomDto);
     ChatRoom addChatMembers(String roomId, String nickname);
     ChatRoom removeChatMember(String roomId, String nickname);
-    List<ChatRoom> getChatRooms();
-    ChatRoom getChatRoom(String roomId);
+    List<ResponseChatRoomListDto> getChatRooms();
     void addChatMessages(ChatMessageDto chatMessage);
-    List<ChatRoom> findByMembersNickname(String nickname);
+    List<ResponseChatRoomListDto> findByMembersNickname(String nickname);
     void deleteChatRoom(String roomId,String username);
 
     // 채팅 메세지 로직
