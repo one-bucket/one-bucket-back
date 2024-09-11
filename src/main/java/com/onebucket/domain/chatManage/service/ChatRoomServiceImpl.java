@@ -84,7 +84,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     @Override
     @Transactional
-    public ChatRoom addChatMembers(String roomId, String nickname) {
+    public void addChatMembers(String roomId, String nickname) {
         chatRoomValidator.validateChatRoomExists(roomId);
 
         if(!memberRepository.existsByNickname(nickname)) {
@@ -95,7 +95,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
             Query query = new Query(Criteria.where("roomId").is(roomId));
             Update update = new Update().addToSet("members", ChatMemberDto.from(nickname));
 
-            return mongoTemplate.findAndModify(query, update,
+            mongoTemplate.findAndModify(query, update,
                     FindAndModifyOptions.options().returnNew(true), ChatRoom.class);
         } catch (CommonException e) {
             // MongoDB 예외나 다른 예외 처리
@@ -105,7 +105,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     @Override
     @Transactional
-    public ChatRoom removeChatMember(String roomId, String nickname) {
+    public void removeChatMember(String roomId, String nickname) {
         ChatRoom chatRoom = chatRoomRepository.findByRoomId(roomId)
                 .orElseThrow(() -> new ChatRoomException(ChatErrorCode.NOT_EXIST_ROOM));
 
@@ -122,7 +122,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
             Update update = new Update().pull("members", ChatMemberDto.from(nickname));
 
             // findAndModify로 members에서 해당 유저를 제거
-            return mongoTemplate.findAndModify(query, update,
+            mongoTemplate.findAndModify(query, update,
                     FindAndModifyOptions.options().returnNew(true), ChatRoom.class);
         } catch (CommonException e) {
             // MongoDB 예외나 다른 예외 처리

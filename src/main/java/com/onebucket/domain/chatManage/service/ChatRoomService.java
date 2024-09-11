@@ -32,8 +32,8 @@ import java.util.List;
 public interface ChatRoomService {
     // 채팅방 로직
     String createChatRoom(CreateChatRoomDto createChatRoomDto);
-    ChatRoom addChatMembers(String roomId, String nickname);
-    ChatRoom removeChatMember(String roomId, String nickname);
+    void addChatMembers(String roomId, String nickname);
+    void removeChatMember(String roomId, String nickname);
     List<ResponseChatRoomListDto> getChatRooms();
     void addChatMessages(ChatMessageDto chatMessage);
     List<ResponseChatRoomListDto> findByMembersNickname(String nickname);
