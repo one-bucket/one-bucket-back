@@ -5,7 +5,7 @@ import com.onebucket.domain.memberManage.dao.ProfileRepository;
 import com.onebucket.domain.WalletManage.dao.WalletRepository;
 import com.onebucket.domain.memberManage.domain.Profile;
 import com.onebucket.domain.WalletManage.domain.Wallet;
-import com.onebucket.domain.WalletManage.dto.RequestBalanceDto;
+import com.onebucket.domain.WalletManage.dto.BalanceDto;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.WalletManageException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
@@ -61,7 +61,7 @@ public class WalletServiceImpl implements WalletService {
 
     @Override
     @Transactional
-    public BigDecimal addBalance(RequestBalanceDto dto) {
+    public BigDecimal addBalance(BalanceDto dto) {
         Wallet wallet = findWalletAndValidate(dto);
         wallet.addBalance(dto.amount()); // 잔액 추가
         try {
@@ -76,7 +76,7 @@ public class WalletServiceImpl implements WalletService {
 
     @Override
     @Transactional
-    public BigDecimal deductBalance(RequestBalanceDto dto) {
+    public BigDecimal deductBalance(BalanceDto dto) {
         Wallet wallet = findWalletAndValidate(dto);
         wallet.deductBalance(dto.amount()); // 잔액 추가
         try {
@@ -98,15 +98,16 @@ public class WalletServiceImpl implements WalletService {
     }
 
     // 공통 로직을 처리하는 메서드
-    private Wallet findWalletAndValidate(RequestBalanceDto dto) {
+    private Wallet findWalletAndValidate(BalanceDto dto) {
         validateAmount(dto);  // 금액 검증
-        Profile profile = profileRepository.findProfileWithWalletById(dto.memberId())
+        Long id = usernameToId(dto.username());
+        Profile profile = profileRepository.findProfileWithWalletById(id)
                 .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER_PROFILE));
         return profile.getWallet();
     }
 
     // 금액 검증 로직
-    private void validateAmount(RequestBalanceDto dto) {
+    private void validateAmount(BalanceDto dto) {
         BigDecimal amount = dto.amount();
         if(amount == null) {
             throw new WalletManageException(WalletErrorCode.AMOUNT_CANNOT_BE_NULL);

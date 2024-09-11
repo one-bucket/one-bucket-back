@@ -1,11 +1,11 @@
-package com.onebucket.domain.WalletManage.dto;
+package com.onebucket.domain.WalletManage.dto.request;
 
 import java.math.BigDecimal;
 
 /**
- * <br>package name   : com.onebucket.domain.memberManage.dto.request
- * <br>file name      : RequestBalanceDto
- * <br>date           : 2024-09-09
+ * <br>package name   : com.onebucket.domain.WalletManage.dto.request
+ * <br>file name      : RequestAddBalanceDto
+ * <br>date           : 2024-09-11
  * <pre>
  * <span style="color: white;">[description]</span>
  *
@@ -20,10 +20,10 @@ import java.math.BigDecimal;
  * =======================================================
  * DATE           AUTHOR               NOTE
  * -------------------------------------------------------
- * 2024-09-09        SeungHoon              init create
+ * 2024-09-11        SeungHoon              init create
  * </pre>
  */
-public interface RequestBalanceDto {
-    BigDecimal amount();
-    Long memberId();
+public record RequestAddBalanceDto(
+        BigDecimal amount
+) {
 }
