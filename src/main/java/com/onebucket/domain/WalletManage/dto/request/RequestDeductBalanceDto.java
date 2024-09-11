@@ -1,5 +1,8 @@
 package com.onebucket.domain.WalletManage.dto.request;
 
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotNull;
+
 import java.math.BigDecimal;
 
 /**
@@ -24,6 +27,8 @@ import java.math.BigDecimal;
  * </pre>
  */
 public record RequestDeductBalanceDto(
+        @NotNull(message = "Amount cannot be null")
+        @DecimalMin(value = "0.0", inclusive = false, message = "Amount must be greater than 0")
         BigDecimal amount
 ) {
 }

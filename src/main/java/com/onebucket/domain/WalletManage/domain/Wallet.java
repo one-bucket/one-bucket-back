@@ -44,18 +44,10 @@ public class Wallet {
     @Column(scale = 2)  // 소수점 이하 두 자리까지 허용
     private BigDecimal balance;
 
-    /**
-     * 추후 분산락을 도입하여 동시성 문제를 해결하자.
-     * @param amount
-     */
     public void addBalance(BigDecimal amount) {
         this.balance = this.balance.add(amount);
     }
 
-    /**
-     * 추후 분산락을 도입하여 동시성 문제를 해결하자.
-     * @param amount
-     */
     public void deductBalance(BigDecimal amount) {
         this.balance = this.balance.subtract(amount);
     }
