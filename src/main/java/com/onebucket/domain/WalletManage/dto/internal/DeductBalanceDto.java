@@ -1,4 +1,4 @@
-package com.onebucket.domain.WalletManage.dto;
+package com.onebucket.domain.WalletManage.dto.internal;
 
 import lombok.Builder;
 

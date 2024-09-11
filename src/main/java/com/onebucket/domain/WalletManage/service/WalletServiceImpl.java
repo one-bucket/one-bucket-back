@@ -5,7 +5,7 @@ import com.onebucket.domain.memberManage.dao.ProfileRepository;
 import com.onebucket.domain.WalletManage.dao.WalletRepository;
 import com.onebucket.domain.memberManage.domain.Profile;
 import com.onebucket.domain.WalletManage.domain.Wallet;
-import com.onebucket.domain.WalletManage.dto.BalanceDto;
+import com.onebucket.domain.WalletManage.dto.internal.BalanceDto;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.WalletManageException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;

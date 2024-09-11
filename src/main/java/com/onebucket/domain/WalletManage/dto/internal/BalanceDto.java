@@ -1,14 +1,10 @@
-package com.onebucket.domain.WalletManage.dto;
-
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
-import lombok.Builder;
+package com.onebucket.domain.WalletManage.dto.internal;
 
 import java.math.BigDecimal;
 
 /**
  * <br>package name   : com.onebucket.domain.memberManage.dto.request
- * <br>file name      : RequestAddBalance
+ * <br>file name      : RequestBalanceDto
  * <br>date           : 2024-09-09
  * <pre>
  * <span style="color: white;">[description]</span>
@@ -27,20 +23,7 @@ import java.math.BigDecimal;
  * 2024-09-09        SeungHoon              init create
  * </pre>
  */
-@Builder
-public class AddBalanceDto implements BalanceDto {
-    private BigDecimal amount;
-
-    @NotNull(message = "")
-    private String username;
-
-    @Override
-    public BigDecimal amount() {
-        return amount;
-    }
-
-    @Override
-    public String username() {
-        return username;
-    }
+public interface BalanceDto {
+    BigDecimal amount();
+    String username();
 }

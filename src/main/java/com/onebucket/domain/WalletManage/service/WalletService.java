@@ -1,6 +1,6 @@
 package com.onebucket.domain.WalletManage.service;
 
-import com.onebucket.domain.WalletManage.dto.BalanceDto;
+import com.onebucket.domain.WalletManage.dto.internal.BalanceDto;
 
 import java.math.BigDecimal;
 

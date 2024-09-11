@@ -1,9 +1,10 @@
 package com.onebucket.domain.WalletManage.controller;
 
-import com.onebucket.domain.WalletManage.dto.AddBalanceDto;
-import com.onebucket.domain.WalletManage.dto.DeductBalanceDto;
+import com.onebucket.domain.WalletManage.dto.internal.AddBalanceDto;
+import com.onebucket.domain.WalletManage.dto.internal.DeductBalanceDto;
 import com.onebucket.domain.WalletManage.dto.request.RequestAddBalanceDto;
 import com.onebucket.domain.WalletManage.dto.request.RequestDeductBalanceDto;
+import com.onebucket.domain.WalletManage.dto.response.ResponseBalanceDto;
 import com.onebucket.domain.WalletManage.service.WalletService;
 import com.onebucket.global.utils.SecurityUtils;
 import jakarta.validation.Valid;
@@ -42,25 +43,28 @@ public class WalletController {
     private final SecurityUtils securityUtils;
 
     @PostMapping("/charge")
-    public ResponseEntity<BigDecimal> chargeMoney(@Valid @RequestBody RequestAddBalanceDto dto) {
+    public ResponseEntity<ResponseBalanceDto> chargeMoney(@Valid @RequestBody RequestAddBalanceDto dto) {
         String username = securityUtils.getCurrentUsername();
         AddBalanceDto addBalanceDto = AddBalanceDto.builder().amount(dto.amount()).username(username).build();
-        BigDecimal response = walletService.addBalance(addBalanceDto);
+        BigDecimal balance = walletService.addBalance(addBalanceDto);
+        ResponseBalanceDto response = ResponseBalanceDto.of(balance);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/deduct")
-    public ResponseEntity<BigDecimal> deductMoney(@Valid @RequestBody RequestDeductBalanceDto dto) {
+    public ResponseEntity<ResponseBalanceDto> deductMoney(@Valid @RequestBody RequestDeductBalanceDto dto) {
         String username = securityUtils.getCurrentUsername();
         DeductBalanceDto deductBalanceDto = DeductBalanceDto.builder().amount(dto.amount()).username(username).build();
-        BigDecimal response = walletService.deductBalance(deductBalanceDto);
+        BigDecimal balance = walletService.addBalance(addBalanceDto);
+        ResponseBalanceDto response = ResponseBalanceDto.of(balance);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping
-    public ResponseEntity<BigDecimal> getMoney() {
+    public ResponseEntity<ResponseBalanceDto> getMoney() {
         String username = securityUtils.getCurrentUsername();
-        BigDecimal response = walletService.getBalance(username);
+        BigDecimal balance = walletService.getBalance(username);
+        ResponseBalanceDto response = ResponseBalanceDto.of(balance);
         return ResponseEntity.ok(response);
     }
 }
