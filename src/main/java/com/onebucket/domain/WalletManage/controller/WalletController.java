@@ -55,7 +55,7 @@ public class WalletController {
     public ResponseEntity<ResponseBalanceDto> deductMoney(@Valid @RequestBody RequestDeductBalanceDto dto) {
         String username = securityUtils.getCurrentUsername();
         DeductBalanceDto deductBalanceDto = DeductBalanceDto.builder().amount(dto.amount()).username(username).build();
-        BigDecimal balance = walletService.addBalance(deductBalanceDto);
+        BigDecimal balance = walletService.deductBalance(deductBalanceDto);
         ResponseBalanceDto response = ResponseBalanceDto.of(balance);
         return ResponseEntity.ok(response);
     }
