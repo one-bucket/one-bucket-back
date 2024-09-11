@@ -13,7 +13,9 @@ import lombok.NoArgsConstructor;
  * <br>date           : 9/11/24
  * <pre>
  * <span style="color: white;">[description]</span>
- *
+ * 각 post의 좋아요 기능을 위한 엔티티 테이블이다. member와 post의 쌍으로 이루어져 있으며
+ * primary key는 이 둘의 복합 키로 구성되어 있다.
+ * member_id에 대하여 index를 구성하였다.
  * </pre>
  * <pre>
  * <span style="color: white;">usage:</span>
@@ -26,11 +28,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@IdClass(LikeMapId.class)
+@IdClass(LikesMapId.class)
 @Table(
         name = "likes_map",
         indexes = {
-
+                @Index(name = "idx_member_id", columnList = "member_id")
         }
 )
 public class LikesMap {

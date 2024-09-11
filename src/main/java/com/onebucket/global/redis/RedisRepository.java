@@ -88,4 +88,8 @@ public class RedisRepository {
     public Long getRank(String key, String value) {
         return stringRedisTemplate.opsForZSet().rank(key, value);
     }
+
+    public void increaseValue(String key) {
+        stringRedisTemplate.opsForValue().increment(key);
+    }
 }

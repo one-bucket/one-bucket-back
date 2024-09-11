@@ -40,6 +40,7 @@ public enum BoardErrorCode implements ErrorCode {
     UNKNOWN_COMMENT("2013", HttpStatus.BAD_REQUEST, "unknown comment"),
 
     UNKNOWN_BOARD_TYPE("2104", HttpStatus.BAD_REQUEST, "unknown board type"),
+    NOT_EXISTING("2105", HttpStatus.NOT_FOUND, "data not exist."),
 
     I_AM_AN_APPLE_PIE("2999", HttpStatus.INTERNAL_SERVER_ERROR, "something went wrong in server");
 

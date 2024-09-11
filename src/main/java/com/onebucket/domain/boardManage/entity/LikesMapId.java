@@ -25,7 +25,7 @@ import java.util.Objects;
 @Getter
 @Setter
 @Builder
-public class LikeMapId implements Serializable {
+public class LikesMapId implements Serializable {
     private Long memberId;
     private Long postId;
 
@@ -33,9 +33,9 @@ public class LikeMapId implements Serializable {
     public boolean equals(Object o) {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
-        LikeMapId likeMapId = (LikeMapId) o;
-        return Objects.equals(memberId, likeMapId.memberId)
-                && Objects.equals(postId, likeMapId.postId);
+        LikesMapId likesMapId = (LikesMapId) o;
+        return Objects.equals(memberId, likesMapId.memberId)
+                && Objects.equals(postId, likesMapId.postId);
     }
 
     @Override

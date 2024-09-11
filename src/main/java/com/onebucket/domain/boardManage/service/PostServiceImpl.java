@@ -2,6 +2,7 @@ package com.onebucket.domain.boardManage.service;
 
 import com.onebucket.domain.boardManage.dao.BoardRepository;
 import com.onebucket.domain.boardManage.dao.CommentRepository;
+import com.onebucket.domain.boardManage.dao.LikesMapRepository;
 import com.onebucket.domain.boardManage.dao.PostRepository;
 import com.onebucket.domain.boardManage.dto.internal.board.GetBoardDto;
 import com.onebucket.domain.boardManage.dto.internal.comment.CreateCommentDto;
@@ -9,6 +10,8 @@ import com.onebucket.domain.boardManage.dto.internal.comment.GetCommentDto;
 import com.onebucket.domain.boardManage.dto.internal.post.*;
 import com.onebucket.domain.boardManage.entity.Board;
 import com.onebucket.domain.boardManage.entity.Comment;
+import com.onebucket.domain.boardManage.entity.LikesMap;
+import com.onebucket.domain.boardManage.entity.LikesMapId;
 import com.onebucket.domain.boardManage.entity.post.Post;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
@@ -56,6 +59,7 @@ public class PostServiceImpl implements PostService {
     private final SecurityUtils securityUtils;
     private final CommentRepository commentRepository;
     private final RedisRepository redisRepository;
+    private final LikesMapRepository likesMapRepository;
 
 
     /**
@@ -257,6 +261,35 @@ public class PostServiceImpl implements PostService {
 
     }
 
+    public void increaseLikesCount(Long postId, Long memberId) {
+
+        Member member = findMember(memberId);
+        Post post = findPost(postId);
+        LikesMap likesMap = LikesMap.builder()
+                .member(member)
+                .post(post)
+                .build();
+
+        likesMapRepository.save(likesMap);
+
+        String redisKey = "post:likes:" + postId;
+
+        redisRepository.increaseValue(redisKey);
+    }
+
+    public void decreaseLikesCount(Long postId, Long memberId) {
+        Member member = findMember(memberId);
+        Post post = findPost(postId);
+        LikesMapId likesMapId = LikesMapId.builder()
+                .memberId(memberId)
+                .postId(postId)
+                .build();
+
+        likesMapRepository.findById(likesMapId).orElseThrow(() ->
+                new UserBoardException(BoardErrorCode.NOT_EXISTING, "perhaps, user may not commit likes"));
+
+    }
+
 
 
 
@@ -268,6 +301,16 @@ public class PostServiceImpl implements PostService {
     private Post findPost(Long id) {
         return postRepository.findById(id).orElseThrow(() ->
                 new BoardManageException(BoardErrorCode.UNKNOWN_POST));
+    }
+
+    private Member findMember(Long id) {
+        return memberRepository.findById(id).orElseThrow(() ->
+                new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
+    }
+
+    private Member findMember(String username) {
+        return memberRepository.findByUsername(username).orElseThrow(() ->
+                new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
     }
 
     private boolean isUserMatchingBoard(Long univId, Board board) {
