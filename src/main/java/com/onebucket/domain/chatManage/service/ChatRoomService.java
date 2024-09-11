@@ -41,5 +41,5 @@ public interface ChatRoomService {
 
     // 채팅 메세지 로직
     List<ChatMessageDto> getChatMessages(String roomId);
-    String uploadChatImage(MultipartFile file, String username);
+    String uploadChatImage(MultipartFile file, String roomId);
 }

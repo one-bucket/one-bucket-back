@@ -80,7 +80,7 @@ public class ChatRoomController {
     }
 
     // ----------------------------------- 채팅 ------------------------------------------------ //
-    @GetMapping("/messages/{roomId}")
+    @GetMapping("/room/{roomId}/messages")
     public ResponseEntity<List<ChatMessage>> getMessages(@PathVariable String roomId) {
         List<ChatMessageDto> messagesList = chatRoomService.getChatMessages(roomId);
         List<ChatMessage> response = messagesList.stream()
@@ -94,10 +94,9 @@ public class ChatRoomController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/messages/files")
-    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
-        String username = securityUtils.getCurrentUsername();
-        String response = chatRoomService.uploadChatImage(file,username);
+    @PostMapping("/room/{roomId}/messages/files")
+    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file, @PathVariable String roomId) {
+        String response = chatRoomService.uploadChatImage(file,roomId);
         return ResponseEntity.ok(response);
     }
 }

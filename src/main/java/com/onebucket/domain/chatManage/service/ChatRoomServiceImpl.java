@@ -15,6 +15,7 @@ import com.onebucket.global.exceptionManage.customException.memberManageExceptoi
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.ChatErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.CommonErrorCode;
+import com.onebucket.global.minio.MinioDeleteInfoDto;
 import com.onebucket.global.minio.MinioRepository;
 import com.onebucket.global.minio.MinioSaveInfoDto;
 import com.onebucket.global.utils.ChatRoomValidator;
@@ -186,6 +187,10 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                 .and("createdBy").is(nickname));
 
         mongoTemplate.remove(query, ChatRoom.class);
+
+        // 채팅방에 속한 이미지 삭제
+        MinioDeleteInfoDto dto = MinioDeleteInfoDto.of(bucketName,"chat/" + roomId,"png",roomId);
+        minioRepository.deleteAllFilesInRoom(dto);
     }
 
     @Override
@@ -197,8 +202,8 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
-    public String uploadChatImage(MultipartFile file, String username) {
-        String fileName = "chat/" + username + "/" + file.getOriginalFilename();
+    public String uploadChatImage(MultipartFile file, String roomId) {
+        String fileName = "chat/" + roomId + "/" + file.getOriginalFilename();
 
         MinioSaveInfoDto dto = MinioSaveInfoDto.builder()
                 .bucketName(bucketName)
