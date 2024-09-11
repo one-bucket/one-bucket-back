@@ -224,7 +224,7 @@ public class PostServiceImpl implements PostService {
     @Transactional
     public void increaseViewCount(PostAuthorDto dto) {
         int MAX_SIZE = 300;
-        int EXPIRE_HOURS = 4;
+        long EXPIRE_HOURS = 4;
 
         Long userId = memberRepository.findByUsername(dto.getUsername()).orElseThrow(() ->
                 new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER)).getId();

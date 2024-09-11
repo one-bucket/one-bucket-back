@@ -6,6 +6,7 @@ import com.onebucket.domain.boardManage.dao.PostRepository;
 import com.onebucket.domain.boardManage.dto.internal.comment.CreateCommentDto;
 import com.onebucket.domain.boardManage.dto.internal.post.CreatePostDto;
 import com.onebucket.domain.boardManage.dto.internal.post.DeletePostDto;
+import com.onebucket.domain.boardManage.dto.internal.post.PostAuthorDto;
 import com.onebucket.domain.boardManage.entity.Board;
 import com.onebucket.domain.boardManage.entity.BoardType;
 import com.onebucket.domain.boardManage.entity.Comment;
@@ -359,4 +360,87 @@ class PostServiceTest {
     }
 
     //-+-+-+-+-+-+]] increaseViewCount [[-+-+-+-+-+-+
+    @Test
+    @DisplayName("increaseViewCount - success / view increase")
+    void testIncreaseViewCount_success() {
+        String username = "username";
+        Long userId = 1L;
+        Long postId = 100L;
+        String postKey = String.valueOf(postId);
+        String sortedSetKey = "views:" + userId;
+        PostAuthorDto postAuthorDto = PostAuthorDto.builder()
+                .postId(postId)
+                .username(username)
+                .build();
+        when(memberRepository.findByUsername(username)).thenReturn(Optional.of(mockMember));
+        when(mockMember.getId()).thenReturn(userId);
+
+        //기존에 조회한 기록이 없는 경우
+        when(redisRepository.getRank(sortedSetKey, postKey))
+                .thenReturn(null);
+        //300개가 넘지 않음
+        when(redisRepository.getSortedSetSize(sortedSetKey)).thenReturn(100L);
+
+        postService.increaseViewCount(postAuthorDto);
+
+        verify(postRepository, times(1)).increaseView(postId);
+        verify(redisRepository, times(1))
+                .addToSortedSet(eq(sortedSetKey), eq(postKey), anyDouble());
+        verify(redisRepository, never()).removeRangeFromSortedSet(eq(sortedSetKey), eq(0L), anyLong());
+        verify(redisRepository, times(1)).setExpire(eq(sortedSetKey), anyLong());
+    }
+
+    @Test
+    @DisplayName("increaseViewCount - success / already seen post")
+    void testIncreaseViewCount_success_alreadySeenPost() {
+        String username = "username";
+        Long userId = 1L;
+        Long postId = 100L;
+        String postKey = String.valueOf(postId);
+        String sortedSetKey = "views:" + userId;
+        PostAuthorDto postAuthorDto = PostAuthorDto.builder()
+                .postId(postId)
+                .username(username)
+                .build();
+        when(memberRepository.findByUsername(username)).thenReturn(Optional.of(mockMember));
+        when(mockMember.getId()).thenReturn(userId);
+
+        //기존에 조회한 기록이 존재하는 경우
+        when(redisRepository.getRank(sortedSetKey, postKey)).thenReturn(184931L);
+
+        postService.increaseViewCount(postAuthorDto);
+
+        verify(postRepository, never()).increaseView(anyLong());
+        verify(redisRepository, times(1)).setExpire(eq(sortedSetKey), anyLong());
+    }
+
+    @Test
+    @DisplayName("increaseViewCount - success / record over 300")
+    void testIncreaseViewCount_success_recordOver300() {
+        String username = "username";
+        Long userId = 1L;
+        Long postId = 100L;
+        String postKey = String.valueOf(postId);
+        String sortedSetKey = "views:" + userId;
+        PostAuthorDto postAuthorDto = PostAuthorDto.builder()
+                .postId(postId)
+                .username(username)
+                .build();
+        when(memberRepository.findByUsername(username)).thenReturn(Optional.of(mockMember));
+        when(mockMember.getId()).thenReturn(userId);
+
+        //기존에 조회한 기록이 없는 경우
+        when(redisRepository.getRank(sortedSetKey, postKey))
+                .thenReturn(null);
+        //300개가 넘지 않음
+        when(redisRepository.getSortedSetSize(sortedSetKey)).thenReturn(301L);
+
+        postService.increaseViewCount(postAuthorDto);
+
+        verify(postRepository, times(1)).increaseView(postId);
+        verify(redisRepository, times(1))
+                .addToSortedSet(eq(sortedSetKey), eq(postKey), anyDouble());
+        verify(redisRepository, times(1)).removeRangeFromSortedSet(eq(sortedSetKey), eq(0L), anyLong());
+        verify(redisRepository, times(1)).setExpire(eq(sortedSetKey), anyLong());
+    }
 }
