@@ -2,14 +2,14 @@ package com.onebucket.domain.boardManage.service;
 
 import com.onebucket.domain.boardManage.dao.*;
 import com.onebucket.domain.boardManage.dto.internal.comment.CreateCommentDto;
+import com.onebucket.domain.boardManage.dto.internal.post.PostAuthorDto;
 import com.onebucket.domain.boardManage.entity.Board;
 import com.onebucket.domain.boardManage.entity.Comment;
 import com.onebucket.domain.boardManage.entity.post.Post;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.testComponent.testUtils.DataBaseCleaner;
-import jakarta.persistence.EntityManager;
-import org.hibernate.Hibernate;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -125,6 +125,98 @@ public class ConcurrencyTest {
                     .text(rs.getString("text"))
                     .build();
         }
+    }
+
+    @Test
+    @Sql(scripts = "/sql/IntegrationData.sql")
+    @DisplayName("test concurrent increase view count")
+    void testConcurrent_increaseViewCount() throws InterruptedException {
+
+        Member member = memberRepository.findById(1L).orElseThrow();
+        Board board = boardRepository.findById(1L).orElseThrow();
+
+        Post post = Post.builder()
+                .id(1L)
+                .author(member)
+                .board(board)
+                .text("text of post")
+                .title("title of post")
+                .build();
+        postRepository.save(post);
+
+        PostAuthorDto dto1 = PostAuthorDto.builder()
+                .username("username1")
+                .postId(1L)
+                .build();
+
+        PostAuthorDto dto2 = PostAuthorDto.builder()
+                .username("username2")
+                .postId(1L)
+                .build();
+
+        PostAuthorDto dto3 = PostAuthorDto.builder()
+                .username("username3")
+                .postId(1L)
+                .build();
+
+        int numberOfThreads = 5;
+        ExecutorService service = Executors.newFixedThreadPool(numberOfThreads);
+        CountDownLatch latch = new CountDownLatch(numberOfThreads);
+
+        service.execute(() -> {
+            postService.increaseViewCount(dto1);
+            latch.countDown();
+        });
+
+        service.execute(() -> {
+            try {
+                Thread.sleep(150);
+                postService.increaseViewCount(dto1);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            latch.countDown();
+        });
+
+        service.execute(() -> {
+            try {
+                Thread.sleep(100);
+                postService.increaseViewCount(dto1);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            latch.countDown();
+        });
+
+        service.execute(() -> {
+            try {
+                Thread.sleep(50);
+                postService.increaseViewCount(dto2);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            latch.countDown();
+        });
+        service.execute(() -> {
+            try {
+                Thread.sleep(50);
+                postService.increaseViewCount(dto3);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            latch.countDown();
+        });
+
+        latch.await();
+
+        String query = """
+                SELECT views FROM post WHERE id = ?
+                """;
+        Long viewCount = jdbcTemplate.queryForObject(query, Long.class, 1L);
+
+        assertThat(viewCount).isEqualTo(3L);
+
+
     }
 
 }

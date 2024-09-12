@@ -6,7 +6,6 @@ import com.onebucket.domain.memberManage.domain.Member;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import org.hibernate.annotations.ColumnDefault;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -80,11 +79,11 @@ public class Post {
     @Builder.Default
     private List<Comment> comments = new ArrayList<>();
 
-    @ColumnDefault("0L")
-    private Long views;
+    @Builder.Default
+    private Long views = 0L;
 
-    @ColumnDefault("0L")
-    private Long likes;
+    @Builder.Default
+    private Long likes = 0L;
 
     public void addComment(Comment comment) {
         comments.add(comment);
