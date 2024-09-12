@@ -3,6 +3,7 @@ package com.onebucket.global.redis;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -62,6 +63,7 @@ public class RedisRepository {
     public void delete(String key) {
         stringRedisTemplate.delete(key);
     }
+
 
     // TODO: test case 작성
     public boolean isTokenExists(String key) {

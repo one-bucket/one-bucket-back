@@ -4,10 +4,7 @@ import com.onebucket.domain.boardManage.entity.Board;
 import com.onebucket.domain.boardManage.entity.Comment;
 import com.onebucket.domain.memberManage.domain.Member;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.ColumnDefault;
 import org.springframework.data.annotation.CreatedDate;
@@ -40,6 +37,7 @@ import java.util.List;
  * </pre>
  */
 @Getter
+@Setter
 @Entity
 @SuperBuilder
 @NoArgsConstructor
@@ -53,6 +51,7 @@ import java.util.List;
                 @Index(name = "idx_board_id", columnList = "board_id") // board_id 컬럼에 대한 인덱스 추가
         }
 )
+
 public class Post {
 
     @Id

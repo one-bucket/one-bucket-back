@@ -51,6 +51,7 @@ import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
+
 public class PostServiceImpl implements PostService {
 
     private final PostRepository postRepository;
@@ -132,9 +133,9 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public void addCommentToPost(CreateCommentDto dto) {
+
         Post post = postRepository.findById(dto.getPostId()).orElseThrow(() ->
                 new UserBoardException(BoardErrorCode.UNKNOWN_POST));
-
         Member member = memberRepository.findByUsername(dto.getUsername()).orElseThrow(() ->
                 new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
 
@@ -257,8 +258,6 @@ public class PostServiceImpl implements PostService {
         } else {
             redisRepository.setExpire(sortedSetKey, EXPIRE_HOURS);
         }
-
-
     }
 
     public void increaseLikesCount(Long postId, Long memberId) {
@@ -281,8 +280,8 @@ public class PostServiceImpl implements PostService {
         Member member = findMember(memberId);
         Post post = findPost(postId);
         LikesMapId likesMapId = LikesMapId.builder()
-                .memberId(memberId)
-                .postId(postId)
+                .member(memberId)
+                .post(postId)
                 .build();
 
         likesMapRepository.findById(likesMapId).orElseThrow(() ->

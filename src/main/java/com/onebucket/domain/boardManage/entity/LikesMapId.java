@@ -11,7 +11,8 @@ import java.util.Objects;
  * <br>date           : 9/11/24
  * <pre>
  * <span style="color: white;">[description]</span>
- *
+ * {@link LikesMap} 의 복합키 설정을 위한 객체. 객체의 값 비교를 위해 equals와 hashcode를 override하여
+ * 구현하였다.
  * </pre>
  * <pre>
  * <span style="color: white;">usage:</span>
@@ -26,20 +27,20 @@ import java.util.Objects;
 @Setter
 @Builder
 public class LikesMapId implements Serializable {
-    private Long memberId;
-    private Long postId;
+    private Long member;
+    private Long post;
 
     @Override
     public boolean equals(Object o) {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
         LikesMapId likesMapId = (LikesMapId) o;
-        return Objects.equals(memberId, likesMapId.memberId)
-                && Objects.equals(postId, likesMapId.postId);
+        return Objects.equals(member, likesMapId.member)
+                && Objects.equals(post, likesMapId.post);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(memberId, postId);
+        return Objects.hash(member, post);
     }
 }
