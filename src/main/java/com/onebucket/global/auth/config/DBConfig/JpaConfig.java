@@ -35,6 +35,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
         "com.onebucket.domain.memberManage.dao",
         "com.onebucket.domain.universityManage.dao",
         "com.onebucket.domain.paymentManage.dao",
+        "com.onebucket.domain.walletManage.dao"
 })
 public class JpaConfig {
     @PersistenceContext

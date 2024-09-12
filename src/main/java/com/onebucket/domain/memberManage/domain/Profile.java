@@ -1,6 +1,6 @@
 package com.onebucket.domain.memberManage.domain;
 
-import com.onebucket.domain.WalletManage.domain.Wallet;
+import com.onebucket.domain.walletManage.domain.Wallet;
 import jakarta.persistence.*;
 import lombok.*;
 

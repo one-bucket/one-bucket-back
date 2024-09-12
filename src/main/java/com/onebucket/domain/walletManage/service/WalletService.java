@@ -1,12 +1,12 @@
-package com.onebucket.domain.WalletManage.dto.internal;
+package com.onebucket.domain.walletManage.service;
 
-import lombok.Builder;
+import com.onebucket.domain.walletManage.dto.internal.BalanceDto;
 
 import java.math.BigDecimal;
 
 /**
- * <br>package name   : com.onebucket.domain.memberManage.dto.request
- * <br>file name      : RequestDeductBalanceDto
+ * <br>package name   : com.onebucket.domain.memberManage.service
+ * <br>file name      : WalletService
  * <br>date           : 2024-09-09
  * <pre>
  * <span style="color: white;">[description]</span>
@@ -25,18 +25,11 @@ import java.math.BigDecimal;
  * 2024-09-09        SeungHoon              init create
  * </pre>
  */
-@Builder
-public class DeductBalanceDto implements BalanceDto {
-    private BigDecimal amount;
-    private String username;
+public interface WalletService {
+    void createInitWallet(Long id);
 
-    @Override
-    public BigDecimal amount() {
-        return amount;
-    }
+    BigDecimal addBalance(BalanceDto dto);
+    BigDecimal deductBalance(BalanceDto dto);
 
-    @Override
-    public String username() {
-        return username;
-    }
+    BigDecimal getBalance(String username);
 }

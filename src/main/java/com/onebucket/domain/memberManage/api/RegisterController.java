@@ -1,6 +1,6 @@
 package com.onebucket.domain.memberManage.api;
 
-import com.onebucket.domain.WalletManage.service.WalletService;
+import com.onebucket.domain.walletManage.service.WalletService;
 import com.onebucket.domain.memberManage.dto.CreateMemberRequestDto;
 import com.onebucket.domain.memberManage.service.MemberService;
 import com.onebucket.domain.memberManage.service.ProfileService;

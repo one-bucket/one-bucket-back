@@ -1,13 +1,10 @@
-package com.onebucket.domain.WalletManage.dto.request;
-
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotNull;
+package com.onebucket.domain.walletManage.dto.response;
 
 import java.math.BigDecimal;
 
 /**
- * <br>package name   : com.onebucket.domain.WalletManage.dto.request
- * <br>file name      : RequestAddBalanceDto
+ * <br>package name   : com.onebucket.domain.WalletManage.dto.response
+ * <br>file name      : ResponseBalanceDto
  * <br>date           : 2024-09-11
  * <pre>
  * <span style="color: white;">[description]</span>
@@ -26,9 +23,10 @@ import java.math.BigDecimal;
  * 2024-09-11        SeungHoon              init create
  * </pre>
  */
-public record RequestAddBalanceDto(
-        @NotNull(message = "Amount cannot be null")
-        @DecimalMin(value = "0.0", inclusive = false, message = "Amount must be greater than 0")
-        BigDecimal amount
+public record ResponseBalanceDto(
+        BigDecimal balance
 ) {
+    public static ResponseBalanceDto of(BigDecimal balance) {
+        return new ResponseBalanceDto(balance);
+    }
 }

@@ -1,4 +1,4 @@
-package com.onebucket.domain.WalletManage.dto.request;
+package com.onebucket.domain.walletManage.dto.request;
 
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;

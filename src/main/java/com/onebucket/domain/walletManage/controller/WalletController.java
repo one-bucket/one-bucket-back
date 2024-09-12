@@ -1,11 +1,11 @@
-package com.onebucket.domain.WalletManage.controller;
+package com.onebucket.domain.walletManage.controller;
 
-import com.onebucket.domain.WalletManage.dto.internal.AddBalanceDto;
-import com.onebucket.domain.WalletManage.dto.internal.DeductBalanceDto;
-import com.onebucket.domain.WalletManage.dto.request.RequestAddBalanceDto;
-import com.onebucket.domain.WalletManage.dto.request.RequestDeductBalanceDto;
-import com.onebucket.domain.WalletManage.dto.response.ResponseBalanceDto;
-import com.onebucket.domain.WalletManage.service.WalletService;
+import com.onebucket.domain.walletManage.dto.internal.AddBalanceDto;
+import com.onebucket.domain.walletManage.dto.internal.DeductBalanceDto;
+import com.onebucket.domain.walletManage.dto.request.RequestAddBalanceDto;
+import com.onebucket.domain.walletManage.dto.request.RequestDeductBalanceDto;
+import com.onebucket.domain.walletManage.dto.response.ResponseBalanceDto;
+import com.onebucket.domain.walletManage.service.WalletService;
 import com.onebucket.global.utils.SecurityUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

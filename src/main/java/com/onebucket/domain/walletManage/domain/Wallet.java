@@ -1,4 +1,4 @@
-package com.onebucket.domain.WalletManage.domain;
+package com.onebucket.domain.walletManage.domain;
 
 import com.onebucket.domain.memberManage.domain.Profile;
 import jakarta.persistence.*;

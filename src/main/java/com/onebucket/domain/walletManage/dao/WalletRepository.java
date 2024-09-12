@@ -1,12 +1,11 @@
-package com.onebucket.domain.WalletManage.service;
+package com.onebucket.domain.walletManage.dao;
 
-import com.onebucket.domain.WalletManage.dto.internal.BalanceDto;
-
-import java.math.BigDecimal;
+import com.onebucket.domain.walletManage.domain.Wallet;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
- * <br>package name   : com.onebucket.domain.memberManage.service
- * <br>file name      : WalletService
+ * <br>package name   : com.onebucket.domain.memberManage.dao
+ * <br>file name      : WalletRepository
  * <br>date           : 2024-09-09
  * <pre>
  * <span style="color: white;">[description]</span>
@@ -25,11 +24,5 @@ import java.math.BigDecimal;
  * 2024-09-09        SeungHoon              init create
  * </pre>
  */
-public interface WalletService {
-    void createInitWallet(Long id);
-
-    BigDecimal addBalance(BalanceDto dto);
-    BigDecimal deductBalance(BalanceDto dto);
-
-    BigDecimal getBalance(String username);
+public interface WalletRepository extends JpaRepository<Wallet, Long> {
 }

@@ -1,4 +1,4 @@
-package com.onebucket.domain.WalletManage.dto.internal;
+package com.onebucket.domain.walletManage.dto.internal;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
