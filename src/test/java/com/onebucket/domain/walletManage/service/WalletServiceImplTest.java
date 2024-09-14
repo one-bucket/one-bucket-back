@@ -46,6 +46,9 @@ class WalletServiceImplTest {
     @Mock
     private ProfileRepository profileRepository;
 
+    @Mock
+    private Wallet wallet;
+
     @InjectMocks
     private WalletServiceImpl walletService;
 
@@ -56,7 +59,7 @@ class WalletServiceImplTest {
 
     @Test
     @DisplayName("Wallet 생성 성공")
-    void createInitWallet() {
+    void createInitWallet_success() {
         Long id = 1L;
         doReturn(Optional.of(Profile.builder().build())).when(profileRepository).findProfileWithWalletById(id);
         walletService.createInitWallet(id);
@@ -66,16 +69,17 @@ class WalletServiceImplTest {
 
     @Test
     @DisplayName("잔액 충전하기 성공")
-    void addBalance() {
+    void addBalance_success() {
+        
     }
 
     @Test
     @DisplayName("잔액 소모하기 성공")
-    void deductBalance() {
+    void deductBalance_success() {
     }
 
     @Test
     @DisplayName("잔액 반환하기 성공")
-    void getBalance() {
+    void getBalance_success() {
     }
 }
