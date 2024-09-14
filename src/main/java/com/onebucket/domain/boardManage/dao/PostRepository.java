@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * <br>package name   : com.onebucket.domain.boardManage.dao
@@ -38,7 +39,13 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Query("UPDATE Post p SET p.views = p.views + 1 WHERE p.id = :id")
     void increaseView(@Param("id") Long id);
 
+    //이후 로그로 얼만큼 변환되었는지에 대해 알고 싶으면 int로 반환타입을 설정해주어 갱신된 행의 개수를 파악할 수 있음
     @Modifying
-    @Query("UPDATE Post p SET p.likes = p.likes + 1 WHERE p.id = :id")
-    void increaseLikes(@Param("id") Long id);
+    @Transactional
+    @Query("""
+            UPDATE Post p
+            SET p.likes = CASE WHEN p.likes + :increment < 0 THEN 0 ELSE p.likes + :increment END
+            WHERE p.id = :postId
+            """)
+    void updateLikes(@Param("postId") Long postId, @Param("increment") Long increment);
 }

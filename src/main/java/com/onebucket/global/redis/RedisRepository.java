@@ -3,10 +3,10 @@ package com.onebucket.global.redis;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -93,5 +93,14 @@ public class RedisRepository {
 
     public void increaseValue(String key) {
         stringRedisTemplate.opsForValue().increment(key);
+    }
+
+    public void decreaseValue(String key) {
+        stringRedisTemplate.opsForValue().decrement(key);
+    }
+    
+    public void flushAll() {
+        Objects.requireNonNull(
+                stringRedisTemplate.getConnectionFactory()).getConnection().serverCommands().flushAll();
     }
 }

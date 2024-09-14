@@ -23,6 +23,7 @@ import com.onebucket.global.exceptionManage.errorCode.BoardErrorCode;
 import com.onebucket.global.redis.RedisRepository;
 import com.onebucket.global.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -260,6 +261,7 @@ public class PostServiceImpl implements PostService {
         }
     }
 
+    @Override
     public void increaseLikesCount(Long postId, Long memberId) {
 
         Member member = findMember(memberId);
@@ -276,17 +278,21 @@ public class PostServiceImpl implements PostService {
         redisRepository.increaseValue(redisKey);
     }
 
+    @Override
     public void decreaseLikesCount(Long postId, Long memberId) {
-        Member member = findMember(memberId);
-        Post post = findPost(postId);
         LikesMapId likesMapId = LikesMapId.builder()
                 .member(memberId)
                 .post(postId)
                 .build();
 
-        likesMapRepository.findById(likesMapId).orElseThrow(() ->
-                new UserBoardException(BoardErrorCode.NOT_EXISTING, "perhaps, user may not commit likes"));
+        try {
+            likesMapRepository.deleteById(likesMapId);
+        } catch (EmptyResultDataAccessException e) {
+            throw new UserBoardException(BoardErrorCode.NOT_EXISTING,
+                    "perhaps, user may not commit likes in DB");
+        }
 
+        redisRepository.decreaseValue("post:likes:" + postId);
     }
 
 

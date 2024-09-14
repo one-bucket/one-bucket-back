@@ -40,4 +40,6 @@ public interface PostService {
     PostInfoDto getPost(GetPostDto dto);
 
     void increaseViewCount(PostAuthorDto dto);
+    void increaseLikesCount(Long postId, Long memberId);
+    void decreaseLikesCount(Long postId, Long memberId);
 }
