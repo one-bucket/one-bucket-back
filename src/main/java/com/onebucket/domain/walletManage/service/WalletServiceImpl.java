@@ -78,7 +78,8 @@ public class WalletServiceImpl implements WalletService {
     @Transactional
     public BigDecimal deductBalance(BalanceDto dto) {
         Wallet wallet = findWalletAndValidate(dto);
-        wallet.deductBalance(dto.amount()); // 잔액 추가
+        sufficientToPay(dto,wallet);
+        wallet.deductBalance(dto.amount());
         try {
             walletRepository.save(wallet);
             return wallet.getBalance();
@@ -114,6 +115,12 @@ public class WalletServiceImpl implements WalletService {
         }
         if(amount.compareTo(BigDecimal.ZERO) < 0) {
             throw new WalletManageException(WalletErrorCode.AMOUNT_MUST_BE_POSITIVE);
+        }
+    }
+
+    private void sufficientToPay(BalanceDto dto, Wallet wallet) {
+        if(wallet.getBalance().compareTo(dto.amount()) < 0) {
+            throw new WalletManageException(WalletErrorCode.INSUFFICIENT_BALANCE);
         }
     }
 

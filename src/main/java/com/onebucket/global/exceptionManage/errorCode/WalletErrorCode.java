@@ -32,8 +32,9 @@ public enum WalletErrorCode implements ErrorCode {
     AMOUNT_MUST_BE_POSITIVE("6001",HttpStatus.BAD_REQUEST,"amount must be positive"),
     WALLET_NOT_FOUND("6002",HttpStatus.NOT_FOUND,"wallet not found"),
     DATA_ACCESS_ERROR("6003",HttpStatus.BAD_REQUEST,"data access error"),
+    INSUFFICIENT_BALANCE("6004",HttpStatus.BAD_REQUEST,"insufficient balance"),
 
-    INTERNAL_ERROR("6004",HttpStatus.INTERNAL_SERVER_ERROR,"internal error"),
+    INTERNAL_ERROR("6099",HttpStatus.INTERNAL_SERVER_ERROR,"internal error"),
     ;
 
     private final String code;
