@@ -34,6 +34,7 @@ public class DataBaseCleaner implements InitializingBean {
 
     private List<String> tableNames;
 
+
     @Override
     public void afterPropertiesSet() {
         tableNames = entityManager.getMetamodel().getEntities().stream()
@@ -52,6 +53,7 @@ public class DataBaseCleaner implements InitializingBean {
         entityManager.createNativeQuery("SET REFERENTIAL_INTEGRITY FALSE").executeUpdate();
 
         for (String tableName : tableNames) {
+            System.out.println("Deleting table: " + tableName);
             entityManager.createNativeQuery("TRUNCATE TABLE " + tableName).executeUpdate();
         }
 
