@@ -18,6 +18,7 @@ import org.springframework.security.messaging.access.intercept.MessageMatcherDel
  * Websocket 보안 관련 코드.
  * "/ws-stomp" 로 오는 메세지는 모두 허용
  * "/pub", "/sub" 으로 오는 메세지는 모두 인증이 필요하다.
+ * 현재 interceptor가 우선적으로 작동하기 때문에 전혀 기능을 하지 않는 상태이다.
  * CSRF 비활성화
  * </pre>
  * <pre>

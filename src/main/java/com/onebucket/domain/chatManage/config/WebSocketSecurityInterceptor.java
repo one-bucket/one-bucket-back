@@ -21,7 +21,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
  * <br>date           : 2024-07-24
  * <pre>
  * <span style="color: white;">[description]</span>
- * Websocket && Stomp 통신에서 JWT가 유효한지 검사한다. 현재는 모든 채팅을 대상으로 조사를 진행한다.
+ * Websocket && Stomp 통신에서 stomp header에 있는 JWT가 유효한지 검사한다.
  * </pre>
  * <pre>
  * <span style="color: white;">usage:</span>

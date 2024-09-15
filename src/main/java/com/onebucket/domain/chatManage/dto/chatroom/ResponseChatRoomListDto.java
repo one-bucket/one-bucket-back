@@ -5,6 +5,7 @@ import com.onebucket.domain.chatManage.dto.chatmessage.ChatMessageDto;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 /**
  * <br>package name   : com.onebucket.domain.chatManage.dto.chatroom
@@ -32,6 +33,7 @@ public record ResponseChatRoomListDto (
         String roomCreatedBy,
         LocalDateTime roomCreatedAt,
         int maxMembers,
+        Set<ChatMemberDto> memberDtos,
         String lastContent,
         String lastContentSender,
         LocalDateTime ContentCreatedAt
@@ -47,6 +49,7 @@ public record ResponseChatRoomListDto (
                 chatRoom.getCreatedBy(),
                 LocalDateTime.now(),
                 chatRoom.getMaxMembers(),
+                chatRoom.getMembers(),
                 lastMessage != null ? lastMessage.message() : null,
                 lastMessage != null ? lastMessage.sender() : null,
                 lastMessage != null ? lastMessage.createdAt() : null

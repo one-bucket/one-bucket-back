@@ -167,6 +167,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
             return Collections.emptyList();
         }
         List<ChatRoom> chatRooms = chatRoomRepository.findByMembersNickname(nickname);
+        log.info("Found chat rooms for nickname {}: {}", nickname, chatRooms);
         return chatRooms.stream()
                 .map(ResponseChatRoomListDto::from)
                 .toList();
