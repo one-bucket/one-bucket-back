@@ -145,17 +145,17 @@ public class ConcurrencyTest {
         Long postId = savedPost.getId();
 
         PostAuthorDto dto1 = PostAuthorDto.builder()
-                .username("username1")
+                .userId(1L)
                 .postId(postId)
                 .build();
 
         PostAuthorDto dto2 = PostAuthorDto.builder()
-                .username("username2")
+                .userId(2L)
                 .postId(postId)
                 .build();
 
         PostAuthorDto dto3 = PostAuthorDto.builder()
-                .username("username3")
+                .userId(3L)
                 .postId(postId)
                 .build();
 
@@ -249,7 +249,11 @@ public class ConcurrencyTest {
         Long postId = postRepository.save(post).getId();
 
         for(int i = 1; i <= 5; i++) {
-            postService.increaseLikesCount(postId, (long) i);
+            PostAuthorDto dto = PostAuthorDto.builder()
+                    .userId((long) i)
+                    .postId(postId)
+                    .build();
+            postService.increaseLikesCount(dto);
         }
 
         Long likesToAdd = Long.parseLong(redisRepository.get("post:likes:1"));

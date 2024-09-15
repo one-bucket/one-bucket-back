@@ -370,10 +370,9 @@ class PostServiceTest {
         String sortedSetKey = "views:" + userId;
         PostAuthorDto postAuthorDto = PostAuthorDto.builder()
                 .postId(postId)
-                .username(username)
+                .userId(userId)
                 .build();
-        when(memberRepository.findByUsername(username)).thenReturn(Optional.of(mockMember));
-        when(mockMember.getId()).thenReturn(userId);
+
 
         //기존에 조회한 기록이 없는 경우
         when(redisRepository.getRank(sortedSetKey, postKey))
@@ -400,10 +399,9 @@ class PostServiceTest {
         String sortedSetKey = "views:" + userId;
         PostAuthorDto postAuthorDto = PostAuthorDto.builder()
                 .postId(postId)
-                .username(username)
+                .userId(userId)
                 .build();
-        when(memberRepository.findByUsername(username)).thenReturn(Optional.of(mockMember));
-        when(mockMember.getId()).thenReturn(userId);
+
 
         //기존에 조회한 기록이 존재하는 경우
         when(redisRepository.getRank(sortedSetKey, postKey)).thenReturn(184931L);
@@ -424,10 +422,9 @@ class PostServiceTest {
         String sortedSetKey = "views:" + userId;
         PostAuthorDto postAuthorDto = PostAuthorDto.builder()
                 .postId(postId)
-                .username(username)
+                .userId(userId)
                 .build();
-        when(memberRepository.findByUsername(username)).thenReturn(Optional.of(mockMember));
-        when(mockMember.getId()).thenReturn(userId);
+
 
         //기존에 조회한 기록이 없는 경우
         when(redisRepository.getRank(sortedSetKey, postKey))
