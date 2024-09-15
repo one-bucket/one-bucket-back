@@ -22,6 +22,6 @@ import lombok.Getter;
 @Builder
 @Getter
 public class PostAuthorDto {
-    private String username;
+    private Long userId;
     private Long postId;
 }

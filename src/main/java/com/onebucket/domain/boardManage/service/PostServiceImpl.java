@@ -23,6 +23,8 @@ import com.onebucket.global.exceptionManage.errorCode.BoardErrorCode;
 import com.onebucket.global.redis.RedisRepository;
 import com.onebucket.global.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -133,6 +135,7 @@ public class PostServiceImpl implements PostService {
      */
     @Override
     @Transactional
+    @CacheEvict(value = "commentCountCache", key = "#dto.postId")
     public void addCommentToPost(CreateCommentDto dto) {
 
         Post post = postRepository.findById(dto.getPostId()).orElseThrow(() ->
@@ -172,6 +175,7 @@ public class PostServiceImpl implements PostService {
     //TODO: 매개변수를 DTO로 변경  ,  만약 reply가 있다면 삭제가 아닌 빈 comment로 만들어야함.
     @Override
     @Transactional
+    @CacheEvict(value = "commentCountCache", key = "#postId")
     public void deleteCommentFromPost(Long postId, Comment comment) {
         Post post = postRepository.findById(postId).orElseThrow(() ->
                 new UserBoardException(BoardErrorCode.UNKNOWN_POST));
@@ -194,6 +198,7 @@ public class PostServiceImpl implements PostService {
                         .createdDate(post.getCreatedDate())
                         .modifiedDate(post.getModifiedDate())
                         .views(post.getViews())
+                        .likes(post.getLikes())
                         .build());
     }
 
@@ -204,11 +209,6 @@ public class PostServiceImpl implements PostService {
         // Post를 조회
         Post post = postRepository.findById(dto.getPostId()).orElseThrow(() ->
                 new BoardManageException(BoardErrorCode.UNKNOWN_POST));
-
-        Long boardId = post.getBoardId();
-
-        // 사용자의 접근 권한 확인
-        securityUtils.isUserUniversityMatchingBoard(dto.getUsername(), boardId);
 
         // 대댓글을 제외한 직접적인 댓글만 조회
         List<GetCommentDto> comments = post.getComments().stream()
@@ -232,8 +232,7 @@ public class PostServiceImpl implements PostService {
         int MAX_SIZE = 300;
         long EXPIRE_HOURS = 4;
 
-        Long userId = memberRepository.findByUsername(dto.getUsername()).orElseThrow(() ->
-                new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER)).getId();
+        Long userId = dto.getUserId();
         Long postId = dto.getPostId();
         String sortedSetKey = "views:" + userId;
 
@@ -262,10 +261,9 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public void increaseLikesCount(Long postId, Long memberId) {
-
-        Member member = findMember(memberId);
-        Post post = findPost(postId);
+    public void increaseLikesCount(PostAuthorDto dto) {
+        Member member = findMember(dto.getUserId());
+        Post post = findPost(dto.getPostId());
         LikesMap likesMap = LikesMap.builder()
                 .member(member)
                 .post(post)
@@ -273,16 +271,16 @@ public class PostServiceImpl implements PostService {
 
         likesMapRepository.save(likesMap);
 
-        String redisKey = "post:likes:" + postId;
+        String redisKey = "post:likes:" + dto.getPostId();
 
         redisRepository.increaseValue(redisKey);
     }
 
     @Override
-    public void decreaseLikesCount(Long postId, Long memberId) {
+    public void decreaseLikesCount(PostAuthorDto dto) {
         LikesMapId likesMapId = LikesMapId.builder()
-                .member(memberId)
-                .post(postId)
+                .member(dto.getUserId())
+                .post(dto.getPostId())
                 .build();
 
         try {
@@ -292,7 +290,13 @@ public class PostServiceImpl implements PostService {
                     "perhaps, user may not commit likes in DB");
         }
 
-        redisRepository.decreaseValue("post:likes:" + postId);
+        redisRepository.decreaseValue("post:likes:" + dto.getPostId());
+    }
+
+    @Override
+    @Cacheable(value = "commentCountCache", key = "#postId")
+    public Long getCommentCount(Long postId) {
+        return commentRepository.countAllByPostId(postId);
     }
 
 
