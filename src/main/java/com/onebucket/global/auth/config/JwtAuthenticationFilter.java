@@ -56,12 +56,15 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
             "/test/url",
             "/sign-in",
             "/register",
-            "/refresh-token"
+            "/refresh-token",
+            "/ws",
+            "/chat"
     );
 
     private static final List<String> EXCLUDE_URL_PREFIXES = List.of(
             "/test/",
-            "/docs/"
+            "/docs/",
+            "/chat/"
     );
 
     @Override
