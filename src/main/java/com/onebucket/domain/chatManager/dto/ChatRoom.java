@@ -1,12 +1,15 @@
 package com.onebucket.domain.chatManager.dto;
 
-import com.onebucket.domain.chatManager.service.ChatService;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 import org.springframework.web.socket.WebSocketSession;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * <br>package name   : com.onebucket.domain.chatManager.dto
@@ -24,29 +27,21 @@ import java.util.Set;
  */
 
 @Getter
+@Setter
 public class ChatRoom {
     private String roomId;
+    private String roomName;
+    private Long userCount;
+    private ConcurrentHashMap<String, String> userList = new ConcurrentHashMap<String, String>();
     private String name;
     private Set<WebSocketSession> sessions = new HashSet<>();
 
-    @Builder
-    public ChatRoom(String roomId, String name) {
-        this.roomId = roomId;
-        this.name = name;
-    }
+    public ChatRoom create(String roomName) {
+        ChatRoom chatRoom = new ChatRoom();
+        chatRoom.userCount = 1L;
+        chatRoom.roomId = UUID.randomUUID().toString();
+        chatRoom.roomName = roomName;
 
-    public void handlerActions(WebSocketSession session, ChatMessage chatMessage, ChatService chatService) {
-        if(chatMessage.getType().equals(ChatMessage.MessageType.ENTER)) {
-            sessions.add(session);
-            chatMessage.setMessage(chatMessage.getSender() + "님이 입장했습니다.");
-        }
-        sendMessage(chatMessage, chatService);
-
-
-    }
-
-    private <T> void sendMessage(T message, ChatService chatService) {
-        sessions.parallelStream()
-                .forEach(session -> chatService.sendMessage(session, message));
+        return chatRoom;
     }
 }

@@ -1,8 +1,14 @@
 package com.onebucket.domain.chatManager.controller;
 
+import com.onebucket.domain.chatManager.dto.ChatDto;
 import com.onebucket.domain.chatManager.dto.ChatRoom;
-import com.onebucket.domain.chatManager.service.ChatService;
+import com.onebucket.domain.chatManager.repository.ChatRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,17 +29,26 @@ import java.util.List;
  */
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/chat")
+@Slf4j
 public class ChatController {
-    private final ChatService chatService;
+    private final SimpMessageSendingOperations template;
+    private final ChatRepository chatRepository;
 
-    @PostMapping
-    public ChatRoom createRoom(@RequestBody String name) {
-        return chatService.createRoom(name);
+    @MessageMapping("/enterUser")
+    public void enterUser(@Payload ChatDto chat, SimpMessageHeaderAccessor headerAccessor) {
+        chatRepository.plusUserCnt(chat.getRoomId());
+        String userUUID = chatRepository.addUser(chat.getRoomId(), chat.getSender());
+
+        headerAccessor.getSessionAttributes().put("userUUID", userUUID);
+        headerAccessor.getSessionAttributes().put("roomId", chat.getRoomId());
+
+        chat.setMessage(chat.getSender() + "님이 입장하였습니다.");
+        template.convertAndSend("/sub/chat/room/" + chat.getRoomId(), chat);
     }
 
-    @GetMapping
-    public List<ChatRoom> findAllRoom() {
-        return chatService.findAllRoom();
+    @MessageMapping("/sendMessage")
+    public void sendMessage(@Payload ChatDto chat) {
+        chat.setMessage(chat.getMessage());
+        template.convertAndSend("/sub/chat/room/" + chat.getRoomId(), chat);
     }
 }

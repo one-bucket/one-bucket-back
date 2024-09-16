@@ -1,7 +1,6 @@
 package com.onebucket.domain.chatManager.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 /**
  * <br>package name   : com.onebucket.domain.chatManager.entity
@@ -20,14 +19,18 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ChatMessage {
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class ChatDto {
 
     public enum MessageType {
-        ENTER, TALK
+        ENTER, TALK, LEAVE
     }
     private MessageType type;
     private String roomId;
     private String sender;
     private String message;
+    private String time;
 
 }
