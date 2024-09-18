@@ -1,21 +1,28 @@
 package com.onebucket.integrationTest.ApiTest;
 
 import com.onebucket.domain.boardManage.dto.request.RequestCreateBoardDto;
+import com.onebucket.domain.boardManage.dto.request.RequestCreateBoardTypeDto;
+import com.onebucket.domain.boardManage.dto.response.ResponseBoardIdAndNameDto;
 import com.onebucket.domain.boardManage.dto.response.ResponseCreateBoardsDto;
+import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.global.auth.jwtAuth.domain.JwtToken;
+import com.onebucket.global.utils.SuccessResponseDto;
 import com.onebucket.testComponent.testSupport.RestDocsSupportTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
 
+import javax.print.attribute.standard.Media;
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.onebucket.testComponent.testUtils.JsonFieldResultMatcher.hasKey;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.in;
 import static org.springframework.restdocs.http.HttpDocumentation.httpRequest;
 import static org.springframework.restdocs.http.HttpDocumentation.httpResponse;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -45,10 +52,10 @@ public class BoardTest extends RestDocsSupportTest {
         createUniversity(1L);
 
         RequestCreateBoardDto dto = RequestCreateBoardDto.builder()
-                .boardType("board_type")
+                .boardType("type1")
                 .description("description")
                 .name("board")
-                .university("university")
+                .university("univ1")
                 .build();
 
         mockMvc.perform(post("/board/create")
@@ -93,8 +100,8 @@ public class BoardTest extends RestDocsSupportTest {
             createUniversity(i);
             for(long j = 1L; j <= 3L; j++) {
                 ResponseCreateBoardsDto result = ResponseCreateBoardsDto.builder()
-                        .university("university" + i)
-                        .boardType("boardType" + j)
+                        .university("univ" + i)
+                        .boardType("type" + j)
                         .build();
                 results.add(result);
             }
@@ -130,13 +137,85 @@ public class BoardTest extends RestDocsSupportTest {
     @Sql(scripts = "/sql/InitDB.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void boardTypeCreates() throws Exception {
         JwtToken token = createInitUser();
-        
+
+        RequestCreateBoardTypeDto dto = RequestCreateBoardTypeDto.builder()
+                .description("description")
+                .name("type")
+                .build();
+
+        mockMvc.perform(post("/board/type")
+                .header("Authorization", getAuthHeader(token))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isOk())
+                .andExpect(hasKey(new SuccessResponseDto("success create board type")))
+                .andDo(restDocs.document(
+                        httpRequest(),
+                        httpResponse(),
+                        requestFields(
+                                fieldWithPath("name").description("name of board type"),
+                                fieldWithPath("description").description("description of board type")
+                        ),
+                        responseFields(
+                                fieldWithPath("message").description("success create board type")
+                        )
+                ));
+
+        String query = """
+                SELECT COUNT(*)
+                FROM board_type
+                """;
+        Long countOfBoardType = jdbcTemplate.queryForObject(query, Long.class);
+
+        assertThat(countOfBoardType).isEqualTo(1L);
+
+    }
+
+    @Test
+    @DisplayName("POST /board/list test")
+    @Sql(scripts = "/sql/InitDB.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    public void getBoardList() throws Exception {
+        JwtToken token = createInitUser();
+        createBoard(5);
+
+        String setUnivQuery = """
+                UPDATE member
+                SET university_id = 1
+                WHERE username = ?
+                """;
+        jdbcTemplate.update(setUnivQuery, testUsername);
+
+
+        List<ResponseBoardIdAndNameDto> results = new ArrayList<>();
+        long index = 1;
+        for(long i = 1; i <= 5; i++) {
+                ResponseBoardIdAndNameDto result = ResponseBoardIdAndNameDto.builder()
+                    .id(index)
+                    .name("board1" + i)
+                    .build();
+            results.add(result);
+            index++;
+        }
+
+        mockMvc.perform(get("/board/list")
+                        .header("Authorization", getAuthHeader(token))
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(hasKey(results))
+                .andDo(restDocs.document(
+                        httpRequest(),
+                        httpResponse(),
+                        responseFields(
+                                fieldWithPath("[].id").description("id of board"),
+                                fieldWithPath("[].name").description("name of board")
+                        )
+                ));
     }
 
 
     private void createBoardType(Long id) {
         String description = "description" + id;
-        String name = "boardType" + id;
+        String name = "type" + id;
         String query = """
                 INSERT INTO board_type (id, description, name)
                 VALUES (?, ?, ?)
@@ -147,11 +226,33 @@ public class BoardTest extends RestDocsSupportTest {
     private void createUniversity(Long id) {
         String address = "address" + id;
         String email = "email@email." + id;
-        String name = "university" + id;
+        String name = "univ" + id;
         String query = """
                 INSERT INTO university (id, address, email, name)
                 VALUES (?, ?, ?, ?)
                 """;
         jdbcTemplate.update(query, id, address, email, name);
+    }
+
+    private void createBoard(long count) {
+        for(long i = 1; i <= count; i++) {
+            createBoardType(i);
+            createUniversity(i);
+        }
+        Long index = 1L;
+        String query = """
+                INSERT INTO board (id, description, name, board_type_id, university_id)
+                VALUES (?, ?, ?, ?, ?)
+                """;
+        for(long i = 1; i <= count; i++) {
+            for(long j = 1; j <= count; j++) {
+                String name = "board" + i + j;
+                String description = "description" + i + j;
+
+                jdbcTemplate.update(query, index, description, name, j, i);
+
+                index++;
+            }
+        }
     }
 }
