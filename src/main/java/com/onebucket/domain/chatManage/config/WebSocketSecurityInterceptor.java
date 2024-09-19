@@ -45,22 +45,26 @@ public class WebSocketSecurityInterceptor implements ChannelInterceptor {
 
     @Override
     public Message<?> preSend(@NotNull Message<?> message, @NotNull MessageChannel channel) {
-        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
-        String authorizationHeader = accessor.getFirstNativeHeader("Authorization");
-        //StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message); 이렇게 작성하면 회원 role 체크가 안됨
+        StompHeaderAccessor accessor =
+                MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+        assert accessor != null;
+        if(StompCommand.CONNECT.equals(accessor.getCommand())){
+            String authorizationHeader = accessor.getFirstNativeHeader("Authorization");
+            //StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message); 이렇게 작성하면 회원 role 체크가 안됨
 
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            String token = authorizationHeader.substring(7);
-            if (jwtValidator.isTokenValid(token)) {
-                Authentication authentication = jwtValidator.getAuthentication(token);
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-                accessor.setUser(authentication);
+            if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+                String token = authorizationHeader.substring(7);
+                if (jwtValidator.isTokenValid(token)) {
+                    Authentication authentication = jwtValidator.getAuthentication(token);
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                    accessor.setUser(authentication);
+                } else {
+                    throw new JwtException("Invalid JWT token");
+                }
             } else {
-                throw new JwtException("Invalid JWT token");
+                log.info("Authorization header is missing or invalid");
+                throw new JwtException("Authorization header is missing or invalid");
             }
-        } else {
-            log.info("Authorization header is missing or invalid");
-            throw new JwtException("Authorization header is missing or invalid");
         }
         return message;
     }

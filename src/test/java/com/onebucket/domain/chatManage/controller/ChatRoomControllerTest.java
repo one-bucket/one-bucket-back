@@ -165,7 +165,7 @@ class ChatRoomControllerTest {
     void getChatMessage_success() throws Exception {
         String roomId = "room1";
         doReturn(new ArrayList<ChatMessageDto>()).when(chatRoomService).getChatMessages(roomId);
-        String url = "/chat/messages/" + roomId;
+        final String url = "/chat/room/" + roomId + "/messages";
         final ResultActions resultActions = mockMvc.perform(
                 get(url)
         );
@@ -178,7 +178,7 @@ class ChatRoomControllerTest {
         final String roomId = "roomId";
         doThrow(new ChatManageException(ChatErrorCode.INTERNAL_ERROR)).when(chatRoomService).getChatMessages(roomId);
 
-        final String url = "/chat/messages/" + roomId;
+        final String url = "/chat/room/" + roomId + "/messages";
 
         final ResultActions resultActions = mockMvc.perform(
                 get(url)

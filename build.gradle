@@ -50,6 +50,8 @@ dependencies {
     testImplementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.3'
     testImplementation 'com.google.code.gson:gson:2.8.9'
     testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo:4.16.2'
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
 
     //database
     runtimeOnly 'com.mysql:mysql-connector-j'
