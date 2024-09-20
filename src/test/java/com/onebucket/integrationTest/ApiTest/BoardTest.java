@@ -14,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
 
 import javax.print.attribute.standard.Media;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -211,6 +212,13 @@ public class BoardTest extends RestDocsSupportTest {
                         )
                 ));
     }
+    @Test
+    @DisplayName("GET /post/list/{boardId} test")
+    @Sql(scripts = "/sql/InitDB.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    public void getPostByBoard() throws Exception {
+        JwtToken token = createInitUser();
+
+    }
 
 
     private void createBoardType(Long id) {
@@ -253,6 +261,19 @@ public class BoardTest extends RestDocsSupportTest {
 
                 index++;
             }
+        }
+    }
+
+    private void createPost(long boardId, long count) {
+        LocalDate now = LocalDate.now();
+        createBoard(1);
+
+        for(long i = 1; i<= count ; i++) {
+            String query = """
+                    INSERT INTO post (post_type, board_id, created_date, is_modified, likes, modified_date, text, title, views, is_fin, item, joins, location, wanted, author_id)
+                    VALUES ('post', ?, ?, ?, 0, ?, ?, ?, 0, ?)
+                    """;
+            jdbcTemplate.update(query);
         }
     }
 }
