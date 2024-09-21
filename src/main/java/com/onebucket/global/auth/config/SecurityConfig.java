@@ -59,7 +59,6 @@ public class SecurityConfig {
                                 .requestMatchers("/refresh-token").permitAll()
                                 .requestMatchers("/docs/**").permitAll()
                                 .requestMatchers("/test/create-testuser").permitAll()
-                                .requestMatchers("/ws-stomp/**").permitAll()
                                 .anyRequest().authenticated())
                 .addFilterBefore(new JwtAuthenticationFilter(jwtValidator),
                         UsernamePasswordAuthenticationFilter.class);
