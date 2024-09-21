@@ -47,6 +47,7 @@ public class AuthorizationService {
                 new UserBoardException(BoardErrorCode.UNKNOWN_BOARD));
 
         University university = member.getUniversity();
+
         if (university != null) {
             return university.getId().equals(board.getUniversity().getId());
 

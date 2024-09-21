@@ -1,50 +1,36 @@
 package com.onebucket.domain.boardManage.service;
 
-import com.onebucket.domain.boardManage.dao.BoardRepository;
-import com.onebucket.domain.boardManage.dao.CommentRepository;
-import com.onebucket.domain.boardManage.dao.LikesMapRepository;
-import com.onebucket.domain.boardManage.dao.PostRepository;
-
-import com.onebucket.domain.boardManage.dto.internal.comment.GetCommentDto;
+import com.onebucket.domain.boardManage.dao.*;
 import com.onebucket.domain.boardManage.dto.internal.post.*;
+import com.onebucket.domain.boardManage.dto.internal.comment.GetCommentDto;
 import com.onebucket.domain.boardManage.entity.Board;
-
-import com.onebucket.domain.boardManage.entity.post.Post;
+import com.onebucket.domain.boardManage.entity.post.MarketPost;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
-
 import com.onebucket.global.redis.RedisRepository;
 import com.onebucket.global.utils.SecurityUtils;
-
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-
 /**
  * <br>package name   : com.onebucket.domain.boardManage.service
- * <br>file name      : PostServiceImpl
- * <br>date           : 2024-07-18
+ * <br>file name      : MarketPostServiceImpl
+ * <br>date           : 2024-09-21
  * <pre>
  * <span style="color: white;">[description]</span>
- * post 에 대한 service layer. CRUD 및 조회수 증가를 포함하고 있다.
+ *
  * </pre>
  * <pre>
  * <span style="color: white;">usage:</span>
- * @see PostRepository
- * @see BoardRepository
- * @see MemberRepository
- * @see SecurityUtils
- * @see CommentRepository
- * @see RedisRepository
+ * {@code
+ *
+ * } </pre>
  */
-
-
 @Service
-public class PostServiceImpl extends AbstractPostService<Post, PostRepository> implements PostService {
+public class MarketPostServiceImpl extends AbstractPostService<MarketPost, MarketPostRepository> implements MarketPostService {
 
-
-    public PostServiceImpl(PostRepository repository,
+    public MarketPostServiceImpl(MarketPostRepository repository,
                            BoardRepository boardRepository,
                            MemberRepository memberRepository,
                            SecurityUtils securityUtils,
@@ -56,48 +42,57 @@ public class PostServiceImpl extends AbstractPostService<Post, PostRepository> i
     }
 
     @Override
-    protected Post convertCreatePostDtoToPost(CreatePostDto dto) {
+    protected <D extends CreatePostDto> MarketPost convertCreatePostDtoToPost(D dto) {
         Member member = findMember(dto.getUsername());
         Board board = findBoard(dto.getBoardId());
 
-        return Post.builder()
-                .title(dto.getTitle())
-                .text(dto.getText())
+        CreateMarketPostDto marketDto = (CreateMarketPostDto) dto;
+        return MarketPost.builder()
+                .isFin(false)
+                .wanted(marketDto.getWanted())
+                .item(marketDto.getItem())
+                .location(marketDto.getLocation())
                 .author(member)
+                .title(marketDto.getTitle())
+                .text(marketDto.getText())
                 .board(board)
                 .build();
+
     }
 
     @Override
-    protected PostThumbnailDto convertPostToThumbnailDto(Post post) {
+    protected MarketPostThumbnailDto convertPostToThumbnailDto(MarketPost post) {
 
         String nickname = "(unknown)";
         Member member = post.getAuthor();
         if(member != null) {
             nickname = member.getNickname();
         }
-
-        return PostThumbnailDto.builder()
-                .views(post.getViews())
+        return MarketPostThumbnailDto.builder()
+                .joins(post.getJoins())
+                .item(post.getItem())
+                .isFin(post.isFin())
                 .likes(post.getLikes())
-                .title(post.getTitle())
-                .text(post.getText())
-                .boardId(post.getBoardId())
+                .wanted(post.getWanted())
                 .authorNickname(nickname)
                 .createdDate(post.getCreatedDate())
                 .modifiedDate(post.getModifiedDate())
+                .boardId(post.getBoardId())
+                .title(post.getTitle())
+                .text(post.getText())
                 .postId(post.getId())
                 .build();
     }
 
     @Override
-    protected PostInfoDto convertPostToPostInfoDto(Post post, List<GetCommentDto> comments) {
+    protected MarketPostInfoDto convertPostToPostInfoDto(MarketPost post, List<GetCommentDto> comments) {
         String nickname = "(unknown)";
         Member member = post.getAuthor();
         if (member != null) {
             nickname = member.getNickname();
         }
-        return PostInfoDto.builder()
+
+        return MarketPostInfoDto.builder()
                 .views(post.getViews())
                 .likes(post.getLikes())
                 .title(post.getTitle())
@@ -107,6 +102,11 @@ public class PostServiceImpl extends AbstractPostService<Post, PostRepository> i
                 .createdDate(post.getCreatedDate())
                 .modifiedDate(post.getModifiedDate())
                 .comments(comments)
+                .item(post.getItem())
+                .wanted(post.getWanted())
+                .joins(post.getJoins())
+                .isFin(post.isFin())
                 .build();
     }
+
 }
