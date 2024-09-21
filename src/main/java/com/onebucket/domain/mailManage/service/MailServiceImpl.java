@@ -1,25 +1,16 @@
 package com.onebucket.domain.mailManage.service;
 
 import com.onebucket.domain.mailManage.dto.EmailMessage;
-import com.onebucket.domain.universityManage.dto.verifiedCode.internal.VerifiedCodeCheckDto;
-import com.onebucket.domain.universityManage.dto.verifiedCode.internal.VerifiedCodeDto;
-import com.onebucket.domain.memberManage.dao.MemberRepository;
-import com.onebucket.domain.memberManage.domain.Member;
-import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
-import com.onebucket.global.exceptionManage.customException.universityManageException.UniversityException;
-import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
-import com.onebucket.global.exceptionManage.errorCode.UniversityErrorCode;
-import com.onebucket.global.utils.RandomStringUtils;
-import com.onebucket.global.utils.UniversityEmailValidator;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.spring6.SpringTemplateEngine;
 
-import java.util.concurrent.TimeUnit;
+import java.util.Map;
 
 /**
  * <br>package name   : com.onebucket.domain.mailManage.service
@@ -46,14 +37,25 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class MailServiceImpl implements MailService {
     private final JavaMailSender javaMailSender;
+    private final SpringTemplateEngine templateEngine;
 
-    public void sendEmail(EmailMessage emailMessage, String content) {
+    // 이메일 발송 메서드, 템플릿 선택을 포함
+    public void sendEmail(EmailMessage emailMessage, String templateName, Map<String, Object> variables) {
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         try {
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
             mimeMessageHelper.setTo(emailMessage.to());
             mimeMessageHelper.setSubject(emailMessage.title());
-            mimeMessageHelper.setText(content, true);
+
+            // Thymeleaf context에 데이터를 넣기
+            Context context = new Context();
+            context.setVariables(variables); // 변수를 설정
+
+            // 선택된 템플릿 이름으로 템플릿을 처리
+            String htmlContent = templateEngine.process(templateName, context);
+            mimeMessageHelper.setText(htmlContent, true);
+
+            // 이메일 발송
             javaMailSender.send(mimeMessage);
         } catch (MessagingException e) {
             throw new RuntimeException(e);

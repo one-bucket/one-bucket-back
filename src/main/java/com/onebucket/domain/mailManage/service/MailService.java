@@ -3,6 +3,8 @@ package com.onebucket.domain.mailManage.service;
 import com.onebucket.domain.mailManage.dto.EmailMessage;
 import com.onebucket.domain.universityManage.dto.verifiedCode.internal.VerifiedCodeDto;
 
+import java.util.Map;
+
 /**
  * <br>package name   : com.onebucket.domain.mailManage.service
  * <br>file name      : MailService
@@ -25,5 +27,5 @@ import com.onebucket.domain.universityManage.dto.verifiedCode.internal.VerifiedC
  * </pre>
  */
 public interface MailService {
-    void sendEmail(EmailMessage emailMessage, String content);
+    void sendEmail(EmailMessage emailMessage, String templateName, Map<String, Object> variables);
 }

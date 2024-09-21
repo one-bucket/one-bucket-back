@@ -16,7 +16,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <br>package name   : com.onebucket.domain.universityManage.controller
@@ -91,7 +93,10 @@ public class UniversityController {
         VerifiedCodeDto verifiedCodeDto = VerifiedCodeDto.of(dto,username);
         String verifiedCode = universityService.makeVerifiedCode(verifiedCodeDto);
         EmailMessage emailMessage = EmailMessage.of(dto.universityEmail(),"[한바구니] 학교 이메일 인증");
-        mailService.sendEmail(emailMessage,verifiedCode);
+        // 템플릿에 전달할 데이터를 설정
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("verificationCode", verifiedCode);
+        mailService.sendEmail(emailMessage, "email-verification", variables);
         return ResponseEntity.ok(new SuccessResponseDto("success send verifiedCode"));
     }
 

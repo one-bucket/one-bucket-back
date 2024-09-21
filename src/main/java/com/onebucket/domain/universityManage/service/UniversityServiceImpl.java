@@ -60,7 +60,6 @@ public class UniversityServiceImpl implements UniversityService {
     private final MemberRepository memberRepository;
     private final UniversityEmailValidator validator;
     private final RandomStringUtils randomStringUtils;
-    private final MailService mailService;
 
     /**
      * 새로운 대학 정보를 만들고 만든 대학 정보를 반환한다. 같은 이름을 가진 대학교는 추가할 수 없음.
@@ -156,8 +155,6 @@ public class UniversityServiceImpl implements UniversityService {
         if (storedCode == null || !storedCode.equals(dto.verifiedCode())) {
             throw new UniversityException(UniversityErrorCode.INVALID_VERIFICATION_CODE);
         }
-
-        // 유저 권한 업데이트
         Member member = memberRepository.findByUsername(dto.username())
                 .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
 
