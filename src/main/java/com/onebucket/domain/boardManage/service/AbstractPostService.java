@@ -214,6 +214,7 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
     @Override
     @Cacheable(value = "commentCountCache", key = "#postId")
     public Long getCommentCount(Long postId) {
+        System.out.println("step 2");
         return commentRepository.countAllByPostId(postId);
     }
 

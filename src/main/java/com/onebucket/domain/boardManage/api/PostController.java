@@ -51,7 +51,7 @@ public class PostController {
         // dto 분리 일부로 안함
         Page<PostThumbnailDto> posts = postService.getPostsByBoard(getBoardDto);
         posts.forEach(post -> {
-            Long commentCount = postService.getCommentCount(post.getPostId());
+            Long commentCount = (Long) postService.getCommentCount(post.getPostId());
             post.setCommentsCount(commentCount);
         });
         return ResponseEntity.ok(posts);
