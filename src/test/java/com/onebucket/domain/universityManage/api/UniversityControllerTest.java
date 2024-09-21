@@ -2,9 +2,8 @@ package com.onebucket.domain.universityManage.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.onebucket.domain.universityManage.domain.University;
-import com.onebucket.domain.universityManage.dto.UniversityDto;
-import com.onebucket.domain.universityManage.dto.UpdateUniversityDto;
+import com.onebucket.domain.universityManage.dto.university.UniversityDto;
+import com.onebucket.domain.universityManage.dto.university.UpdateUniversityDto;
 import com.onebucket.domain.universityManage.service.UniversityService;
 import com.onebucket.global.exceptionManage.customException.universityManageException.UniversityException;
 import com.onebucket.global.exceptionManage.errorCode.UniversityErrorCode;

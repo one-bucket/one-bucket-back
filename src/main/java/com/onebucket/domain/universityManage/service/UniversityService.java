@@ -1,7 +1,10 @@
 package com.onebucket.domain.universityManage.service;
 
-import com.onebucket.domain.universityManage.dto.UniversityDto;
-import com.onebucket.domain.universityManage.dto.UpdateUniversityDto;
+import com.onebucket.domain.mailManage.dto.EmailMessage;
+import com.onebucket.domain.universityManage.dto.university.UniversityDto;
+import com.onebucket.domain.universityManage.dto.university.UpdateUniversityDto;
+import com.onebucket.domain.universityManage.dto.verifiedCode.internal.VerifiedCodeCheckDto;
+import com.onebucket.domain.universityManage.dto.verifiedCode.internal.VerifiedCodeDto;
 
 import java.util.List;
 
@@ -27,9 +30,14 @@ import java.util.List;
  * </pre>
  */
 public interface UniversityService {
+    // 대학교 CRUD
     Long createUniversity(UniversityDto universityDto);
     List<UniversityDto> findAllUniversity();
     UniversityDto getUniversity(String name);
     void updateUniversity(String name, UpdateUniversityDto dto);
     void deleteUniversity(String name);
+
+    // 대학교 이메일 인증
+    void verifyCode(VerifiedCodeCheckDto dto);
+    String makeVerifiedCode(VerifiedCodeDto dto);
 }

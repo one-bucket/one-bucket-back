@@ -3,11 +3,9 @@ package com.onebucket.domain.universityManage.service;
 
 import com.onebucket.domain.universityManage.dao.UniversityRepository;
 import com.onebucket.domain.universityManage.domain.University;
-import com.onebucket.domain.universityManage.dto.UniversityDto;
+import com.onebucket.domain.universityManage.dto.university.UniversityDto;
 import com.onebucket.global.exceptionManage.customException.universityManageException.UniversityException;
 import com.onebucket.global.exceptionManage.errorCode.UniversityErrorCode;
-import com.onebucket.global.utils.UniversityEmailValidator;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

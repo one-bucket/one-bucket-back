@@ -1,18 +1,32 @@
 package com.onebucket.domain.universityManage.service;
 
+import com.onebucket.domain.mailManage.dto.EmailMessage;
+import com.onebucket.domain.mailManage.service.MailService;
+import com.onebucket.domain.memberManage.dao.MemberRepository;
+import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.domain.universityManage.dao.UniversityRepository;
 import com.onebucket.domain.universityManage.domain.University;
-import com.onebucket.domain.universityManage.dto.UniversityDto;
-import com.onebucket.domain.universityManage.dto.UpdateUniversityDto;
+import com.onebucket.domain.universityManage.dto.university.UniversityDto;
+import com.onebucket.domain.universityManage.dto.university.UpdateUniversityDto;
+import com.onebucket.domain.universityManage.dto.verifiedCode.internal.VerifiedCodeCheckDto;
+import com.onebucket.domain.universityManage.dto.verifiedCode.internal.VerifiedCodeDto;
+import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.customException.universityManageException.UniversityException;
+import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.UniversityErrorCode;
 import com.onebucket.global.utils.EntityUtils;
+import com.onebucket.global.utils.RandomStringUtils;
+import com.onebucket.global.utils.UniversityEmailValidator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -38,9 +52,15 @@ import java.util.stream.Collectors;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UniversityServiceImpl implements UniversityService {
 
     private final UniversityRepository universityRepository;
+    private final StringRedisTemplate redisTemplate;
+    private final MemberRepository memberRepository;
+    private final UniversityEmailValidator validator;
+    private final RandomStringUtils randomStringUtils;
+    private final MailService mailService;
 
     /**
      * 새로운 대학 정보를 만들고 만든 대학 정보를 반환한다. 같은 이름을 가진 대학교는 추가할 수 없음.
@@ -127,5 +147,36 @@ public class UniversityServiceImpl implements UniversityService {
         University university = universityRepository.findByName(name)
                 .orElseThrow(()->new UniversityException(UniversityErrorCode.NOT_EXIST_UNIVERSITY));
         universityRepository.delete(university);
+    }
+
+    @Override
+    public void verifyCode(VerifiedCodeCheckDto dto) {
+        String storedCode = redisTemplate.opsForValue().get(dto.username());
+        // 인증 코드 검증
+        if (storedCode == null || !storedCode.equals(dto.verifiedCode())) {
+            throw new UniversityException(UniversityErrorCode.INVALID_VERIFICATION_CODE);
+        }
+
+        // 유저 권한 업데이트
+        Member member = memberRepository.findByUsername(dto.username())
+                .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
+
+        if (!member.getRoles().contains("ROLE_USER")) {
+            member.getRoles().add("ROLE_USER");
+            log.info("member의 role 출력 : {}",member.getRoles());
+            memberRepository.save(member);  // 변경된 권한 저장
+        }
+    }
+
+    @Override
+    public String makeVerifiedCode(VerifiedCodeDto dto) {
+        if(!validator.isValidUniversityEmail(dto)) {
+            throw new UniversityException(UniversityErrorCode.INVALID_EMAIL);
+        }
+        // 인증 코드 생성
+        String verifiedCode = randomStringUtils.generateRandomStr(6);
+        redisTemplate.opsForValue().set(dto.username(),verifiedCode,5, TimeUnit.MINUTES);
+
+        return verifiedCode;
     }
 }

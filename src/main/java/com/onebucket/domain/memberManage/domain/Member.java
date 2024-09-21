@@ -61,7 +61,7 @@ public class Member {
 
     @ElementCollection(fetch=FetchType.EAGER)
     @Builder.Default
-    private List<String> roles = new ArrayList<>(List.of("GUEST"));
+    private List<String> roles = new ArrayList<>(List.of("ROLE_GUEST"));
 
     @OneToOne(fetch =FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @PrimaryKeyJoinColumn

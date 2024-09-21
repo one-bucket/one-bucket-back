@@ -1,5 +1,6 @@
 package com.onebucket.global.utils;
 
+import com.onebucket.domain.universityManage.dto.verifiedCode.internal.VerifiedCodeDto;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -43,15 +44,15 @@ public class UniversityEmailValidator {
         universityEmailDomains.put("서울시립대학교", "@uos.ac.kr");
         universityEmailDomains.put("건국대학교", "@konkuk.ac.kr");
         universityEmailDomains.put("동국대학교", "@dgu.ac.kr");
-        universityEmailDomains.put("홍익대학교", "@hongik.ac.kr");
+        universityEmailDomains.put("홍익대학교", "@g.hongik.ac.kr");
         universityEmailDomains.put("국민대학교", "@kookmin.ac.kr");
         universityEmailDomains.put("숭실대학교", "@soongsil.ac.kr");
         universityEmailDomains.put("세종대학교", "@sju.ac.kr");
         universityEmailDomains.put("단국대학교", "@dankook.ac.kr");
     }
 
-    public boolean isValidUniversityEmail(String universityName, String email) {
-        String domain = universityEmailDomains.get(universityName);
-        return domain != null && email.endsWith(domain);
+    public boolean isValidUniversityEmail(VerifiedCodeDto dto) {
+        String domain = universityEmailDomains.get(dto.university());
+        return domain != null && dto.universityEmail().endsWith(domain);
     }
 }

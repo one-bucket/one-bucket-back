@@ -1,4 +1,4 @@
-package com.onebucket.domain.universityManage.dto;
+package com.onebucket.domain.universityManage.dto.university;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
