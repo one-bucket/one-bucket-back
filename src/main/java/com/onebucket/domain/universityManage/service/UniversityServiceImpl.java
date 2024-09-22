@@ -14,6 +14,7 @@ import com.onebucket.global.exceptionManage.customException.memberManageExceptoi
 import com.onebucket.global.exceptionManage.customException.universityManageException.UniversityException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.UniversityErrorCode;
+import com.onebucket.global.redis.RedisRepository;
 import com.onebucket.global.utils.EntityUtils;
 import com.onebucket.global.utils.RandomStringUtils;
 import com.onebucket.global.utils.UniversityEmailValidator;
@@ -21,8 +22,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -56,10 +55,10 @@ import java.util.stream.Collectors;
 public class UniversityServiceImpl implements UniversityService {
 
     private final UniversityRepository universityRepository;
-    private final StringRedisTemplate redisTemplate;
     private final MemberRepository memberRepository;
     private final UniversityEmailValidator validator;
     private final RandomStringUtils randomStringUtils;
+    private final RedisRepository redisRepository;
 
     /**
      * 새로운 대학 정보를 만들고 만든 대학 정보를 반환한다. 같은 이름을 가진 대학교는 추가할 수 없음.
@@ -150,7 +149,7 @@ public class UniversityServiceImpl implements UniversityService {
 
     @Override
     public void verifyCode(VerifiedCodeCheckDto dto) {
-        String storedCode = redisTemplate.opsForValue().get(dto.username());
+        String storedCode = redisRepository.get(dto.username());
         // 인증 코드 검증
         if (storedCode == null || !storedCode.equals(dto.verifiedCode())) {
             throw new UniversityException(UniversityErrorCode.INVALID_VERIFICATION_CODE);
@@ -158,9 +157,9 @@ public class UniversityServiceImpl implements UniversityService {
         Member member = memberRepository.findByUsername(dto.username())
                 .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
 
+        // 유저의 권한 추가
         if (!member.getRoles().contains("ROLE_USER")) {
             member.getRoles().add("ROLE_USER");
-            log.info("member의 role 출력 : {}",member.getRoles());
             memberRepository.save(member);  // 변경된 권한 저장
         }
     }
@@ -172,8 +171,13 @@ public class UniversityServiceImpl implements UniversityService {
         }
         // 인증 코드 생성
         String verifiedCode = randomStringUtils.generateRandomStr(6);
-        redisTemplate.opsForValue().set(dto.username(),verifiedCode,5, TimeUnit.MINUTES);
-
+        long EXPIRED_TIME = 5L;
+        redisRepository.save()
+                        .key(dto.username())
+                        .value(verifiedCode)
+                        .timeout(EXPIRED_TIME)
+                        .timeUnit(TimeUnit.MINUTES)
+                        .save();
         return verifiedCode;
     }
 }

@@ -33,6 +33,8 @@ public enum UniversityErrorCode implements ErrorCode {
     NOT_EXIST_UNIVERSITY("3002",HttpStatus.NOT_FOUND,"Can't find University"),
     INVALID_EMAIL("3003", HttpStatus.BAD_REQUEST, "Invalid student email address"),
     INVALID_VERIFICATION_CODE("3004", HttpStatus.BAD_REQUEST, "Invalid verification code"),
+    VERIFICATION_CODE_NOT_FOUND("3005", HttpStatus.BAD_REQUEST, "Can't find verification code"),
+
     ;
 
     private final String code;

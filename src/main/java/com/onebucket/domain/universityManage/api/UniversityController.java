@@ -63,13 +63,13 @@ public class UniversityController {
     }
 
     @GetMapping("/univs")
-    public ResponseEntity<?> getAllUniversity() {
+    public ResponseEntity<List<UniversityDto>> getAllUniversity() {
         List<UniversityDto> universities = universityService.findAllUniversity();
         return ResponseEntity.ok(universities);
     }
 
     @GetMapping("/univs/{name}")
-    public ResponseEntity<?> getUniversity(@PathVariable String name) {
+    public ResponseEntity<UniversityDto> getUniversity(@PathVariable String name) {
         UniversityDto universityDto = universityService.getUniversity(name);
         return ResponseEntity.ok(universityDto);
     }
