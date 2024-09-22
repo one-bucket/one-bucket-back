@@ -84,6 +84,7 @@ public class MarketPostServiceImpl extends AbstractPostService<MarketPost, Marke
                 .title(post.getTitle())
                 .text(post.getText())
                 .postId(post.getId())
+                .views(post.getViews())
                 .build();
     }
 

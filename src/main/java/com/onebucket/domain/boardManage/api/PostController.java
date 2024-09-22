@@ -1,5 +1,6 @@
 package com.onebucket.domain.boardManage.api;
 
+import com.onebucket.domain.boardManage.dto.internal.board.GetBoardDto;
 import com.onebucket.domain.boardManage.dto.internal.post.*;
 import com.onebucket.domain.boardManage.dto.request.RequestCreatePostDto;
 import com.onebucket.domain.boardManage.dto.response.ResponsePostDto;
@@ -12,6 +13,7 @@ import com.onebucket.global.exceptionManage.errorCode.BoardErrorCode;
 import com.onebucket.global.utils.SecurityUtils;
 import com.onebucket.global.utils.SuccessResponseWithIdDto;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -96,4 +98,15 @@ public class PostController extends AbstractPostController<Post, PostService>{
         return ResponseEntity.ok(new SuccessResponseWithIdDto("success create post", savedId));
     }
 
+    @Override
+    protected ResponseEntity<Page<? extends PostThumbnailDto>> getPostByBoardInternal(GetBoardDto getBoardDto) {
+        Page<PostThumbnailDto> posts = postService.getPostsByBoard(getBoardDto);
+
+        posts.forEach(post -> {
+            Long commentCount = (Long) postService.getCommentCount(post.getPostId());
+            post.setCommentsCount(commentCount);
+            post.setLikes(post.getLikes() + postService.getLikesInRedis(post.getPostId()));
+        });
+        return ResponseEntity.ok(posts);
+    }
 }

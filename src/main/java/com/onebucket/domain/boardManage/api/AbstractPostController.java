@@ -41,21 +41,16 @@ public abstract class AbstractPostController<T extends Post, S extends BasePostS
 
     @GetMapping("/list/{boardId}")
     @PreAuthorize("@authorizationService.isUserCanAccessBoard(#boardId)")
-    public ResponseEntity<Page<PostThumbnailDto>> getPostsByBoard(@PathVariable Long boardId, Pageable pageable) {
+    public ResponseEntity<Page<? extends PostThumbnailDto>> getPostsByBoard(@PathVariable Long boardId, Pageable pageable) {
         GetBoardDto getBoardDto = GetBoardDto.builder()
                 .boardId(boardId)
                 .pageable(pageable)
                 .build();
 
-        // dto 분리 일부로 안함
-        Page<PostThumbnailDto> posts = postService.getPostsByBoard(getBoardDto);
-        posts.forEach(post -> {
-            Long commentCount = (Long) postService.getCommentCount(post.getPostId());
-            post.setCommentsCount(commentCount);
-            post.setLikes(post.getLikes() + postService.getLikesInRedis(post.getPostId()));
-        });
-        return ResponseEntity.ok(posts);
+        return getPostByBoardInternal(getBoardDto);
     }
+
+    protected abstract  ResponseEntity<Page<? extends PostThumbnailDto>> getPostByBoardInternal(GetBoardDto getBoardDto);
 
     @GetMapping("/{postId}")
     @PreAuthorize("@authorizationService.isUserCanAccessPost(#postId)")

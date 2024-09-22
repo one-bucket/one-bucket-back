@@ -128,7 +128,6 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
     @Override
     @Transactional(readOnly = true)
     public Page<PostThumbnailDto> getPostsByBoard(GetBoardDto dto) {
-
         return repository.findByBoardId(dto.getBoardId(), dto.getPageable())
                 .map(this::convertPostToThumbnailDto);
     }

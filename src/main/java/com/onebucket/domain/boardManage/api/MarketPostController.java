@@ -1,5 +1,6 @@
 package com.onebucket.domain.boardManage.api;
 
+import com.onebucket.domain.boardManage.dto.internal.board.GetBoardDto;
 import com.onebucket.domain.boardManage.dto.internal.post.*;
 import com.onebucket.domain.boardManage.dto.request.RequestCreateMarketPostDto;
 import com.onebucket.domain.boardManage.dto.response.ResponseMarketPostDto;
@@ -13,6 +14,7 @@ import com.onebucket.global.exceptionManage.errorCode.BoardErrorCode;
 import com.onebucket.global.utils.SecurityUtils;
 import com.onebucket.global.utils.SuccessResponseWithIdDto;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -107,5 +109,18 @@ public class MarketPostController extends AbstractPostController<MarketPost, Mar
         increaseViewCountInternal(postAuthorDto);
 
         return ResponseEntity.ok(response);
+    }
+
+    @Override
+    protected ResponseEntity<Page<? extends PostThumbnailDto>> getPostByBoardInternal(GetBoardDto getBoardDto) {
+        Page<MarketPostThumbnailDto> posts = postService.getPostsByBoard(getBoardDto)
+                        .map(post -> (MarketPostThumbnailDto) post);
+
+        posts.forEach(post -> {
+            Long commentCount = (Long) postService.getCommentCount(post.getPostId());
+            post.setCommentsCount(commentCount);
+            post.setLikes(post.getLikes() + postService.getLikesInRedis(post.getPostId()));
+        });
+        return ResponseEntity.ok(posts);
     }
 }
