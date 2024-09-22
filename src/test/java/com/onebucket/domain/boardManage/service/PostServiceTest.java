@@ -97,8 +97,7 @@ class PostServiceTest {
         when(memberRepository.findByUsername(username)).thenReturn(Optional.of(mockMember));
         when(postRepository.save(any(Post.class))).thenReturn(mockPost);
         when(boardRepository.findById(1L)).thenReturn(Optional.of(mockBoard));
-        when(mockBoard.getUniversity()).thenReturn(mockUniversity);
-        when(mockUniversity.getId()).thenReturn(1L);
+
         when(mockPost.getId()).thenReturn(100L);
 
         Long postId = postService.createPost(dto);
@@ -107,29 +106,6 @@ class PostServiceTest {
         assertThat(postId).isEqualTo(100L);
     }
 
-    @Test
-    @DisplayName("createPost - fail /invalid university")
-    void testCreatePost_fail_invalid_university() {
-        String username = "username";
-        Long univId = 1L;
-        Long boardId = 1L;
-        CreatePostDto dto = CreatePostDto.builder()
-                .username(username)
-                .boardId(boardId)
-                .univId(univId)
-                .build();
-        when(memberRepository.findByUsername(username)).thenReturn(Optional.of(mockMember));
-        when(boardRepository.findById(1L)).thenReturn(Optional.of(mockBoard));
-        when(mockBoard.getUniversity()).thenReturn(mockUniversity);
-        when(mockUniversity.getId()).thenReturn(2L);
-
-        assertThatThrownBy(() -> postService.createPost(dto))
-                .isInstanceOf(AuthenticationException.class)
-                .extracting("errorCode")
-                .isEqualTo(AuthenticationErrorCode.INVALID_SUBMIT);
-
-        verify(postRepository, never()).save(any(Post.class));
-    }
 
     @Test
     @DisplayName("createPost - fail / unknown board")

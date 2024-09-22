@@ -4,7 +4,6 @@ import com.onebucket.domain.boardManage.dto.request.RequestCreateBoardDto;
 import com.onebucket.domain.boardManage.dto.request.RequestCreateBoardTypeDto;
 import com.onebucket.domain.boardManage.dto.response.ResponseBoardIdAndNameDto;
 import com.onebucket.domain.boardManage.dto.response.ResponseCreateBoardsDto;
-import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.global.auth.jwtAuth.domain.JwtToken;
 import com.onebucket.global.utils.SuccessResponseDto;
 import com.onebucket.testComponent.testSupport.RestDocsSupportTest;
@@ -13,14 +12,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
 
-import javax.print.attribute.standard.Media;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.onebucket.testComponent.testUtils.JsonFieldResultMatcher.hasKey;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.in;
 import static org.springframework.restdocs.http.HttpDocumentation.httpRequest;
 import static org.springframework.restdocs.http.HttpDocumentation.httpResponse;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
@@ -142,6 +139,7 @@ public class BoardTest extends RestDocsSupportTest {
         RequestCreateBoardTypeDto dto = RequestCreateBoardTypeDto.builder()
                 .description("description")
                 .name("type")
+                .type("Post")
                 .build();
 
         mockMvc.perform(post("/board/type")
@@ -155,7 +153,8 @@ public class BoardTest extends RestDocsSupportTest {
                         httpResponse(),
                         requestFields(
                                 fieldWithPath("name").description("name of board type"),
-                                fieldWithPath("description").description("description of board type")
+                                fieldWithPath("description").description("description of board type"),
+                                fieldWithPath("type").description("type which is post or market post or else")
                         ),
                         responseFields(
                                 fieldWithPath("message").description("success create board type")
@@ -208,7 +207,8 @@ public class BoardTest extends RestDocsSupportTest {
                         httpResponse(),
                         responseFields(
                                 fieldWithPath("[].id").description("id of board"),
-                                fieldWithPath("[].name").description("name of board")
+                                fieldWithPath("[].name").description("name of board"),
+                                fieldWithPath("[].type").description("type of board")
                         )
                 ));
     }
