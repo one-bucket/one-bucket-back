@@ -1,5 +1,11 @@
 package com.onebucket.domain.chatManage.dto.chatmessage;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.onebucket.domain.chatManage.domain.ChatMessage;
 import com.onebucket.domain.chatManage.domain.MessageType;
 
@@ -32,6 +38,10 @@ public record ChatMessageDto(
         String sender,
         String roomId,
         String imgUrl,
+        @JsonProperty("createdAt")
+        @JsonSerialize(using = LocalDateTimeSerializer.class) // 직렬화 시 필요
+        @JsonDeserialize(using = LocalDateTimeDeserializer.class) // 역직렬화 시 필요
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
         LocalDateTime createdAt
 ) {
     public static ChatMessageDto from(ChatMessage m) {
