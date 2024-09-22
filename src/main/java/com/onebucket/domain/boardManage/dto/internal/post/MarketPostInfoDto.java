@@ -27,4 +27,5 @@ public class MarketPostInfoDto extends PostInfoDto {
     private int joins;
     private int wanted;
     private boolean isFin;
+    private String location;
 }

@@ -75,7 +75,8 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
             throw new UserBoardException(BoardErrorCode.I_AM_AN_APPLE_PIE, "maybe, author is null");
         }
         Long authorId = author.getId();
-        if(authorId.equals(deletePostDto.getId())) {
+
+        if(authorId.equals(deletePostDto.getMemberId())) {
             repository.delete(findPost);
         } else {
             throw new AuthenticationException(AuthenticationErrorCode.UNAUTHORIZED_ACCESS,
@@ -182,11 +183,19 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
     public void increaseLikesCount(PostAuthorDto dto) {
         Member member = findMember(dto.getUserId());
         Post post = findPost(dto.getPostId());
+
+        LikesMapId id = LikesMapId.builder()
+                .post(post.getId())
+                .member(member.getId())
+                .build();
+        if(likesMapRepository.existsById(id)) {
+            return;
+        }
+
         LikesMap likesMap = LikesMap.builder()
                 .member(member)
                 .post(post)
                 .build();
-
         likesMapRepository.save(likesMap);
 
         String redisKey = "post:likes:" + dto.getPostId();
@@ -214,8 +223,27 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
     @Override
     @Cacheable(value = "commentCountCache", key = "#postId")
     public Long getCommentCount(Long postId) {
-        System.out.println("step 2");
         return commentRepository.countAllByPostId(postId);
+    }
+    @Override
+    public Long getLikesInRedis(Long postId) {
+        String redisKey = "post:likes:" + postId;
+
+        String result = redisRepository.get(redisKey);
+        if(result == null) {
+            return 0L;
+        }
+        return Long.parseLong(result);
+    }
+
+    @Override
+    public boolean isUserLikesPost(PostAuthorDto dto) {
+        LikesMapId id = LikesMapId.builder()
+                .post(dto.getPostId())
+                .member(dto.getUserId())
+                .build();
+        return likesMapRepository.existsById(id);
+
     }
 
     protected Board findBoard(Long id) {

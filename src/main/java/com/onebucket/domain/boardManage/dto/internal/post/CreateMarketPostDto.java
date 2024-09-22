@@ -2,6 +2,7 @@ package com.onebucket.domain.boardManage.dto.internal.post;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 /**
  * <br>package name   : com.onebucket.domain.boardManage.dto.internal.post
@@ -19,6 +20,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@SuperBuilder
 public class CreateMarketPostDto extends CreatePostDto {
     private String item;
     private int wanted;

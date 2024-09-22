@@ -29,4 +29,5 @@ public interface LikesMapRepository extends JpaRepository<LikesMap, LikesMapId> 
     long countByPostId(Long postId);
 
     void deleteById(@NotNull LikesMapId likesMapId);
+
 }

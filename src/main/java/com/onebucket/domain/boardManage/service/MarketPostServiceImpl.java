@@ -68,6 +68,7 @@ public class MarketPostServiceImpl extends AbstractPostService<MarketPost, Marke
         if(member != null) {
             nickname = member.getNickname();
         }
+
         return MarketPostThumbnailDto.builder()
                 .joins(post.getJoins())
                 .item(post.getItem())
@@ -93,6 +94,7 @@ public class MarketPostServiceImpl extends AbstractPostService<MarketPost, Marke
         }
 
         return MarketPostInfoDto.builder()
+                .postId(post.getId())
                 .views(post.getViews())
                 .likes(post.getLikes())
                 .title(post.getTitle())
@@ -106,6 +108,7 @@ public class MarketPostServiceImpl extends AbstractPostService<MarketPost, Marke
                 .wanted(post.getWanted())
                 .joins(post.getJoins())
                 .isFin(post.isFin())
+                .location(post.getLocation())
                 .build();
     }
 

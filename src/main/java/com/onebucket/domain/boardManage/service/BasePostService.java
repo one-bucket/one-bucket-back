@@ -32,4 +32,6 @@ public interface BasePostService {
     void increaseLikesCount(PostAuthorDto dto);
     void decreaseLikesCount(PostAuthorDto dto);
     Long getCommentCount(Long postId);
+    Long getLikesInRedis(Long postId);
+    boolean isUserLikesPost(PostAuthorDto dto);
 }
