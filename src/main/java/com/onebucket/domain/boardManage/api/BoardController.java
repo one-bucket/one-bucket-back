@@ -55,9 +55,11 @@ public class BoardController {
     }
 
     private ResponseBoardIdAndNameDto convertToResponseDto(BoardIdAndNameDto dto) {
+        String type = boardService.getType(dto.getId());
         return ResponseBoardIdAndNameDto.builder()
                 .id(dto.getId())
                 .name(dto.getName())
+                .type(type)
                 .build();
     }
 }

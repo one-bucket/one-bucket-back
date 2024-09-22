@@ -1,6 +1,8 @@
 package com.onebucket.domain.boardManage.dto.response;
 
 import com.onebucket.domain.boardManage.dto.internal.board.BoardIdAndNameDto;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 /**
@@ -26,5 +28,8 @@ import lombok.experimental.SuperBuilder;
  */
 
 @SuperBuilder
+@Getter
+@Setter
 public class ResponseBoardIdAndNameDto extends BoardIdAndNameDto {
+    private String type;
 }

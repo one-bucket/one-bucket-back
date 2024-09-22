@@ -7,6 +7,7 @@ import com.onebucket.domain.boardManage.entity.Board;
 import com.onebucket.domain.boardManage.entity.post.MarketPost;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
+
 import com.onebucket.global.redis.RedisRepository;
 import com.onebucket.global.utils.SecurityUtils;
 import org.springframework.stereotype.Service;
@@ -68,6 +69,7 @@ public class MarketPostServiceImpl extends AbstractPostService<MarketPost, Marke
         if(member != null) {
             nickname = member.getNickname();
         }
+
 
         return MarketPostThumbnailDto.builder()
                 .joins(post.getJoins())

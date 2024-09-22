@@ -11,6 +11,7 @@ import com.onebucket.domain.universityManage.dao.UniversityRepository;
 import com.onebucket.domain.universityManage.domain.University;
 import com.onebucket.global.exceptionManage.customException.boardManageException.AdminManageBoardException;
 import com.onebucket.global.exceptionManage.customException.boardManageException.BoardManageException;
+import com.onebucket.global.exceptionManage.customException.boardManageException.UserBoardException;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.customException.universityManageException.UniversityManageException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
@@ -158,12 +159,18 @@ public class BoardServiceImpl implements BoardService {
         return userUniv.equals(boardUniv);
 
     }
+    @Override
+    public String getType(Long boardId) {
+        return boardRepository.findById(boardId).orElseThrow(() -> new UserBoardException(BoardErrorCode.UNKNOWN_BOARD))
+                .getBoardType().getType();
+    }
 
     @Override
     public void createBoardType(CreateBoardTypeDto dto) {
         BoardType boardType = BoardType.builder()
                 .name(dto.getName())
                 .description(dto.getDescription())
+                .type(dto.getType())
                 .build();
 
         try {

@@ -36,6 +36,7 @@ public class PostThumbnailDto extends PostDto {
     private String authorNickname;
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
+    private String type;
 
     private Long views;
     private Long likes;

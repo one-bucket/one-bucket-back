@@ -32,6 +32,7 @@ public enum BoardErrorCode implements ErrorCode {
 
     UNKNOWN_POST("2000", HttpStatus.NOT_FOUND, "unknown post "),
     COMMENT_LAYER_OVERHEAD("2001", HttpStatus.BAD_REQUEST, "no re-reply comment"),
+    MISMATCH_POST_AND_BOARD("2002", HttpStatus.BAD_REQUEST, "not allowed post type in this board"),
 
 
     DUPLICATE_BOARD_TYPE("2100", HttpStatus.CONFLICT, "duplicate board type name"),

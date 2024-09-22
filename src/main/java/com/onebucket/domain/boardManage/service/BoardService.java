@@ -37,4 +37,6 @@ public interface BoardService {
 
     void createBoardType(CreateBoardTypeDto dto);
     List<BoardIdAndNameDto>getBoardList(Long univId);
+
+    String getType(Long boardId);
 }

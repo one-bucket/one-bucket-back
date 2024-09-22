@@ -86,6 +86,7 @@ public class AdminBoardController {
         CreateBoardTypeDto createBoardTypeDto = CreateBoardTypeDto.builder()
                 .name(dto.getName())
                 .description(dto.getDescription())
+                .type(dto.getType())
                 .build();
 
         boardService.createBoardType(createBoardTypeDto);

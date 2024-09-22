@@ -5,8 +5,11 @@ import com.onebucket.domain.boardManage.dto.request.RequestCreateMarketPostDto;
 import com.onebucket.domain.boardManage.dto.response.ResponseMarketPostDto;
 import com.onebucket.domain.boardManage.dto.response.ResponsePostDto;
 import com.onebucket.domain.boardManage.entity.post.MarketPost;
+import com.onebucket.domain.boardManage.service.BoardService;
 import com.onebucket.domain.boardManage.service.MarketPostService;
 import com.onebucket.domain.memberManage.service.MemberService;
+import com.onebucket.global.exceptionManage.customException.boardManageException.UserBoardException;
+import com.onebucket.global.exceptionManage.errorCode.BoardErrorCode;
 import com.onebucket.global.utils.SecurityUtils;
 import com.onebucket.global.utils.SuccessResponseWithIdDto;
 import jakarta.validation.Valid;
@@ -36,13 +39,20 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/market-post")
 public class MarketPostController extends AbstractPostController<MarketPost, MarketPostService> {
 
-    public MarketPostController(MarketPostService postService, SecurityUtils securityUtils, MemberService memberService) {
-        super(postService, securityUtils, memberService);
+    public MarketPostController(MarketPostService postService, SecurityUtils securityUtils, MemberService memberService, BoardService boardService) {
+        super(postService, securityUtils, memberService, boardService);
     }
 
     @PreAuthorize("@authorizationService.isUserCanAccessBoard(#dto.boardId)")
     @PostMapping("/create")
     public ResponseEntity<SuccessResponseWithIdDto> createPost(@RequestBody @Valid RequestCreateMarketPostDto dto) {
+
+        String type = boardService.getType(dto.getBoardId());
+        System.out.println("type of market is " + type);
+        if(!type.equals("marketPost")) {
+            throw new UserBoardException(BoardErrorCode.MISMATCH_POST_AND_BOARD);
+        }
+
         String username = securityUtils.getCurrentUsername();
         Long univId = securityUtils.getUnivId(username);
 

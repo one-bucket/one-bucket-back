@@ -1,5 +1,7 @@
 package com.onebucket.domain.boardManage.dto.response;
 
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 /**
@@ -17,6 +19,8 @@ import lombok.experimental.SuperBuilder;
  * } </pre>
  */
 @SuperBuilder
+@Getter
+@Setter
 public class ResponseMarketPostDto extends ResponsePostDto {
     private String item;
     private int wanted;

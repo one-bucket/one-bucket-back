@@ -97,6 +97,7 @@ public class PostServiceImpl extends AbstractPostService<Post, PostRepository> i
         if (member != null) {
             nickname = member.getNickname();
         }
+
         return PostInfoDto.builder()
                 .postId(post.getId())
                 .views(post.getViews())

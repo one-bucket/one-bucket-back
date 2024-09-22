@@ -4,8 +4,11 @@ import com.onebucket.domain.boardManage.dto.internal.post.*;
 import com.onebucket.domain.boardManage.dto.request.RequestCreatePostDto;
 import com.onebucket.domain.boardManage.dto.response.ResponsePostDto;
 import com.onebucket.domain.boardManage.entity.post.Post;
+import com.onebucket.domain.boardManage.service.BoardService;
 import com.onebucket.domain.boardManage.service.PostService;
 import com.onebucket.domain.memberManage.service.MemberService;
+import com.onebucket.global.exceptionManage.customException.boardManageException.UserBoardException;
+import com.onebucket.global.exceptionManage.errorCode.BoardErrorCode;
 import com.onebucket.global.utils.SecurityUtils;
 import com.onebucket.global.utils.SuccessResponseWithIdDto;
 import jakarta.validation.Valid;
@@ -31,12 +34,13 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/post")
 public class PostController extends AbstractPostController<Post, PostService>{
 
-    public PostController(PostService postService, SecurityUtils securityUtils, MemberService memberService) {
-        super(postService, securityUtils, memberService);
+    public PostController(PostService postService, SecurityUtils securityUtils, MemberService memberService, BoardService boardService) {
+        super(postService, securityUtils, memberService, boardService);
     }
 
     @Override
     protected ResponseEntity<? extends ResponsePostDto> getPostInternal(GetPostDto dto) {
+
         PostInfoDto postInfoDto = postService.getPost(dto);
 
         Long savedInRedisLikes = postService.getLikesInRedis(postInfoDto.getPostId());
@@ -72,6 +76,11 @@ public class PostController extends AbstractPostController<Post, PostService>{
     @PreAuthorize("@authorizationService.isUserCanAccessBoard(#dto.boardId)")
     @PostMapping("/create")
     public ResponseEntity<SuccessResponseWithIdDto> createPost(@RequestBody @Valid RequestCreatePostDto dto) {
+        String type = boardService.getType(dto.getBoardId());
+
+        if(!type.equals("Post")) {
+            throw new UserBoardException(BoardErrorCode.MISMATCH_POST_AND_BOARD);
+        }
         String username = securityUtils.getCurrentUsername();
         Long univId = securityUtils.getUnivId(username);
 

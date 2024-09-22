@@ -5,6 +5,7 @@ import com.onebucket.domain.boardManage.dto.internal.post.*;
 import com.onebucket.domain.boardManage.dto.response.ResponsePostDto;
 import com.onebucket.domain.boardManage.entity.post.Post;
 import com.onebucket.domain.boardManage.service.BasePostService;
+import com.onebucket.domain.boardManage.service.BoardService;
 import com.onebucket.domain.memberManage.service.MemberService;
 import com.onebucket.global.utils.SecurityUtils;
 import com.onebucket.global.utils.SuccessResponseDto;
@@ -36,6 +37,7 @@ public abstract class AbstractPostController<T extends Post, S extends BasePostS
     protected final S postService;
     protected final SecurityUtils securityUtils;
     protected final MemberService memberService;
+    protected final BoardService boardService;
 
     @GetMapping("/list/{boardId}")
     @PreAuthorize("@authorizationService.isUserCanAccessBoard(#boardId)")
