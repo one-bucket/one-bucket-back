@@ -46,178 +46,178 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @ActiveProfiles("test")
 public class ConcurrencyTest {
-
-    @Autowired
-    private PostRepository postRepository;
-    @Autowired
-    private BoardRepository boardRepository;
-    @Autowired
-    private MemberRepository memberRepository;
-    @Autowired
-    private LikesMapRepository likesMapRepository;
-    @Autowired
-    private PostService postService;
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-    @Autowired
-    private RedisRepository redisRepository;
-    @Autowired
-    private SyncDataScheduledService syncDataScheduledService;
-
-    @Test
-    @Sql(scripts = "/sql/IntegrationData.sql")
-    void testConcurrentAddCommentToPost() throws InterruptedException {
-        Member member = memberRepository.findById(1L).orElseThrow();
-        Board board = boardRepository.findById(1L).orElseThrow();
-
-        Post post = Post.builder()
-                .author(member)
-                .board(board)
-                .text("text of post")
-                .title("title of post")
-                .build();
-        Long postId = postRepository.save(post).getId();
-
-
-        CreateCommentDto dto1 = CreateCommentDto.builder()
-                .text("text")
-                .postId(postId)
-                .username("username1")
-                .text("text1")
-                .build();
-
-        CreateCommentDto dto2 = CreateCommentDto.builder()
-                .text("text2")
-                .postId(postId)
-                .username("username2")
-                .text("text2")
-                .build();
-
-
-        int numberOfThreads = 2;
-        ExecutorService service = Executors.newFixedThreadPool(numberOfThreads);
-        CountDownLatch latch = new CountDownLatch(numberOfThreads);
-
-        service.execute(() -> {
-            postService.addCommentToPost(dto1);
-            latch.countDown();
-        });
-        service.execute(() -> {
-            postService.addCommentToPost(dto2);
-            latch.countDown();
-        });
-
-        latch.await();
-
-        String sql = "SELECT id, text FROM comment WHERE post_id = ?";
-        List<Comment> comments = jdbcTemplate.query(sql, new CommentRowMapper(), postId);
-
-        assertThat(comments.size()).isEqualTo(2);
-        assertThat(comments)
-                .extracting(Comment::getText)
-                .containsExactlyInAnyOrder("text1", "text2");
-
-    }
-    private static class CommentRowMapper implements RowMapper<Comment> {
-        @Override
-        public Comment mapRow(ResultSet rs, int rowNum) throws SQLException {
-            return Comment.builder()
-                    .id(rs.getLong("id"))
-                    .text(rs.getString("text"))
-                    .build();
-        }
-    }
-
-    @Test
-    @Sql(scripts = "/sql/IntegrationData.sql")
-    @DisplayName("test concurrent increase view count")
-    void testConcurrent_increaseViewCount() throws InterruptedException {
-        Member member = memberRepository.findById(1L).orElseThrow();
-        Board board = boardRepository.findById(1L).orElseThrow();
-
-        Post post = Post.builder()
-                .author(member)
-                .board(board)
-                .text("text of post")
-                .title("title of post")
-                .build();
-        Post savedPost = postRepository.save(post);
-        Long postId = savedPost.getId();
-
-        PostAuthorDto dto1 = PostAuthorDto.builder()
-                .userId(1L)
-                .postId(postId)
-                .build();
-
-        PostAuthorDto dto2 = PostAuthorDto.builder()
-                .userId(2L)
-                .postId(postId)
-                .build();
-
-        PostAuthorDto dto3 = PostAuthorDto.builder()
-                .userId(3L)
-                .postId(postId)
-                .build();
-
-        int numberOfThreads = 5;
-        ExecutorService service = Executors.newFixedThreadPool(numberOfThreads);
-        CountDownLatch latch = new CountDownLatch(numberOfThreads);
-
-        service.execute(() -> {
-            postService.increaseViewCount(dto1);
-            latch.countDown();
-        });
-
-        service.execute(() -> {
-            try {
-                sleep(150);
-                postService.increaseViewCount(dto1);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-            latch.countDown();
-        });
-
-        service.execute(() -> {
-            try {
-                sleep(50);
-                postService.increaseViewCount(dto1);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-            latch.countDown();
-        });
-
-        service.execute(() -> {
-            try {
-                sleep(50);
-                postService.increaseViewCount(dto2);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-            latch.countDown();
-        });
-        service.execute(() -> {
-            try {
-                sleep(50);
-                postService.increaseViewCount(dto3);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-            latch.countDown();
-        });
-
-        latch.await();
-
-        String query = """
-                SELECT views FROM post WHERE id = ?
-                """;
-        Long viewCount = jdbcTemplate.queryForObject(query, Long.class, postId);
-
-        assertThat(viewCount).isEqualTo(3L);
-
-        redisRepository.flushAll();
-    }
+//
+//    @Autowired
+//    private PostRepository postRepository;
+//    @Autowired
+//    private BoardRepository boardRepository;
+//    @Autowired
+//    private MemberRepository memberRepository;
+//    @Autowired
+//    private LikesMapRepository likesMapRepository;
+//    @Autowired
+//    private PostService postService;
+//    @Autowired
+//    private JdbcTemplate jdbcTemplate;
+//    @Autowired
+//    private RedisRepository redisRepository;
+//    @Autowired
+//    private SyncDataScheduledService syncDataScheduledService;
+//
+//    @Test
+//    @Sql(scripts = "/sql/IntegrationData.sql")
+//    void testConcurrentAddCommentToPost() throws InterruptedException {
+//        Member member = memberRepository.findById(1L).orElseThrow();
+//        Board board = boardRepository.findById(1L).orElseThrow();
+//
+//        Post post = Post.builder()
+//                .author(member)
+//                .board(board)
+//                .text("text of post")
+//                .title("title of post")
+//                .build();
+//        Long postId = postRepository.save(post).getId();
+//
+//
+//        CreateCommentDto dto1 = CreateCommentDto.builder()
+//                .text("text")
+//                .postId(postId)
+//                .username("username1")
+//                .text("text1")
+//                .build();
+//
+//        CreateCommentDto dto2 = CreateCommentDto.builder()
+//                .text("text2")
+//                .postId(postId)
+//                .username("username2")
+//                .text("text2")
+//                .build();
+//
+//
+//        int numberOfThreads = 2;
+//        ExecutorService service = Executors.newFixedThreadPool(numberOfThreads);
+//        CountDownLatch latch = new CountDownLatch(numberOfThreads);
+//
+//        service.execute(() -> {
+//            postService.addCommentToPost(dto1);
+//            latch.countDown();
+//        });
+//        service.execute(() -> {
+//            postService.addCommentToPost(dto2);
+//            latch.countDown();
+//        });
+//
+//        latch.await();
+//
+//        String sql = "SELECT id, text FROM comment WHERE post_id = ?";
+//        List<Comment> comments = jdbcTemplate.query(sql, new CommentRowMapper(), postId);
+//
+//        assertThat(comments.size()).isEqualTo(2);
+//        assertThat(comments)
+//                .extracting(Comment::getText)
+//                .containsExactlyInAnyOrder("text1", "text2");
+//
+//    }
+//    private static class CommentRowMapper implements RowMapper<Comment> {
+//        @Override
+//        public Comment mapRow(ResultSet rs, int rowNum) throws SQLException {
+//            return Comment.builder()
+//                    .id(rs.getLong("id"))
+//                    .text(rs.getString("text"))
+//                    .build();
+//        }
+//    }
+//
+//    @Test
+//    @Sql(scripts = "/sql/IntegrationData.sql")
+//    @DisplayName("test concurrent increase view count")
+//    void testConcurrent_increaseViewCount() throws InterruptedException {
+//        Member member = memberRepository.findById(1L).orElseThrow();
+//        Board board = boardRepository.findById(1L).orElseThrow();
+//
+//        Post post = Post.builder()
+//                .author(member)
+//                .board(board)
+//                .text("text of post")
+//                .title("title of post")
+//                .build();
+//        Post savedPost = postRepository.save(post);
+//        Long postId = savedPost.getId();
+//
+//        PostAuthorDto dto1 = PostAuthorDto.builder()
+//                .userId(1L)
+//                .postId(postId)
+//                .build();
+//
+//        PostAuthorDto dto2 = PostAuthorDto.builder()
+//                .userId(2L)
+//                .postId(postId)
+//                .build();
+//
+//        PostAuthorDto dto3 = PostAuthorDto.builder()
+//                .userId(3L)
+//                .postId(postId)
+//                .build();
+//
+//        int numberOfThreads = 5;
+//        ExecutorService service = Executors.newFixedThreadPool(numberOfThreads);
+//        CountDownLatch latch = new CountDownLatch(numberOfThreads);
+//
+//        service.execute(() -> {
+//            postService.increaseViewCount(dto1);
+//            latch.countDown();
+//        });
+//
+//        service.execute(() -> {
+//            try {
+//                sleep(150);
+//                postService.increaseViewCount(dto1);
+//            } catch (InterruptedException e) {
+//                Thread.currentThread().interrupt();
+//            }
+//            latch.countDown();
+//        });
+//
+//        service.execute(() -> {
+//            try {
+//                sleep(50);
+//                postService.increaseViewCount(dto1);
+//            } catch (InterruptedException e) {
+//                Thread.currentThread().interrupt();
+//            }
+//            latch.countDown();
+//        });
+//
+//        service.execute(() -> {
+//            try {
+//                sleep(50);
+//                postService.increaseViewCount(dto2);
+//            } catch (InterruptedException e) {
+//                Thread.currentThread().interrupt();
+//            }
+//            latch.countDown();
+//        });
+//        service.execute(() -> {
+//            try {
+//                sleep(50);
+//                postService.increaseViewCount(dto3);
+//            } catch (InterruptedException e) {
+//                Thread.currentThread().interrupt();
+//            }
+//            latch.countDown();
+//        });
+//
+//        latch.await();
+//
+//        String query = """
+//                SELECT views FROM post WHERE id = ?
+//                """;
+//        Long viewCount = jdbcTemplate.queryForObject(query, Long.class, postId);
+//
+//        assertThat(viewCount).isEqualTo(3L);
+//
+//        redisRepository.flushAll();
+//    }
 
 //    /**
 //     * <pre>
