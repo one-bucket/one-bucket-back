@@ -79,6 +79,11 @@ public class Post {
     @Builder.Default
     private List<Comment> comments = new ArrayList<>();
 
+    @ElementCollection
+    @CollectionTable(name = "post_images", joinColumns = @JoinColumn(name = "post_id"))
+    @Column(name = "image_url")
+    private List<String> imageUrls = new ArrayList<>();
+
     @Builder.Default
     private Long views = 0L;
 
@@ -93,6 +98,13 @@ public class Post {
     public void deleteComment(Comment comment) {
         comments.remove(comment);
         comment.setPost(null);
+    }
+
+    public void addImage(String url) {
+        imageUrls.add(url);
+    }
+    public void deleteImage(String url) {
+        imageUrls.remove(url);
     }
 
 

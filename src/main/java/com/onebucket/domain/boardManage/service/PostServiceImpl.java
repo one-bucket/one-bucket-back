@@ -13,6 +13,7 @@ import com.onebucket.domain.boardManage.entity.post.Post;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
 
+import com.onebucket.global.minio.MinioRepository;
 import com.onebucket.global.redis.RedisRepository;
 import com.onebucket.global.utils.SecurityUtils;
 
@@ -50,9 +51,10 @@ public class PostServiceImpl extends AbstractPostService<Post, PostRepository> i
                            SecurityUtils securityUtils,
                            CommentRepository commentRepository,
                            RedisRepository redisRepository,
-                           LikesMapRepository likesMapRepository) {
+                           LikesMapRepository likesMapRepository,
+                           MinioRepository minioRepository) {
         super(repository, boardRepository, memberRepository, securityUtils,
-                commentRepository, redisRepository, likesMapRepository);
+                commentRepository, redisRepository, likesMapRepository, minioRepository);
     }
 
     @Override

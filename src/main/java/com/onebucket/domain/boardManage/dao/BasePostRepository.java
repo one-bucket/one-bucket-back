@@ -39,4 +39,8 @@ public interface BasePostRepository<T extends Post> extends JpaRepository<T, Lon
             WHERE p.id = :postId
             """)
     void updateLikes(@Param("postId") Long postId, @Param("increment") Long increment);
+
+    @Modifying
+    @Query("UPDATE Post p SET p.imageUrls = CONCAT(p.imageUrls, :imageUrl) WHERE p.id = :postId")
+    void addImageUrl(@Param("postId") Long postId, @Param("imageUrl") String imageUrl);
 }

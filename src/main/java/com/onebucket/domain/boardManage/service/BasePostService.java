@@ -5,6 +5,7 @@ import com.onebucket.domain.boardManage.dto.internal.comment.CreateCommentDto;
 import com.onebucket.domain.boardManage.dto.internal.post.*;
 import com.onebucket.domain.boardManage.entity.Comment;
 import org.springframework.data.domain.Page;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * <br>package name   : com.onebucket.domain.boardManage.service
@@ -34,4 +35,5 @@ public interface BasePostService {
     Long getCommentCount(Long postId);
     Long getLikesInRedis(Long postId);
     boolean isUserLikesPost(PostAuthorDto dto);
+    void saveImage(MultipartFile multipartFile, SaveImageDto dto);
 }

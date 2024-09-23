@@ -20,6 +20,8 @@ import com.onebucket.global.exceptionManage.customException.boardManageException
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.BoardErrorCode;
+import com.onebucket.global.minio.MinioRepository;
+import com.onebucket.global.minio.MinioSaveInfoDto;
 import com.onebucket.global.redis.RedisRepository;
 import com.onebucket.global.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -57,6 +60,7 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
     protected final CommentRepository commentRepository;
     protected final RedisRepository redisRepository;
     protected final LikesMapRepository likesMapRepository;
+    protected final MinioRepository minioRepository;
 
 
     @Override
@@ -244,6 +248,28 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
         return likesMapRepository.existsById(id);
 
     }
+
+    @Override
+    public void saveImage(MultipartFile multipartFile, SaveImageDto dto) {
+
+        String url = "/post/" + dto.getPostId() + "/image/" + dto.getImageName();
+        MinioSaveInfoDto minioSaveInfoDto = MinioSaveInfoDto.builder()
+                .bucketName("one-bucket")
+                .fileName(url)
+                .fileExtension(dto.getFileExtension())
+                .build();
+
+        try {
+            minioRepository.uploadFile(multipartFile,minioSaveInfoDto);
+            Post post = repository.findById(dto.getPostId()).orElseThrow();
+            post.addImage(url + "." + dto.getFileExtension());
+        } catch (Exception e) {
+            throw new UserBoardException(BoardErrorCode.I_AM_AN_APPLE_PIE, "error occur while save image");
+        }
+
+    }
+
+
 
     protected Board findBoard(Long id) {
         return boardRepository.findById(id).orElseThrow(() ->

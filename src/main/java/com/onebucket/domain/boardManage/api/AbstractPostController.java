@@ -7,6 +7,8 @@ import com.onebucket.domain.boardManage.entity.post.Post;
 import com.onebucket.domain.boardManage.service.BasePostService;
 import com.onebucket.domain.boardManage.service.BoardService;
 import com.onebucket.domain.memberManage.service.MemberService;
+import com.onebucket.global.exceptionManage.customException.boardManageException.UserBoardException;
+import com.onebucket.global.exceptionManage.errorCode.CommonErrorCode;
 import com.onebucket.global.utils.SecurityUtils;
 import com.onebucket.global.utils.SuccessResponseDto;
 import com.onebucket.global.utils.SuccessResponseWithIdDto;
@@ -16,6 +18,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * <br>package name   : com.onebucket.domain.boardManage.api
@@ -115,6 +121,48 @@ public abstract class AbstractPostController<T extends Post, S extends BasePostS
 
         return ResponseEntity.ok(new SuccessResponseDto("success delete likes"));
     }
+
+    @PostMapping("/save/image/{postId}")
+    @PreAuthorize("@authorizationService.isUserCanAccessPost(#postId)")
+    public ResponseEntity<SuccessResponseWithIdDto> saveImage(
+            @PathVariable Long postId,
+            @RequestParam("file") List<MultipartFile> files
+            ) {
+        Long index = 0L;
+        for(MultipartFile file : files) {
+            String originFileName = file.getOriginalFilename();
+            String fileName = getFileNameWithoutExtension(originFileName);
+            String extension = getFileExtension(originFileName);
+            SaveImageDto dto = SaveImageDto.builder()
+                    .postId(postId)
+                    .imageName(fileName)
+                    .fileExtension(extension)
+                    .build();
+            postService.saveImage(file, dto);
+            index++;
+        }
+        return ResponseEntity.ok(new SuccessResponseWithIdDto("success save images", index));
+    }
+
+    private String getFileNameWithoutExtension(String fileName) {
+        if(fileName == null) {
+            throw new UserBoardException(CommonErrorCode.ILLEGAL_ARGUMENT, "file name is null");
+        }
+        return fileName.substring(0, fileName.lastIndexOf('.'));
+    }
+
+    // 파일 확장자 추출 메서드
+    private String getFileExtension(String fileName) {
+        if(fileName == null) {
+            throw new UserBoardException(CommonErrorCode.ILLEGAL_ARGUMENT, "file name is null");
+        }
+        return fileName.substring(fileName.lastIndexOf('.') + 1);
+    }
+
+
+
+
+
 
 
 

@@ -8,6 +8,7 @@ import com.onebucket.domain.boardManage.entity.post.MarketPost;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
 
+import com.onebucket.global.minio.MinioRepository;
 import com.onebucket.global.redis.RedisRepository;
 import com.onebucket.global.utils.SecurityUtils;
 import org.springframework.stereotype.Service;
@@ -32,14 +33,15 @@ import java.util.List;
 public class MarketPostServiceImpl extends AbstractPostService<MarketPost, MarketPostRepository> implements MarketPostService {
 
     public MarketPostServiceImpl(MarketPostRepository repository,
-                           BoardRepository boardRepository,
-                           MemberRepository memberRepository,
-                           SecurityUtils securityUtils,
-                           CommentRepository commentRepository,
-                           RedisRepository redisRepository,
-                           LikesMapRepository likesMapRepository) {
+                                 BoardRepository boardRepository,
+                                 MemberRepository memberRepository,
+                                 SecurityUtils securityUtils,
+                                 CommentRepository commentRepository,
+                                 RedisRepository redisRepository,
+                                 LikesMapRepository likesMapRepository,
+                                 MinioRepository minioRepository) {
         super(repository, boardRepository, memberRepository, securityUtils,
-                commentRepository, redisRepository, likesMapRepository);
+                commentRepository, redisRepository, likesMapRepository, minioRepository);
     }
 
     @Override
