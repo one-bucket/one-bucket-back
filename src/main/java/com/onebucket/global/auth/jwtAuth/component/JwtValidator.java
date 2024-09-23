@@ -96,6 +96,7 @@ public class JwtValidator {
                 .map(SimpleGrantedAuthority::new)
                 .toList();
 
+
         UserDetails principal = new User(claims.getSubject(), "", authorities);
         return new UsernamePasswordAuthenticationToken(principal, "", authorities);
     }

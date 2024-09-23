@@ -61,6 +61,7 @@ public class MemberServiceImpl implements MemberService {
                 .nickname(createMemberRequestDto.getNickname())
                 .university(saveNullUniv())
                 .build();
+        member.addRoles("GUEST");
         try {
             Member newMember = memberRepository.save(member);
             return newMember.getId();
