@@ -2,10 +2,7 @@ package com.onebucket.domain.boardManage.service;
 
 import com.onebucket.domain.boardManage.dao.BoardRepository;
 import com.onebucket.domain.boardManage.dao.BoardTypeRepository;
-import com.onebucket.domain.boardManage.dto.internal.board.BoardIdsDto;
-import com.onebucket.domain.boardManage.dto.internal.board.CreateBoardDto;
-import com.onebucket.domain.boardManage.dto.internal.board.CreateBoardTypeDto;
-import com.onebucket.domain.boardManage.dto.internal.board.CreateBoardsDto;
+import com.onebucket.domain.boardManage.dto.internal.board.*;
 import com.onebucket.domain.boardManage.entity.Board;
 import com.onebucket.domain.boardManage.entity.BoardType;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
@@ -14,6 +11,7 @@ import com.onebucket.domain.universityManage.dao.UniversityRepository;
 import com.onebucket.domain.universityManage.domain.University;
 import com.onebucket.global.exceptionManage.customException.boardManageException.AdminManageBoardException;
 import com.onebucket.global.exceptionManage.customException.boardManageException.BoardManageException;
+import com.onebucket.global.exceptionManage.customException.boardManageException.UserBoardException;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.customException.universityManageException.UniversityManageException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
@@ -161,12 +159,18 @@ public class BoardServiceImpl implements BoardService {
         return userUniv.equals(boardUniv);
 
     }
+    @Override
+    public String getType(Long boardId) {
+        return boardRepository.findById(boardId).orElseThrow(() -> new UserBoardException(BoardErrorCode.UNKNOWN_BOARD))
+                .getBoardType().getType();
+    }
 
     @Override
     public void createBoardType(CreateBoardTypeDto dto) {
         BoardType boardType = BoardType.builder()
                 .name(dto.getName())
                 .description(dto.getDescription())
+                .type(dto.getType())
                 .build();
 
         try {
@@ -174,6 +178,11 @@ public class BoardServiceImpl implements BoardService {
         } catch(DataIntegrityViolationException e) {
             throw new AdminManageBoardException(BoardErrorCode.DUPLICATE_BOARD_TYPE);
         }
+    }
+
+    @Override
+    public List<BoardIdAndNameDto>getBoardList(Long univId) {
+        return boardRepository.findBoardIdAndNameByUniversityId(univId);
     }
 
     private Long generateCombinationKey(Long universityId, Long boardTypeId) {

@@ -10,20 +10,14 @@ import lombok.experimental.SuperBuilder;
  * <br>date           : 2024-08-15
  * <pre>
  * <span style="color: white;">[description]</span>
- *
+ * 댓글을 생성할 때 service 레이어로 전해지는 dto이다.
  * </pre>
  * <pre>
  * <span style="color: white;">usage:</span>
  * {@code
- *
+ * Long parentCommentId;
+ * String username;
  * } </pre>
- * <pre>
- * modified log :
- * ====================================================
- * DATE           AUTHOR               NOTE
- * ----------------------------------------------------
- * 2024-08-15        jack8              init create
- * </pre>
  */
 
 @SuperBuilder

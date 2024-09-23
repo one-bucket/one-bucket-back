@@ -1,7 +1,6 @@
 package com.onebucket.domain.boardManage.dao;
 
 import com.onebucket.domain.boardManage.entity.post.MarketPost;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -26,5 +25,5 @@ import org.springframework.stereotype.Repository;
  * </pre>
  */
 @Repository
-public interface MarketPostRepository extends JpaRepository<MarketPost, Long> {
+public interface MarketPostRepository extends BasePostRepository<MarketPost> {
 }

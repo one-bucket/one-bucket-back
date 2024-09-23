@@ -15,7 +15,9 @@ import com.onebucket.domain.memberManage.dto.ReadMemberInfoDto;
 import com.onebucket.domain.universityManage.dao.UniversityRepository;
 import com.onebucket.domain.universityManage.domain.University;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
+import com.onebucket.global.exceptionManage.customException.universityManageException.UniversityException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
+import com.onebucket.global.exceptionManage.errorCode.UniversityErrorCode;
 import com.onebucket.global.utils.RandomStringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -342,6 +344,7 @@ public class MemberServiceTest {
         String username = "username";
         when(memberRepository.findByUsername(username)).thenReturn(Optional.of(mockMember));
         when(mockMember.getUniversity()).thenReturn(mockUniversity);
+        when(mockUniversity.getName()).thenReturn("name");
 
         University result = memberService.usernameToUniversity(username);
 
@@ -355,9 +358,10 @@ public class MemberServiceTest {
         when(memberRepository.findByUsername(username)).thenReturn(Optional.of(mockMember));
         when(mockMember.getUniversity()).thenReturn(null);
 
-        University result = memberService.usernameToUniversity(username);
-        assertThat(result.getName()).isEqualTo("null");
-        assertThat(result.getAddress()).isEqualTo("null");
+        assertThatThrownBy(() -> memberService.usernameToUniversity(username))
+                .isInstanceOf(UniversityException.class)
+                .extracting("errorCode")
+                .isEqualTo(UniversityErrorCode.NOT_EXIST_UNIVERSITY);
     }
 
     @Test
@@ -370,6 +374,25 @@ public class MemberServiceTest {
                 .isInstanceOf(AuthenticationException.class)
                 .extracting("errorCode")
                 .isEqualTo(AuthenticationErrorCode.UNKNOWN_USER);
+    }
+
+    @Test
+    @DisplayName("usernameToUniversity - fail / returned university is basic type")
+    void testUsernameToUniversity_fail_baseUniv() {
+        University university = University.builder()
+                .name("null")
+                .address("null")
+                .email("null")
+                .id(1L)
+                .build();
+        String username = "username";
+        when(memberRepository.findByUsername(username)).thenReturn(Optional.of(mockMember));
+        when(mockMember.getUniversity()).thenReturn(university);
+
+        assertThatThrownBy(() -> memberService.usernameToUniversity(username))
+                .isInstanceOf(UniversityException.class)
+                .extracting("errorCode")
+                .isEqualTo(UniversityErrorCode.NOT_EXIST_UNIVERSITY);
     }
 
 }

@@ -4,10 +4,7 @@ import com.onebucket.domain.boardManage.entity.Board;
 import com.onebucket.domain.boardManage.entity.Comment;
 import com.onebucket.domain.memberManage.domain.Member;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -39,6 +36,7 @@ import java.util.List;
  * </pre>
  */
 @Getter
+@Setter
 @Entity
 @SuperBuilder
 @NoArgsConstructor
@@ -52,6 +50,7 @@ import java.util.List;
                 @Index(name = "idx_board_id", columnList = "board_id") // board_id 컬럼에 대한 인덱스 추가
         }
 )
+
 public class Post {
 
     @Id
@@ -66,7 +65,7 @@ public class Post {
     private Long boardId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id")
+    @JoinColumn(name = "author_id", nullable = true)
     private Member author;
 
 
@@ -80,6 +79,17 @@ public class Post {
     @Builder.Default
     private List<Comment> comments = new ArrayList<>();
 
+    @ElementCollection
+    @CollectionTable(name = "post_images", joinColumns = @JoinColumn(name = "post_id"))
+    @Column(name = "image_url")
+    private List<String> imageUrls = new ArrayList<>();
+
+    @Builder.Default
+    private Long views = 0L;
+
+    @Builder.Default
+    private Long likes = 0L;
+
     public void addComment(Comment comment) {
         comments.add(comment);
         comment.setPost(this);
@@ -88,6 +98,13 @@ public class Post {
     public void deleteComment(Comment comment) {
         comments.remove(comment);
         comment.setPost(null);
+    }
+
+    public void addImage(String url) {
+        imageUrls.add(url);
+    }
+    public void deleteImage(String url) {
+        imageUrls.remove(url);
     }
 
 

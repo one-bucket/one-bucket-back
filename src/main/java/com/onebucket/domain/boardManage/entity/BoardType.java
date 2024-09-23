@@ -41,6 +41,9 @@ public class BoardType {
 
     private String name;
 
+    @Builder.Default
+    private String type = "Post";
+
     @Column(columnDefinition = "TEXT")
     private String description;
 }

@@ -1,11 +1,8 @@
 package com.onebucket.domain.boardManage.dao;
 
 import com.onebucket.domain.boardManage.entity.post.Post;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
+import org.springframework.stereotype.Repository;
 /**
  * <br>package name   : com.onebucket.domain.boardManage.dao
  * <br>file name      : PostRepository
@@ -28,6 +25,5 @@ import org.springframework.stereotype.Repository;
  * </pre>
  */
 @Repository
-public interface PostRepository extends JpaRepository<Post, Long> {
-    Page<Post> findByBoardId(Long boardId, Pageable pageable);
+public interface PostRepository extends BasePostRepository<Post> {
 }

@@ -2,7 +2,6 @@ package com.onebucket.domain.universityManage.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.onebucket.domain.universityManage.domain.University;
 import com.onebucket.domain.universityManage.dto.UniversityDto;
 import com.onebucket.domain.universityManage.dto.UpdateUniversityDto;
 import com.onebucket.domain.universityManage.service.UniversityService;
@@ -10,7 +9,6 @@ import com.onebucket.global.exceptionManage.customException.universityManageExce
 import com.onebucket.global.exceptionManage.errorCode.UniversityErrorCode;
 import com.onebucket.global.exceptionManage.exceptionHandler.BaseExceptionHandler;
 import com.onebucket.global.exceptionManage.exceptionHandler.DataExceptionHandler;
-import com.onebucket.global.exceptionManage.exceptionHandler.UniversityExceptionHandler;
 import com.onebucket.global.utils.SuccessResponseDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -78,7 +76,7 @@ class UniversityControllerTest {
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         mockMvc = MockMvcBuilders.standaloneSetup(universityController)
-                .setControllerAdvice(new BaseExceptionHandler(), new DataExceptionHandler(), new UniversityExceptionHandler())
+                .setControllerAdvice(new BaseExceptionHandler(), new DataExceptionHandler())
                 .build();
     }
 

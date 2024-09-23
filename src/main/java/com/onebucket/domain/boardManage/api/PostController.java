@@ -4,14 +4,18 @@ import com.onebucket.domain.boardManage.dto.internal.board.GetBoardDto;
 import com.onebucket.domain.boardManage.dto.internal.post.*;
 import com.onebucket.domain.boardManage.dto.request.RequestCreatePostDto;
 import com.onebucket.domain.boardManage.dto.response.ResponsePostDto;
+import com.onebucket.domain.boardManage.entity.post.Post;
+import com.onebucket.domain.boardManage.service.BoardService;
 import com.onebucket.domain.boardManage.service.PostService;
+import com.onebucket.domain.memberManage.service.MemberService;
+import com.onebucket.global.exceptionManage.customException.boardManageException.UserBoardException;
+import com.onebucket.global.exceptionManage.errorCode.BoardErrorCode;
 import com.onebucket.global.utils.SecurityUtils;
 import com.onebucket.global.utils.SuccessResponseWithIdDto;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -27,47 +31,31 @@ import org.springframework.web.bind.annotation.*;
  * {@code
  *
  * } </pre>
- * <pre>
- * modified log :
- * ====================================================
- * DATE           AUTHOR               NOTE
- * ----------------------------------------------------
- * 2024-07-18        jack8              init create
- * </pre>
  */
 @RestController
 @RequestMapping("/post")
-@RequiredArgsConstructor
-public class PostController {
+public class PostController extends AbstractPostController<Post, PostService>{
 
-    private final PostService postService;
-    private final SecurityUtils securityUtils;
-
-    @GetMapping("/list/{boardId}")
-    public ResponseEntity<Page<PostThumbnailDto>> getPostsByBoard(@PathVariable Long boardId, Pageable pageable) {
-        String username = securityUtils.getCurrentUsername();
-
-        securityUtils.isUserUniversityMatchingBoard(username, boardId);
-
-        GetBoardDto getBoardDto = GetBoardDto.builder()
-                .boardId(boardId)
-                .pageable(pageable)
-                .build();
-
-        // dto 분리 일부로 안함
-        Page<PostThumbnailDto> posts = postService.getPostsByBoard(getBoardDto);
-        return ResponseEntity.ok(posts);
+    public PostController(PostService postService, SecurityUtils securityUtils, MemberService memberService, BoardService boardService) {
+        super(postService, securityUtils, memberService, boardService);
     }
 
-    @GetMapping("/{postId}")
-    public ResponseEntity<ResponsePostDto> getPostById(@PathVariable Long postId) {
-        String username = securityUtils.getCurrentUsername();
-        GetPostDto getPostDto = GetPostDto.builder()
-                .postId(postId)
-                .username(username)
-                .build();
+    @Override
+    protected ResponseEntity<? extends ResponsePostDto> getPostInternal(GetPostDto dto) {
 
-        PostInfoDto postInfoDto = postService.getPost(getPostDto);
+        PostInfoDto postInfoDto = postService.getPost(dto);
+
+        Long savedInRedisLikes = postService.getLikesInRedis(postInfoDto.getPostId());
+        Long likes = postInfoDto.getLikes() + savedInRedisLikes;
+
+        Long userId = memberService.usernameToId(dto.getUsername());
+
+        PostAuthorDto postAuthorDto = PostAuthorDto.builder()
+                .userId(userId)
+                .postId(dto.getPostId())
+                .build();
+        boolean isUserAlreadyLikes = postService.isUserLikesPost(postAuthorDto);
+
         ResponsePostDto response = ResponsePostDto.builder()
                 .postId(postInfoDto.getPostId())
                 .boardId(postInfoDto.getBoardId())
@@ -77,13 +65,24 @@ public class PostController {
                 .comments(postInfoDto.getComments())
                 .title(postInfoDto.getTitle())
                 .text(postInfoDto.getText())
+                .likes(likes)
+                .views(postInfoDto.getViews())
+                .isUserAlreadyLikes(isUserAlreadyLikes)
                 .build();
+
+        increaseViewCountInternal(postAuthorDto);
 
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping
+    @PreAuthorize("@authorizationService.isUserCanAccessBoard(#dto.boardId)")
+    @PostMapping("/create")
     public ResponseEntity<SuccessResponseWithIdDto> createPost(@RequestBody @Valid RequestCreatePostDto dto) {
+        String type = boardService.getType(dto.getBoardId());
+
+        if(!type.equals("Post")) {
+            throw new UserBoardException(BoardErrorCode.MISMATCH_POST_AND_BOARD);
+        }
         String username = securityUtils.getCurrentUsername();
         Long univId = securityUtils.getUnivId(username);
 
@@ -99,17 +98,15 @@ public class PostController {
         return ResponseEntity.ok(new SuccessResponseWithIdDto("success create post", savedId));
     }
 
-    @DeleteMapping("/{postId}")
-    public ResponseEntity<SuccessResponseWithIdDto> deletePost(@PathVariable Long postId) {
-        String username = securityUtils.getCurrentUsername();
+    @Override
+    protected ResponseEntity<Page<? extends PostThumbnailDto>> getPostByBoardInternal(GetBoardDto getBoardDto) {
+        Page<PostThumbnailDto> posts = postService.getPostsByBoard(getBoardDto);
 
-        DeletePostDto deletePostDto = DeletePostDto.builder()
-                .id(postId)
-                .username(username)
-                .build();
-
-        postService.deletePost(deletePostDto);
-
-        return ResponseEntity.ok(new SuccessResponseWithIdDto("success delete post", postId));
+        posts.forEach(post -> {
+            Long commentCount = (Long) postService.getCommentCount(post.getPostId());
+            post.setCommentsCount(commentCount);
+            post.setLikes(post.getLikes() + postService.getLikesInRedis(post.getPostId()));
+        });
+        return ResponseEntity.ok(posts);
     }
 }

@@ -9,19 +9,12 @@ import lombok.Getter;
  * <br>date           : 2024-08-08
  * <pre>
  * <span style="color: white;">[description]</span>
- *
- * </pre>
- * <pre>
- * <span style="color: white;">usage:</span>
+ * post를 삭제할 때 사용하는 dto.
  * {@code
+ * Long id;
+ * String username;
+ * }
  *
- * } </pre>
- * <pre>
- * modified log :
- * ====================================================
- * DATE           AUTHOR               NOTE
- * ----------------------------------------------------
- * 2024-08-08        jack8              init create
  * </pre>
  */
 
@@ -29,5 +22,5 @@ import lombok.Getter;
 @Getter
 public class DeletePostDto {
     private Long id;
-    private String username;
+    private Long memberId;
 }

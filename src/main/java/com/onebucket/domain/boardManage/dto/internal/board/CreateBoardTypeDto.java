@@ -32,4 +32,5 @@ import lombok.experimental.SuperBuilder;
 public class CreateBoardTypeDto {
     private String name;
     private String description;
+    private String type;
 }
