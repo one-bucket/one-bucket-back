@@ -3,14 +3,13 @@ package com.onebucket.domain.tradeManage.api;
 import com.onebucket.domain.tradeManage.service.PendingServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * <br>package name   : com.onebucket.domain.tradeManage.api
- * <br>file name      : pendingTradeController
- * <br>date           : 9/24/24
+ * <br>package name   : com.onebucket.domain.boardManage.api
+ * <br>file name      : PendingController
+ * <br>date           : 2024-09-24
  * <pre>
  * <span style="color: white;">[description]</span>
  *
@@ -23,11 +22,11 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequiredArgsConstructor
-public class pendingTradeController {
+public class PendingController {
     private final PendingServiceImpl pendingService;
 
-    @GetMapping("/getTrade")
-    public ResponseEntity<?> getAll() {
+    @GetMapping("/getAllPend")
+    public ResponseEntity<?> getAllPend() {
         return ResponseEntity.ok(pendingService.getAll());
     }
 }

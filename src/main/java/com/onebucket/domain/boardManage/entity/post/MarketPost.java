@@ -9,9 +9,6 @@ import jakarta.persistence.OneToOne;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import org.hibernate.annotations.Fetch;
-
-import java.time.LocalDateTime;
 
 /**
  * <br>package name   : com.onebucket.domain.boardManage.entity

@@ -1,13 +1,8 @@
 package com.onebucket.domain.tradeManage.entity;
 
-import com.onebucket.domain.boardManage.entity.Comment;
 import com.onebucket.domain.memberManage.domain.Member;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.simpleframework.xml.strategy.Strategy;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -28,11 +23,12 @@ import java.util.List;
  * } </pre>
  */
 @Entity
-@Table(name = "pending_trade")
+//@Table(name = "pending_trade")
 @Builder
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
+@Setter
 public class PendingTrade {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,6 +40,7 @@ public class PendingTrade {
             joinColumns = @JoinColumn(name = "pending_trade_id"),
             inverseJoinColumns = @JoinColumn(name = "member_id")
     )
+    @Builder.Default
     private List<Member> members = new ArrayList<>();
 
     public void addMember(Member member) {

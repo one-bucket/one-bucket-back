@@ -10,7 +10,6 @@ import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.domain.universityManage.dao.UniversityRepository;
 import com.onebucket.domain.universityManage.domain.University;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,12 +24,9 @@ import org.springframework.test.context.jdbc.Sql;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
 
 /**
  * <br>package name   : com.onebucket.domain.boardManage.dao
@@ -128,10 +124,6 @@ class BoardDaoTest {
                 .author(member)
                 .title("market title")
                 .text("market text")
-                .isFin(false)
-                .item("item")
-                .location("홍익대학교")
-                .wanted(3)
                 .build();
 
         MarketPost savedMarketPost = marketPostRepository.save(marketPost);

@@ -13,7 +13,6 @@ import com.onebucket.domain.tradeManage.dao.PendingTradeRepository;
 import com.onebucket.global.minio.MinioRepository;
 import com.onebucket.global.redis.RedisRepository;
 import com.onebucket.global.utils.SecurityUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -37,7 +36,7 @@ public class MarketPostServiceImpl extends AbstractPostService<MarketPost, Marke
 
 
     private final PendingTradeRepository pendingTradeRepository;
-    @Autowired
+
     public MarketPostServiceImpl(MarketPostRepository repository,
                                  BoardRepository boardRepository,
                                  MemberRepository memberRepository,

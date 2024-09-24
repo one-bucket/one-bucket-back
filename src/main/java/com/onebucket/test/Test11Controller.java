@@ -14,7 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
-public class TestController {
+public class Test11Controller {
 
     private final SecurityUtils securityUtils;
     private final MinioRepository minioRepository;

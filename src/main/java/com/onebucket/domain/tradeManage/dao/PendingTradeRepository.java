@@ -5,9 +5,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 /**
- * <br>package name   : com.onebucket.domain.tradeManage.repository
+ * <br>package name   : com.onebucket.domain.boardManage.dao
  * <br>file name      : PendingTradeRepository
- * <br>date           : 9/24/24
+ * <br>date           : 2024-09-24
  * <pre>
  * <span style="color: white;">[description]</span>
  *
@@ -18,6 +18,7 @@ import org.springframework.stereotype.Repository;
  *
  * } </pre>
  */
+
 @Repository
 public interface PendingTradeRepository extends JpaRepository<PendingTrade, Long> {
 }
