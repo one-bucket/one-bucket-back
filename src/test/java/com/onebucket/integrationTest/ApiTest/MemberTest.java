@@ -541,6 +541,8 @@ public class MemberTest extends RestDocsSupportTest {
                                         .description("name of account profile"),
                                 fieldWithPath("gender")
                                         .description("gender of account profile"),
+                                fieldWithPath("email")
+                                        .description("email of account email"),
                                 fieldWithPath("age")
                                         .description("age of account profile"),
                                 fieldWithPath("birth")

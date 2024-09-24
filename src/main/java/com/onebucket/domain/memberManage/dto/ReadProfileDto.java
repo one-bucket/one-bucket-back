@@ -46,6 +46,7 @@ public class ReadProfileDto {
     private String gender;
     private int age;
     private String description;
+    private String email;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate birth;
 

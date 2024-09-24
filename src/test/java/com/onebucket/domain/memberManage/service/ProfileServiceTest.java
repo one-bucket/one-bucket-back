@@ -5,7 +5,9 @@ import com.onebucket.domain.memberManage.dao.ProfileRepository;
 import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.domain.memberManage.domain.Profile;
 import com.onebucket.domain.memberManage.dto.ReadProfileDto;
+import com.onebucket.domain.memberManage.dto.RequestSetEmailDto.RequestSetEmailDto;
 import com.onebucket.domain.memberManage.dto.UpdateProfileDto;
+import com.onebucket.domain.memberManage.dto.internal.SetEmailDto;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import com.onebucket.global.minio.MinioRepository;
@@ -357,5 +359,19 @@ class ProfileServiceTest {
                 .isInstanceOf(AuthenticationException.class)
                 .extracting("errorCode")
                 .isEqualTo(AuthenticationErrorCode.UNKNOWN_USER_PROFILE);
+    }
+
+    @Test
+    @DisplayName("updateProfileEmail - success")
+    void testUpdateProfileEmail_success() {
+        Long id = 1L;
+        when(profileRepository.findById(id)).thenReturn(Optional.of(mockProfile));
+        profileService.updateProfileEmail(id, SetEmailDto.of("username",new RequestSetEmailDto("valid email")));
+
+        ArgumentCaptor<Profile> captor = ArgumentCaptor.forClass(Profile.class);
+        verify(profileRepository).save(captor.capture());
+        Profile captureProfile = captor.getValue();
+
+        assertThat(captureProfile).isNotNull();
     }
 }

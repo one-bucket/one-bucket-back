@@ -2,6 +2,7 @@ package com.onebucket.domain.memberManage.service;
 
 import com.onebucket.domain.memberManage.dto.ReadProfileDto;
 import com.onebucket.domain.memberManage.dto.UpdateProfileDto;
+import com.onebucket.domain.memberManage.dto.internal.SetEmailDto;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -32,7 +33,7 @@ public interface ProfileService {
     byte[] readProfileImage(Long id);
 
     void updateProfile(Long id, UpdateProfileDto dto);
-
+    void updateProfileEmail(Long id, SetEmailDto dto);
     void updateImage(Long id, MultipartFile file);
     void updateImageToBasic(Long id);
 
