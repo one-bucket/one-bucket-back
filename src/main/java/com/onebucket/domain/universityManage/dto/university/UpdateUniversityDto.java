@@ -31,9 +31,8 @@ import lombok.Setter;
 @Setter
 @Builder
 public class UpdateUniversityDto {
-
     private String address;
-
+    private String name;
     @Email(message = "Email should be valid")
     private String email;
 }

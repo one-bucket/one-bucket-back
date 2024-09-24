@@ -2,6 +2,7 @@ package com.onebucket.domain.universityManage.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.onebucket.domain.universityManage.dto.university.GetUniversityDto;
 import com.onebucket.domain.universityManage.dto.university.UniversityDto;
 import com.onebucket.domain.universityManage.dto.university.UpdateUniversityDto;
 import com.onebucket.domain.universityManage.service.UniversityService;
@@ -88,7 +89,7 @@ class UniversityControllerTest {
         UniversityDto dto = getDto();
         when(universityService.createUniversity(any(UniversityDto.class))).thenReturn(1L);
 
-        mockMvc.perform(post("/admin/univs")
+        mockMvc.perform(post("/admin/univ")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
@@ -107,7 +108,7 @@ class UniversityControllerTest {
 
         when(universityService.createUniversity(any(UniversityDto.class))).thenThrow(exception);
 
-        mockMvc.perform(post("/admin/univs")
+        mockMvc.perform(post("/admin/univ")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
@@ -166,9 +167,10 @@ class UniversityControllerTest {
 
         String name = "name";
         UniversityDto dto = getDto(name);
-        when(universityService.getUniversity(name)).thenReturn(dto);
+        GetUniversityDto getUniversityDto = new GetUniversityDto("valid name");
+        when(universityService.getUniversity(getUniversityDto)).thenReturn(dto);
 
-        mockMvc.perform(get("/admin/univs/{name}", name)
+        mockMvc.perform(get("/admin/univ")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -182,9 +184,9 @@ class UniversityControllerTest {
         UniversityErrorCode code = UniversityErrorCode.NOT_EXIST_UNIVERSITY;
         UniversityException exception = new UniversityException(code);
 
-        when(universityService.getUniversity(anyString())).thenThrow(exception);
+        when(universityService.getUniversity(new GetUniversityDto("invalid"))).thenThrow(exception);
 
-        mockMvc.perform(get("/admin/univs/{name}", "name")
+        mockMvc.perform(get("/admin/univ")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(hasStatus(code))
@@ -198,10 +200,11 @@ class UniversityControllerTest {
     void testUpdateUniversity_success() throws Exception {
         String name = "name";
         UpdateUniversityDto dto = UpdateUniversityDto.builder()
+                .name("new university")
                 .address("new address")
                 .build();
 
-        mockMvc.perform(patch("/admin/univs/{name}", name)
+        mockMvc.perform(patch("/admin/univs")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -209,7 +212,7 @@ class UniversityControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(hasKey(new SuccessResponseDto("success update university")));
 
-        verify(universityService, times(1)).updateUniversity(eq(name), any(UpdateUniversityDto.class));
+        verify(universityService, times(1)).updateUniversity(any(UpdateUniversityDto.class));
     }
 
     @Test
@@ -223,9 +226,9 @@ class UniversityControllerTest {
         UniversityErrorCode code = UniversityErrorCode.NOT_EXIST_UNIVERSITY;
         UniversityException exception = new UniversityException(code);
 
-        doThrow(exception).when(universityService).updateUniversity(eq(name), any(UpdateUniversityDto.class));
+        doThrow(exception).when(universityService).updateUniversity(any(UpdateUniversityDto.class));
 
-        mockMvc.perform(patch("/admin/univs/{name}", name)
+        mockMvc.perform(patch("/admin/univs")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)

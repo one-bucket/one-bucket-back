@@ -1,18 +1,15 @@
 package com.onebucket.domain.universityManage.service;
 
-import com.onebucket.domain.mailManage.dto.EmailMessage;
-import com.onebucket.domain.mailManage.service.MailService;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
-import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.domain.universityManage.dao.UniversityRepository;
 import com.onebucket.domain.universityManage.domain.University;
+import com.onebucket.domain.universityManage.dto.university.DeleteUniversityDto;
+import com.onebucket.domain.universityManage.dto.university.GetUniversityDto;
 import com.onebucket.domain.universityManage.dto.university.UniversityDto;
 import com.onebucket.domain.universityManage.dto.university.UpdateUniversityDto;
 import com.onebucket.domain.universityManage.dto.verifiedCode.internal.VerifiedCodeCheckDto;
 import com.onebucket.domain.universityManage.dto.verifiedCode.internal.VerifiedCodeDto;
-import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.customException.universityManageException.UniversityException;
-import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.UniversityErrorCode;
 import com.onebucket.global.redis.RedisRepository;
 import com.onebucket.global.utils.EntityUtils;
@@ -111,8 +108,8 @@ public class UniversityServiceImpl implements UniversityService {
      * @return 특정 이름을 가진 대학교 정보 출력
      */
     @Override
-    public UniversityDto getUniversity(String name) {
-        University university = universityRepository.findByName(name)
+    public UniversityDto getUniversity(GetUniversityDto dto) {
+        University university = universityRepository.findByName(dto.name())
                 .orElseThrow(()-> new UniversityException(UniversityErrorCode.NOT_EXIST_UNIVERSITY));
         return UniversityDto.builder()
                 .name(university.getName())
@@ -121,51 +118,35 @@ public class UniversityServiceImpl implements UniversityService {
                 .build();
     }
 
-    /**
-     * 대학 정보 업데이트하기.
-     * @param name 대학의 이름
-     * @param dto 업데이트 하고자 하는 필드
-     */
     @Override
     @Transactional
-    public void updateUniversity(String name, UpdateUniversityDto dto) {
-        University university = universityRepository.findByName(name)
+    public void updateUniversity(UpdateUniversityDto dto) {
+        University university = universityRepository.findByName(dto.getName())
                 .orElseThrow(()->new UniversityException(UniversityErrorCode.NOT_EXIST_UNIVERSITY));
 
         EntityUtils.updateIfNotNull(dto.getAddress(),university::setAddress);
         EntityUtils.updateIfNotNull(dto.getEmail(),university::setEmail);
     }
 
-    /**
-     * 대학 정보 삭제하기
-     * @param name 대학의 이름
-     */
     @Override
-    public void deleteUniversity(String name) {
-        University university = universityRepository.findByName(name)
+    public void deleteUniversity(DeleteUniversityDto dto) {
+        University university = universityRepository.findByName(dto.name())
                 .orElseThrow(()->new UniversityException(UniversityErrorCode.NOT_EXIST_UNIVERSITY));
         universityRepository.delete(university);
     }
 
     @Override
     public void verifyCode(VerifiedCodeCheckDto dto) {
-        String storedCode = redisRepository.get(dto.username());
+        String storedCode = redisRepository.get(dto.universityEmail());
         // 인증 코드 검증
         if (storedCode == null || !storedCode.equals(dto.verifiedCode())) {
             throw new UniversityException(UniversityErrorCode.INVALID_VERIFICATION_CODE);
-        }
-        Member member = memberRepository.findByUsername(dto.username())
-                .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
-
-        // 유저의 권한 추가
-        if (!member.getRoles().contains("ROLE_USER")) {
-            member.getRoles().add("ROLE_USER");
-            memberRepository.save(member);  // 변경된 권한 저장
         }
     }
 
     @Override
     public String makeVerifiedCode(VerifiedCodeDto dto) {
+        // 학교 인증에 대한 로직을 다시 작성해야한다.
         if(!validator.isValidUniversityEmail(dto)) {
             throw new UniversityException(UniversityErrorCode.INVALID_EMAIL);
         }
@@ -173,7 +154,7 @@ public class UniversityServiceImpl implements UniversityService {
         String verifiedCode = randomStringUtils.generateRandomStr(6);
         long EXPIRED_TIME = 5L;
         redisRepository.save()
-                        .key(dto.username())
+                        .key(dto.universityEmail())
                         .value(verifiedCode)
                         .timeout(EXPIRED_TIME)
                         .timeUnit(TimeUnit.MINUTES)

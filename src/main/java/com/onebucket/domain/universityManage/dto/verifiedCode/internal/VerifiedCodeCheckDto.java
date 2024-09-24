@@ -24,10 +24,10 @@ import com.onebucket.domain.universityManage.dto.verifiedCode.request.RequestCod
  * </pre>
  */
 public record VerifiedCodeCheckDto(
-        String username,
+        String universityEmail,
         String verifiedCode
 ) {
-    public static VerifiedCodeCheckDto of(String username, RequestCodeCheckDto dto) {
-        return new VerifiedCodeCheckDto(username, dto.verifiedCode());
+    public static VerifiedCodeCheckDto of(RequestCodeCheckDto dto) {
+        return new VerifiedCodeCheckDto(dto.verifiedCode(),dto.universityEmail());
     }
 }

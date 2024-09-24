@@ -3,6 +3,7 @@ package com.onebucket.domain.universityManage.service;
 
 import com.onebucket.domain.universityManage.dao.UniversityRepository;
 import com.onebucket.domain.universityManage.domain.University;
+import com.onebucket.domain.universityManage.dto.university.GetUniversityDto;
 import com.onebucket.domain.universityManage.dto.university.UniversityDto;
 import com.onebucket.global.exceptionManage.customException.universityManageException.UniversityException;
 import com.onebucket.global.exceptionManage.errorCode.UniversityErrorCode;
@@ -48,9 +49,6 @@ class UniversityServiceTest {
     @Mock
     private UniversityRepository universityRepository;
 
-    @Mock
-    private University university;
-
     @InjectMocks
     private UniversityServiceImpl universityService;
 
@@ -87,7 +85,7 @@ class UniversityServiceTest {
         universityRepository.save(createUniversity());
         doReturn(Optional.of(createUniversity())).when(universityRepository).findByName("홍익대학교");
 
-        final UniversityDto result = universityService.getUniversity("홍익대학교");
+        final UniversityDto result = universityService.getUniversity(new GetUniversityDto("홍익대학교"));
 
         assertThat(result.getName()).isEqualTo("홍익대학교");
         assertThat(result.getAddress()).isEqualTo("서울시 마포구 상수동");
@@ -100,7 +98,7 @@ class UniversityServiceTest {
         doReturn(Optional.empty()).when(universityRepository).findByName("홍익대학교");
 
         final UniversityException result = assertThrows(UniversityException.class,
-                ()->universityService.getUniversity("홍익대학교"));
+                ()->universityService.getUniversity(new GetUniversityDto("홍익대학교")));
 
         assertThat(result.getErrorCode()).isEqualTo(UniversityErrorCode.NOT_EXIST_UNIVERSITY);
     }

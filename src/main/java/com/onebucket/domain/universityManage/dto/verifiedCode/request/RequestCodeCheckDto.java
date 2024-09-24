@@ -22,6 +22,7 @@ package com.onebucket.domain.universityManage.dto.verifiedCode.request;
  * </pre>
  */
 public record RequestCodeCheckDto(
+        String universityEmail,
         String verifiedCode
 ) {
 }
