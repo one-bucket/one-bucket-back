@@ -28,7 +28,7 @@ public class CreateMarketPostDto extends CreatePostDto {
     private Long price;
     private Long count;
 
-    private int wanted;
+    private Long wanted;
     private String location;
     private LocalDateTime dueDate;
 }

@@ -8,9 +8,12 @@ import com.onebucket.domain.boardManage.entity.post.MarketPost;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
 
+import com.onebucket.domain.tradeManage.entity.PendingTrade;
+import com.onebucket.domain.tradeManage.dao.PendingTradeRepository;
 import com.onebucket.global.minio.MinioRepository;
 import com.onebucket.global.redis.RedisRepository;
 import com.onebucket.global.utils.SecurityUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -32,6 +35,9 @@ import java.util.List;
 @Service
 public class MarketPostServiceImpl extends AbstractPostService<MarketPost, MarketPostRepository> implements MarketPostService {
 
+
+    private final PendingTradeRepository pendingTradeRepository;
+    @Autowired
     public MarketPostServiceImpl(MarketPostRepository repository,
                                  BoardRepository boardRepository,
                                  MemberRepository memberRepository,
@@ -39,9 +45,11 @@ public class MarketPostServiceImpl extends AbstractPostService<MarketPost, Marke
                                  CommentRepository commentRepository,
                                  RedisRepository redisRepository,
                                  LikesMapRepository likesMapRepository,
-                                 MinioRepository minioRepository) {
+                                 MinioRepository minioRepository,
+                                 PendingTradeRepository pendingTradeRepository) {
         super(repository, boardRepository, memberRepository, securityUtils,
                 commentRepository, redisRepository, likesMapRepository, minioRepository);
+        this.pendingTradeRepository = pendingTradeRepository;
     }
 
     @Override
@@ -50,20 +58,27 @@ public class MarketPostServiceImpl extends AbstractPostService<MarketPost, Marke
         Board board = findBoard(dto.getBoardId());
 
         CreateMarketPostDto marketDto = (CreateMarketPostDto) dto;
+
+        PendingTrade tradeInfo = PendingTrade.builder()
+                .item(marketDto.getItem())
+                .price(marketDto.getPrice())
+                .count(marketDto.getCount())
+                .location(marketDto.getLocation())
+                .dueDate(marketDto.getDueDate())
+                .wanted(marketDto.getWanted())
+                .isFin(false)
+                .build();
+        tradeInfo.addMember(member);
+
+        PendingTrade savedPendingTrade = pendingTradeRepository.save(tradeInfo);
+
         return MarketPost.builder()
                 //일반 post value
                 .board(board)
                 .author(member)
                 .title(dto.getTitle())
                 .text(dto.getText())
-                //market value
-                .item(marketDto.getItem())
-                .price(marketDto.getPrice())
-                .count(marketDto.getCount())
-                .location(marketDto.getLocation())
-                .wanted(marketDto.getWanted())
-                .dueDate(marketDto.getDueDate())
-                .isFin(false)
+                .pendingTrade(savedPendingTrade)
                 .build();
 
     }
@@ -89,6 +104,8 @@ public class MarketPostServiceImpl extends AbstractPostService<MarketPost, Marke
             imageUrl = images.get(1);
         }
 
+        //거래에 대한 실질적인 정보를 담은 테이블 로드
+        PendingTrade pendingTrade = post.getPendingTrade();
 
         return MarketPostThumbnailDto.builder()
                 //value of post
@@ -104,13 +121,13 @@ public class MarketPostServiceImpl extends AbstractPostService<MarketPost, Marke
                 .isImageExist(isImageExist)
                 .thumbnailImage(imageUrl)
 
-                .item(post.getItem())
-                .joins(post.getJoins())
-                .wanted(post.getWanted())
-                .dueDate(post.getDueDate())
-                .price(post.getPrice())
-                .count(post.getCount())
-                .isFin(post.isFin())
+                .item(pendingTrade.getItem())
+                .joins(pendingTrade.getJoins())
+                .wanted(pendingTrade.getWanted())
+                .dueDate(pendingTrade.getDueDate())
+                .price(pendingTrade.getPrice())
+                .count(pendingTrade.getCount())
+                .isFin(pendingTrade.isFin())
                 .build();
     }
 
@@ -121,6 +138,8 @@ public class MarketPostServiceImpl extends AbstractPostService<MarketPost, Marke
         if (member != null) {
             nickname = member.getNickname();
         }
+
+        PendingTrade pendingTrade = post.getPendingTrade();
 
         return MarketPostInfoDto.builder()
                 .postId(post.getId())
@@ -134,14 +153,14 @@ public class MarketPostServiceImpl extends AbstractPostService<MarketPost, Marke
                 .createdDate(post.getCreatedDate())
                 .modifiedDate(post.getModifiedDate())
 
-                .item(post.getItem())
-                .wanted(post.getWanted())
-                .joins(post.getJoins())
-                .isFin(post.isFin())
-                .location(post.getLocation())
-                .price(post.getPrice())
-                .count(post.getCount())
-                .dueDate(post.getDueDate())
+                .item(pendingTrade.getItem())
+                .wanted(pendingTrade.getWanted())
+                .joins(pendingTrade.getJoins())
+                .isFin(pendingTrade.isFin())
+                .location(pendingTrade.getLocation())
+                .price(pendingTrade.getPrice())
+                .count(pendingTrade.getCount())
+                .dueDate(pendingTrade.getDueDate())
                 .build();
     }
 

@@ -1,10 +1,15 @@
 package com.onebucket.domain.boardManage.entity.post;
 
 
+import com.onebucket.domain.tradeManage.entity.PendingTrade;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.OneToOne;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.Fetch;
 
 import java.time.LocalDateTime;
 
@@ -37,16 +42,6 @@ import java.time.LocalDateTime;
 @SuperBuilder
 public class MarketPost extends Post {
 
-
-    private String item;
-    private int joins;
-    private int wanted;
-    private boolean isFin;
-    private String location;
-
-
-    private Long price;
-    private Long count;
-    private LocalDateTime dueDate;
-
+    @OneToOne(cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
+    private PendingTrade pendingTrade;
 }

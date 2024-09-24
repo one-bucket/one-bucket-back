@@ -26,8 +26,8 @@ import java.time.LocalDateTime;
 @SuperBuilder
 public class MarketPostInfoDto extends PostInfoDto {
     private String item;
-    private int joins;
-    private int wanted;
+    private Long joins;
+    private Long wanted;
     private boolean isFin;
     private String location;
 

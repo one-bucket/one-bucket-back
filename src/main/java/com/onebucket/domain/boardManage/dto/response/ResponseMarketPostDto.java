@@ -23,6 +23,6 @@ import lombok.experimental.SuperBuilder;
 @Setter
 public class ResponseMarketPostDto extends ResponsePostDto {
     private String item;
-    private int wanted;
+    private Long wanted;
     private String location;
 }

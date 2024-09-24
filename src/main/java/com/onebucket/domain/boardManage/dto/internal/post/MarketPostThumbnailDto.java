@@ -25,8 +25,8 @@ import java.time.LocalDateTime;
 @SuperBuilder
 public class MarketPostThumbnailDto extends PostThumbnailDto {
     private String item;
-    private int joins;
-    private int wanted;
+    private Long joins;
+    private Long wanted;
     private boolean isFin;
     private Long price;
     private Long count;

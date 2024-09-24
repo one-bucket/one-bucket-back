@@ -21,6 +21,6 @@ import lombok.Setter;
 @Setter
 public class RequestCreateMarketPostDto extends RequestCreatePostDto {
     private String item;
-    private int wanted;
+    private Long wanted;
     private String location;
 }
