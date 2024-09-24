@@ -1,8 +1,6 @@
 package com.onebucket.domain.universityManage.service;
 
-import com.onebucket.domain.mailManage.dto.EmailMessage;
 import com.onebucket.domain.universityManage.dto.university.DeleteUniversityDto;
-import com.onebucket.domain.universityManage.dto.university.GetUniversityDto;
 import com.onebucket.domain.universityManage.dto.university.UniversityDto;
 import com.onebucket.domain.universityManage.dto.university.UpdateUniversityDto;
 import com.onebucket.domain.universityManage.dto.verifiedCode.internal.VerifiedCodeCheckDto;
@@ -35,7 +33,7 @@ public interface UniversityService {
     // 대학교 CRUD
     Long createUniversity(UniversityDto universityDto);
     List<UniversityDto> findAllUniversity();
-    UniversityDto getUniversity(GetUniversityDto dto);
+    UniversityDto getUniversity(String name);
     void updateUniversity(UpdateUniversityDto dto);
     void deleteUniversity(DeleteUniversityDto dto);
 

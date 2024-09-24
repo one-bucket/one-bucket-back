@@ -1,7 +1,6 @@
 package com.onebucket.domain.universityManage.api;
 
 import com.onebucket.domain.universityManage.dto.university.DeleteUniversityDto;
-import com.onebucket.domain.universityManage.dto.university.GetUniversityDto;
 import com.onebucket.domain.universityManage.dto.university.UniversityDto;
 import com.onebucket.domain.universityManage.dto.university.UpdateUniversityDto;
 import com.onebucket.domain.universityManage.service.UniversityService;
@@ -52,9 +51,9 @@ public class UniversityAdminController {
         return ResponseEntity.ok(universities);
     }
 
-    @GetMapping("/univ")
-    public ResponseEntity<UniversityDto> getUniversity(@RequestBody GetUniversityDto dto) {
-        UniversityDto universityDto = universityService.getUniversity(dto);
+    @GetMapping("/univ/{name}")
+    public ResponseEntity<UniversityDto> getUniversity(@PathVariable String name) {
+        UniversityDto universityDto = universityService.getUniversity(name);
         return ResponseEntity.ok(universityDto);
     }
 

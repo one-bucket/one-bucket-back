@@ -2,7 +2,6 @@ package com.onebucket.domain.universityManage.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.onebucket.domain.universityManage.dto.university.GetUniversityDto;
 import com.onebucket.domain.universityManage.dto.university.UniversityDto;
 import com.onebucket.domain.universityManage.dto.university.UpdateUniversityDto;
 import com.onebucket.domain.universityManage.service.UniversityService;
@@ -65,7 +64,7 @@ class UniversityControllerTest {
     private UniversityService universityService;
 
     @InjectMocks
-    private UniversityController universityController;
+    private UniversityAdminController universityAdminController;
 
 
     private MockMvc mockMvc;
@@ -77,7 +76,7 @@ class UniversityControllerTest {
     void setup() {
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
-        mockMvc = MockMvcBuilders.standaloneSetup(universityController)
+        mockMvc = MockMvcBuilders.standaloneSetup(universityAdminController)
                 .setControllerAdvice(new BaseExceptionHandler(), new DataExceptionHandler(), new UniversityExceptionHandler())
                 .build();
     }
@@ -167,10 +166,9 @@ class UniversityControllerTest {
 
         String name = "name";
         UniversityDto dto = getDto(name);
-        GetUniversityDto getUniversityDto = new GetUniversityDto("valid name");
-        when(universityService.getUniversity(getUniversityDto)).thenReturn(dto);
+        when(universityService.getUniversity(name)).thenReturn(dto);
 
-        mockMvc.perform(get("/admin/univ")
+        mockMvc.perform(get("/admin/univ/{name}", name)
                         .characterEncoding(StandardCharsets.UTF_8)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -184,9 +182,9 @@ class UniversityControllerTest {
         UniversityErrorCode code = UniversityErrorCode.NOT_EXIST_UNIVERSITY;
         UniversityException exception = new UniversityException(code);
 
-        when(universityService.getUniversity(new GetUniversityDto("invalid"))).thenThrow(exception);
+        when(universityService.getUniversity(anyString())).thenThrow(exception);
 
-        mockMvc.perform(get("/admin/univ")
+        mockMvc.perform(get("/admin/univ/{name}", "name")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(hasStatus(code))

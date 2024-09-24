@@ -4,7 +4,6 @@ import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.universityManage.dao.UniversityRepository;
 import com.onebucket.domain.universityManage.domain.University;
 import com.onebucket.domain.universityManage.dto.university.DeleteUniversityDto;
-import com.onebucket.domain.universityManage.dto.university.GetUniversityDto;
 import com.onebucket.domain.universityManage.dto.university.UniversityDto;
 import com.onebucket.domain.universityManage.dto.university.UpdateUniversityDto;
 import com.onebucket.domain.universityManage.dto.verifiedCode.internal.VerifiedCodeCheckDto;
@@ -108,8 +107,8 @@ public class UniversityServiceImpl implements UniversityService {
      * @return 특정 이름을 가진 대학교 정보 출력
      */
     @Override
-    public UniversityDto getUniversity(GetUniversityDto dto) {
-        University university = universityRepository.findByName(dto.name())
+    public UniversityDto getUniversity(String name) {
+        University university = universityRepository.findByName(name)
                 .orElseThrow(()-> new UniversityException(UniversityErrorCode.NOT_EXIST_UNIVERSITY));
         return UniversityDto.builder()
                 .name(university.getName())
