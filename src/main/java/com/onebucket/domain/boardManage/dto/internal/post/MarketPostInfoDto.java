@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
+import java.time.LocalDateTime;
+
 
 /**
  * <br>package name   : com.onebucket.domain.boardManage.dto.internal.post
@@ -28,4 +30,8 @@ public class MarketPostInfoDto extends PostInfoDto {
     private int wanted;
     private boolean isFin;
     private String location;
+
+    private Long price;
+    private Long count;
+    private LocalDateTime dueDate;
 }

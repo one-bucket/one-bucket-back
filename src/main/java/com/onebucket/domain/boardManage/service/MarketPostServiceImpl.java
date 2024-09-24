@@ -51,14 +51,19 @@ public class MarketPostServiceImpl extends AbstractPostService<MarketPost, Marke
 
         CreateMarketPostDto marketDto = (CreateMarketPostDto) dto;
         return MarketPost.builder()
-                .isFin(false)
-                .wanted(marketDto.getWanted())
-                .item(marketDto.getItem())
-                .location(marketDto.getLocation())
-                .author(member)
-                .title(marketDto.getTitle())
-                .text(marketDto.getText())
+                //일반 post value
                 .board(board)
+                .author(member)
+                .title(dto.getTitle())
+                .text(dto.getText())
+                //market value
+                .item(marketDto.getItem())
+                .price(marketDto.getPrice())
+                .count(marketDto.getCount())
+                .location(marketDto.getLocation())
+                .wanted(marketDto.getWanted())
+                .dueDate(marketDto.getDueDate())
+                .isFin(false)
                 .build();
 
     }
@@ -72,21 +77,40 @@ public class MarketPostServiceImpl extends AbstractPostService<MarketPost, Marke
             nickname = member.getNickname();
         }
 
+        //실제 썸네일에 들어갈 내용에 대해 앞 n 글자만 반환
+        String preText = post.getText().substring(50);
+
+        boolean isImageExist = true;
+        String imageUrl = "fail:null image";
+        List<String> images = post.getImageUrls();
+        if(images.isEmpty()) {
+            isImageExist = false;
+        } else {
+            imageUrl = images.get(1);
+        }
+
 
         return MarketPostThumbnailDto.builder()
-                .joins(post.getJoins())
-                .item(post.getItem())
-                .isFin(post.isFin())
-                .likes(post.getLikes())
-                .wanted(post.getWanted())
+                //value of post
+                .postId(post.getId())
+                .boardId(post.getBoardId())
                 .authorNickname(nickname)
+                .title(post.getTitle())
+                .text(preText)
+                .likes(post.getLikes())
+                .views(post.getViews())
                 .createdDate(post.getCreatedDate())
                 .modifiedDate(post.getModifiedDate())
-                .boardId(post.getBoardId())
-                .title(post.getTitle())
-                .text(post.getText())
-                .postId(post.getId())
-                .views(post.getViews())
+                .isImageExist(isImageExist)
+                .thumbnailImage(imageUrl)
+
+                .item(post.getItem())
+                .joins(post.getJoins())
+                .wanted(post.getWanted())
+                .dueDate(post.getDueDate())
+                .price(post.getPrice())
+                .count(post.getCount())
+                .isFin(post.isFin())
                 .build();
     }
 
@@ -100,20 +124,24 @@ public class MarketPostServiceImpl extends AbstractPostService<MarketPost, Marke
 
         return MarketPostInfoDto.builder()
                 .postId(post.getId())
-                .views(post.getViews())
-                .likes(post.getLikes())
-                .title(post.getTitle())
-                .text(post.getText())
                 .boardId(post.getBoardId())
                 .authorNickname(nickname)
+                .title(post.getTitle())
+                .text(post.getText())
+                .comments(comments)
+                .likes(post.getLikes())
+                .views(post.getViews())
                 .createdDate(post.getCreatedDate())
                 .modifiedDate(post.getModifiedDate())
-                .comments(comments)
+
                 .item(post.getItem())
                 .wanted(post.getWanted())
                 .joins(post.getJoins())
                 .isFin(post.isFin())
                 .location(post.getLocation())
+                .price(post.getPrice())
+                .count(post.getCount())
+                .dueDate(post.getDueDate())
                 .build();
     }
 

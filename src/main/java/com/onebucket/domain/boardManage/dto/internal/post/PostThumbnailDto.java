@@ -41,4 +41,7 @@ public class PostThumbnailDto extends PostDto {
     private Long likes;
     private Long commentsCount;
 
+    private boolean isImageExist;
+    private String thumbnailImage;
+
 }
