@@ -45,7 +45,7 @@ public class UniversityController {
     private final UniversityService universityService;
     private final MailService mailService;
 
-    @PostMapping("/univs/send-code")
+    @PostMapping("/univ/send-code")
     public ResponseEntity<SuccessResponseDto> sendVerifiedCode(@RequestBody RequestCodeDto dto) {
         VerifiedCodeDto verifiedCodeDto = VerifiedCodeDto.of(dto);
         String verifiedCode = universityService.makeVerifiedCode(verifiedCodeDto);
@@ -57,7 +57,7 @@ public class UniversityController {
         return ResponseEntity.ok(new SuccessResponseDto("success send verifiedCode"));
     }
 
-    @PostMapping("/univs/verify-code")
+    @PostMapping("/univ/verify-code")
     public ResponseEntity<SuccessResponseDto> verifyCode(@RequestBody RequestCodeCheckDto dto) {
         VerifiedCodeCheckDto verifiedCodeCheckDto = VerifiedCodeCheckDto.of(dto);
         universityService.verifyCode(verifiedCodeCheckDto);

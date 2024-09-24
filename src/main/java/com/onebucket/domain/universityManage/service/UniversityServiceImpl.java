@@ -51,7 +51,6 @@ import java.util.stream.Collectors;
 public class UniversityServiceImpl implements UniversityService {
 
     private final UniversityRepository universityRepository;
-    private final MemberRepository memberRepository;
     private final UniversityEmailValidator validator;
     private final RandomStringUtils randomStringUtils;
     private final RedisRepository redisRepository;
