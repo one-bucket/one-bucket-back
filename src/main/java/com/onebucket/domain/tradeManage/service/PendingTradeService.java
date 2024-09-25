@@ -21,5 +21,7 @@ public interface PendingTradeService {
     boolean makeFinish(Long tradeId);
     boolean makeUnFinish(Long tradeId);
     boolean extendDeadLine(Long tradeId);
+    void closeTrade(Long tradeId);
+    void deleteTrade(Long tradeId);
     void updateInfo();
 }
