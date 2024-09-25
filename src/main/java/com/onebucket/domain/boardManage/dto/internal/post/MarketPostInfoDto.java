@@ -34,4 +34,6 @@ public class MarketPostInfoDto extends PostInfoDto {
     private Long price;
     private Long count;
     private LocalDateTime dueDate;
+
+    private Long pendingId;
 }

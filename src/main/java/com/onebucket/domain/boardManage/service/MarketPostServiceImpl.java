@@ -160,6 +160,8 @@ public class MarketPostServiceImpl extends AbstractPostService<MarketPost, Marke
                 .price(pendingTrade.getPrice())
                 .count(pendingTrade.getCount())
                 .dueDate(pendingTrade.getDueDate())
+
+                .pendingId(pendingTrade.getId())
                 .build();
     }
 
