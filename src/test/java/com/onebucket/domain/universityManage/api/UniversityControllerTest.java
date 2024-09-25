@@ -116,7 +116,7 @@ class UniversityControllerTest {
                 .andExpect(hasKey(code));
 
     }
-    
+
     //-+-+-+-+-+-+]] getAllUniversity test [[-+-+-+-+-+-+
     @Test
     @DisplayName("getAllUniversity - success")
