@@ -1,5 +1,7 @@
 package com.onebucket.domain.universityManage.dto.verifiedCode.request;
 
+import jakarta.validation.constraints.Email;
+
 /**
  * <br>package name   : com.onebucket.domain.mailManage.dto.request
  * <br>file name      : RequestCodeCheckDto
@@ -22,6 +24,7 @@ package com.onebucket.domain.universityManage.dto.verifiedCode.request;
  * </pre>
  */
 public record RequestCodeCheckDto(
+        @Email
         String universityEmail,
         String verifiedCode
 ) {

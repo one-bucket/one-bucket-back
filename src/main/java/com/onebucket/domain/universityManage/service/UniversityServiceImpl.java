@@ -2,6 +2,7 @@ package com.onebucket.domain.universityManage.service;
 
 import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.dao.ProfileRepository;
+import com.onebucket.domain.memberManage.domain.Profile;
 import com.onebucket.domain.universityManage.dao.UniversityRepository;
 import com.onebucket.domain.universityManage.domain.University;
 import com.onebucket.domain.universityManage.dto.university.DeleteUniversityDto;
@@ -16,7 +17,6 @@ import com.onebucket.global.exceptionManage.errorCode.UniversityErrorCode;
 import com.onebucket.global.redis.RedisRepository;
 import com.onebucket.global.utils.EntityUtils;
 import com.onebucket.global.utils.RandomStringUtils;
-import com.onebucket.global.utils.UniversityEmailValidator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -54,11 +54,10 @@ import java.util.stream.Collectors;
 public class UniversityServiceImpl implements UniversityService {
 
     private final UniversityRepository universityRepository;
-    private final UniversityEmailValidator validator;
     private final RandomStringUtils randomStringUtils;
     private final RedisRepository redisRepository;
-    // 프로필에 이메일 필드가 추가되면 사용할 것임.
     private final ProfileRepository profileRepository;
+    private final MemberRepository memberRepository;
 
     /**
      * 새로운 대학 정보를 만들고 만든 대학 정보를 반환한다. 같은 이름을 가진 대학교는 추가할 수 없음.
@@ -138,37 +137,50 @@ public class UniversityServiceImpl implements UniversityService {
         universityRepository.delete(university);
     }
 
+    /**
+     * 전달 받은 인증코드가 유효하면 프로필에 학교 이메일 추가
+     * @param dto
+     */
     @Override
     public void verifyCode(VerifiedCodeCheckDto dto) {
-        String storedCode = redisRepository.get(dto.universityEmail());
+        String storedCode = redisRepository.get(dto.username());
         // 인증 코드 검증
         if (storedCode == null || !storedCode.equals(dto.verifiedCode())) {
             throw new UniversityException(UniversityErrorCode.INVALID_VERIFICATION_CODE);
         }
+        Long id = memberRepository.findIdByUsername(dto.username()).orElseThrow(
+                () -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
+        Profile profile = profileRepository.findById(id).orElseThrow(
+                () -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER_PROFILE));
+        profile.setEmail(dto.universityEmail());
+        profileRepository.save(profile);
     }
 
     @Override
     public String makeVerifiedCode(VerifiedCodeDto dto) {
-        if(!validator.isValidUniversityEmail(dto)) {
-            throw new UniversityException(UniversityErrorCode.INVALID_EMAIL);
-        }
-        // redis에 이미 존재하는 이메일인지?
-        if(redisRepository.isTokenExists(dto.universityEmail())) {
-            throw new AuthenticationException(AuthenticationErrorCode.DUPLICATE_USER);
-        }
-        // mysql에 이미 존재하는 이메일인지?
-        if(profileRepository.existsByEmail(dto.universityEmail())) {
-            throw new AuthenticationException(AuthenticationErrorCode.DUPLICATE_USER);
-        }
+        University university = universityRepository.findByName(dto.university())
+                .orElseThrow(() -> new UniversityException(UniversityErrorCode.NOT_EXIST_UNIVERSITY));
+        // 유효한 이메일인지 확인
+        validateUniversityEmail(dto, university);
         // 인증 코드 생성
         String verifiedCode = randomStringUtils.generateRandomStr(6);
         long EXPIRED_TIME = 5L;
         redisRepository.save()
-                        .key(dto.universityEmail())
+                        .key(dto.username())
                         .value(verifiedCode)
                         .timeout(EXPIRED_TIME)
                         .timeUnit(TimeUnit.MINUTES)
                         .save();
         return verifiedCode;
+    }
+
+    private void validateUniversityEmail(VerifiedCodeDto dto, University university) {
+        if(!dto.universityEmail().endsWith(university.getEmail())) {
+            throw new UniversityException(UniversityErrorCode.INVALID_EMAIL);
+        }
+        // redis에 이미 존재하는 이메일인지?
+        if(redisRepository.isTokenExists(dto.username())) {
+            throw new AuthenticationException(AuthenticationErrorCode.DUPLICATE_USER);
+        }
     }
 }

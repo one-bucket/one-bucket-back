@@ -60,7 +60,6 @@ public class SecurityConfig {
                                 .requestMatchers("/docs/**").permitAll()
                                 .requestMatchers("/test/create-testuser").permitAll()
                                 .requestMatchers("/ws-stomp/**").permitAll()
-//                                .requestMatchers("/admin/**").permitAll()
                                 .requestMatchers("/admin/**").permitAll()
 //                                .requestMatchers("/admin/**").hasRole("ADMIN")
                                 .anyRequest().authenticated())

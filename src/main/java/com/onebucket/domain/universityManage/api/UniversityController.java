@@ -8,6 +8,7 @@ import com.onebucket.domain.universityManage.dto.verifiedCode.internal.VerifiedC
 import com.onebucket.domain.universityManage.dto.verifiedCode.request.RequestCodeCheckDto;
 import com.onebucket.domain.universityManage.dto.verifiedCode.request.RequestCodeDto;
 import com.onebucket.domain.universityManage.service.UniversityService;
+import com.onebucket.global.utils.SecurityUtils;
 import com.onebucket.global.utils.SuccessResponseDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -44,10 +45,12 @@ public class UniversityController {
 
     private final UniversityService universityService;
     private final MailService mailService;
+    private final SecurityUtils securityUtils;
 
     @PostMapping("/univ/send-code")
     public ResponseEntity<SuccessResponseDto> sendVerifiedCode(@RequestBody RequestCodeDto dto) {
-        VerifiedCodeDto verifiedCodeDto = VerifiedCodeDto.of(dto);
+        String username = securityUtils.getCurrentUsername();
+        VerifiedCodeDto verifiedCodeDto = VerifiedCodeDto.of(dto,username);
         String verifiedCode = universityService.makeVerifiedCode(verifiedCodeDto);
         EmailMessage emailMessage = EmailMessage.of(dto.universityEmail(),"[한바구니] 학교 이메일 인증");
         // 템플릿에 전달할 데이터를 설정
@@ -59,7 +62,8 @@ public class UniversityController {
 
     @PostMapping("/univ/verify-code")
     public ResponseEntity<SuccessResponseDto> verifyCode(@RequestBody RequestCodeCheckDto dto) {
-        VerifiedCodeCheckDto verifiedCodeCheckDto = VerifiedCodeCheckDto.of(dto);
+        String username = securityUtils.getCurrentUsername();
+        VerifiedCodeCheckDto verifiedCodeCheckDto = VerifiedCodeCheckDto.of(username,dto);
         universityService.verifyCode(verifiedCodeCheckDto);
         return ResponseEntity.ok(new SuccessResponseDto("verify code success"));
     }

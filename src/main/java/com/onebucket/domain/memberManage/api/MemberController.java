@@ -6,7 +6,6 @@ import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.domain.memberManage.domain.Profile;
 import com.onebucket.domain.memberManage.dto.*;
 import com.onebucket.domain.memberManage.dto.RequestSetEmailDto.RequestSetEmailDto;
-import com.onebucket.domain.memberManage.dto.internal.SetEmailDto;
 import com.onebucket.domain.memberManage.dto.internal.SetUniversityDto;
 import com.onebucket.domain.memberManage.dto.request.RequestSetUnivDto;
 import com.onebucket.domain.memberManage.service.MemberService;
@@ -242,15 +241,4 @@ public class MemberController {
         memberService.setUniversity(setUniversityDto);
         return ResponseEntity.ok(new SuccessResponseDto("success set university"));
     }
-
-    @PostMapping("/profile/email")
-    public ResponseEntity<SuccessResponseDto> setProfileEmail(@Valid @RequestBody RequestSetEmailDto dto) {
-        String username = securityUtils.getCurrentUsername();
-        Long id = memberService.usernameToId(username);
-        SetEmailDto setEmailDto = SetEmailDto.of(username,dto);
-        profileService.updateProfileEmail(id,setEmailDto);
-        return ResponseEntity.ok(new SuccessResponseDto("success set email"));
-    }
-
-
 }

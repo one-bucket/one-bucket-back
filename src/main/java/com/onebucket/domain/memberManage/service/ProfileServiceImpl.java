@@ -6,7 +6,6 @@ import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.domain.memberManage.domain.Profile;
 import com.onebucket.domain.memberManage.dto.ReadProfileDto;
 import com.onebucket.domain.memberManage.dto.UpdateProfileDto;
-import com.onebucket.domain.memberManage.dto.internal.SetEmailDto;
 import com.onebucket.global.exceptionManage.customException.CommonException;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
@@ -135,13 +134,6 @@ public class ProfileServiceImpl implements ProfileService {
         EntityUtils.updateIfNotNull(dto.getDescription(), profile::setDescription);
         EntityUtils.updateIfNotNull(dto.getBirth(), profile::setBirth);
 
-        profileRepository.save(profile);
-    }
-
-    @Override
-    public void updateProfileEmail(Long id,SetEmailDto dto) {
-        Profile profile = getprofile(id);
-        profile.setEmail(dto.email());
         profileRepository.save(profile);
     }
 

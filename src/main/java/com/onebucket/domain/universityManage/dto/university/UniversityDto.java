@@ -30,6 +30,5 @@ public class UniversityDto {
     private String address;
 
     @NotBlank(message = "email must not be empty")
-    @Email(message = "Email should be valid")
     private String email;
 }
