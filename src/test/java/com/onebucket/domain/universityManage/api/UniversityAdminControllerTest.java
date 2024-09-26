@@ -2,7 +2,7 @@ package com.onebucket.domain.universityManage.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.onebucket.domain.universityManage.dto.university.UniversityDto;
+import com.onebucket.domain.universityManage.dto.university.ResponseUniversityDto;
 import com.onebucket.domain.universityManage.dto.university.UpdateUniversityDto;
 import com.onebucket.domain.universityManage.service.UniversityService;
 import com.onebucket.global.exceptionManage.customException.universityManageException.UniversityException;
@@ -58,7 +58,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * </pre>
  */
 @ExtendWith(MockitoExtension.class)
-class UniversityControllerTest {
+class UniversityAdminControllerTest {
 
     @Mock
     private UniversityService universityService;
@@ -85,8 +85,8 @@ class UniversityControllerTest {
     @Test
     @DisplayName("createUniversity - success")
     void testCreateUniversity_success() throws Exception {
-        UniversityDto dto = getDto();
-        when(universityService.createUniversity(any(UniversityDto.class))).thenReturn(1L);
+        ResponseUniversityDto dto = getDto();
+        when(universityService.createUniversity(any(ResponseUniversityDto.class))).thenReturn(1L);
 
         mockMvc.perform(post("/admin/univ")
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -100,12 +100,12 @@ class UniversityControllerTest {
     @Test
     @DisplayName("createUniversity - fail / duplicate university")
     void testCreateUniversity_fail_duplicateUniv() throws Exception {
-        UniversityDto dto = getDto();
+        ResponseUniversityDto dto = getDto();
 
         UniversityErrorCode code = UniversityErrorCode.DUPLICATE_UNIVERSITY;
         UniversityException exception = new UniversityException(code);
 
-        when(universityService.createUniversity(any(UniversityDto.class))).thenThrow(exception);
+        when(universityService.createUniversity(any(ResponseUniversityDto.class))).thenThrow(exception);
 
         mockMvc.perform(post("/admin/univ")
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -122,7 +122,7 @@ class UniversityControllerTest {
     @DisplayName("getAllUniversity - success")
     void testGetAllUniversity_success() throws Exception {
 
-        List<UniversityDto> responses = IntStream.rangeClosed(1, 10)
+        List<ResponseUniversityDto> responses = IntStream.rangeClosed(1, 10)
                 .mapToObj(i -> getDto("name" + i))
                 .toList();
 
@@ -141,7 +141,7 @@ class UniversityControllerTest {
     @Test
     @DisplayName("GetAllUniversity - success / blank DB")
     void testGetAllUniversity_success_blankDB() throws Exception {
-        UniversityDto defaultDto = UniversityDto.builder()
+        ResponseUniversityDto defaultDto = ResponseUniversityDto.builder()
                 .name("not insert")
                 .address("data")
                 .email("yet")
@@ -165,7 +165,7 @@ class UniversityControllerTest {
     void testGetUniversity_success() throws Exception {
 
         String name = "name";
-        UniversityDto dto = getDto(name);
+        ResponseUniversityDto dto = getDto(name);
         when(universityService.getUniversity(name)).thenReturn(dto);
 
         mockMvc.perform(get("/admin/univ/{name}", name)
@@ -242,19 +242,19 @@ class UniversityControllerTest {
 
 
 
-    private UniversityDto getDto(String name, String address, String email) {
-        return UniversityDto.builder()
+    private ResponseUniversityDto getDto(String name, String address, String email) {
+        return ResponseUniversityDto.builder()
                 .name(name)
                 .address(address)
                 .email(email)
                 .build();
     }
 
-    private UniversityDto getDto(String name) {
+    private ResponseUniversityDto getDto(String name) {
         return getDto(name, "address", "email@email.com");
     }
 
-    private UniversityDto getDto() {
+    private ResponseUniversityDto getDto() {
         return getDto("name");
     }
 }
