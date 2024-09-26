@@ -5,7 +5,7 @@ import com.onebucket.domain.memberManage.service.MemberService;
 import com.onebucket.domain.memberManage.service.ProfileService;
 import com.onebucket.domain.universityManage.dto.verifiedCode.internal.VerifiedCodeCheckDto;
 import com.onebucket.domain.universityManage.dto.verifiedCode.request.RequestCodeCheckDto;
-import com.onebucket.domain.universityManage.service.UniversityService;
+import com.onebucket.domain.universityManage.service.UniversityEmailVerificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -34,14 +34,14 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class VerificationFacadeService  {
 
-    private final UniversityService universityService;
+    private final UniversityEmailVerificationService universityEmailVerificationService;
     private final ProfileService profileService;
     private final MemberService memberService;
 
     public void verifyAndUpdateProfileAndMember(String username, RequestCodeCheckDto dto) {
         // 인증 코드 검증
         VerifiedCodeCheckDto verifiedCodeCheckDto = VerifiedCodeCheckDto.of(username, dto);
-        universityService.verifyCode(verifiedCodeCheckDto);
+        universityEmailVerificationService.verifyCode(verifiedCodeCheckDto);
 
         // 프로필 이메일 업데이트
         profileService.updateProfileEmail(username, dto.universityEmail());

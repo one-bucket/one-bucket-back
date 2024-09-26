@@ -36,8 +36,4 @@ public interface UniversityService {
     ResponseUniversityDto getUniversity(String name);
     void updateUniversity(UpdateUniversityDto dto);
     void deleteUniversity(DeleteUniversityDto dto);
-
-    // 대학교 이메일 인증
-    void verifyCode(VerifiedCodeCheckDto dto);
-    String makeVerifiedCode(VerifiedCodeDto dto);
 }

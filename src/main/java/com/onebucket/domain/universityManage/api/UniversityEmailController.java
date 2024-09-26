@@ -5,7 +5,7 @@ import com.onebucket.domain.mailManage.service.MailService;
 import com.onebucket.domain.universityManage.dto.verifiedCode.internal.VerifiedCodeDto;
 import com.onebucket.domain.universityManage.dto.verifiedCode.request.RequestCodeCheckDto;
 import com.onebucket.domain.universityManage.dto.verifiedCode.request.RequestCodeDto;
-import com.onebucket.domain.universityManage.service.UniversityService;
+import com.onebucket.domain.universityManage.service.UniversityEmailVerificationService;
 import com.onebucket.global.facade.verification.VerificationFacadeService;
 import com.onebucket.global.utils.SecurityUtils;
 import com.onebucket.global.utils.SuccessResponseDto;
@@ -40,9 +40,9 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/univ")
-public class UniversityController {
+public class UniversityEmailController {
 
-    private final UniversityService universityService;
+    private final UniversityEmailVerificationService universityEmailVerificationService;
     private final MailService mailService;
     private final SecurityUtils securityUtils;
     private final VerificationFacadeService verificationFacadeService;
@@ -51,7 +51,7 @@ public class UniversityController {
     public ResponseEntity<SuccessResponseDto> sendVerifiedCode(@RequestBody RequestCodeDto dto) {
         String username = securityUtils.getCurrentUsername();
         VerifiedCodeDto verifiedCodeDto = VerifiedCodeDto.of(dto,username);
-        String verifiedCode = universityService.makeVerifiedCode(verifiedCodeDto);
+        String verifiedCode = universityEmailVerificationService.makeVerifiedCode(verifiedCodeDto);
 
         EmailMessage emailMessage = EmailMessage.of(dto.universityEmail(),"[한바구니] 학교 이메일 인증");
         // 템플릿에 전달할 데이터를 설정
