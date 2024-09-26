@@ -1,7 +1,7 @@
 package com.onebucket.domain.universityManage.api;
 
 import com.onebucket.domain.universityManage.dto.university.DeleteUniversityDto;
-import com.onebucket.domain.universityManage.dto.university.UniversityDto;
+import com.onebucket.domain.universityManage.dto.university.ResponseUniversityDto;
 import com.onebucket.domain.universityManage.dto.university.UpdateUniversityDto;
 import com.onebucket.domain.universityManage.service.UniversityService;
 import com.onebucket.global.utils.SuccessResponseDto;
@@ -40,21 +40,21 @@ public class UniversityAdminController {
     private final UniversityService universityService;
 
     @PostMapping("/univ")
-    public ResponseEntity<SuccessResponseDto> createUniversity(@Valid @RequestBody UniversityDto universityDto) {
-        Long id = universityService.createUniversity(universityDto);
+    public ResponseEntity<SuccessResponseDto> createUniversity(@Valid @RequestBody ResponseUniversityDto responseUniversityDto) {
+        Long id = universityService.createUniversity(responseUniversityDto);
         return ResponseEntity.ok(new SuccessResponseDto("success create university / id is " + id));
     }
 
     @GetMapping("/univs")
-    public ResponseEntity<List<UniversityDto>> getAllUniversity() {
-        List<UniversityDto> universities = universityService.findAllUniversity();
+    public ResponseEntity<List<ResponseUniversityDto>> getAllUniversity() {
+        List<ResponseUniversityDto> universities = universityService.findAllUniversity();
         return ResponseEntity.ok(universities);
     }
 
     @GetMapping("/univ/{name}")
-    public ResponseEntity<UniversityDto> getUniversity(@PathVariable String name) {
-        UniversityDto universityDto = universityService.getUniversity(name);
-        return ResponseEntity.ok(universityDto);
+    public ResponseEntity<ResponseUniversityDto> getUniversity(@PathVariable String name) {
+        ResponseUniversityDto responseUniversityDto = universityService.getUniversity(name);
+        return ResponseEntity.ok(responseUniversityDto);
     }
 
     @DeleteMapping("/univs")
