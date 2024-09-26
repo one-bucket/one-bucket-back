@@ -2,7 +2,6 @@ package com.onebucket.global.exceptionManage.errorCode;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 
 /**
@@ -26,7 +25,8 @@ public enum TradeErrorCode implements ErrorCode {
     FULL_TRADE("6002", HttpStatus.CONFLICT, "already full trade member"),
     ALREADY_JOIN("6003", HttpStatus.BAD_REQUEST, "you already join this trade"),
     FINISH_TRADE("6004", HttpStatus.BAD_REQUEST, "already finished trade"),
-    DUE_DATE_OVER("6005", HttpStatus.BAD_REQUEST, "due date of this trade is finish");
+    DUE_DATE_OVER("6005", HttpStatus.BAD_REQUEST, "due date of this trade is finish"),
+    NOT_OWNER_OF_TRADE("6006", HttpStatus.FORBIDDEN, "you are not allowed to access this trade");
 
     private final String code;
     private final HttpStatus httpStatus;

@@ -2,18 +2,24 @@ package com.onebucket.domain.tradeManage.service;
 
 import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
+import com.onebucket.domain.tradeManage.dao.CloseTradeRepository;
 import com.onebucket.domain.tradeManage.dao.PendingTradeRepository;
+import com.onebucket.domain.tradeManage.dto.internal.UpdatePendingTradeDto;
 import com.onebucket.domain.tradeManage.dto.internal.UserTradeDto;
+import com.onebucket.domain.tradeManage.entity.CloseTrade;
 import com.onebucket.domain.tradeManage.entity.PendingTrade;
 import com.onebucket.global.exceptionManage.customException.TradeManageException.PendingTradeException;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.TradeErrorCode;
+import com.onebucket.global.utils.EntityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
 
 /**
  * <br>package name   : com.onebucket.domain.tradeManage.service
@@ -30,13 +36,17 @@ import java.util.List;
  * } </pre>
  */
 @Service
+@Transactional
 @RequiredArgsConstructor
-public class PendingTradeServiceImpl {
+public class PendingTradeServiceImpl implements PendingTradeService {
 
     private final PendingTradeRepository pendingTradeRepository;
+    private final CloseTradeRepository closeTradeRepository;
     private final MemberRepository memberRepository;
 
-    public void addMember(UserTradeDto dto) {
+
+    @Override
+    public Long addMember(UserTradeDto dto) {
         Long userId = dto.getUserId();
         Long tradeId = dto.getTradeId();
 
@@ -60,19 +70,23 @@ public class PendingTradeServiceImpl {
         }
 
         pendingTrade.addMember(member);
-        pendingTradeRepository.save(pendingTrade);
+        return pendingTradeRepository.save(pendingTrade).getId();
     }
+    @Override
     public void quitMember(UserTradeDto dto) {
         Long userId = dto.getUserId();
         Long tradeId = dto.getTradeId();
 
         Member member = findMember(userId);
         PendingTrade pendingTrade = findPendingTrade(tradeId);
-
+        if(!pendingTrade.getOwner().equals(member)) {
+            throw new PendingTradeException(TradeErrorCode.NOT_OWNER_OF_TRADE);
+        }
         pendingTrade.deleteMember(member);
         pendingTradeRepository.save(pendingTrade);
     }
 
+    @Override
     public boolean makeFinish(Long tradeId, boolean isFin) {
         PendingTrade pendingTrade = findPendingTrade(tradeId);
 
@@ -80,6 +94,55 @@ public class PendingTradeServiceImpl {
 
         PendingTrade savedPendingTrade = pendingTradeRepository.save(pendingTrade);
         return savedPendingTrade.isFin();
+    }
+
+
+    @Override
+    public void update(UpdatePendingTradeDto dto) {
+        PendingTrade pendingTrade = findPendingTrade(dto.getId());
+
+        EntityUtils.updateIfNotNull(dto.getItem(), pendingTrade::setItem);
+        EntityUtils.updateIfNotNull(dto.getWanted(), pendingTrade::setWanted);
+        EntityUtils.updateIfNotNull(dto.getJoins(), pendingTrade::setJoins);
+        EntityUtils.updateIfNotNull(dto.getPrice(), pendingTrade::setPrice);
+        EntityUtils.updateIfNotNull(dto.getCount(), pendingTrade::setCount);
+        EntityUtils.updateIfNotNull(dto.getLocation(), pendingTrade::setLocation);
+        pendingTradeRepository.save(pendingTrade);
+    }
+
+    @Override
+    public List<String> getMembersNick(Long tradeId) {
+        PendingTrade pendingTrade = findPendingTrade(tradeId);
+        List<Member> members =  pendingTrade.getMembers();
+
+        return members.stream().map(Member::getNickname).toList();
+    }
+
+    @Override
+    public void deleteTrade(Long tradeId) {
+        pendingTradeRepository.deleteById(tradeId);
+    }
+    @Override
+    public Long closeTrade(Long tradeId) {
+        PendingTrade pendingTrade = findPendingTrade(tradeId);
+        List<Long> memberIds = pendingTrade.getMembers().stream().map(Member::getId).toList();
+
+        CloseTrade closeTrade = CloseTrade.builder()
+                .item(pendingTrade.getItem())
+                .finishTradeAt(pendingTrade.getFinishTradeAt())
+                .startTradeAt(pendingTrade.getStartTradeAt())
+                .memberIds(memberIds)
+                .build();
+        return closeTradeRepository.save(closeTrade).getId();
+    }
+
+    @Override
+    public LocalDateTime extendDueDate(Long tradeId) {
+        PendingTrade pendingTrade = findPendingTrade(tradeId);
+
+        pendingTrade.extendDueDate();
+
+        return pendingTradeRepository.save(pendingTrade).getDueDate();
     }
 
 

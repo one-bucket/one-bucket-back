@@ -15,6 +15,7 @@ import com.onebucket.global.redis.RedisRepository;
 import com.onebucket.global.utils.SecurityUtils;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -55,6 +56,7 @@ public class MarketPostServiceImpl extends AbstractPostService<MarketPost, Marke
     protected <D extends CreatePostDto> MarketPost convertCreatePostDtoToPost(D dto) {
         Member member = findMember(dto.getUsername());
         Board board = findBoard(dto.getBoardId());
+        LocalDateTime dueDate = LocalDateTime.now().plusWeeks(2);
 
         CreateMarketPostDto marketDto = (CreateMarketPostDto) dto;
 
@@ -63,8 +65,9 @@ public class MarketPostServiceImpl extends AbstractPostService<MarketPost, Marke
                 .price(marketDto.getPrice())
                 .count(marketDto.getCount())
                 .location(marketDto.getLocation())
-                .dueDate(marketDto.getDueDate())
+                .dueDate(dueDate)
                 .wanted(marketDto.getWanted())
+                .owner(member)
                 .isFin(false)
                 .build();
         tradeInfo.addMember(member);

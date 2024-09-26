@@ -1,10 +1,15 @@
 package com.onebucket.domain.tradeManage.service;
 
+import com.onebucket.domain.tradeManage.dto.internal.UpdatePendingTradeDto;
+import com.onebucket.domain.tradeManage.dto.internal.UserTradeDto;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * <br>package name   : com.onebucket.domain.tradeManage.service
  * <br>file name      : PendingTradeService
- * <br>date           : 2024-09-24
+ * <br>date           : 2024-09-26
  * <pre>
  * <span style="color: white;">[description]</span>
  *
@@ -16,12 +21,20 @@ package com.onebucket.domain.tradeManage.service;
  * } </pre>
  */
 public interface PendingTradeService {
-    void addMember(Long userId, Long tradeId);
-    void quitMember(Long userId, Long tradeId);
-    boolean makeFinish(Long tradeId);
-    boolean makeUnFinish(Long tradeId);
-    boolean extendDueDate(Long tradeId);
-    void closeTrade(Long tradeId);
+    Long addMember(UserTradeDto dto);
+
+    void quitMember(UserTradeDto dto);
+
+    boolean makeFinish(Long tradeId, boolean isFin);
+
+    void update(UpdatePendingTradeDto dto);
+
+    List<String> getMembersNick(Long tradeId);
+
     void deleteTrade(Long tradeId);
-    void updateInfo();
+
+    Long closeTrade(Long tradeId);
+
+    LocalDateTime extendDueDate(Long tradeId);
+
 }

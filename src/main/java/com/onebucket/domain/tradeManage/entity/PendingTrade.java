@@ -34,6 +34,10 @@ public class PendingTrade {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id", nullable = true)
+    private Member owner;
+
     @ManyToMany
     @JoinTable(
             name = "pending_trade_member",
@@ -67,6 +71,12 @@ public class PendingTrade {
     private Long count;
 
     private LocalDateTime dueDate;
+
+    public void extendDueDate() {
+        if(dueDate != null) {
+            this.dueDate = dueDate.plusWeeks(2);
+        }
+    }
 
     private String location;
 

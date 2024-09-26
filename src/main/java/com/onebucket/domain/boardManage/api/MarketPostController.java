@@ -41,7 +41,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/market-post")
 public class MarketPostController extends AbstractPostController<MarketPost, MarketPostService> {
 
-    public MarketPostController(MarketPostService postService, SecurityUtils securityUtils, MemberService memberService, BoardService boardService) {
+
+    public MarketPostController(MarketPostService postService, SecurityUtils securityUtils,
+                                MemberService memberService, BoardService boardService) {
         super(postService, securityUtils, memberService, boardService);
     }
 
@@ -50,7 +52,6 @@ public class MarketPostController extends AbstractPostController<MarketPost, Mar
     public ResponseEntity<SuccessResponseWithIdDto> createPost(@RequestBody @Valid RequestCreateMarketPostDto dto) {
 
         String type = boardService.getType(dto.getBoardId());
-        System.out.println("type of market is " + type);
         if(!type.equals("marketPost")) {
             throw new UserBoardException(BoardErrorCode.MISMATCH_POST_AND_BOARD);
         }

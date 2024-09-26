@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
-import java.time.LocalDateTime;
 
 /**
  * <br>package name   : com.onebucket.domain.boardManage.dto.internal.post
@@ -30,5 +29,4 @@ public class CreateMarketPostDto extends CreatePostDto {
 
     private Long wanted;
     private String location;
-    private LocalDateTime dueDate;
 }
