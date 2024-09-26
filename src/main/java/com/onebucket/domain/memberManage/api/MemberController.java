@@ -227,18 +227,4 @@ public class MemberController {
 
         return ResponseEntity.ok(new SuccessResponseDto(url));
     }
-
-
-    //TODO :  권한 문제 해결하기
-    @PostMapping("/member/univ")
-    public ResponseEntity<SuccessResponseDto> setMemberUniv(@Valid @RequestBody RequestSetUnivDto dto) {
-        String username = securityUtils.getCurrentUsername();
-        SetUniversityDto setUniversityDto = SetUniversityDto.builder()
-                .username(username)
-                .university(dto.getUniversity())
-                .build();
-
-        memberService.setUniversity(setUniversityDto);
-        return ResponseEntity.ok(new SuccessResponseDto("success set university"));
-    }
 }

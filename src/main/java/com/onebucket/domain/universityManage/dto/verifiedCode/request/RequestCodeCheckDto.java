@@ -24,6 +24,7 @@ import jakarta.validation.constraints.Email;
  * </pre>
  */
 public record RequestCodeCheckDto(
+        String university,
         @Email
         String universityEmail,
         String verifiedCode

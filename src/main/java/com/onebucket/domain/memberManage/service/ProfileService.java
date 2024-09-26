@@ -34,6 +34,7 @@ public interface ProfileService {
     void updateProfile(Long id, UpdateProfileDto dto);
     void updateImage(Long id, MultipartFile file);
     void updateImageToBasic(Long id);
+    void updateProfileEmail(String username, String email);
 
     String getImageUrl(Long id);
 
