@@ -20,7 +20,7 @@ public interface PendingTradeService {
     void quitMember(Long userId, Long tradeId);
     boolean makeFinish(Long tradeId);
     boolean makeUnFinish(Long tradeId);
-    boolean extendDeadLine(Long tradeId);
+    boolean extendDueDate(Long tradeId);
     void closeTrade(Long tradeId);
     void deleteTrade(Long tradeId);
     void updateInfo();
