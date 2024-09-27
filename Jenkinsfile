@@ -94,8 +94,6 @@ pipeline {
                         docker stop one-bucket-container || true
                         docker rm one-bucket-container || true
                         docker run -d --name one-bucket-container -p 8080:8080 \\
-                            --log-driver=loki \\
-                            --log-opt loki-url="http://localhost:3100/loki/api/v1/push" \\
                             -e MYSQL_HOST=${SERVER_MYSQL_HOST} \\
                             -e MYSQL_USER=${SERVER_MYSQL_USER} \\
                             -e MYSQL_PASSWORD=${SERVER_MYSQL_PASSWORD} \\
