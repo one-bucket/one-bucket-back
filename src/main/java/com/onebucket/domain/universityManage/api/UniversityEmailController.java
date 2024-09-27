@@ -6,9 +6,10 @@ import com.onebucket.domain.universityManage.dto.verifiedCode.internal.VerifiedC
 import com.onebucket.domain.universityManage.dto.verifiedCode.request.RequestCodeCheckDto;
 import com.onebucket.domain.universityManage.dto.verifiedCode.request.RequestCodeDto;
 import com.onebucket.domain.universityManage.service.UniversityEmailVerificationService;
-import com.onebucket.global.facade.verification.VerificationFacadeService;
+import com.onebucket.domain.universityManage.service.facade.VerificationAndUpdateFacadeService;
 import com.onebucket.global.utils.SecurityUtils;
 import com.onebucket.global.utils.SuccessResponseDto;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -45,10 +46,10 @@ public class UniversityEmailController {
     private final UniversityEmailVerificationService universityEmailVerificationService;
     private final MailService mailService;
     private final SecurityUtils securityUtils;
-    private final VerificationFacadeService verificationFacadeService;
+    private final VerificationAndUpdateFacadeService verificationAndUpdateFacadeService;
 
     @PostMapping("/send-code")
-    public ResponseEntity<SuccessResponseDto> sendVerifiedCode(@RequestBody RequestCodeDto dto) {
+    public ResponseEntity<SuccessResponseDto> sendVerifiedCode(@Valid @RequestBody RequestCodeDto dto) {
         String username = securityUtils.getCurrentUsername();
         VerifiedCodeDto verifiedCodeDto = VerifiedCodeDto.of(dto,username);
         String verifiedCode = universityEmailVerificationService.makeVerifiedCode(verifiedCodeDto);
@@ -62,9 +63,9 @@ public class UniversityEmailController {
     }
 
     @PostMapping("/verify-code")
-    public ResponseEntity<SuccessResponseDto> verifyCode(@RequestBody RequestCodeCheckDto dto) {
+    public ResponseEntity<SuccessResponseDto> verifyCode(@Valid @RequestBody RequestCodeCheckDto dto) {
         String username = securityUtils.getCurrentUsername();
-        verificationFacadeService.verifyAndUpdateProfileAndMember(username, dto);
+        verificationAndUpdateFacadeService.verifyAndUpdateProfileAndMember(username, dto);
         return ResponseEntity.ok(new SuccessResponseDto("verify code success"));
     }
 }
