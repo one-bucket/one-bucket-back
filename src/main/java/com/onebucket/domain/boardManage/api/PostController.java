@@ -80,7 +80,7 @@ public class PostController extends AbstractPostController<Post, PostService>{
     public ResponseEntity<SuccessResponseWithIdDto> createPost(@RequestBody @Valid RequestCreatePostDto dto) {
         String type = boardService.getType(dto.getBoardId());
 
-        if(!type.equals("Post")) {
+        if(!type.equals("post")) {
             throw new UserBoardException(BoardErrorCode.MISMATCH_POST_AND_BOARD);
         }
         String username = securityUtils.getCurrentUsername();
