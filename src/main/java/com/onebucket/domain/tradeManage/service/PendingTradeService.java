@@ -2,6 +2,7 @@ package com.onebucket.domain.tradeManage.service;
 
 import com.onebucket.domain.tradeManage.dto.internal.UpdatePendingTradeDto;
 import com.onebucket.domain.tradeManage.dto.internal.UserTradeDto;
+import com.onebucket.domain.tradeManage.dto.request.TradeFinishDto;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,7 +26,7 @@ public interface PendingTradeService {
 
     void quitMember(UserTradeDto dto);
 
-    boolean makeFinish(Long tradeId, boolean isFin);
+    boolean makeFinish(TradeFinishDto.InternalTradeFinishDto dto);
 
     void update(UpdatePendingTradeDto dto);
 
