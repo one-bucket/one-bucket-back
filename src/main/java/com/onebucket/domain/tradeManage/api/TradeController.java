@@ -2,15 +2,13 @@ package com.onebucket.domain.tradeManage.api;
 
 import com.onebucket.domain.memberManage.service.MemberService;
 import com.onebucket.domain.tradeManage.dto.internal.UserTradeDto;
+import com.onebucket.domain.tradeManage.dto.request.TradeFinishDto;
 import com.onebucket.domain.tradeManage.service.PendingTradeService;
-import com.onebucket.domain.tradeManage.service.PendingTradeServiceImpl;
 import com.onebucket.global.utils.SecurityUtils;
 import com.onebucket.global.utils.SuccessResponseDto;
 import com.onebucket.global.utils.SuccessResponseWithIdDto;
-import com.sun.net.httpserver.Authenticator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -66,6 +64,17 @@ public class TradeController {
 
         return ResponseEntity.ok(new SuccessResponseDto("success quit trade"));
     }
+
+    @PostMapping("/finish")
+    public ResponseEntity<SuccessResponseDto> makeFinishTrade(@RequestBody TradeFinishDto.RequestTradeFinishDto dto) {
+        TradeFinishDto.InternalTradeFinishDto internalDto = TradeFinishDto.InternalTradeFinishDto.of(dto);
+
+        pendingTradeService.makeFinish(internalDto);
+
+        return ResponseEntity.ok(new SuccessResponseDto("success finish trade"));
+    }
+
+
 
 
 

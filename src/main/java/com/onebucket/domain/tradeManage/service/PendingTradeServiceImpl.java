@@ -6,6 +6,7 @@ import com.onebucket.domain.tradeManage.dao.CloseTradeRepository;
 import com.onebucket.domain.tradeManage.dao.PendingTradeRepository;
 import com.onebucket.domain.tradeManage.dto.internal.UpdatePendingTradeDto;
 import com.onebucket.domain.tradeManage.dto.internal.UserTradeDto;
+import com.onebucket.domain.tradeManage.dto.request.TradeFinishDto;
 import com.onebucket.domain.tradeManage.entity.CloseTrade;
 import com.onebucket.domain.tradeManage.entity.PendingTrade;
 import com.onebucket.global.exceptionManage.customException.TradeManageException.PendingTradeException;
@@ -87,7 +88,9 @@ public class PendingTradeServiceImpl implements PendingTradeService {
     }
 
     @Override
-    public boolean makeFinish(Long tradeId, boolean isFin) {
+    public boolean makeFinish(TradeFinishDto.InternalTradeFinishDto dto) {
+        Long tradeId = dto.getTradeId();
+        boolean isFin = dto.isValue();
         PendingTrade pendingTrade = findPendingTrade(tradeId);
 
         pendingTrade.setFin(isFin);
