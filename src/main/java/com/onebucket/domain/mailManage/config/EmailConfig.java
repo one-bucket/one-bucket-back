@@ -32,26 +32,33 @@ import java.util.Properties;
 @Configuration
 public class EmailConfig {
 
+    @Value("${spring.mail.host}")
+    private String host;
+    @Value("${spring.mail.port}")
+    private int port;
     @Value("${spring.mail.username}")
     private String username;
-
     @Value("${spring.mail.password}")
     private String password;
+    @Value("${spring.mail.protocol}")
+    private String protocol;
+    @Value("${spring.mail.properties.mail.smtp.auth}")
+    private String auth;
+    @Value("${spring.mail.properties.mail.smtp.starttls.enable}")
+    private String startTtls;
 
     @Bean
     public JavaMailSender javaMailSender() {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-        mailSender.setHost("smtp.gmail.com");  // 이메일 발송을 위한 SMTP 서버 설정
-        mailSender.setPort(587);  // SMTP 포트 설정
+        mailSender.setHost(host);  // 이메일 발송을 위한 SMTP 서버 설정
+        mailSender.setPort(port);  // SMTP 포트 설정
         mailSender.setUsername(username);  // 발송자 이메일 계정
         mailSender.setPassword(password);  // 발송자 이메일 비밀번호
 
         Properties props = mailSender.getJavaMailProperties();
-        props.put("mail.transport.protocol", "smtp");
-        props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable", "true");
-        props.put("mail.smtp.starttls.required", "true");
-        props.put("mail.debug", "true");  // 디버깅 로그 활성화
+        props.put("mail.transport.protocol", protocol);
+        props.put("mail.smtp.auth", auth);
+        props.put("mail.smtp.starttls.enable", startTtls);
 
         return mailSender;
     }
