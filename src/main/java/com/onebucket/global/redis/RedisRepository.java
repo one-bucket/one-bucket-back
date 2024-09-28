@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.util.Set;
+
 /**
  * <br>package name   : com.onebucket.global.redis
  * <br>file name      : RedisService
@@ -64,5 +66,9 @@ public class RedisRepository {
     // TODO: test case 작성
     public boolean isTokenExists(String key) {
         return Boolean.TRUE.equals(stringRedisTemplate.hasKey(key));
+    }
+
+    public Set<String> keys(String pattern) {
+        return stringRedisTemplate.keys(pattern);
     }
 }

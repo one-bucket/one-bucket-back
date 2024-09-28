@@ -14,6 +14,7 @@ import com.onebucket.global.utils.RandomStringUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -47,6 +48,7 @@ public class UniversityEmailVerificationServiceImpl implements UniversityEmailVe
     private final ProfileRepository profileRepository;
 
     private static final long EXPIRED_TIME = 5L;
+    private static final String HEADER = "verify:";
 
     /**
      * 전달 받은 인증코드가 유효하면 프로필에 학교 이메일 추가
@@ -54,7 +56,7 @@ public class UniversityEmailVerificationServiceImpl implements UniversityEmailVe
      */
     @Override
     public void verifyCode(VerifiedCodeCheckDto dto) {
-        String storedCode = redisRepository.get(createVerificationCodeKey(dto.username(),dto.universityEmail()));
+        String storedCode = redisRepository.get(createVerificationCodeKey(dto.universityEmail(),dto.username()));
         // 인증 코드 검증
         if (storedCode == null || !storedCode.equals(dto.verifiedCode())) {
             throw new VerificationException(VerificationErrorCode.INVALID_VERIFICATION_CODE);
@@ -77,7 +79,7 @@ public class UniversityEmailVerificationServiceImpl implements UniversityEmailVe
         // 인증 코드 생성
         String verifiedCode = randomStringUtils.generateRandomStr(6);
         redisRepository.save()
-                .key(createVerificationCodeKey(dto.username(), dto.universityEmail()))
+                .key(createVerificationCodeKey(dto.universityEmail(), dto.username()))
                 .value(verifiedCode)
                 .timeout(EXPIRED_TIME)
                 .timeUnit(TimeUnit.MINUTES)
@@ -91,22 +93,8 @@ public class UniversityEmailVerificationServiceImpl implements UniversityEmailVe
             throw new VerificationException(VerificationErrorCode.INVALID_EMAIL);
         }
 
-        // redis 에 관련 정보가 저장되어 있는지, 다른 이용자가 동일한 이메일로 인증하고 있는 중인지 체크
-        String emailOwnershipKey = createEmailOwnershipKey(dto.universityEmail());
-        String currentOwner = redisRepository.get(emailOwnershipKey);
-
-        if(currentOwner == null) {
-            // 현 이용자가 이메일 인증을 하고 있음을 저장한다.
-            redisRepository.save()
-                    .key(emailOwnershipKey)
-                    .value(dto.username())
-                    .timeout(EXPIRED_TIME)
-                    .timeUnit(TimeUnit.MINUTES)
-                    .save();
-        } else if (!currentOwner.equals(dto.username())) {
-            // 이미 동일한 email로 다른 사용자가 인증을 시도하고 있음.
-            throw new VerificationException(VerificationErrorCode.DUPLICATE_EMAIL);
-        }
+        // 이미 인증 중인 이메일인가?
+        validateEmailOwnership(dto.universityEmail(),dto.username());
 
         // 이미 db에 저장되어 있는 이메일인지 확인
         if(profileRepository.existsByEmail(dto.universityEmail())) {
@@ -114,10 +102,23 @@ public class UniversityEmailVerificationServiceImpl implements UniversityEmailVe
         }
     }
 
-    private String createVerificationCodeKey(String username, String universityEmail) {
-        return username + ":" + universityEmail;
+    private String createVerificationCodeKey(String universityEmail, String username) {
+        return HEADER + universityEmail + ":" + username;
     }
-    private String createEmailOwnershipKey(String universityEmail) {
-        return "emailOwnership:" + universityEmail;
+
+    private void validateEmailOwnership(String universityEmail, String username) {
+        Set<String> keys = redisRepository.keys(HEADER + universityEmail + ":*");
+
+        if(keys != null && !keys.isEmpty()) {
+            for(String key : keys) {
+                int lastColonIndex = key.lastIndexOf(":");
+                if(lastColonIndex != -1) {
+                    String existUsername = key.substring(lastColonIndex + 1);
+                    if(!username.equals(existUsername)) {
+                        throw new VerificationException(VerificationErrorCode.DUPLICATE_EMAIL);
+                    }
+                }
+            }
+        }
     }
 }
