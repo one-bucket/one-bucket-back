@@ -23,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * <br>package name   : com.onebucket.domain.memberManage.api
@@ -73,7 +74,7 @@ public class MemberController {
         Long id = memberService.usernameToId(username);
         ReadProfileDto profile = profileService.readProfile(id);
         EmailMessage emailMessage = EmailMessage.of(profile.getEmail(),"[한바구니] 임시 비밀번호 발급");
-        Map<String, Object> variables = new HashMap<>();
+        Map<String, Object> variables = new ConcurrentHashMap<>();
         variables.put("temporaryPassword", temporaryPassword);
         mailService.sendEmail(emailMessage,"reset-password",variables);
         return ResponseEntity.ok(new SuccessResponseDto("success reset password"));
