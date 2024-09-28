@@ -101,6 +101,7 @@ class MemberControllerTest {
         when(securityUtils.getCurrentUsername()).thenReturn("username");
         when(memberService.usernameToId("username")).thenReturn(id);
         when(profileService.readProfile(id)).thenReturn(ReadProfileDto.builder().build());
+        when(memberService.changePassword("username")).thenReturn("password");
         mockMvc.perform(post("/member/password/reset")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .accept(MediaType.APPLICATION_JSON))
@@ -109,6 +110,7 @@ class MemberControllerTest {
                 .andExpect((hasKey(new SuccessResponseDto("success reset password"))));
 
         verify(memberService,  times(1)).changePassword("username");
+        verify(mailService, times(1)).sendEmail(any(EmailMessage.class),anyString(),anyMap());
     }
 
     @Test
