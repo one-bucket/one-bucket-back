@@ -1,8 +1,8 @@
 package com.onebucket.domain.tradeManage.api;
 
 import com.onebucket.domain.memberManage.service.MemberService;
-import com.onebucket.domain.tradeManage.dto.internal.UserTradeDto;
-import com.onebucket.domain.tradeManage.dto.request.TradeFinishDto;
+import com.onebucket.domain.tradeManage.dto.TradeKeyDto;
+
 import com.onebucket.domain.tradeManage.service.PendingTradeService;
 import com.onebucket.global.utils.SecurityUtils;
 import com.onebucket.global.utils.SuccessResponseDto;
@@ -40,7 +40,7 @@ public class TradeController {
         String username = securityUtils.getCurrentUsername();
         Long userId = memberService.usernameToId(username);
 
-        UserTradeDto userTradeDto = UserTradeDto.builder()
+        TradeKeyDto.UserTrade userTradeDto = TradeKeyDto.UserTrade.builder()
                 .tradeId(tradeId)
                 .userId(userId)
                 .build();
@@ -55,7 +55,7 @@ public class TradeController {
         String username = securityUtils.getCurrentUsername();
         Long userId = memberService.usernameToId(username);
 
-        UserTradeDto userTradeDto = UserTradeDto.builder()
+        TradeKeyDto.UserTrade userTradeDto = TradeKeyDto.UserTrade.builder()
                 .tradeId(tradeId)
                 .userId(userId)
                 .build();
@@ -66,10 +66,10 @@ public class TradeController {
     }
 
     @PostMapping("/finish")
-    public ResponseEntity<SuccessResponseDto> makeFinishTrade(@RequestBody TradeFinishDto.RequestTradeFinishDto dto) {
-        TradeFinishDto.InternalTradeFinishDto internalDto = TradeFinishDto.InternalTradeFinishDto.of(dto);
+    public ResponseEntity<SuccessResponseDto> makeFinishTrade(@RequestBody TradeKeyDto.RequestFinish dto) {
+        TradeKeyDto.Finish finishDto = TradeKeyDto.Finish.of(dto);
 
-        pendingTradeService.makeFinish(internalDto);
+        pendingTradeService.makeFinish(finishDto);
 
         return ResponseEntity.ok(new SuccessResponseDto("success finish trade"));
     }

@@ -78,9 +78,9 @@ public class PendingTrade {
 
     private LocalDateTime dueDate;
 
-    public void extendDueDate() {
+    public void extendDueDate(Long date) {
         if(dueDate != null) {
-            this.dueDate = dueDate.plusWeeks(2);
+            this.dueDate = dueDate.plusDays(date);
         }
     }
 

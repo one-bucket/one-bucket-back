@@ -1,8 +1,8 @@
 package com.onebucket.domain.tradeManage.service;
 
-import com.onebucket.domain.tradeManage.dto.internal.UpdatePendingTradeDto;
-import com.onebucket.domain.tradeManage.dto.internal.UserTradeDto;
-import com.onebucket.domain.tradeManage.dto.request.TradeFinishDto;
+import com.onebucket.domain.tradeManage.dto.TradeDto;
+import com.onebucket.domain.tradeManage.dto.TradeKeyDto;
+
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -22,20 +22,20 @@ import java.util.List;
  * } </pre>
  */
 public interface PendingTradeService {
-    Long addMember(UserTradeDto dto);
+    Long create(TradeDto.Create dto);
 
-    void quitMember(UserTradeDto dto);
+    TradeDto.Info getInfo(TradeKeyDto.FindTrade dto);
 
-    boolean makeFinish(TradeFinishDto.InternalTradeFinishDto dto);
+    void update(TradeDto.Update dto);
 
-    void update(UpdatePendingTradeDto dto);
+    Long addMember(TradeKeyDto.UserTrade dto);
 
-    List<String> getMembersNick(Long tradeId);
+    void quitMember(TradeKeyDto.UserTrade dto);
 
-    void deleteTrade(Long tradeId);
+    boolean makeFinish(TradeKeyDto.Finish dto);
 
-    Long closeTrade(Long tradeId);
+    Long terminate(TradeKeyDto.FindTrade dto);
 
-    LocalDateTime extendDueDate(Long tradeId);
+    LocalDateTime extendDueDate(TradeKeyDto.ExtendDate dto);
 
 }

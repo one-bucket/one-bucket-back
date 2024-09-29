@@ -4,17 +4,18 @@ import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.domain.tradeManage.dao.CloseTradeRepository;
 import com.onebucket.domain.tradeManage.dao.PendingTradeRepository;
-import com.onebucket.domain.tradeManage.dto.internal.UpdatePendingTradeDto;
-import com.onebucket.domain.tradeManage.dto.internal.UserTradeDto;
-import com.onebucket.domain.tradeManage.dto.request.TradeFinishDto;
+import com.onebucket.domain.tradeManage.dao.TradeTagRepository;
+import com.onebucket.domain.tradeManage.dto.TradeDto;
+import com.onebucket.domain.tradeManage.dto.TradeKeyDto;
 import com.onebucket.domain.tradeManage.entity.CloseTrade;
 import com.onebucket.domain.tradeManage.entity.PendingTrade;
+import com.onebucket.domain.tradeManage.entity.TradeTag;
 import com.onebucket.global.exceptionManage.customException.TradeManageException.PendingTradeException;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.TradeErrorCode;
-import com.onebucket.global.utils.EntityUtils;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.validator.internal.constraintvalidators.bv.AssertTrueValidator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,12 +43,45 @@ import java.util.List;
 public class PendingTradeServiceImpl implements PendingTradeService {
 
     private final PendingTradeRepository pendingTradeRepository;
+    private final TradeTagRepository tradeTagRepository;
     private final CloseTradeRepository closeTradeRepository;
     private final MemberRepository memberRepository;
-
+    private final AssertTrueValidator assertTrueValidator;
 
     @Override
-    public Long addMember(UserTradeDto dto) {
+    public Long create(TradeDto.Create dto) {
+        Member member = findMember(dto.getOwnerId());
+        TradeTag tag = findTag(dto.getTag());
+
+        PendingTrade pendingTrade = TradeDto.to(dto, member, tag);
+
+        return pendingTradeRepository.save(pendingTrade).getId();
+    }
+    @Override
+    public TradeDto.Info getInfo(TradeKeyDto.FindTrade dto) {
+
+        PendingTrade pendingTrade = findPendingTrade(dto.getTradeId());
+
+        return TradeDto.Info.of(pendingTrade);
+    }
+    @Override
+    public void update(TradeDto.Update dto) {
+        PendingTrade pendingTrade = findPendingTrade(dto.getId());
+        TradeTag tag = findTag(dto.getTag());
+
+        pendingTrade.setItem(dto.getItem());
+        pendingTrade.setWanted(dto.getWanted());
+        pendingTrade.setPrice(dto.getPrice());
+        pendingTrade.setCount(dto.getCount());
+        pendingTrade.setLocation(dto.getLocation());
+        pendingTrade.setLinkUrl(dto.getLinkUrl());
+        pendingTrade.setTradeTag(tag);
+
+        pendingTradeRepository.save(pendingTrade);
+    }
+    @Override
+    //새로운 유저가 해당 거래에 참여
+    public Long addMember(TradeKeyDto.UserTrade dto) {
         Long userId = dto.getUserId();
         Long tradeId = dto.getTradeId();
 
@@ -73,24 +107,25 @@ public class PendingTradeServiceImpl implements PendingTradeService {
         pendingTrade.addMember(member);
         return pendingTradeRepository.save(pendingTrade).getId();
     }
+
+    //참여해 있던 유저가 탈퇴
     @Override
-    public void quitMember(UserTradeDto dto) {
+    public void quitMember(TradeKeyDto.UserTrade dto) {
         Long userId = dto.getUserId();
         Long tradeId = dto.getTradeId();
 
         Member member = findMember(userId);
         PendingTrade pendingTrade = findPendingTrade(tradeId);
-        if(!pendingTrade.getOwner().equals(member)) {
-            throw new PendingTradeException(TradeErrorCode.NOT_OWNER_OF_TRADE);
+        if(pendingTrade.getOwner().equals(member)) {
+            throw new PendingTradeException(TradeErrorCode.OWNER_CANNOT_QUIT);
         }
         pendingTrade.deleteMember(member);
         pendingTradeRepository.save(pendingTrade);
     }
-
     @Override
-    public boolean makeFinish(TradeFinishDto.InternalTradeFinishDto dto) {
+    public boolean makeFinish(TradeKeyDto.Finish dto) {
         Long tradeId = dto.getTradeId();
-        boolean isFin = dto.isValue();
+        boolean isFin = dto.isFin();
         PendingTrade pendingTrade = findPendingTrade(tradeId);
 
         pendingTrade.setFin(isFin);
@@ -99,35 +134,11 @@ public class PendingTradeServiceImpl implements PendingTradeService {
         return savedPendingTrade.isFin();
     }
 
-
+    //TODO: 종료 프로토콜 좀 더 다듬어봐야 할듯
     @Override
-    public void update(UpdatePendingTradeDto dto) {
-        PendingTrade pendingTrade = findPendingTrade(dto.getId());
+    public Long terminate(TradeKeyDto.FindTrade dto) {
+        PendingTrade pendingTrade = findPendingTrade(dto.getTradeId());
 
-        EntityUtils.updateIfNotNull(dto.getItem(), pendingTrade::setItem);
-        EntityUtils.updateIfNotNull(dto.getWanted(), pendingTrade::setWanted);
-        EntityUtils.updateIfNotNull(dto.getJoins(), pendingTrade::setJoins);
-        EntityUtils.updateIfNotNull(dto.getPrice(), pendingTrade::setPrice);
-        EntityUtils.updateIfNotNull(dto.getCount(), pendingTrade::setCount);
-        EntityUtils.updateIfNotNull(dto.getLocation(), pendingTrade::setLocation);
-        pendingTradeRepository.save(pendingTrade);
-    }
-
-    @Override
-    public List<String> getMembersNick(Long tradeId) {
-        PendingTrade pendingTrade = findPendingTrade(tradeId);
-        List<Member> members =  pendingTrade.getMembers();
-
-        return members.stream().map(Member::getNickname).toList();
-    }
-
-    @Override
-    public void deleteTrade(Long tradeId) {
-        pendingTradeRepository.deleteById(tradeId);
-    }
-    @Override
-    public Long closeTrade(Long tradeId) {
-        PendingTrade pendingTrade = findPendingTrade(tradeId);
         List<Long> memberIds = pendingTrade.getMembers().stream().map(Member::getId).toList();
 
         CloseTrade closeTrade = CloseTrade.builder()
@@ -138,12 +149,11 @@ public class PendingTradeServiceImpl implements PendingTradeService {
                 .build();
         return closeTradeRepository.save(closeTrade).getId();
     }
-
     @Override
-    public LocalDateTime extendDueDate(Long tradeId) {
-        PendingTrade pendingTrade = findPendingTrade(tradeId);
+    public LocalDateTime extendDueDate(TradeKeyDto.ExtendDate dto) {
+        PendingTrade pendingTrade = findPendingTrade(dto.getTradeId());
 
-        pendingTrade.extendDueDate();
+        pendingTrade.extendDueDate(dto.getDate());
 
         return pendingTradeRepository.save(pendingTrade).getDueDate();
     }
@@ -158,5 +168,9 @@ public class PendingTradeServiceImpl implements PendingTradeService {
     private PendingTrade findPendingTrade(Long tradeId) {
         return pendingTradeRepository.findById(tradeId).orElseThrow(() ->
                 new PendingTradeException(TradeErrorCode.UNKNOWN_TRADE));
+    }
+    private TradeTag findTag(String tag) {
+        return tradeTagRepository.findById(tag).orElseThrow(() ->
+                new PendingTradeException(TradeErrorCode.UNKNOWN_TAG));
     }
 }

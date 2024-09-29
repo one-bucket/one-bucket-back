@@ -26,7 +26,9 @@ public enum TradeErrorCode implements ErrorCode {
     ALREADY_JOIN("6003", HttpStatus.BAD_REQUEST, "you already join this trade"),
     FINISH_TRADE("6004", HttpStatus.BAD_REQUEST, "already finished trade"),
     DUE_DATE_OVER("6005", HttpStatus.BAD_REQUEST, "due date of this trade is finish"),
-    NOT_OWNER_OF_TRADE("6006", HttpStatus.FORBIDDEN, "you are not allowed to access this trade");
+    OWNER_CANNOT_QUIT("6006", HttpStatus.FORBIDDEN, "you are not allowed to access this trade"),
+
+    UNKNOWN_TAG("6100", HttpStatus.BAD_REQUEST, "unknown tag. insert tag first in trade_tag");
 
     private final String code;
     private final HttpStatus httpStatus;

@@ -4,7 +4,6 @@ import com.onebucket.domain.boardManage.dto.internal.board.GetBoardDto;
 import com.onebucket.domain.boardManage.dto.internal.post.*;
 import com.onebucket.domain.boardManage.dto.parents.PostDto;
 import com.onebucket.domain.boardManage.dto.parents.ValueDto;
-import com.onebucket.domain.boardManage.entity.post.Post;
 import com.onebucket.domain.boardManage.service.BasePostService;
 import com.onebucket.domain.boardManage.service.BoardService;
 import com.onebucket.domain.memberManage.service.MemberService;
@@ -39,7 +38,7 @@ import java.util.List;
  */
 
 @RequiredArgsConstructor
-public abstract class AbstractPostController<T extends Post, S extends BasePostService> {
+public abstract class AbstractPostController<S extends BasePostService> {
     protected final S postService;
     protected final SecurityUtils securityUtils;
     protected final MemberService memberService;
@@ -72,11 +71,7 @@ public abstract class AbstractPostController<T extends Post, S extends BasePostS
         return getPostInternal(findPost);
     }
 
-    protected abstract ResponseEntity<? extends PostDto.ResponseInfo> getPostInternal(ValueDto.FindPost dto);
 
-    protected void increaseViewCountInternal(ValueDto.FindPost dto) {
-        postService.increaseViewCount(dto);
-    }
     @DeleteMapping("/{postId}")
     public ResponseEntity<SuccessResponseWithIdDto> deletePost(@PathVariable Long postId) {
         String username = securityUtils.getCurrentUsername();
@@ -157,6 +152,11 @@ public abstract class AbstractPostController<T extends Post, S extends BasePostS
         }
         return fileName.substring(fileName.lastIndexOf('.') + 1);
     }
+    protected void increaseViewCountInternal(ValueDto.FindPost dto) {
+        postService.increaseViewCount(dto);
+    }
+    protected abstract ResponseEntity<? extends PostDto.ResponseInfo> getPostInternal(ValueDto.FindPost dto);
+
 
 
 

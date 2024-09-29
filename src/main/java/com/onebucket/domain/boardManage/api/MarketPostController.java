@@ -4,7 +4,6 @@ import com.onebucket.domain.boardManage.dto.internal.board.GetBoardDto;
 import com.onebucket.domain.boardManage.dto.parents.MarketPostDto;
 import com.onebucket.domain.boardManage.dto.parents.PostDto;
 import com.onebucket.domain.boardManage.dto.parents.ValueDto;
-import com.onebucket.domain.boardManage.entity.post.MarketPost;
 import com.onebucket.domain.boardManage.service.BoardService;
 import com.onebucket.domain.boardManage.service.MarketPostService;
 import com.onebucket.domain.memberManage.service.MemberService;
@@ -38,7 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/market-post")
-public class MarketPostController extends AbstractPostController<MarketPost, MarketPostService> {
+public class MarketPostController extends AbstractPostController<MarketPostService> {
 
 
     public MarketPostController(MarketPostService postService, SecurityUtils securityUtils,

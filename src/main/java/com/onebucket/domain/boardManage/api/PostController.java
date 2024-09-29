@@ -3,7 +3,6 @@ package com.onebucket.domain.boardManage.api;
 import com.onebucket.domain.boardManage.dto.internal.board.GetBoardDto;
 import com.onebucket.domain.boardManage.dto.parents.PostDto;
 import com.onebucket.domain.boardManage.dto.parents.ValueDto;
-import com.onebucket.domain.boardManage.entity.post.Post;
 import com.onebucket.domain.boardManage.service.BoardService;
 import com.onebucket.domain.boardManage.service.PostService;
 import com.onebucket.domain.memberManage.service.MemberService;
@@ -33,7 +32,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("/post")
-public class PostController extends AbstractPostController<Post, PostService>{
+public class PostController extends AbstractPostController<PostService>{
 
     public PostController(PostService postService, SecurityUtils securityUtils, MemberService memberService, BoardService boardService) {
         super(postService, securityUtils, memberService, boardService);
