@@ -58,6 +58,12 @@ public class PendingTrade {
 
     private String item;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "tag_id", nullable = false)
+    private TradeTag tradeTag;
+
+    private String linkUrl;
+
     private Long wanted;
 
     private Long joins;

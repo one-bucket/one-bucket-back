@@ -1,9 +1,8 @@
 package com.onebucket.domain.boardManage.api;
 
 import com.onebucket.domain.boardManage.dto.internal.board.GetBoardDto;
-import com.onebucket.domain.boardManage.dto.internal.post.*;
-import com.onebucket.domain.boardManage.dto.request.RequestCreatePostDto;
-import com.onebucket.domain.boardManage.dto.response.ResponsePostDto;
+import com.onebucket.domain.boardManage.dto.parents.PostDto;
+import com.onebucket.domain.boardManage.dto.parents.ValueDto;
 import com.onebucket.domain.boardManage.entity.post.Post;
 import com.onebucket.domain.boardManage.service.BoardService;
 import com.onebucket.domain.boardManage.service.PostService;
@@ -41,43 +40,29 @@ public class PostController extends AbstractPostController<Post, PostService>{
     }
 
     @Override
-    protected ResponseEntity<? extends ResponsePostDto> getPostInternal(GetPostDto dto) {
+    protected ResponseEntity<? extends PostDto.ResponseInfo> getPostInternal(ValueDto.FindPost dto) {
 
-        PostInfoDto postInfoDto = postService.getPost(dto);
+        ValueDto.GetPost getPost = ValueDto.GetPost.of(dto);
+
+        PostDto.Info postInfoDto = postService.getPost(getPost);
 
         Long savedInRedisLikes = postService.getLikesInRedis(postInfoDto.getPostId());
         Long likes = postInfoDto.getLikes() + savedInRedisLikes;
 
-        Long userId = memberService.usernameToId(dto.getUsername());
+        boolean isUserAlreadyLikes = postService.isUserLikesPost(dto);
 
-        PostAuthorDto postAuthorDto = PostAuthorDto.builder()
-                .userId(userId)
-                .postId(dto.getPostId())
-                .build();
-        boolean isUserAlreadyLikes = postService.isUserLikesPost(postAuthorDto);
+        PostDto.ResponseInfo response = PostDto.ResponseInfo.of(postInfoDto);
+        response.setLikes(likes);
+        response.setUserAlreadyLikes(isUserAlreadyLikes);
 
-        ResponsePostDto response = ResponsePostDto.builder()
-                .postId(postInfoDto.getPostId())
-                .boardId(postInfoDto.getBoardId())
-                .authorNickname(postInfoDto.getAuthorNickname())
-                .createdDate(postInfoDto.getCreatedDate())
-                .modifiedDate(postInfoDto.getModifiedDate())
-                .comments(postInfoDto.getComments())
-                .title(postInfoDto.getTitle())
-                .text(postInfoDto.getText())
-                .likes(likes)
-                .views(postInfoDto.getViews())
-                .isUserAlreadyLikes(isUserAlreadyLikes)
-                .build();
-
-        increaseViewCountInternal(postAuthorDto);
+        increaseViewCountInternal(dto);
 
         return ResponseEntity.ok(response);
     }
 
     @PreAuthorize("@authorizationService.isUserCanAccessBoard(#dto.boardId)")
     @PostMapping("/create")
-    public ResponseEntity<SuccessResponseWithIdDto> createPost(@RequestBody @Valid RequestCreatePostDto dto) {
+    public ResponseEntity<SuccessResponseWithIdDto> createPost(@RequestBody @Valid PostDto.RequestCreate dto) {
         String type = boardService.getType(dto.getBoardId());
 
         if(!type.equals("post")) {
@@ -86,7 +71,7 @@ public class PostController extends AbstractPostController<Post, PostService>{
         String username = securityUtils.getCurrentUsername();
         Long univId = securityUtils.getUnivId(username);
 
-        CreatePostDto createPostDto = CreatePostDto.builder()
+        PostDto.Create createPostDto = PostDto.Create.builder()
                 .boardId(dto.getBoardId())
                 .text(dto.getText())
                 .title(dto.getTitle())
@@ -99,8 +84,8 @@ public class PostController extends AbstractPostController<Post, PostService>{
     }
 
     @Override
-    protected ResponseEntity<Page<? extends PostThumbnailDto>> getPostByBoardInternal(GetBoardDto getBoardDto) {
-        Page<PostThumbnailDto> posts = postService.getPostsByBoard(getBoardDto);
+    protected ResponseEntity<Page<? extends PostDto.Thumbnail>> getPostByBoardInternal(GetBoardDto getBoardDto) {
+        Page<PostDto.Thumbnail> posts = postService.getPostsByBoard(getBoardDto);
 
         posts.forEach(post -> {
             Long commentCount = (Long) postService.getCommentCount(post.getPostId());

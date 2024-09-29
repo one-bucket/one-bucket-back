@@ -1,10 +1,9 @@
 package com.onebucket.domain.boardManage.api;
 
 import com.onebucket.domain.boardManage.dto.internal.board.GetBoardDto;
-import com.onebucket.domain.boardManage.dto.internal.post.*;
-import com.onebucket.domain.boardManage.dto.request.RequestCreateMarketPostDto;
-import com.onebucket.domain.boardManage.dto.response.ResponseMarketPostDto;
-import com.onebucket.domain.boardManage.dto.response.ResponsePostDto;
+import com.onebucket.domain.boardManage.dto.parents.MarketPostDto;
+import com.onebucket.domain.boardManage.dto.parents.PostDto;
+import com.onebucket.domain.boardManage.dto.parents.ValueDto;
 import com.onebucket.domain.boardManage.entity.post.MarketPost;
 import com.onebucket.domain.boardManage.service.BoardService;
 import com.onebucket.domain.boardManage.service.MarketPostService;
@@ -49,7 +48,7 @@ public class MarketPostController extends AbstractPostController<MarketPost, Mar
 
     @PreAuthorize("@authorizationService.isUserCanAccessBoard(#dto.boardId)")
     @PostMapping("/create")
-    public ResponseEntity<SuccessResponseWithIdDto> createPost(@RequestBody @Valid RequestCreateMarketPostDto dto) {
+    public ResponseEntity<SuccessResponseWithIdDto> createPost(@RequestBody @Valid MarketPostDto.RequestCreate dto) {
 
         String type = boardService.getType(dto.getBoardId());
         if(!type.equals("marketPost")) {
@@ -59,15 +58,12 @@ public class MarketPostController extends AbstractPostController<MarketPost, Mar
         String username = securityUtils.getCurrentUsername();
         Long univId = securityUtils.getUnivId(username);
 
-        CreateMarketPostDto createMarketPostDto = CreateMarketPostDto.builder()
+        MarketPostDto.Create createMarketPostDto = MarketPostDto.Create.builder()
                 .boardId(dto.getBoardId())
                 .text(dto.getText())
                 .title(dto.getTitle())
                 .username(username)
                 .univId(univId)
-                .item(dto.getItem())
-                .location(dto.getLocation())
-                .wanted(dto.getWanted())
                 .build();
 
         Long savedId = postService.createPost(createMarketPostDto);
@@ -75,47 +71,30 @@ public class MarketPostController extends AbstractPostController<MarketPost, Mar
     }
 
     @Override
-    protected ResponseEntity<? extends ResponsePostDto> getPostInternal(GetPostDto dto) {
-        MarketPostInfoDto marketPostInfoDto = (MarketPostInfoDto) postService.getPost(dto);
+    protected ResponseEntity<? extends PostDto.ResponseInfo> getPostInternal(ValueDto.FindPost dto) {
+
+        ValueDto.GetPost getPost = ValueDto.GetPost.of(dto);
+        MarketPostDto.Info marketPostInfoDto = (MarketPostDto.Info) postService.getPost(getPost);
 
         Long savedInRedisLikes = postService.getLikesInRedis(marketPostInfoDto.getPostId());
 
         Long likes = marketPostInfoDto.getLikes() + savedInRedisLikes;
 
-        Long userId = memberService.usernameToId(dto.getUsername());
+        boolean isUserAlreadyLikes = postService.isUserLikesPost(dto);
 
-        PostAuthorDto postAuthorDto = PostAuthorDto.builder()
-                .userId(userId)
-                .postId(dto.getPostId())
-                .build();
-        boolean isUserAlreadyLikes = postService.isUserLikesPost(postAuthorDto);
+        MarketPostDto.ResponseInfo response = MarketPostDto.ResponseInfo.of(marketPostInfoDto);
+        response.setLikes(likes);
+        response.setUserAlreadyLikes(isUserAlreadyLikes);
 
-        ResponseMarketPostDto response = ResponseMarketPostDto.builder()
-                .postId(marketPostInfoDto.getPostId())
-                .boardId(marketPostInfoDto.getBoardId())
-                .authorNickname(marketPostInfoDto.getAuthorNickname())
-                .createdDate(marketPostInfoDto.getCreatedDate())
-                .modifiedDate(marketPostInfoDto.getModifiedDate())
-                .comments(marketPostInfoDto.getComments())
-                .title(marketPostInfoDto.getTitle())
-                .text(marketPostInfoDto.getText())
-                .item(marketPostInfoDto.getItem())
-                .wanted(marketPostInfoDto.getWanted())
-                .location(marketPostInfoDto.getLocation())
-                .likes(likes)
-                .views(marketPostInfoDto.getViews())
-                .isUserAlreadyLikes(isUserAlreadyLikes)
-                .build();
-
-        increaseViewCountInternal(postAuthorDto);
+        increaseViewCountInternal(dto);
 
         return ResponseEntity.ok(response);
     }
 
     @Override
-    protected ResponseEntity<Page<? extends PostThumbnailDto>> getPostByBoardInternal(GetBoardDto getBoardDto) {
-        Page<MarketPostThumbnailDto> posts = postService.getPostsByBoard(getBoardDto)
-                        .map(post -> (MarketPostThumbnailDto) post);
+    protected ResponseEntity<Page<? extends PostDto.Thumbnail>> getPostByBoardInternal(GetBoardDto getBoardDto) {
+        Page<MarketPostDto.Thumbnail> posts = postService.getPostsByBoard(getBoardDto)
+                        .map(post -> (MarketPostDto.Thumbnail) post);
 
         posts.forEach(post -> {
             Long commentCount = (Long) postService.getCommentCount(post.getPostId());

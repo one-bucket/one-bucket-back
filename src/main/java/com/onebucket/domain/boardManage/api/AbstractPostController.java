@@ -2,7 +2,8 @@ package com.onebucket.domain.boardManage.api;
 
 import com.onebucket.domain.boardManage.dto.internal.board.GetBoardDto;
 import com.onebucket.domain.boardManage.dto.internal.post.*;
-import com.onebucket.domain.boardManage.dto.response.ResponsePostDto;
+import com.onebucket.domain.boardManage.dto.parents.PostDto;
+import com.onebucket.domain.boardManage.dto.parents.ValueDto;
 import com.onebucket.domain.boardManage.entity.post.Post;
 import com.onebucket.domain.boardManage.service.BasePostService;
 import com.onebucket.domain.boardManage.service.BoardService;
@@ -21,7 +22,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * <br>package name   : com.onebucket.domain.boardManage.api
@@ -47,7 +47,7 @@ public abstract class AbstractPostController<T extends Post, S extends BasePostS
 
     @GetMapping("/list/{boardId}")
     @PreAuthorize("@authorizationService.isUserCanAccessBoard(#boardId)")
-    public ResponseEntity<Page<? extends PostThumbnailDto>> getPostsByBoard(@PathVariable Long boardId, Pageable pageable) {
+    public ResponseEntity<Page<? extends PostDto.Thumbnail>> getPostsByBoard(@PathVariable Long boardId, Pageable pageable) {
         GetBoardDto getBoardDto = GetBoardDto.builder()
                 .boardId(boardId)
                 .pageable(pageable)
@@ -56,36 +56,35 @@ public abstract class AbstractPostController<T extends Post, S extends BasePostS
         return getPostByBoardInternal(getBoardDto);
     }
 
-    protected abstract  ResponseEntity<Page<? extends PostThumbnailDto>> getPostByBoardInternal(GetBoardDto getBoardDto);
+    protected abstract ResponseEntity<Page<? extends PostDto.Thumbnail>> getPostByBoardInternal(GetBoardDto getBoardDto);
 
     @GetMapping("/{postId}")
     @PreAuthorize("@authorizationService.isUserCanAccessPost(#postId)")
-    public ResponseEntity<? extends ResponsePostDto> getPostById(@PathVariable Long postId) {
+    public ResponseEntity<? extends PostDto.ResponseInfo> getPostById(@PathVariable Long postId) {
         String username = securityUtils.getCurrentUsername();
         Long userId = memberService.usernameToId(username);
 
-        GetPostDto getPostDto = GetPostDto.builder()
+        ValueDto.FindPost findPost = ValueDto.FindPost.builder()
                 .postId(postId)
-                .username(username)
+                .userId(userId)
                 .build();
 
-        return getPostInternal(getPostDto);
+        return getPostInternal(findPost);
     }
 
-    protected abstract ResponseEntity<? extends ResponsePostDto> getPostInternal(GetPostDto dto);
+    protected abstract ResponseEntity<? extends PostDto.ResponseInfo> getPostInternal(ValueDto.FindPost dto);
 
-    protected void increaseViewCountInternal(PostAuthorDto postAuthorDto) {
-
-        postService.increaseViewCount(postAuthorDto);
+    protected void increaseViewCountInternal(ValueDto.FindPost dto) {
+        postService.increaseViewCount(dto);
     }
     @DeleteMapping("/{postId}")
     public ResponseEntity<SuccessResponseWithIdDto> deletePost(@PathVariable Long postId) {
         String username = securityUtils.getCurrentUsername();
         Long userId = memberService.usernameToId(username);
 
-        DeletePostDto deletePostDto = DeletePostDto.builder()
-                .id(postId)
-                .memberId(userId)
+        ValueDto.FindPost deletePostDto = ValueDto.FindPost.builder()
+                .postId(postId)
+                .userId(userId)
                 .build();
 
         System.out.println("in time 1");
@@ -99,11 +98,11 @@ public abstract class AbstractPostController<T extends Post, S extends BasePostS
     public ResponseEntity<SuccessResponseDto> addLikes(@PathVariable Long postId) {
         String username = securityUtils.getCurrentUsername();
         Long userId = memberService.usernameToId(username);
-        PostAuthorDto postAuthorDto = PostAuthorDto.builder()
+        ValueDto.FindPost dto = ValueDto.FindPost.builder()
                 .userId(userId)
                 .postId(postId)
                 .build();
-        postService.increaseLikesCount(postAuthorDto);
+        postService.increaseLikesCount(dto);
 
         return ResponseEntity.ok(new SuccessResponseDto("success add likes"));
     }
@@ -113,11 +112,11 @@ public abstract class AbstractPostController<T extends Post, S extends BasePostS
     public ResponseEntity<SuccessResponseDto> deleteLikes(@PathVariable Long postId) {
         String username = securityUtils.getCurrentUsername();
         Long userId = memberService.usernameToId(username);
-        PostAuthorDto postAuthorDto = PostAuthorDto.builder()
+        ValueDto.FindPost dto = ValueDto.FindPost.builder()
                 .userId(userId)
                 .postId(postId)
                 .build();
-        postService.decreaseLikesCount(postAuthorDto);
+        postService.decreaseLikesCount(dto);
 
         return ResponseEntity.ok(new SuccessResponseDto("success delete likes"));
     }

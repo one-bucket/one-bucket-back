@@ -1,18 +1,13 @@
 package com.onebucket.domain.boardManage.dto.parents;
 
-import com.onebucket.domain.boardManage.dto.internal.comment.GetCommentDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 /**
  * <br>package name   : com.onebucket.domain.boardManage.dto.parents
- * <br>file name      : PostDto
- * <br>date           : 2024-08-08
+ * <br>file name      : MarketPostDto
+ * <br>date           : 2024-09-29
  * <pre>
  * <span style="color: white;">[description]</span>
  *
@@ -20,71 +15,49 @@ import java.util.List;
  * <pre>
  * <span style="color: white;">usage:</span>
  * {@code
- *     private Long boardId;
- *     private String title;
- *     private String text;
+ *
  * } </pre>
  */
-
-public class PostDto {
-
-    @Getter
-    @SuperBuilder
-    @NoArgsConstructor
-    public static class BasePost {
-        private Long boardId;
-        private String title;
-        private String text;
-    }
-
-    //------------------------------------------------
+public class MarketPostDto {
 
     @Getter
     @SuperBuilder
     @NoArgsConstructor
-    public static class RequestCreate extends BasePost {
+    public static class BaseMarketPost extends PostDto.BasePost {
 
     }
 
     @Getter
     @SuperBuilder
-    public static class Create extends BasePost {
-        private String username;
-        private Long univId;
+    @NoArgsConstructor
+    public static class RequestCreate extends PostDto.RequestCreate {
+        private Long tradeId;
     }
 
     @Getter
-    @Setter
     @SuperBuilder
-    @NoArgsConstructor
-    public static class Thumbnail extends BasePost {
-
-        private Long postId;
-        private String authorNickname;
-        private LocalDateTime createdDate;
-        private LocalDateTime modifiedDate;
-
-        private Long views;
-        private Long likes;
-        private Long commentsCount;
-
-        private boolean isImageExist;
-        private String thumbnailImage;
+    public static class Create extends PostDto.Create {
+        private Long tradeId;
     }
 
     @Getter
     @SuperBuilder
     @NoArgsConstructor
-    public static class Info extends Thumbnail {
-        private List<GetCommentDto> comments;
+    public static class Thumbnail extends PostDto.Thumbnail {
+        private Long tradeId;
     }
 
     @Getter
-    @Setter
     @SuperBuilder
     @NoArgsConstructor
-    public static class ResponseInfo extends Info {
-        private boolean isUserAlreadyLikes;
+    public static class Info extends PostDto.Info {
+        private Long tradeId;
+    }
+
+    @Getter
+    @SuperBuilder
+    public static class ResponseInfo extends PostDto.ResponseInfo {
+        private Long tradeId;
 
         public static ResponseInfo of(Info info) {
             return ResponseInfo.builder()
@@ -98,9 +71,10 @@ public class PostDto {
                     .text(info.getText())
                     .likes(info.getLikes())
                     .views(info.getViews())
+                    .tradeId(info.getTradeId())
                     .build();
         }
-    }
 
+    }
 
 }

@@ -1,8 +1,9 @@
 package com.onebucket.domain.boardManage.service;
 
 import com.onebucket.domain.boardManage.dao.*;
-import com.onebucket.domain.boardManage.dto.internal.post.*;
 import com.onebucket.domain.boardManage.dto.internal.comment.GetCommentDto;
+import com.onebucket.domain.boardManage.dto.parents.MarketPostDto;
+import com.onebucket.domain.boardManage.dto.parents.PostDto;
 import com.onebucket.domain.boardManage.entity.Board;
 import com.onebucket.domain.boardManage.entity.post.MarketPost;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
@@ -15,7 +16,6 @@ import com.onebucket.global.redis.RedisRepository;
 import com.onebucket.global.utils.SecurityUtils;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -53,40 +53,25 @@ public class MarketPostServiceImpl extends AbstractPostService<MarketPost, Marke
     }
 
     @Override
-    protected <D extends CreatePostDto> MarketPost convertCreatePostDtoToPost(D dto) {
+    protected <D extends PostDto.Create> MarketPost convertCreatePostDtoToPost(D dto) {
         Member member = findMember(dto.getUsername());
         Board board = findBoard(dto.getBoardId());
-        LocalDateTime dueDate = LocalDateTime.now().plusWeeks(2);
 
-        CreateMarketPostDto marketDto = (CreateMarketPostDto) dto;
+        MarketPostDto.Create marketDto = (MarketPostDto.Create) dto;
 
-        PendingTrade tradeInfo = PendingTrade.builder()
-                .item(marketDto.getItem())
-                .price(marketDto.getPrice())
-                .count(marketDto.getCount())
-                .location(marketDto.getLocation())
-                .dueDate(dueDate)
-                .wanted(marketDto.getWanted())
-                .owner(member)
-                .isFin(false)
-                .build();
-        tradeInfo.addMember(member);
-
-        PendingTrade savedPendingTrade = pendingTradeRepository.save(tradeInfo);
+        PendingTrade pendingTrade = pendingTradeRepository.getReferenceById(marketDto.getTradeId());
 
         return MarketPost.builder()
-                //일반 post value
                 .board(board)
                 .author(member)
                 .title(dto.getTitle())
                 .text(dto.getText())
-                .pendingTrade(savedPendingTrade)
+                .pendingTrade(pendingTrade)
                 .build();
-
     }
 
     @Override
-    protected MarketPostThumbnailDto convertPostToThumbnailDto(MarketPost post) {
+    protected MarketPostDto.Thumbnail convertPostToThumbnailDto(MarketPost post) {
 
         String nickname = "(unknown)";
         Member member = post.getAuthor();
@@ -106,10 +91,7 @@ public class MarketPostServiceImpl extends AbstractPostService<MarketPost, Marke
             imageUrl = images.get(1);
         }
 
-        //거래에 대한 실질적인 정보를 담은 테이블 로드
-        PendingTrade pendingTrade = post.getPendingTrade();
-
-        return MarketPostThumbnailDto.builder()
+        return MarketPostDto.Thumbnail.builder()
                 //value of post
                 .postId(post.getId())
                 .boardId(post.getBoardId())
@@ -123,27 +105,19 @@ public class MarketPostServiceImpl extends AbstractPostService<MarketPost, Marke
                 .isImageExist(isImageExist)
                 .thumbnailImage(imageUrl)
 
-                .item(pendingTrade.getItem())
-                .joins(pendingTrade.getJoins())
-                .wanted(pendingTrade.getWanted())
-                .dueDate(pendingTrade.getDueDate())
-                .price(pendingTrade.getPrice())
-                .count(pendingTrade.getCount())
-                .isFin(pendingTrade.isFin())
+                .tradeId(post.getPendingTrade().getId())
                 .build();
     }
 
     @Override
-    protected MarketPostInfoDto convertPostToPostInfoDto(MarketPost post, List<GetCommentDto> comments) {
+    protected MarketPostDto.Info convertPostToPostInfoDto(MarketPost post, List<GetCommentDto> comments) {
         String nickname = "(unknown)";
         Member member = post.getAuthor();
         if (member != null) {
             nickname = member.getNickname();
         }
 
-        PendingTrade pendingTrade = post.getPendingTrade();
-
-        return MarketPostInfoDto.builder()
+        return MarketPostDto.Info.builder()
                 .postId(post.getId())
                 .boardId(post.getBoardId())
                 .authorNickname(nickname)
@@ -155,16 +129,7 @@ public class MarketPostServiceImpl extends AbstractPostService<MarketPost, Marke
                 .createdDate(post.getCreatedDate())
                 .modifiedDate(post.getModifiedDate())
 
-                .item(pendingTrade.getItem())
-                .wanted(pendingTrade.getWanted())
-                .joins(pendingTrade.getJoins())
-                .isFin(pendingTrade.isFin())
-                .location(pendingTrade.getLocation())
-                .price(pendingTrade.getPrice())
-                .count(pendingTrade.getCount())
-                .dueDate(pendingTrade.getDueDate())
-
-                .pendingId(pendingTrade.getId())
+                .tradeId(post.getPendingTrade().getId())
                 .build();
     }
 
