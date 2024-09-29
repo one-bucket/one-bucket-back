@@ -46,7 +46,6 @@ public class PendingTradeServiceImpl implements PendingTradeService {
     private final TradeTagRepository tradeTagRepository;
     private final CloseTradeRepository closeTradeRepository;
     private final MemberRepository memberRepository;
-    private final AssertTrueValidator assertTrueValidator;
 
     @Override
     public Long create(TradeDto.Create dto) {
