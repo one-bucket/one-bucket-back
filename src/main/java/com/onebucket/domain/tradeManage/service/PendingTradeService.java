@@ -5,7 +5,6 @@ import com.onebucket.domain.tradeManage.dto.TradeKeyDto;
 
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 /**
  * <br>package name   : com.onebucket.domain.tradeManage.service
@@ -24,7 +23,7 @@ import java.util.List;
 public interface PendingTradeService {
     Long create(TradeDto.Create dto);
 
-    TradeDto.Info getInfo(TradeKeyDto.FindTrade dto);
+    TradeDto.Info getInfo(Long tradeId);
 
     void update(TradeDto.Update dto);
 

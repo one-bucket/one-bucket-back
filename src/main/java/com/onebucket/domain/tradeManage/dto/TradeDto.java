@@ -45,6 +45,27 @@ public class TradeDto {
     public static class Create extends BaseTrade {
         private Long ownerId;
         private Long dueDays;
+
+        public static Create of(Requestcreate dto) {
+            return Create.builder()
+                    .item(dto.getItem())
+                    .wanted(dto.getWanted())
+                    .price(dto.getPrice())
+                    .count(dto.getCount())
+                    .location(dto.getLocation())
+                    .linkUrl(dto.getLinkUrl())
+                    .tag(dto.getTag())
+                    .ownerId(dto.getOwnerId())
+                    .dueDays(dto.getDueDays())
+                    .build();
+        }
+    }
+
+    @Getter
+    @SuperBuilder
+    @NoArgsConstructor
+    public static class Requestcreate extends Create {
+
     }
 
     @Getter
@@ -87,13 +108,36 @@ public class TradeDto {
     @Getter
     @SuperBuilder
     @NoArgsConstructor
+    public static class ResponseInfo extends Info {
+
+        public static ResponseInfo of(Info dto) {
+            return ResponseInfo.builder()
+                    .item(dto.getItem())
+                    .wanted(dto.getWanted())
+                    .price(dto.getPrice())
+                    .count(dto.getCount())
+
+                    .id(dto.getId())
+                    .userId(dto.getUserId())
+                    .tag(dto.getTag())
+                    .linkUrl(dto.getLinkUrl())
+                    .location(dto.getLocation())
+                    .dueDate(dto.getDueDate())
+                    .joins(dto.getJoins())
+                    .memberIds(dto.getMemberIds())
+                    .isFin(dto.isFin())
+                    .startTradeAt(dto.getStartTradeAt())
+                    .build();
+        }
+    }
+
+    @Getter
+    @SuperBuilder
+    @NoArgsConstructor
     public static class Update extends BaseTrade {
         private Long id;
     }
-    /**
-     * @param dto
-     * @return
-     */
+
     public static PendingTrade to(Create dto, Member member, TradeTag tag) {
         LocalDateTime now = LocalDateTime.now();
         return PendingTrade.builder()

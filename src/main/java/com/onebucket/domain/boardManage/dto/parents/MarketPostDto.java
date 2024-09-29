@@ -1,7 +1,10 @@
 package com.onebucket.domain.boardManage.dto.parents;
 
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import com.onebucket.domain.tradeManage.dto.TradeDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 /**
@@ -38,13 +41,28 @@ public class MarketPostDto {
     @SuperBuilder
     public static class Create extends PostDto.Create {
         private Long tradeId;
+
+        public static Create of(RequestCreate dto, String username, Long univId, Long tradeId) {
+            return Create.builder()
+                    .boardId(dto.getBoardId())
+                    .text(dto.getText())
+                    .title(dto.getTitle())
+                    .username(username)
+                    .univId(univId)
+                    .tradeId(tradeId)
+                    .build();
+        }
     }
 
     @Getter
+    @Setter
     @SuperBuilder
     @NoArgsConstructor
     public static class Thumbnail extends PostDto.Thumbnail {
         private Long tradeId;
+
+        @JsonUnwrapped(prefix = "trade_")
+        private TradeDto.ResponseInfo tradeInfo;
     }
 
     @Getter
@@ -59,7 +77,10 @@ public class MarketPostDto {
     public static class ResponseInfo extends PostDto.ResponseInfo {
         private Long tradeId;
 
-        public static ResponseInfo of(Info info) {
+        @JsonUnwrapped(prefix = "trade_")
+        private TradeDto.ResponseInfo tradeInfo;
+
+        public static ResponseInfo of(Info info, TradeDto.ResponseInfo tradeInfo) {
             return ResponseInfo.builder()
                     .postId(info.getPostId())
                     .boardId(info.getBoardId())
@@ -72,6 +93,8 @@ public class MarketPostDto {
                     .likes(info.getLikes())
                     .views(info.getViews())
                     .tradeId(info.getTradeId())
+
+                    .tradeInfo(tradeInfo)
                     .build();
         }
 

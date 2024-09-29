@@ -4,9 +4,12 @@ import com.onebucket.domain.boardManage.dto.internal.board.GetBoardDto;
 import com.onebucket.domain.boardManage.dto.parents.MarketPostDto;
 import com.onebucket.domain.boardManage.dto.parents.PostDto;
 import com.onebucket.domain.boardManage.dto.parents.ValueDto;
+import com.onebucket.domain.boardManage.dto.request.RequestCreateMarketPostDto;
 import com.onebucket.domain.boardManage.service.BoardService;
 import com.onebucket.domain.boardManage.service.MarketPostService;
 import com.onebucket.domain.memberManage.service.MemberService;
+import com.onebucket.domain.tradeManage.dto.TradeDto;
+import com.onebucket.domain.tradeManage.service.PendingTradeService;
 import com.onebucket.global.exceptionManage.customException.boardManageException.UserBoardException;
 import com.onebucket.global.exceptionManage.errorCode.BoardErrorCode;
 import com.onebucket.global.utils.SecurityUtils;
@@ -38,50 +41,66 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/market-post")
 public class MarketPostController extends AbstractPostController<MarketPostService> {
+    private final PendingTradeService pendingTradeService;
 
 
     public MarketPostController(MarketPostService postService, SecurityUtils securityUtils,
-                                MemberService memberService, BoardService boardService) {
+                                MemberService memberService, BoardService boardService,
+                                PendingTradeService pendingTradeService) {
         super(postService, securityUtils, memberService, boardService);
+        this.pendingTradeService = pendingTradeService;
     }
 
     @PreAuthorize("@authorizationService.isUserCanAccessBoard(#dto.boardId)")
     @PostMapping("/create")
-    public ResponseEntity<SuccessResponseWithIdDto> createPost(@RequestBody @Valid MarketPostDto.RequestCreate dto) {
+    public ResponseEntity<SuccessResponseWithIdDto> createPost(@RequestBody @Valid RequestCreateMarketPostDto dto) {
 
-        String type = boardService.getType(dto.getBoardId());
+        MarketPostDto.RequestCreate marketPostCreateDto = dto.getMarketPostCreateDto();
+        TradeDto.Requestcreate tradeCreateDto = dto.getTradeCreateDto();
+
+
+        String type = boardService.getType(marketPostCreateDto.getBoardId());
         if(!type.equals("marketPost")) {
             throw new UserBoardException(BoardErrorCode.MISMATCH_POST_AND_BOARD);
         }
-
         String username = securityUtils.getCurrentUsername();
         Long univId = securityUtils.getUnivId(username);
 
-        MarketPostDto.Create createMarketPostDto = MarketPostDto.Create.builder()
-                .boardId(dto.getBoardId())
-                .text(dto.getText())
-                .title(dto.getTitle())
-                .username(username)
-                .univId(univId)
-                .build();
 
-        Long savedId = postService.createPost(createMarketPostDto);
+        //PendingTrade 저장
+        TradeDto.Create internalTradeCreateDto = TradeDto.Create.of(tradeCreateDto);
+        Long tradeId = pendingTradeService.create(internalTradeCreateDto);
+
+
+        //MarketPost 저장
+        MarketPostDto.Create internalMarketPostCreateDto = MarketPostDto.Create
+                .of(marketPostCreateDto, username, univId, tradeId);
+
+        Long savedId = postService.createPost(internalMarketPostCreateDto);
         return ResponseEntity.ok(new SuccessResponseWithIdDto("success create post", savedId));
     }
 
     @Override
     protected ResponseEntity<? extends PostDto.ResponseInfo> getPostInternal(ValueDto.FindPost dto) {
 
+        //MarketPost 가져오기
         ValueDto.GetPost getPost = ValueDto.GetPost.of(dto);
         MarketPostDto.Info marketPostInfoDto = (MarketPostDto.Info) postService.getPost(getPost);
 
+        //일부 필드 재정의 인자 값 설정
         Long savedInRedisLikes = postService.getLikesInRedis(marketPostInfoDto.getPostId());
-
         Long likes = marketPostInfoDto.getLikes() + savedInRedisLikes;
 
         boolean isUserAlreadyLikes = postService.isUserLikesPost(dto);
 
-        MarketPostDto.ResponseInfo response = MarketPostDto.ResponseInfo.of(marketPostInfoDto);
+        //trade 정보 가져오기
+        Long tradeId = marketPostInfoDto.getTradeId();
+
+        TradeDto.Info tradeInfo = pendingTradeService.getInfo(tradeId);
+        TradeDto.ResponseInfo responseTradeInfo = TradeDto.ResponseInfo.of(tradeInfo);
+
+        //response 설정
+        MarketPostDto.ResponseInfo response = MarketPostDto.ResponseInfo.of(marketPostInfoDto, responseTradeInfo);
         response.setLikes(likes);
         response.setUserAlreadyLikes(isUserAlreadyLikes);
 
@@ -99,6 +118,12 @@ public class MarketPostController extends AbstractPostController<MarketPostServi
             Long commentCount = (Long) postService.getCommentCount(post.getPostId());
             post.setCommentsCount(commentCount);
             post.setLikes(post.getLikes() + postService.getLikesInRedis(post.getPostId()));
+
+            //tradeInfo 설정하기
+            Long tradeId = post.getTradeId();
+            TradeDto.Info tradeInfo = pendingTradeService.getInfo(tradeId);
+            TradeDto.ResponseInfo responseTradeInfo = TradeDto.ResponseInfo.of(tradeInfo);
+            post.setTradeInfo(responseTradeInfo);
         });
         return ResponseEntity.ok(posts);
     }

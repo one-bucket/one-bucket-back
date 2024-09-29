@@ -86,6 +86,7 @@ public class PostDto {
     public static class ResponseInfo extends Info {
         private boolean isUserAlreadyLikes;
 
+
         public static ResponseInfo of(Info info) {
             return ResponseInfo.builder()
                     .postId(info.getPostId())

@@ -58,9 +58,9 @@ public class PendingTradeServiceImpl implements PendingTradeService {
         return pendingTradeRepository.save(pendingTrade).getId();
     }
     @Override
-    public TradeDto.Info getInfo(TradeKeyDto.FindTrade dto) {
+    public TradeDto.Info getInfo(Long tradeId) {
 
-        PendingTrade pendingTrade = findPendingTrade(dto.getTradeId());
+        PendingTrade pendingTrade = findPendingTrade(tradeId);
 
         return TradeDto.Info.of(pendingTrade);
     }
