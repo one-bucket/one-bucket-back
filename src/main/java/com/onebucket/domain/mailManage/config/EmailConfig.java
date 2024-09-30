@@ -35,7 +35,7 @@ public class EmailConfig {
     @Value("${spring.mail.host}")
     private String host;
     @Value("${spring.mail.port}")
-    private int port;
+    private String port;
     @Value("${spring.mail.username}")
     private String username;
     @Value("${spring.mail.password}")
@@ -50,8 +50,9 @@ public class EmailConfig {
     @Bean
     public JavaMailSender javaMailSender() {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-        mailSender.setHost(host);  // 이메일 발송을 위한 SMTP 서버 설정
-        mailSender.setPort(port);  // SMTP 포트 설정
+        mailSender.setHost(host); // 이메일 발송을 위한 SMTP 서버 설정
+        int portNumber = Integer.parseInt(port);
+        mailSender.setPort(portNumber);  // SMTP 포트 설정
         mailSender.setUsername(username);  // 발송자 이메일 계정
         mailSender.setPassword(password);  // 발송자 이메일 비밀번호
 
