@@ -58,7 +58,7 @@ public class UniversityAdminController {
     }
 
     @DeleteMapping("/univs")
-    public ResponseEntity<SuccessResponseDto> deleteUniversity(@PathVariable DeleteUniversityDto dto) {
+    public ResponseEntity<SuccessResponseDto> deleteUniversity(@Valid @RequestBody DeleteUniversityDto dto) {
         universityService.deleteUniversity(dto);
         return ResponseEntity.ok(new SuccessResponseDto("success delete university"));
     }

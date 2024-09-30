@@ -1,5 +1,7 @@
 package com.onebucket.domain.universityManage.dto.university;
 
+import jakarta.validation.constraints.NotNull;
+
 /**
  * <br>package name   : com.onebucket.domain.universityManage.dto.university
  * <br>file name      : DeleteUniversityDto
@@ -22,6 +24,7 @@ package com.onebucket.domain.universityManage.dto.university;
  * </pre>
  */
 public record DeleteUniversityDto(
+        @NotNull
         String name
 ) {
 }
