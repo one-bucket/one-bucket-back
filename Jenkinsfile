@@ -49,6 +49,7 @@ pipeline {
                     "MAIL_PASSWORD=${MAIL_PASSWORD}",
                     "MAIL_PORT=${MAIL_PORT}",
                     "MAIL_USERNAME=${MAIL_USERNAME}",
+                    "MAIL_PROTOCOL=${MAIL_PROTOCOL}",
                     "MAIL_SMTP_AUTH=${MAIL_SMTP_AUTH}",
                     "MAIL_SMTP_STARTTLS_ENABLE=${MAIL_SMTP_STARTTLS_ENABLE}"
                 ]) {
@@ -112,6 +113,7 @@ pipeline {
                             -e MAIL_PASSWORD=${MAIL_PASSWORD} \\
                             -e MAIL_PORT=${MAIL_PORT} \\
                             -e MAIL_USERNAME=${MAIL_USERNAME} \\
+                            -e MAIL_PROTOCOL=${MAIL_PROTOCOL} \\
                             -e MAIL_SMTP_AUTH=${MAIL_SMTP_AUTH} \\
                             -e MAIL_SMTP_STARTTLS_ENABLE=${MAIL_SMTP_STARTTLS_ENABLE} \\
                             ${DOCKER_IMAGE}
