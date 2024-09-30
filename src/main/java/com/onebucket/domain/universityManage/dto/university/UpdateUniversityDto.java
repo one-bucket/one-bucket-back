@@ -1,4 +1,4 @@
-package com.onebucket.domain.universityManage.dto;
+package com.onebucket.domain.universityManage.dto.university;
 
 import jakarta.validation.constraints.Email;
 import lombok.Builder;
@@ -31,9 +31,8 @@ import lombok.Setter;
 @Setter
 @Builder
 public class UpdateUniversityDto {
-
     private String address;
-
+    private String name;
     @Email(message = "Email should be valid")
     private String email;
 }

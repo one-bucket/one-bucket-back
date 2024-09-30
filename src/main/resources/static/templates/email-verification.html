@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>이메일 인증 코드</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border: 1px solid #dddddd;
+        }
+        .header {
+            text-align: center;
+            background-color: #3498db;
+            padding: 20px;
+            color: #ffffff;
+        }
+        .content {
+            margin-top: 20px;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .code {
+            background-color: #f1f1f1;
+            padding: 10px;
+            font-size: 20px;
+            text-align: center;
+            font-weight: bold;
+            margin: 20px 0;
+            letter-spacing: 2px;
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #777777;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>이메일 인증 코드</h1>
+    </div>
+    <div class="content">
+        <p>안녕하세요,</p>
+        <p>아래의 인증 코드를 입력하여 학교 이메일 인증을 완료해주세요:</p>
+        <div class="code" th:text="${verificationCode}">123456</div>
+        <p>이 인증 코드는 5분간 유효합니다. 인증을 완료한 후 계속해서 서비스를 이용해 주세요.</p>
+        <p>감사합니다.</p>
+    </div>
+    <hr>
+    <div class="footer">
+        <p>이 메일은 자동으로 발송된 메일입니다. 회신하지 마세요.</p>
+    </div>
+</div>
+</body>
+</html>

@@ -5,6 +5,7 @@ import com.onebucket.domain.memberManage.dao.ProfileRepository;
 import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.domain.memberManage.domain.Profile;
 import com.onebucket.domain.memberManage.dto.ReadProfileDto;
+import com.onebucket.domain.memberManage.dto.RequestSetEmailDto.RequestSetEmailDto;
 import com.onebucket.domain.memberManage.dto.UpdateProfileDto;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;

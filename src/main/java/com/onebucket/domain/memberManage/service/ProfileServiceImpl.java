@@ -92,6 +92,7 @@ public class ProfileServiceImpl implements ProfileService {
                 .description(profile.getDescription())
                 .age(profile.getAge())
                 .gender(profile.getGender())
+                .email(profile.getEmail())
                 .createAt(profile.getCreateAt())
                 .updateAt(profile.getUpdateAt())
                 .build();
@@ -162,6 +163,16 @@ public class ProfileServiceImpl implements ProfileService {
 
         profile.setBasicImage(true);
         profile.setUpdateAt(LocalDateTime.now());
+        profileRepository.save(profile);
+    }
+
+    @Override
+    public void updateProfileEmail(String username, String email) {
+        Long id = memberRepository.findIdByUsername(username).orElseThrow(
+                () -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
+        Profile profile = profileRepository.findById(id).orElseThrow(
+                () -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER_PROFILE));
+        profile.setEmail(email);
         profileRepository.save(profile);
     }
 
