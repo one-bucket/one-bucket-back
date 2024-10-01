@@ -68,13 +68,11 @@ public class MemberController {
         String temporaryPassword = memberService.changePassword(dto.username());
 
         // 인증번호 보내기
-        Long id = memberService.usernameToId(dto.username());
-        ReadProfileDto profile = profileService.readProfile(id);
-        EmailMessage emailMessage = EmailMessage.of(profile.getEmail(),"[한바구니] 임시 비밀번호 발급");
+        EmailMessage emailMessage = EmailMessage.of(dto.email(),"[한바구니] 임시 비밀번호 발급");
         Map<String, Object> variables = new ConcurrentHashMap<>();
         variables.put("temporaryPassword", temporaryPassword);
         mailService.sendEmail(emailMessage,"reset-password",variables);
-        return ResponseEntity.ok(new SuccessResponseDto("success reset password"));
+        return ResponseEntity.ok(new SuccessResponseDto("success reset password and send email. please reset password"));
     }
 
     /**

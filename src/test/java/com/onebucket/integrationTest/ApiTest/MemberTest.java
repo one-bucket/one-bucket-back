@@ -190,8 +190,9 @@ public class MemberTest extends RestDocsSupportTest {
     @Test
     @DisplayName("POST /password/reset test")
     void resetPassword() throws Exception {
+        String email = "example@gmail.com";
+
         createInitUser();
-        createInitProfile();
         greenMail.start();
 
         String query = """
@@ -201,19 +202,19 @@ public class MemberTest extends RestDocsSupportTest {
                 """;
         String oldPassword = jdbcTemplate.queryForObject(query, String.class, testUsername);
 
-        RequestResetPasswordDto dto = new RequestResetPasswordDto(testUsername);
+        RequestResetPasswordDto dto = new RequestResetPasswordDto(testUsername,email);
 
         mockMvc.perform(post("/member/password/reset")
                         .content(objectMapper.writeValueAsString(dto))
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect((hasKey(new SuccessResponseDto("success reset password"))))
+                .andExpect((hasKey(new SuccessResponseDto("success reset password and send email. please reset password"))))
                 .andDo(restDocs.document(
                         httpResponse(),
                         httpRequest(),
                         responseFields(
-                                fieldWithPath("message").description("success reset password")
+                                fieldWithPath("message").description("success reset password and send email. please reset password")
                         )
                 ));
 

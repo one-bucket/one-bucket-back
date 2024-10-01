@@ -98,10 +98,7 @@ class MemberControllerTest {
     @Test
     @DisplayName("resetPassword - success")
     void testResetPassword_success() throws Exception {
-        Long id = -1L;
-        RequestResetPasswordDto dto = new RequestResetPasswordDto("username");
-        when(memberService.usernameToId("username")).thenReturn(id);
-        when(profileService.readProfile(id)).thenReturn(ReadProfileDto.builder().build());
+        RequestResetPasswordDto dto = new RequestResetPasswordDto("username","example@gmail.com");
         when(memberService.changePassword("username")).thenReturn("password");
         mockMvc.perform(post("/member/password/reset")
                         .content(objectMapper.writeValueAsString(dto))
@@ -110,7 +107,7 @@ class MemberControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect((hasKey(new SuccessResponseDto("success reset password"))));
+                .andExpect((hasKey(new SuccessResponseDto("success reset password and send email. please reset password"))));
 
         verify(memberService,  times(1)).changePassword("username");
         verify(mailService, times(1)).sendEmail(any(EmailMessage.class),anyString(),anyMap());
@@ -120,7 +117,7 @@ class MemberControllerTest {
     @DisplayName("resetPassword - fail / unknown username while change password")
     void testResetPassword_fail_unknownUser() throws Exception {
         String username = "username";
-        RequestResetPasswordDto dto = new RequestResetPasswordDto(username);
+        RequestResetPasswordDto dto = new RequestResetPasswordDto(username,"example@gmail.com");
         AuthenticationErrorCode code = AuthenticationErrorCode.UNKNOWN_USER;
         AuthenticationException exception = new AuthenticationException(code);
         when(memberService.changePassword(username)).thenThrow(exception);
