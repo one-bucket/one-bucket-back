@@ -2,6 +2,10 @@ package com.onebucket.testComponent.testSupport;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.icegreen.greenmail.junit5.GreenMailExtension;
+import com.icegreen.greenmail.configuration.GreenMailConfiguration;
+import com.icegreen.greenmail.util.ServerSetupTest;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import com.onebucket.domain.memberManage.dto.UpdateProfileDto;
 import com.onebucket.global.auth.config.SecurityConfig;
 import com.onebucket.global.auth.jwtAuth.component.JwtProvider;
@@ -95,6 +99,10 @@ public class RestDocsSupportTest {
     @Value("${minio.bucketName}")
     protected String bucketName;
 
+    @RegisterExtension
+    protected static GreenMailExtension greenMail = new GreenMailExtension(ServerSetupTest.SMTP)
+            .withConfiguration(GreenMailConfiguration.aConfig().withUser("dummy", "dummy"))
+            .withPerMethodLifecycle(false);
 
     protected final String testUsername = "test-user";
     protected final String testPassword = "!1Password1!";
@@ -124,7 +132,6 @@ public class RestDocsSupportTest {
                 .alwaysDo(MockMvcResultHandlers.print())
                 .addFilters(new CharacterEncodingFilter("UTF-8", true))
                 .build();
-
     }
 
     @AfterEach
@@ -214,8 +221,8 @@ public class RestDocsSupportTest {
 
     protected Long createInitProfile(String username) {
         String query = """
-                INSERT INTO profile (id, name, gender, age, description, birth, is_basic_image, create_at, update_at)
-                SELECT m.id, ?, ?, ?, ? ,?, 1, ?, ?
+                INSERT INTO profile (id, name, gender, email, age, description, birth, is_basic_image, create_at, update_at)
+                SELECT m.id, ?, ?, ?, ?, ? ,?, 1, ?, ?
                 FROM member m
                 WHERE m.username = ?
                 """;
@@ -223,6 +230,7 @@ public class RestDocsSupportTest {
         jdbcTemplate.update(query,
                 initProfileInfo.getName(),
                 initProfileInfo.getGender(),
+                "email",
                 initProfileInfo.getAge(),
                 initProfileInfo.getDescription(),
                 initProfileInfo.getBirth(),

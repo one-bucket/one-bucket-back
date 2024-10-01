@@ -1,7 +1,10 @@
 package com.onebucket.integrationTest.ApiTest;
 
+import com.icegreen.greenmail.util.GreenMail;
+import com.icegreen.greenmail.util.ServerSetupTest;
 import com.onebucket.domain.memberManage.domain.Profile;
 import com.onebucket.domain.memberManage.dto.*;
+import com.onebucket.domain.memberManage.dto.request.RequestResetPasswordDto;
 import com.onebucket.global.auth.jwtAuth.domain.JwtToken;
 import com.onebucket.global.minio.MinioSaveInfoDto;
 import com.onebucket.global.utils.SuccessResponseDto;
@@ -12,6 +15,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.test.web.servlet.MvcResult;
 
+import javax.mail.internet.MimeMessage;
 import java.time.LocalDate;
 import java.util.Optional;
 
@@ -183,36 +187,46 @@ public class MemberTest extends RestDocsSupportTest {
     }
 
 
-//    @Test
-//    @DisplayName("POST /password/reset test")
-//    void resetPassword() throws Exception {
-//        JwtToken token = createInitUser();
-//        String query = """
-//                SELECT password
-//                FROM member
-//                WHERE username = ?
-//                """;
-//        String oldPassword = jdbcTemplate.queryForObject(query, String.class, testUsername);
-//
-//
-//        mockMvc.perform(post("/member/password/reset")
-//                        .header("Authorization", getAuthHeader(token))
-//                        .accept(MediaType.APPLICATION_JSON))
-//                .andExpect(status().isOk())
-//                .andExpect((hasKey(new SuccessResponseDto("success reset password"))))
-//                .andDo(restDocs.document(
-//                        httpResponse(),
-//                        httpRequest(),
-//                        responseFields(
-//                                fieldWithPath("message").description("success reset password")
-//                        )
-//                ));
-//
-//
-//
-//        String newPassword = jdbcTemplate.queryForObject(query, String.class, testUsername);
-//        assertThat(oldPassword).isNotEqualTo(newPassword);
-//    }
+    @Test
+    @DisplayName("POST /password/reset test")
+    void resetPassword() throws Exception {
+        createInitUser();
+        createInitProfile();
+        greenMail.start();
+
+        String query = """
+                SELECT password
+                FROM member
+                WHERE username = ?
+                """;
+        String oldPassword = jdbcTemplate.queryForObject(query, String.class, testUsername);
+
+        RequestResetPasswordDto dto = new RequestResetPasswordDto(testUsername);
+
+        mockMvc.perform(post("/member/password/reset")
+                        .content(objectMapper.writeValueAsString(dto))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect((hasKey(new SuccessResponseDto("success reset password"))))
+                .andDo(restDocs.document(
+                        httpResponse(),
+                        httpRequest(),
+                        responseFields(
+                                fieldWithPath("message").description("success reset password")
+                        )
+                ));
+
+        // GreenMail을 사용하여 이메일이 발송되었는지 확인
+        MimeMessage[] receivedMessages = greenMail.getReceivedMessages();
+        assertThat(receivedMessages).hasSize(1);
+        assertThat(receivedMessages[0].getSubject()).isEqualTo("[한바구니] 임시 비밀번호 발급");
+
+
+        String newPassword = jdbcTemplate.queryForObject(query, String.class, testUsername);
+        assertThat(oldPassword).isNotEqualTo(newPassword);
+        greenMail.stop();
+    }
 
 
     @Test
@@ -343,7 +357,7 @@ public class MemberTest extends RestDocsSupportTest {
     @DisplayName("POST /profile/update test")
     void updateProfile() throws Exception {
         JwtToken token = createInitUser();
-        Long id = createInitProfile();
+        createInitProfile();
 
         UpdateProfileDto dto = UpdateProfileDto.builder()
                 .name("john")

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.onebucket.domain.mailManage.dto.EmailMessage;
 import com.onebucket.domain.mailManage.service.MailService;
 import com.onebucket.domain.memberManage.dto.*;
+import com.onebucket.domain.memberManage.dto.request.RequestResetPasswordDto;
 import com.onebucket.domain.memberManage.service.MemberService;
 import com.onebucket.domain.memberManage.service.ProfileService;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
@@ -98,11 +99,13 @@ class MemberControllerTest {
     @DisplayName("resetPassword - success")
     void testResetPassword_success() throws Exception {
         Long id = -1L;
-        when(securityUtils.getCurrentUsername()).thenReturn("username");
+        RequestResetPasswordDto dto = new RequestResetPasswordDto("username");
         when(memberService.usernameToId("username")).thenReturn(id);
         when(profileService.readProfile(id)).thenReturn(ReadProfileDto.builder().build());
         when(memberService.changePassword("username")).thenReturn("password");
         mockMvc.perform(post("/member/password/reset")
+                        .content(objectMapper.writeValueAsString(dto))
+                        .contentType(MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
@@ -114,31 +117,17 @@ class MemberControllerTest {
     }
 
     @Test
-    @DisplayName("resetPassword - fail / not exist authentication in token while getCurrentUsername")
-    void testResetPassword_fail_notExistAuth() throws Exception {
-        String internalMessage = "Not exist authentication in ContextHolder";
-        AuthenticationErrorCode code = AuthenticationErrorCode.NON_EXIST_AUTHENTICATION;
-        AuthenticationException exception = new AuthenticationException(code, internalMessage);
-        when(securityUtils.getCurrentUsername()).thenThrow(exception);
-
-        mockMvc.perform(post("/member/password/reset")
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andDo(print())
-                .andExpect(hasStatus(code))
-                .andExpect(hasKey(code, internalMessage));
-    }
-
-    @Test
     @DisplayName("resetPassword - fail / unknown username while change password")
     void testResetPassword_fail_unknownUser() throws Exception {
         String username = "username";
+        RequestResetPasswordDto dto = new RequestResetPasswordDto(username);
         AuthenticationErrorCode code = AuthenticationErrorCode.UNKNOWN_USER;
         AuthenticationException exception = new AuthenticationException(code);
-        when(securityUtils.getCurrentUsername()).thenReturn(username);
         when(memberService.changePassword(username)).thenThrow(exception);
 
         mockMvc.perform(post("/member/password/reset")
+                        .content(objectMapper.writeValueAsString(dto))
+                        .contentType(MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
