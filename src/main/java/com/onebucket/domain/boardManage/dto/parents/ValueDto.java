@@ -60,10 +60,17 @@ public class ValueDto {
     }
 
     @Getter
-    @Builder
+    @SuperBuilder
     public static class PageablePost {
         private Long boardId;
         private Pageable pageable;
+    }
+
+    @Getter
+    @SuperBuilder
+    public static class SearchPageablePost extends PageablePost {
+        private Integer option;
+        private String keyword;
     }
 
 }

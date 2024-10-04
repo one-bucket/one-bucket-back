@@ -26,6 +26,8 @@ import com.onebucket.global.minio.MinioSaveInfoDto;
 import com.onebucket.global.redis.RedisRepository;
 import com.onebucket.global.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -62,6 +64,15 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
     protected final RedisRepository redisRepository;
     protected final LikesMapRepository likesMapRepository;
     protected final MinioRepository minioRepository;
+
+    @NestedConfigurationProperty
+    @Value("${board.views.maxSize}")
+    private int MAX_SIZE;
+
+    @NestedConfigurationProperty
+    @Value("${board.views.expireHour}")
+    private long EXPIRE_HOUR;
+
 
 
     @Override
@@ -140,6 +151,14 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
         return repository.findByBoardId(dto.getBoardId(), dto.getPageable())
                 .map(this::convertPostToThumbnailDto);
     }
+
+//    public Page<PostDto.Thumbnail> getSearchResult(ValueDto.SearchPageablePost dto) {
+//        String keyword = dto.getKeyword();
+//        Integer option = dto.getOption();
+//
+//    }
+
+
     @Override
     @Transactional(readOnly = true)
     public PostDto.Info getPost(ValueDto.GetPost dto) {
@@ -156,8 +175,6 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
     @Override
     @Transactional
     public void increaseViewCount(ValueDto.FindPost dto) {
-        int MAX_SIZE = 300;
-        long EXPIRE_HOURS = 4;
 
         Long userId = dto.getUserId();
         Long postId = dto.getPostId();
@@ -181,9 +198,9 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
                 redisRepository.removeRangeFromSortedSet(sortedSetKey, 0, size - MAX_SIZE - 1);
             }
 
-            redisRepository.setExpire(sortedSetKey, EXPIRE_HOURS);
+            redisRepository.setExpire(sortedSetKey, EXPIRE_HOUR);
         } else {
-            redisRepository.setExpire(sortedSetKey, EXPIRE_HOURS);
+            redisRepository.setExpire(sortedSetKey, EXPIRE_HOUR);
         }
     }
 
@@ -226,6 +243,7 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
         }
 
         redisRepository.decreaseValue("post:likes:" + dto.getPostId());
+
     }
 
     @Override
@@ -273,6 +291,7 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
         }
 
     }
+
 
 
 
