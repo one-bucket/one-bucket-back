@@ -4,9 +4,8 @@ import com.onebucket.domain.boardManage.dao.BoardRepository;
 import com.onebucket.domain.boardManage.dao.CommentRepository;
 import com.onebucket.domain.boardManage.dao.PostRepository;
 import com.onebucket.domain.boardManage.dto.internal.comment.CreateCommentDto;
-import com.onebucket.domain.boardManage.dto.internal.post.CreatePostDto;
-import com.onebucket.domain.boardManage.dto.internal.post.DeletePostDto;
-import com.onebucket.domain.boardManage.dto.internal.post.PostAuthorDto;
+import com.onebucket.domain.boardManage.dto.parents.PostDto;
+import com.onebucket.domain.boardManage.dto.parents.ValueDto;
 import com.onebucket.domain.boardManage.entity.Board;
 import com.onebucket.domain.boardManage.entity.BoardType;
 import com.onebucket.domain.boardManage.entity.Comment;
@@ -86,21 +85,24 @@ class PostServiceTest {
     @Test
     @DisplayName("createPost - success")
     void testCreatePost_success() {
+
         String username = "username";
         Long univId = 1L;
         Long boardId = 1L;
-        CreatePostDto dto = CreatePostDto.builder()
-                .username(username)
+        PostDto.Create createDto = PostDto.Create.builder()
                 .boardId(boardId)
                 .univId(univId)
+                .username(username)
+                .title("title")
+                .text("text")
                 .build();
         when(memberRepository.findByUsername(username)).thenReturn(Optional.of(mockMember));
-        when(postRepository.save(any(Post.class))).thenReturn(mockPost);
-        when(boardRepository.findById(1L)).thenReturn(Optional.of(mockBoard));
+        when(boardRepository.findById(boardId)).thenReturn(Optional.of(mockBoard));
 
+        when(postRepository.save(any(Post.class))).thenReturn(mockPost);
         when(mockPost.getId()).thenReturn(100L);
 
-        Long postId = postService.createPost(dto);
+        Long postId = postService.createPost(createDto);
 
         verify(postRepository, times(1)).save(any(Post.class));
         assertThat(postId).isEqualTo(100L);
@@ -113,15 +115,17 @@ class PostServiceTest {
         String username = "username";
         Long univId = 1L;
         Long boardId = 1L;
-        CreatePostDto dto = CreatePostDto.builder()
-                .username(username)
+        PostDto.Create createDto = PostDto.Create.builder()
                 .boardId(boardId)
                 .univId(univId)
+                .username(username)
+                .title("title")
+                .text("text")
                 .build();
         when(memberRepository.findByUsername(username)).thenReturn(Optional.of(mockMember));
         when(boardRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> postService.createPost(dto))
+        assertThatThrownBy(() -> postService.createPost(createDto))
                 .isInstanceOf(BoardManageException.class)
                 .extracting("errorCode")
                 .isEqualTo(BoardErrorCode.UNKNOWN_BOARD);
@@ -133,16 +137,16 @@ class PostServiceTest {
     @Test
     @DisplayName("deletePost - success")
     void testDeletePost_success() {
-        Long memberId = 100L;
+        Long userId = 100L;
         Long postId = 1L;
-        DeletePostDto dto = DeletePostDto.builder()
-                .id(postId)
-                .memberId(memberId)
+        ValueDto.FindPost dto = ValueDto.FindPost.builder()
+                .postId(postId)
+                .userId(userId)
                 .build();
 
         when(postRepository.findById(postId)).thenReturn(Optional.of(mockPost));
         when(mockPost.getAuthor()).thenReturn(mockMember);
-        when(mockMember.getId()).thenReturn(memberId);
+        when(mockMember.getId()).thenReturn(userId);
 
         postService.deletePost(dto);
         verify(postRepository, times(1)).delete(any(Post.class));
@@ -151,11 +155,11 @@ class PostServiceTest {
     @Test
     @DisplayName("deletePost - fail / unknown post")
     void testDeletePost_fail_unknownPost() {
-        Long memberId = 100L;
+        Long userId = 100L;
         Long postId = 1L;
-        DeletePostDto dto = DeletePostDto.builder()
-                .id(postId)
-                .memberId(memberId)
+        ValueDto.FindPost dto = ValueDto.FindPost.builder()
+                .postId(postId)
+                .userId(userId)
                 .build();
 
         when(postRepository.findById(postId)).thenReturn(Optional.empty());
@@ -172,11 +176,11 @@ class PostServiceTest {
     @DisplayName("deletePost - fail / not author's post")
     void testDeletePost_fail_unmatchedUser() {
 
-        Long memberId = 100L;
+        Long userId = 100L;
         Long postId = 1L;
-        DeletePostDto dto = DeletePostDto.builder()
-                .id(postId)
-                .memberId(memberId)
+        ValueDto.FindPost dto = ValueDto.FindPost.builder()
+                .postId(postId)
+                .userId(userId)
                 .build();
 
         when(postRepository.findById(postId)).thenReturn(Optional.of(mockPost));
@@ -195,11 +199,11 @@ class PostServiceTest {
     @Test
     @DisplayName("deletePost - fail / no author in post") //becuase author may exit this service.
     void testDeletePost_fail_noAuthorInPost() {
-        Long memberId = 100L;
+        Long userId = 100L;
         Long postId = 1L;
-        DeletePostDto dto = DeletePostDto.builder()
-                .id(postId)
-                .memberId(memberId)
+        ValueDto.FindPost dto = ValueDto.FindPost.builder()
+                .postId(postId)
+                .userId(userId)
                 .build();
 
         when(postRepository.findById(postId)).thenReturn(Optional.of(mockPost));
@@ -334,6 +338,40 @@ class PostServiceTest {
         verify(commentRepository, never()).save(any(Comment.class));
         verify(postRepository, never()).save(any(Post.class));
     }
+    //-+-+-+-+-+-+]] deleteCommentFromPost [[-+-+-+-+-+-+
+    /**
+     * <pre>
+     * 1. find post from postId
+     * 2. get list of comments in post.
+     * 3. get one comemnt that given in parameter, used stream filter
+     * 4. delete comment by method in {@link Post} entity.
+     * 5. save entity.
+     * </pre>
+     * @see PostRepository
+     */
+    @Test
+    @DisplayName("deleteCommentFromPost - success")
+    void testDeleteCommentFromPost_success() {
+        Long postId = 1L;
+        Long commentId = 10L;
+        when(postRepository.findById(postId)).thenReturn(Optional.of(mockPost));
+        when(mockPost.getComments()).thenReturn(List.of(mockComment));
+        when(mockComment.getId()).thenReturn(commentId);
+
+        ValueDto.FindComment dto = ValueDto.FindComment.builder()
+                .postId(postId)
+                .commentId(commentId)
+                .build();
+
+        postService.deleteCommentFromPost(dto);
+
+        verify(postRepository, times(1)).save(mockPost);
+    }
+
+    @Test
+    @DisplayName("deletePostFromPos")
+
+
 
     //-+-+-+-+-+-+]] increaseViewCount [[-+-+-+-+-+-+
     @Test
@@ -344,11 +382,11 @@ class PostServiceTest {
         Long postId = 100L;
         String postKey = String.valueOf(postId);
         String sortedSetKey = "views:" + userId;
-        PostAuthorDto postAuthorDto = PostAuthorDto.builder()
+
+        ValueDto.FindPost dto = ValueDto.FindPost.builder()
                 .postId(postId)
                 .userId(userId)
                 .build();
-
 
         //기존에 조회한 기록이 없는 경우
         when(redisRepository.getRank(sortedSetKey, postKey))
@@ -356,7 +394,7 @@ class PostServiceTest {
         //300개가 넘지 않음
         when(redisRepository.getSortedSetSize(sortedSetKey)).thenReturn(100L);
 
-        postService.increaseViewCount(postAuthorDto);
+        postService.increaseViewCount(dto);
 
         verify(postRepository, times(1)).increaseView(postId);
         verify(redisRepository, times(1))
@@ -373,7 +411,7 @@ class PostServiceTest {
         Long postId = 100L;
         String postKey = String.valueOf(postId);
         String sortedSetKey = "views:" + userId;
-        PostAuthorDto postAuthorDto = PostAuthorDto.builder()
+        ValueDto.FindPost dto = ValueDto.FindPost.builder()
                 .postId(postId)
                 .userId(userId)
                 .build();
@@ -382,7 +420,7 @@ class PostServiceTest {
         //기존에 조회한 기록이 존재하는 경우
         when(redisRepository.getRank(sortedSetKey, postKey)).thenReturn(184931L);
 
-        postService.increaseViewCount(postAuthorDto);
+        postService.increaseViewCount(dto);
 
         verify(postRepository, never()).increaseView(anyLong());
         verify(redisRepository, times(1)).setExpire(eq(sortedSetKey), anyLong());
@@ -396,7 +434,7 @@ class PostServiceTest {
         Long postId = 100L;
         String postKey = String.valueOf(postId);
         String sortedSetKey = "views:" + userId;
-        PostAuthorDto postAuthorDto = PostAuthorDto.builder()
+        ValueDto.FindPost dto = ValueDto.FindPost.builder()
                 .postId(postId)
                 .userId(userId)
                 .build();
@@ -408,7 +446,7 @@ class PostServiceTest {
         //300개가 넘지 않음
         when(redisRepository.getSortedSetSize(sortedSetKey)).thenReturn(301L);
 
-        postService.increaseViewCount(postAuthorDto);
+        postService.increaseViewCount(dto);
 
         verify(postRepository, times(1)).increaseView(postId);
         verify(redisRepository, times(1))

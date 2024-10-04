@@ -28,7 +28,7 @@ public interface BasePostService {
     <D extends PostDto.Create> Long createPost(D dto);
     void deletePost(ValueDto.FindPost dto);
     void addCommentToPost(CreateCommentDto dto);
-    void deleteCommentFromPost(Long postId, Comment comment);
+    void deleteCommentFromPost(ValueDto.FindComment dto);
     Page<PostDto.Thumbnail> getPostsByBoard(GetBoardDto dto);
     PostDto.Info getPost(ValueDto.GetPost dto);
     void increaseViewCount(ValueDto.FindPost dto);

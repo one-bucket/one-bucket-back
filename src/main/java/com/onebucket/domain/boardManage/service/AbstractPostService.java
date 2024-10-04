@@ -125,10 +125,14 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
     }
     @Override
     @Transactional
-    @CacheEvict(value = "commentCountCache", key = "#postId")
-    public void deleteCommentFromPost(Long postId, Comment comment) {
-        T post = findPost(postId);
-        post.deleteComment(comment);
+    @CacheEvict(value = "commentCountCache", key = "#dto.postId")
+    public void deleteCommentFromPost(ValueDto.FindComment dto) {
+        T post = findPost(dto.getPostId());
+        List<Comment> comments = post.getComments();
+        Comment savedComment = comments.stream().filter((comment) -> comment.getId().equals(dto.getCommentId()))
+                        .findFirst().orElseThrow(() -> new UserBoardException(BoardErrorCode.UNKNOWN_COMMENT));
+
+        post.deleteComment(savedComment);
         repository.save(post);
     }
     @Override

@@ -37,6 +37,15 @@ public class ValueDto {
 
     @Getter
     @SuperBuilder
+    @NoArgsConstructor
+    public static class FindComment {
+        private Long postId;
+        private Long commentId;
+
+    }
+
+    @Getter
+    @SuperBuilder
     public static class GetPost {
         private Long postId;
 

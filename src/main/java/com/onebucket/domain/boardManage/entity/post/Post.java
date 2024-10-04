@@ -3,6 +3,9 @@ package com.onebucket.domain.boardManage.entity.post;
 import com.onebucket.domain.boardManage.entity.Board;
 import com.onebucket.domain.boardManage.entity.Comment;
 import com.onebucket.domain.memberManage.domain.Member;
+import com.onebucket.global.exceptionManage.customException.boardManageException.BoardManageException;
+import com.onebucket.global.exceptionManage.customException.boardManageException.UserBoardException;
+import com.onebucket.global.exceptionManage.errorCode.BoardErrorCode;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -89,6 +92,7 @@ public class Post {
     @ElementCollection
     @CollectionTable(name = "post_images", joinColumns = @JoinColumn(name = "post_id"))
     @Column(name = "image_url")
+    @Builder.Default
     private List<String> imageUrls = new ArrayList<>();
 
     @Builder.Default
@@ -101,10 +105,8 @@ public class Post {
         comments.add(comment);
         comment.setPost(this);
     }
-
     public void deleteComment(Comment comment) {
         comments.remove(comment);
-        comment.setPost(null);
     }
 
     public void addImage(String url) {
