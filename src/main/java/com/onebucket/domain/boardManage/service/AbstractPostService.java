@@ -4,7 +4,6 @@ import com.onebucket.domain.boardManage.dao.BasePostRepository;
 import com.onebucket.domain.boardManage.dao.BoardRepository;
 import com.onebucket.domain.boardManage.dao.CommentRepository;
 import com.onebucket.domain.boardManage.dao.LikesMapRepository;
-import com.onebucket.domain.boardManage.dto.internal.board.GetBoardDto;
 import com.onebucket.domain.boardManage.dto.internal.comment.CreateCommentDto;
 import com.onebucket.domain.boardManage.dto.internal.comment.GetCommentDto;
 import com.onebucket.domain.boardManage.dto.internal.post.*;
@@ -137,7 +136,7 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
     }
     @Override
     @Transactional(readOnly = true)
-    public Page<PostDto.Thumbnail> getPostsByBoard(GetBoardDto dto) {
+    public Page<PostDto.Thumbnail> getPostsByBoard(ValueDto.PageablePost dto) {
         return repository.findByBoardId(dto.getBoardId(), dto.getPageable())
                 .map(this::convertPostToThumbnailDto);
     }

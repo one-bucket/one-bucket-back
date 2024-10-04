@@ -1,6 +1,5 @@
 package com.onebucket.domain.boardManage.api;
 
-import com.onebucket.domain.boardManage.dto.internal.board.GetBoardDto;
 import com.onebucket.domain.boardManage.dto.internal.post.*;
 import com.onebucket.domain.boardManage.dto.parents.PostDto;
 import com.onebucket.domain.boardManage.dto.parents.ValueDto;
@@ -47,7 +46,7 @@ public abstract class AbstractPostController<S extends BasePostService> {
     @GetMapping("/list/{boardId}")
     @PreAuthorize("@authorizationService.isUserCanAccessBoard(#boardId)")
     public ResponseEntity<Page<? extends PostDto.Thumbnail>> getPostsByBoard(@PathVariable Long boardId, Pageable pageable) {
-        GetBoardDto getBoardDto = GetBoardDto.builder()
+        ValueDto.PageablePost getBoardDto = ValueDto.PageablePost.builder()
                 .boardId(boardId)
                 .pageable(pageable)
                 .build();
@@ -55,7 +54,7 @@ public abstract class AbstractPostController<S extends BasePostService> {
         return getPostByBoardInternal(getBoardDto);
     }
 
-    protected abstract ResponseEntity<Page<? extends PostDto.Thumbnail>> getPostByBoardInternal(GetBoardDto getBoardDto);
+    protected abstract ResponseEntity<Page<? extends PostDto.Thumbnail>> getPostByBoardInternal(ValueDto.PageablePost getBoardDto);
 
     @GetMapping("/{postId}")
     @PreAuthorize("@authorizationService.isUserCanAccessPost(#postId)")

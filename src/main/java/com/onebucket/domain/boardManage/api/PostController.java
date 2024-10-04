@@ -1,6 +1,5 @@
 package com.onebucket.domain.boardManage.api;
 
-import com.onebucket.domain.boardManage.dto.internal.board.GetBoardDto;
 import com.onebucket.domain.boardManage.dto.parents.PostDto;
 import com.onebucket.domain.boardManage.dto.parents.ValueDto;
 import com.onebucket.domain.boardManage.service.BoardService;
@@ -83,7 +82,7 @@ public class PostController extends AbstractPostController<PostService>{
     }
 
     @Override
-    protected ResponseEntity<Page<? extends PostDto.Thumbnail>> getPostByBoardInternal(GetBoardDto getBoardDto) {
+    protected ResponseEntity<Page<? extends PostDto.Thumbnail>> getPostByBoardInternal(ValueDto.PageablePost getBoardDto) {
         Page<PostDto.Thumbnail> posts = postService.getPostsByBoard(getBoardDto);
 
         posts.forEach(post -> {

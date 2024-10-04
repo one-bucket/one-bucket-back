@@ -1,8 +1,10 @@
 package com.onebucket.domain.boardManage.dto.parents;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.springframework.data.domain.Pageable;
 
 /**
  * <br>package name   : com.onebucket.domain.boardManage.dto.parents
@@ -55,6 +57,13 @@ public class ValueDto {
                     .postId(findPost.getPostId())
                     .build();
         }
+    }
+
+    @Getter
+    @Builder
+    public static class PageablePost {
+        private Long boardId;
+        private Pageable pageable;
     }
 
 }

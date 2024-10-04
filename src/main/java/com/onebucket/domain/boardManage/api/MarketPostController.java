@@ -1,6 +1,5 @@
 package com.onebucket.domain.boardManage.api;
 
-import com.onebucket.domain.boardManage.dto.internal.board.GetBoardDto;
 import com.onebucket.domain.boardManage.dto.parents.MarketPostDto;
 import com.onebucket.domain.boardManage.dto.parents.PostDto;
 import com.onebucket.domain.boardManage.dto.parents.ValueDto;
@@ -110,7 +109,7 @@ public class MarketPostController extends AbstractPostController<MarketPostServi
     }
 
     @Override
-    protected ResponseEntity<Page<? extends PostDto.Thumbnail>> getPostByBoardInternal(GetBoardDto getBoardDto) {
+    protected ResponseEntity<Page<? extends PostDto.Thumbnail>> getPostByBoardInternal(ValueDto.PageablePost getBoardDto) {
         Page<MarketPostDto.Thumbnail> posts = postService.getPostsByBoard(getBoardDto)
                         .map(post -> (MarketPostDto.Thumbnail) post);
 
