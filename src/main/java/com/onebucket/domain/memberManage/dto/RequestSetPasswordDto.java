@@ -18,7 +18,11 @@ import lombok.*;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class SetPasswordDto {
+public class RequestSetPasswordDto {
+
+    @NotBlank(message = "password must not be empty")
+    @Size(min = 8, max = 20, message = "size of password must be over 8, under 20")
+    private String oldPassword;
 
     @NotBlank(message = "password must not be empty")
     @Size(min = 8, max = 20, message = "size of password must be over 8, under 20")
@@ -26,5 +30,5 @@ public class SetPasswordDto {
             regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,20}$",
             message = "password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
     )
-    private String password;
+    private String newPassword;
 }
