@@ -5,7 +5,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.onebucket.domain.mailManage.dto.EmailMessage;
 import com.onebucket.domain.mailManage.service.MailService;
 import com.onebucket.domain.memberManage.dto.*;
-import com.onebucket.domain.memberManage.dto.request.RequestResetPasswordDto;
+import com.onebucket.domain.memberManage.dto.internal.SetPasswordDto;
+import com.onebucket.domain.memberManage.dto.request.RequestInitPasswordDto;
 import com.onebucket.domain.memberManage.service.MemberService;
 import com.onebucket.domain.memberManage.service.ProfileService;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
@@ -30,8 +31,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
 
 import static com.onebucket.testComponent.testUtils.JsonFieldResultMatcher.hasKey;
 import static com.onebucket.testComponent.testUtils.JsonFieldResultMatcher.hasStatus;
@@ -96,10 +95,10 @@ class MemberControllerTest {
 
     //-+-+-+-+-+-+]] resetPassword test [[-+-+-+-+-+-+
     @Test
-    @DisplayName("resetPassword - success")
-    void testResetPassword_success() throws Exception {
-        RequestResetPasswordDto dto = new RequestResetPasswordDto("username","example@gmail.com");
-        when(memberService.changePassword("username")).thenReturn("password");
+    @DisplayName("initPassword - success")
+    void testInitPassword_success() throws Exception {
+        RequestInitPasswordDto dto = new RequestInitPasswordDto("username","example@gmail.com");
+        when(memberService.initPassword("username")).thenReturn("password");
         mockMvc.perform(post("/member/password/reset")
                         .content(objectMapper.writeValueAsString(dto))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -109,18 +108,18 @@ class MemberControllerTest {
                 .andExpect(status().isOk())
                 .andExpect((hasKey(new SuccessResponseDto("success reset password and send email. please reset password"))));
 
-        verify(memberService,  times(1)).changePassword("username");
+        verify(memberService,  times(1)).initPassword("username");
         verify(mailService, times(1)).sendEmail(any(EmailMessage.class),anyString(),anyMap());
     }
 
     @Test
-    @DisplayName("resetPassword - fail / unknown username while change password")
-    void testResetPassword_fail_unknownUser() throws Exception {
+    @DisplayName("initPassword - fail / unknown username while change password")
+    void testInitPassword_fail_unknownUser() throws Exception {
         String username = "username";
-        RequestResetPasswordDto dto = new RequestResetPasswordDto(username,"example@gmail.com");
+        RequestInitPasswordDto dto = new RequestInitPasswordDto(username,"example@gmail.com");
         AuthenticationErrorCode code = AuthenticationErrorCode.UNKNOWN_USER;
         AuthenticationException exception = new AuthenticationException(code);
-        when(memberService.changePassword(username)).thenThrow(exception);
+        when(memberService.initPassword(username)).thenThrow(exception);
 
         mockMvc.perform(post("/member/password/reset")
                         .content(objectMapper.writeValueAsString(dto))
@@ -140,8 +139,9 @@ class MemberControllerTest {
     @DisplayName("setPassword - success")
     void testSetPassword_success() throws Exception {
         String username = "username";
-        String password = "!1Password1!";
-        SetPasswordDto dto = new SetPasswordDto(password);
+        String oldPassword = "!1Password1!";
+        String newPassword = "!1Password1!!";
+        RequestSetPasswordDto dto = new RequestSetPasswordDto(oldPassword,newPassword);
         when(securityUtils.getCurrentUsername()).thenReturn(username);
         mockMvc.perform(post("/member/password/set")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -151,7 +151,7 @@ class MemberControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(hasKey(new SuccessResponseDto("success set password")));
 
-        verify(memberService, times(1)).changePassword(username, password);
+        verify(memberService, times(1)).changePassword(any(SetPasswordDto.class));
     }
 
     @Test
@@ -162,7 +162,7 @@ class MemberControllerTest {
         AuthenticationException exception = new AuthenticationException(code, internalMessage);
         when(securityUtils.getCurrentUsername()).thenThrow(exception);
 
-        SetPasswordDto dto = new SetPasswordDto("!1Password1!");
+        RequestSetPasswordDto dto = new RequestSetPasswordDto("!1Password1!","!1Password1!!");
 
         mockMvc.perform(post("/member/password/set")
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -178,12 +178,14 @@ class MemberControllerTest {
     @DisplayName("setPassword - fail / unknown username while change password")
     void testSetPassword_fail_unknownUser() throws Exception {
         String username = "username";
-        String password = "!1Password1!";
-        SetPasswordDto dto = new SetPasswordDto(password);
+        String oldPassword = "!1Password1!";
+        String newPassword = "!1Password1!!";
+        RequestSetPasswordDto dto = new RequestSetPasswordDto(oldPassword,newPassword);
+        SetPasswordDto setPasswordDto = SetPasswordDto.of(username,dto);
         AuthenticationErrorCode code = AuthenticationErrorCode.UNKNOWN_USER;
         AuthenticationException exception = new AuthenticationException(code);
         when(securityUtils.getCurrentUsername()).thenReturn(username);
-        when(memberService.changePassword(username, password)).thenThrow(exception);
+        when(memberService.changePassword(setPasswordDto)).thenThrow(exception);
 
         mockMvc.perform(post("/member/password/set")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -200,7 +202,8 @@ class MemberControllerTest {
     void testSetPassword_fail_allValidationErrors() throws Exception {
         // given
         String password = "";
-        SetPasswordDto dto = new SetPasswordDto(password);
+        RequestSetPasswordDto dto = new RequestSetPasswordDto(password,"invalidPassword");
+
 
 
         ValidateErrorCode code = ValidateErrorCode.INVALID_DATA;
@@ -217,7 +220,7 @@ class MemberControllerTest {
                 .andExpect(content().string(containsString("password must contain at least one uppercase letter, one lowercase letter, one number, and one special character")))
                 .andExpect(content().string(containsString("size of password must be over 8, under 20")));
 
-        verify(memberService, never()).changePassword(anyString(), anyString());
+        verify(memberService, never()).changePassword(any(SetPasswordDto.class));
     }
 
 

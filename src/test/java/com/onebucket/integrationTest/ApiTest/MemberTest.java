@@ -1,10 +1,8 @@
 package com.onebucket.integrationTest.ApiTest;
 
-import com.icegreen.greenmail.util.GreenMail;
-import com.icegreen.greenmail.util.ServerSetupTest;
 import com.onebucket.domain.memberManage.domain.Profile;
 import com.onebucket.domain.memberManage.dto.*;
-import com.onebucket.domain.memberManage.dto.request.RequestResetPasswordDto;
+import com.onebucket.domain.memberManage.dto.request.RequestInitPasswordDto;
 import com.onebucket.global.auth.jwtAuth.domain.JwtToken;
 import com.onebucket.global.minio.MinioSaveInfoDto;
 import com.onebucket.global.utils.SuccessResponseDto;
@@ -202,7 +200,7 @@ public class MemberTest extends RestDocsSupportTest {
                 """;
         String oldPassword = jdbcTemplate.queryForObject(query, String.class, testUsername);
 
-        RequestResetPasswordDto dto = new RequestResetPasswordDto(testUsername,email);
+        RequestInitPasswordDto dto = new RequestInitPasswordDto(testUsername,email);
 
         mockMvc.perform(post("/member/password/reset")
                         .content(objectMapper.writeValueAsString(dto))
@@ -236,7 +234,7 @@ public class MemberTest extends RestDocsSupportTest {
         JwtToken token = createInitUser();
 
         String newPassword = "!1NewPassword1!";
-        SetPasswordDto dto = new SetPasswordDto(newPassword);
+        RequestSetPasswordDto dto = new RequestSetPasswordDto(testPassword, newPassword);
 
         String query = """
                 SELECT password
@@ -256,7 +254,8 @@ public class MemberTest extends RestDocsSupportTest {
                         httpRequest(),
                         httpResponse(),
                         requestFields(
-                                fieldWithPath("password").description("new password of account").attributes(getFormat("하나 이상의 대문자, 소문자, 특수문자, 숫자"))
+                                fieldWithPath("oldPassword").description("old password of account").attributes(getFormat("초기화 하고자 하는 비밀번호")),
+                                fieldWithPath("newPassword").description("new password of account").attributes(getFormat("하나 이상의 대문자, 소문자, 특수문자, 숫자"))
                         ),
                         responseFields(
                                 fieldWithPath("message").description("success set password")
