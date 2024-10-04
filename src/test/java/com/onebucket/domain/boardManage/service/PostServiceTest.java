@@ -2,13 +2,12 @@ package com.onebucket.domain.boardManage.service;
 
 import com.onebucket.domain.boardManage.dao.BoardRepository;
 import com.onebucket.domain.boardManage.dao.CommentRepository;
+import com.onebucket.domain.boardManage.dao.LikesMapRepository;
 import com.onebucket.domain.boardManage.dao.PostRepository;
 import com.onebucket.domain.boardManage.dto.internal.comment.CreateCommentDto;
 import com.onebucket.domain.boardManage.dto.parents.PostDto;
 import com.onebucket.domain.boardManage.dto.parents.ValueDto;
-import com.onebucket.domain.boardManage.entity.Board;
-import com.onebucket.domain.boardManage.entity.BoardType;
-import com.onebucket.domain.boardManage.entity.Comment;
+import com.onebucket.domain.boardManage.entity.*;
 import com.onebucket.domain.boardManage.entity.post.Post;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
@@ -23,15 +22,18 @@ import com.onebucket.global.utils.SecurityUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -65,6 +67,8 @@ class PostServiceTest {
     private CommentRepository commentRepository;
     @Mock
     private MemberRepository memberRepository;
+    @Mock
+    private LikesMapRepository likesMapRepository;
     @Mock
     private SecurityUtils securityUtils;
     @Mock
@@ -434,13 +438,71 @@ class PostServiceTest {
                 .containsAll(List.of(1L, 2L,3L, 4L, 5L));
     }
 
+    @Test
+    @DisplayName("getPostsByBoard - success / no post returned")
+    void testGetPostsByBoard_success_noPostReturned() {
+        Long boardId = 1L;
+        Pageable pageable = Pageable.ofSize(5);
+        when(postRepository.findByBoardId(boardId, pageable)).thenReturn(Page.empty());
+        ValueDto.PageablePost dto = ValueDto.PageablePost
+                .builder()
+                .boardId(boardId)
+                .pageable(pageable)
+                .build();
+
+        Page<PostDto.Thumbnail> emptyPostPage = postService.getPostsByBoard(dto);
+        List<PostDto.Thumbnail> listedThumbnails = emptyPostPage.getContent();
+        assertThat(listedThumbnails.size()).isEqualTo(0);
+    }
+
+    //-+-+-+-+-+-+]] getPost [[-+-+-+-+-+-+
+    @Test
+    @DisplayName("getPost - success")
+    void testGetPost_success() {
+        Long postId = 1L;
+        List<Comment> comments = new ArrayList<>();
+        for(long i = 1L; i <= 5L; i++) {
+            comments.add(Comment.builder()
+                    .id(i)
+                    .build());
+        }
+
+        when(postRepository.findById(postId)).thenReturn(Optional.of(mockPost));
+        when(mockPost.getComments()).thenReturn(comments);
+
+        ValueDto.GetPost dto = ValueDto.GetPost.builder()
+                .postId(postId)
+                .build();
+
+        PostDto.Info result = postService.getPost(dto);
+        assertThat(result).isNotNull();
+        assertThat(result.getPostId()).isEqualTo(postId);
+        assertThat(result.getComments())
+                .extracting("id")
+                .containsAll(List.of(1L, 2L, 3L, 4L, 5L));
+
+    }
 
 
     //-+-+-+-+-+-+]] increaseViewCount [[-+-+-+-+-+-+
+    /**
+     * <pre>
+     * 1. get userId, postId from param.
+     * 2. set prefix used in redis, and check if value is exist in redis already.
+     * 3. if no key exist(for example, null value that return from redis),
+     *      plus one views column in database, and add new data in
+     *      redis.
+     * 4. To manage overhead cause of too much data in redis, check the size of
+     *      values that have same key. If size is too big (over 300), delete data.
+     *      To select which data to delete, use score, created by current time.
+     * 5. Also, expire hour is 4.
+     * </pre>
+     * May throws exception of redis, or connection to redis database, that convert
+     * from {@link RedisRepository}
+     */
     @Test
     @DisplayName("increaseViewCount - success / view increase")
     void testIncreaseViewCount_success() {
-        String username = "username";
         Long userId = 1L;
         Long postId = 100L;
         String postKey = String.valueOf(postId);
@@ -517,4 +579,108 @@ class PostServiceTest {
         verify(redisRepository, times(1)).removeRangeFromSortedSet(eq(sortedSetKey), eq(0L), anyLong());
         verify(redisRepository, times(1)).setExpire(eq(sortedSetKey), anyLong());
     }
+
+    //-+-+-+-+-+-+]] increaseLikeCount [[-+-+-+-+-+-+
+    @Test
+    @DisplayName("increaseLikeCount - success")
+    void testIncreaseLikeCount_success() {
+        Long userId = 1L;
+        Long postId = 100L;
+        LikesMapId likesMapId = LikesMapId.builder()
+                .member(userId)
+                .post(postId)
+                .build();
+        when(memberRepository.findById(userId)).thenReturn(Optional.of(mockMember));
+        when(postRepository.findById(postId)).thenReturn(Optional.of(mockPost));
+
+        when(mockMember.getId()).thenReturn(userId);
+        when(mockPost.getId()).thenReturn(postId);
+
+        when(likesMapRepository.existsById(likesMapId)).thenReturn(false);
+
+        ValueDto.FindPost dto = ValueDto.FindPost.builder()
+                .postId(postId)
+                .userId(userId)
+                .build();
+
+        postService.increaseViewCount(dto);
+
+        verify(likesMapRepository, times(1)).save(any(LikesMap.class));
+        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+
+        verify(redisRepository, times(1)).increaseValue(captor.capture());
+        String prefixValue = captor.getValue();
+        assertThat(prefixValue).isEqualTo("post:likes:" + postId);
+    }
+
+    @Test
+    @DisplayName("increaseLikeCount - success / already saved")
+    void testIncreaseLikeCount_success_alreadySaved() {
+        Long userId = 1L;
+        Long postId = 100L;
+        LikesMapId likesMapId = LikesMapId.builder()
+                .member(userId)
+                .post(postId)
+                .build();
+
+        when(memberRepository.findById(userId)).thenReturn(Optional.of(mockMember));
+        when(postRepository.findById(postId)).thenReturn(Optional.of(mockPost));
+
+        when(mockMember.getId()).thenReturn(userId);
+        when(mockPost.getId()).thenReturn(postId);
+
+        when(likesMapRepository.existsById(likesMapId)).thenReturn(true);
+
+        ValueDto.FindPost dto = ValueDto.FindPost.builder()
+                .postId(postId)
+                .userId(userId)
+                .build();
+
+        postService.increaseLikesCount(dto);
+
+        verify(likesMapRepository, never()).save(any(LikesMap.class));
+        verify(redisRepository, never()).increaseValue(anyString());
+    }
+
+    //-+-+-+-+-+-+]] decreaseLikeCount [[-+-+-+-+-+-+
+    @Test
+    @DisplayName("decreaseLikeCount - success")
+    void testDecreaseLikeCount_success() {
+        Long userId = 1L;
+        Long postId = 100L;
+
+        LikesMapId likesMapId = LikesMapId.builder()
+                .member(userId)
+                .post(postId)
+                .build();
+
+        ValueDto.FindPost dto = ValueDto.FindPost.builder()
+                .postId(postId)
+                .userId(userId)
+                .build();
+        postService.decreaseLikesCount(dto);
+        verify(likesMapRepository, times(1)).deleteById(likesMapId);
+        verify(redisRepository, times(1)).decreaseValue(anyString());
+    }
+    @Test
+    @DisplayName("decreaseLikeCount - fail / not Likes before")
+    void testDecreaseLikeCount_fail_notLikes() {
+
+        Long userId = 1L;
+        Long postId = 100L;
+        ValueDto.FindPost dto = ValueDto.FindPost.builder()
+                .postId(postId)
+                .userId(userId)
+                .build();
+        doThrow(EmptyResultDataAccessException.class).when(likesMapRepository).deleteById(any(LikesMapId.class));
+
+        assertThatThrownBy(() -> postService.decreaseLikesCount(dto))
+                .isInstanceOf(UserBoardException.class)
+                .hasMessageContaining("perhaps, user may not commit likes in DB")
+                .extracting("errorCode")
+                .isEqualTo(BoardErrorCode.NOT_EXISTING);
+
+        verify(redisRepository, never()).decreaseValue(anyString());
+    }
+
 }

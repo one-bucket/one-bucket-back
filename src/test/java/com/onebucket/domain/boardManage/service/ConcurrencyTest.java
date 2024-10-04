@@ -2,7 +2,6 @@ package com.onebucket.domain.boardManage.service;
 
 import com.onebucket.domain.boardManage.dao.*;
 import com.onebucket.domain.boardManage.dto.internal.comment.CreateCommentDto;
-import com.onebucket.domain.boardManage.dto.internal.post.PostAuthorDto;
 import com.onebucket.domain.boardManage.entity.Board;
 import com.onebucket.domain.boardManage.entity.Comment;
 import com.onebucket.domain.boardManage.entity.post.Post;
