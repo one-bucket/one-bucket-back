@@ -26,6 +26,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -369,7 +373,66 @@ class PostServiceTest {
     }
 
     @Test
-    @DisplayName("deletePostFromPos")
+    @DisplayName("deleteCommentFromPost - fail / No post to delete")
+    void testDeleteCommentFromPost_fail_noPostToDelete() {
+        Long postId = 1L;
+        Long commentId = 10L;
+        Long savedCommentId = 11L;
+
+        when(postRepository.findById(postId)).thenReturn(Optional.of(mockPost));
+        when(mockPost.getComments()).thenReturn(List.of(mockComment));
+        when(mockComment.getId()).thenReturn(savedCommentId);
+
+        ValueDto.FindComment dto = ValueDto.FindComment.builder()
+                .postId(1L)
+                .commentId(commentId)
+                .build();
+        assertThatThrownBy(() -> postService.deleteCommentFromPost(dto))
+                .isInstanceOf(UserBoardException.class)
+                .extracting(("errorCode"))
+                .isEqualTo(BoardErrorCode.UNKNOWN_COMMENT);
+        verify(postRepository, never()).save(mockPost);
+        }
+
+    //-+-+-+-+-+-+]] getPostsByBoard [[-+-+-+-+-+-+
+
+    /**
+     * 1. Get Page and board id from param
+     * 2. find board from database, and convert to {@link PostDto.Thumbnail}
+     *
+     * Return of findByBoardId maybe empty. (But not null)
+     */
+
+    @Test
+    @DisplayName("getPostsByBoard - success")
+    void testGetPostsByBoard_success() {
+        List<Post> listedPost = new ArrayList<>();
+        for(long i = 1L; i <= 5L; i++) {
+            listedPost.add(Post.builder()
+                    .id(i)
+                    .build());
+        }
+
+        Long boardId = 1L;
+
+        Pageable pageable = Pageable.ofSize(5);
+        Page<Post> posts = new PageImpl<>(listedPost, PageRequest.of(0, listedPost.size()), listedPost.size());
+
+        ValueDto.PageablePost dto = ValueDto.PageablePost
+                .builder()
+                .boardId(boardId)
+                .pageable(pageable)
+                .build();
+
+        when(postRepository.findByBoardId(boardId, pageable)).thenReturn(posts);
+
+        Page<PostDto.Thumbnail> thumbnails = postService.getPostsByBoard(dto);
+        List<PostDto.Thumbnail> listedThumbnails = thumbnails.getContent();
+        assertThat(listedThumbnails.size()).isEqualTo(5);
+        assertThat(listedThumbnails)
+                .extracting("id")
+                .containsAll(List.of(1L, 2L,3L, 4L, 5L));
+    }
 
 
 
