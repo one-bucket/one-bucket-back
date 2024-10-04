@@ -12,12 +12,15 @@ import static org.mockito.Mockito.*;
 
 import com.onebucket.domain.memberManage.dto.NicknameRequestDto;
 import com.onebucket.domain.memberManage.dto.ReadMemberInfoDto;
+import com.onebucket.domain.memberManage.dto.internal.SetPasswordDto;
 import com.onebucket.domain.universityManage.dao.UniversityRepository;
 import com.onebucket.domain.universityManage.domain.University;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.customException.universityManageException.UniversityException;
+import com.onebucket.global.exceptionManage.customException.verificationException.VerificationException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.UniversityErrorCode;
+import com.onebucket.global.exceptionManage.errorCode.VerificationErrorCode;
 import com.onebucket.global.utils.RandomStringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -250,30 +253,32 @@ public class MemberServiceTest {
 
     //-+-+-+-+-+-+]] changePassword test [[-+-+-+-+-+-+
     @Test
-    @DisplayName("changePassword - success / to random string")
+    @DisplayName("initPassword - success / to random string")
     void testChangePassword_success_randomString() {
         //given
         String username = "username";
-        String password = "password";
-
+        String password = "!1Password1!";
         when(memberRepository.findByUsername(username)).thenReturn(Optional.of(mockMember));
         when(randomStringUtils.generateRandomStr(15)).thenReturn(password);
 
-        String newPassword = memberService.changePassword(username);
+        String newPassword = memberService.initPassword(username);
         verify(memberRepository, times(1)).save(mockMember);
-        assertThat(newPassword).isEqualTo(password);
+        assertThat(password).isEqualTo(newPassword);
     }
 
     @Test
     @DisplayName("changePassword -success / to defined string")
     void testChangePassword_success_definedString() {
         String username = "username";
-        String password = "password";
-
+        String oldPassword = "oldPassword";
+        String newPassword = "newPassword";
+        SetPasswordDto dto = new SetPasswordDto(username, oldPassword, newPassword);
         when(memberRepository.findByUsername(username)).thenReturn(Optional.of(mockMember));
+        when(passwordEncoder.matches(dto.oldPassword(),mockMember.getPassword())).thenReturn(true);
+        when(passwordEncoder.encode(dto.newPassword())).thenReturn(newPassword);
+        String result = memberService.changePassword(dto);
 
-        String result = memberService.changePassword(username, password);
-        assertThat(result).isEqualTo(password);
+        assertThat(result).isEqualTo(newPassword);
     }
 
     @Test
@@ -281,10 +286,26 @@ public class MemberServiceTest {
     void testChangePassword_fail_unknownUser() {
         when(memberRepository.findByUsername(anyString())).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> memberService.changePassword("username"))
+        assertThatThrownBy(() -> memberService.changePassword(new SetPasswordDto("username", "oldPassword", "newPassword")))
                 .isInstanceOf(AuthenticationException.class)
                 .extracting("errorCode")
                 .isEqualTo(AuthenticationErrorCode.UNKNOWN_USER);
+    }
+
+    @Test
+    @DisplayName("changePassword - fail / different oldPassword")
+    void testChangePassword_fail_differentOldPassword() {
+        String username = "username";
+        String oldPassword = "oldPassword";
+        String newPassword = "newPassword";
+        SetPasswordDto dto = new SetPasswordDto(username, oldPassword, newPassword);
+        when(memberRepository.findByUsername(username)).thenReturn(Optional.of(mockMember));
+        when(passwordEncoder.matches(dto.oldPassword(),mockMember.getPassword())).thenReturn(false);
+
+        assertThatThrownBy(() -> memberService.changePassword(dto))
+                .isInstanceOf(VerificationException.class)
+                .extracting("errorCode")
+                .isEqualTo(VerificationErrorCode.INVALID_PASSWORD);
     }
 
     //-+-+-+-+-+-+]] usernameToId test [[-+-+-+-+-+-+
