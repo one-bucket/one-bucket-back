@@ -43,4 +43,7 @@ public interface BasePostRepository<T extends Post> extends JpaRepository<T, Lon
     @Modifying
     @Query("UPDATE Post p SET p.imageUrls = CONCAT(p.imageUrls, :imageUrl) WHERE p.id = :postId")
     void addImageUrl(@Param("postId") Long postId, @Param("imageUrl") String imageUrl);
+
+    //search query
+    //Page<T> titleSearchResult(@Param("keyword") String keyword, Pageable pageable);
 }

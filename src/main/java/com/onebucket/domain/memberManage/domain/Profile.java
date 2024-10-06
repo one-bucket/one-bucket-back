@@ -45,6 +45,7 @@ public class Profile {
     private String gender;
     private String email;
     private Integer age;
+    private String email;
     private String description;
     private LocalDate birth;
     private LocalDateTime createAt;

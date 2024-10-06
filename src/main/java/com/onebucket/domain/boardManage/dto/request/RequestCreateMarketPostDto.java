@@ -1,12 +1,15 @@
 package com.onebucket.domain.boardManage.dto.request;
 
+import com.onebucket.domain.boardManage.dto.parents.MarketPostDto;
+import com.onebucket.domain.tradeManage.dto.TradeDto;
+import jakarta.validation.Valid;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 
 /**
  * <br>package name   : com.onebucket.domain.boardManage.dto.request
  * <br>file name      : RequestCreateMarketPostDto
- * <br>date           : 2024-09-22
+ * <br>date           : 2024-09-29
  * <pre>
  * <span style="color: white;">[description]</span>
  *
@@ -17,10 +20,15 @@ import lombok.Setter;
  *
  * } </pre>
  */
+
 @Getter
-@Setter
-public class RequestCreateMarketPostDto extends RequestCreatePostDto {
-    private String item;
-    private int wanted;
-    private String location;
+@NoArgsConstructor
+public class RequestCreateMarketPostDto {
+
+
+    @Valid
+    private MarketPostDto.RequestCreate  marketPostCreateDto;
+    @Valid
+    private TradeDto.Requestcreate tradeCreateDto;
+
 }

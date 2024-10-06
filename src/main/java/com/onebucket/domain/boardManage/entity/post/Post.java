@@ -3,6 +3,9 @@ package com.onebucket.domain.boardManage.entity.post;
 import com.onebucket.domain.boardManage.entity.Board;
 import com.onebucket.domain.boardManage.entity.Comment;
 import com.onebucket.domain.memberManage.domain.Member;
+import com.onebucket.global.exceptionManage.customException.boardManageException.BoardManageException;
+import com.onebucket.global.exceptionManage.customException.boardManageException.UserBoardException;
+import com.onebucket.global.exceptionManage.errorCode.BoardErrorCode;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -20,20 +23,27 @@ import java.util.List;
  * <br>date           : 2024-07-08
  * <pre>
  * <span style="color: white;">[description]</span>
- *
+ * Post에 대한 엔티티. Discriminator type 을 사용하여, 해당 테이블을 상속받는 테이블에 대하여 실제 데이터베이스에서
+ * 동일한 테이블에 저장된다.
+ * board에 대한 인덱스를 생성하였다.
  * </pre>
  * <pre>
  * <span style="color: white;">usage:</span>
  * {@code
+ * private Long id;
+ * private Board board;
+ * private Member author;
+ * private String title;
+ * private String text;
+ * private List<Comment> comments;
+ * private List<String> imageUrls;
+ * private Long views;
+ * private Long likes;
  *
+ * private LocalDateTime createdDate;
+ * private LocalDateTime modifiedDate;
+ * private boolean isModified;
  * } </pre>
- * <pre>
- * modified log :
- * ====================================================
- * DATE           AUTHOR               NOTE
- * ----------------------------------------------------
- * 2024-07-08        jack8              init create
- * </pre>
  */
 @Getter
 @Setter
@@ -82,6 +92,7 @@ public class Post {
     @ElementCollection
     @CollectionTable(name = "post_images", joinColumns = @JoinColumn(name = "post_id"))
     @Column(name = "image_url")
+    @Builder.Default
     private List<String> imageUrls = new ArrayList<>();
 
     @Builder.Default
@@ -94,10 +105,8 @@ public class Post {
         comments.add(comment);
         comment.setPost(this);
     }
-
     public void deleteComment(Comment comment) {
         comments.remove(comment);
-        comment.setPost(null);
     }
 
     public void addImage(String url) {

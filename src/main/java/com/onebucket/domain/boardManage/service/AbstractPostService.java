@@ -4,10 +4,11 @@ import com.onebucket.domain.boardManage.dao.BasePostRepository;
 import com.onebucket.domain.boardManage.dao.BoardRepository;
 import com.onebucket.domain.boardManage.dao.CommentRepository;
 import com.onebucket.domain.boardManage.dao.LikesMapRepository;
-import com.onebucket.domain.boardManage.dto.internal.board.GetBoardDto;
 import com.onebucket.domain.boardManage.dto.internal.comment.CreateCommentDto;
 import com.onebucket.domain.boardManage.dto.internal.comment.GetCommentDto;
 import com.onebucket.domain.boardManage.dto.internal.post.*;
+import com.onebucket.domain.boardManage.dto.parents.PostDto;
+import com.onebucket.domain.boardManage.dto.parents.ValueDto;
 import com.onebucket.domain.boardManage.entity.Board;
 import com.onebucket.domain.boardManage.entity.Comment;
 import com.onebucket.domain.boardManage.entity.LikesMap;
@@ -25,6 +26,8 @@ import com.onebucket.global.minio.MinioSaveInfoDto;
 import com.onebucket.global.redis.RedisRepository;
 import com.onebucket.global.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -62,9 +65,18 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
     protected final LikesMapRepository likesMapRepository;
     protected final MinioRepository minioRepository;
 
+    @NestedConfigurationProperty
+    @Value("${board.views.maxSize}")
+    private int MAX_SIZE;
+
+    @NestedConfigurationProperty
+    @Value("${board.views.expireHour}")
+    private long EXPIRE_HOUR;
+
+
 
     @Override
-    public <D extends CreatePostDto> Long createPost(D dto) {
+    public <D extends PostDto.Create> Long createPost(D dto) {
 
         T post = convertCreatePostDtoToPost(dto);
         T savedPost = repository.save(post);
@@ -72,15 +84,15 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
         return savedPost.getId();
     }
     @Override
-    public void deletePost(DeletePostDto deletePostDto) {
-        T findPost = findPost(deletePostDto.getId());
+    public void deletePost(ValueDto.FindPost dto) {
+        T findPost = findPost(dto.getPostId());
         Member author = findPost.getAuthor();
         if (author == null) {
             throw new UserBoardException(BoardErrorCode.I_AM_AN_APPLE_PIE, "maybe, author is null");
         }
         Long authorId = author.getId();
 
-        if(authorId.equals(deletePostDto.getMemberId())) {
+        if(authorId.equals(dto.getUserId())) {
             repository.delete(findPost);
         } else {
             throw new AuthenticationException(AuthenticationErrorCode.UNAUTHORIZED_ACCESS,
@@ -123,21 +135,33 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
     }
     @Override
     @Transactional
-    @CacheEvict(value = "commentCountCache", key = "#postId")
-    public void deleteCommentFromPost(Long postId, Comment comment) {
-        T post = findPost(postId);
-        post.deleteComment(comment);
+    @CacheEvict(value = "commentCountCache", key = "#dto.postId")
+    public void deleteCommentFromPost(ValueDto.FindComment dto) {
+        T post = findPost(dto.getPostId());
+        List<Comment> comments = post.getComments();
+        Comment savedComment = comments.stream().filter((comment) -> comment.getId().equals(dto.getCommentId()))
+                        .findFirst().orElseThrow(() -> new UserBoardException(BoardErrorCode.UNKNOWN_COMMENT));
+
+        post.deleteComment(savedComment);
         repository.save(post);
     }
     @Override
     @Transactional(readOnly = true)
-    public Page<PostThumbnailDto> getPostsByBoard(GetBoardDto dto) {
+    public Page<PostDto.Thumbnail> getPostsByBoard(ValueDto.PageablePost dto) {
         return repository.findByBoardId(dto.getBoardId(), dto.getPageable())
                 .map(this::convertPostToThumbnailDto);
     }
+
+//    public Page<PostDto.Thumbnail> getSearchResult(ValueDto.SearchPageablePost dto) {
+//        String keyword = dto.getKeyword();
+//        Integer option = dto.getOption();
+//
+//    }
+
+
     @Override
     @Transactional(readOnly = true)
-    public PostInfoDto getPost(GetPostDto dto) {
+    public PostDto.Info getPost(ValueDto.GetPost dto) {
         T post = findPost(dto.getPostId());
 
         List<GetCommentDto> comments = post.getComments().stream()
@@ -150,9 +174,7 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
     }
     @Override
     @Transactional
-    public void increaseViewCount(PostAuthorDto dto) {
-        int MAX_SIZE = 300;
-        long EXPIRE_HOURS = 4;
+    public void increaseViewCount(ValueDto.FindPost dto) {
 
         Long userId = dto.getUserId();
         Long postId = dto.getPostId();
@@ -176,14 +198,14 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
                 redisRepository.removeRangeFromSortedSet(sortedSetKey, 0, size - MAX_SIZE - 1);
             }
 
-            redisRepository.setExpire(sortedSetKey, EXPIRE_HOURS);
+            redisRepository.setExpire(sortedSetKey, EXPIRE_HOUR);
         } else {
-            redisRepository.setExpire(sortedSetKey, EXPIRE_HOURS);
+            redisRepository.setExpire(sortedSetKey, EXPIRE_HOUR);
         }
     }
 
     @Override
-    public void increaseLikesCount(PostAuthorDto dto) {
+    public void increaseLikesCount(ValueDto.FindPost dto) {
         Member member = findMember(dto.getUserId());
         Post post = findPost(dto.getPostId());
 
@@ -207,7 +229,7 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
     }
 
     @Override
-    public void decreaseLikesCount(PostAuthorDto dto) {
+    public void decreaseLikesCount(ValueDto.FindPost dto) {
         LikesMapId likesMapId = LikesMapId.builder()
                 .member(dto.getUserId())
                 .post(dto.getPostId())
@@ -221,6 +243,7 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
         }
 
         redisRepository.decreaseValue("post:likes:" + dto.getPostId());
+
     }
 
     @Override
@@ -240,7 +263,7 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
     }
 
     @Override
-    public boolean isUserLikesPost(PostAuthorDto dto) {
+    public boolean isUserLikesPost(ValueDto.FindPost dto) {
         LikesMapId id = LikesMapId.builder()
                 .post(dto.getPostId())
                 .member(dto.getUserId())
@@ -268,6 +291,7 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
         }
 
     }
+
 
 
 
@@ -304,9 +328,9 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
                 .build();
     }
 
-    protected abstract <D extends CreatePostDto> T convertCreatePostDtoToPost(D dto);
-    protected abstract PostThumbnailDto convertPostToThumbnailDto(T post);
-    protected abstract PostInfoDto convertPostToPostInfoDto(T post, List<GetCommentDto> comments);
+    protected abstract <D extends PostDto.Create> T convertCreatePostDtoToPost(D dto);
+    protected abstract PostDto.Thumbnail convertPostToThumbnailDto(T post);
+    protected abstract PostDto.Info convertPostToPostInfoDto(T post, List<GetCommentDto> comments);
 
 
 }

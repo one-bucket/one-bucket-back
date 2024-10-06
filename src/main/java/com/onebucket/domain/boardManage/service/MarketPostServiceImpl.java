@@ -1,13 +1,16 @@
 package com.onebucket.domain.boardManage.service;
 
 import com.onebucket.domain.boardManage.dao.*;
-import com.onebucket.domain.boardManage.dto.internal.post.*;
 import com.onebucket.domain.boardManage.dto.internal.comment.GetCommentDto;
+import com.onebucket.domain.boardManage.dto.parents.MarketPostDto;
+import com.onebucket.domain.boardManage.dto.parents.PostDto;
 import com.onebucket.domain.boardManage.entity.Board;
 import com.onebucket.domain.boardManage.entity.post.MarketPost;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
 
+import com.onebucket.domain.tradeManage.entity.PendingTrade;
+import com.onebucket.domain.tradeManage.dao.PendingTradeRepository;
 import com.onebucket.global.minio.MinioRepository;
 import com.onebucket.global.redis.RedisRepository;
 import com.onebucket.global.utils.SecurityUtils;
@@ -32,6 +35,9 @@ import java.util.List;
 @Service
 public class MarketPostServiceImpl extends AbstractPostService<MarketPost, MarketPostRepository> implements MarketPostService {
 
+
+    private final PendingTradeRepository pendingTradeRepository;
+
     public MarketPostServiceImpl(MarketPostRepository repository,
                                  BoardRepository boardRepository,
                                  MemberRepository memberRepository,
@@ -39,32 +45,33 @@ public class MarketPostServiceImpl extends AbstractPostService<MarketPost, Marke
                                  CommentRepository commentRepository,
                                  RedisRepository redisRepository,
                                  LikesMapRepository likesMapRepository,
-                                 MinioRepository minioRepository) {
+                                 MinioRepository minioRepository,
+                                 PendingTradeRepository pendingTradeRepository) {
         super(repository, boardRepository, memberRepository, securityUtils,
                 commentRepository, redisRepository, likesMapRepository, minioRepository);
+        this.pendingTradeRepository = pendingTradeRepository;
     }
 
     @Override
-    protected <D extends CreatePostDto> MarketPost convertCreatePostDtoToPost(D dto) {
+    protected <D extends PostDto.Create> MarketPost convertCreatePostDtoToPost(D dto) {
         Member member = findMember(dto.getUsername());
         Board board = findBoard(dto.getBoardId());
 
-        CreateMarketPostDto marketDto = (CreateMarketPostDto) dto;
-        return MarketPost.builder()
-                .isFin(false)
-                .wanted(marketDto.getWanted())
-                .item(marketDto.getItem())
-                .location(marketDto.getLocation())
-                .author(member)
-                .title(marketDto.getTitle())
-                .text(marketDto.getText())
-                .board(board)
-                .build();
+        MarketPostDto.Create marketDto = (MarketPostDto.Create) dto;
 
+        PendingTrade pendingTrade = pendingTradeRepository.getReferenceById(marketDto.getTradeId());
+
+        return MarketPost.builder()
+                .board(board)
+                .author(member)
+                .title(dto.getTitle())
+                .text(dto.getText())
+                .pendingTrade(pendingTrade)
+                .build();
     }
 
     @Override
-    protected MarketPostThumbnailDto convertPostToThumbnailDto(MarketPost post) {
+    protected MarketPostDto.Thumbnail convertPostToThumbnailDto(MarketPost post) {
 
         String nickname = "(unknown)";
         Member member = post.getAuthor();
@@ -72,48 +79,62 @@ public class MarketPostServiceImpl extends AbstractPostService<MarketPost, Marke
             nickname = member.getNickname();
         }
 
+        String preText = "init text";
+        String text = post.getText();
+        if(text.length() > 50) {
+            preText = post.getText().substring(0, 50);
+        } else {
+            preText = text;
+        }
 
-        return MarketPostThumbnailDto.builder()
-                .joins(post.getJoins())
-                .item(post.getItem())
-                .isFin(post.isFin())
-                .likes(post.getLikes())
-                .wanted(post.getWanted())
+        boolean isImageExist = true;
+        String imageUrl = "fail:null image";
+        List<String> images = post.getImageUrls();
+        if(images.isEmpty()) {
+            isImageExist = false;
+        } else {
+            imageUrl = images.get(1);
+        }
+
+        return MarketPostDto.Thumbnail.builder()
+                //value of post
+                .postId(post.getId())
+                .boardId(post.getBoardId())
                 .authorNickname(nickname)
+                .title(post.getTitle())
+                .text(preText)
+                .likes(post.getLikes())
+                .views(post.getViews())
                 .createdDate(post.getCreatedDate())
                 .modifiedDate(post.getModifiedDate())
-                .boardId(post.getBoardId())
-                .title(post.getTitle())
-                .text(post.getText())
-                .postId(post.getId())
-                .views(post.getViews())
+                .isImageExist(isImageExist)
+                .thumbnailImage(imageUrl)
+
+                .tradeId(post.getPendingTrade().getId())
                 .build();
     }
 
     @Override
-    protected MarketPostInfoDto convertPostToPostInfoDto(MarketPost post, List<GetCommentDto> comments) {
+    protected MarketPostDto.Info convertPostToPostInfoDto(MarketPost post, List<GetCommentDto> comments) {
         String nickname = "(unknown)";
         Member member = post.getAuthor();
         if (member != null) {
             nickname = member.getNickname();
         }
 
-        return MarketPostInfoDto.builder()
+        return MarketPostDto.Info.builder()
                 .postId(post.getId())
-                .views(post.getViews())
-                .likes(post.getLikes())
-                .title(post.getTitle())
-                .text(post.getText())
                 .boardId(post.getBoardId())
                 .authorNickname(nickname)
+                .title(post.getTitle())
+                .text(post.getText())
+                .comments(comments)
+                .likes(post.getLikes())
+                .views(post.getViews())
                 .createdDate(post.getCreatedDate())
                 .modifiedDate(post.getModifiedDate())
-                .comments(comments)
-                .item(post.getItem())
-                .wanted(post.getWanted())
-                .joins(post.getJoins())
-                .isFin(post.isFin())
-                .location(post.getLocation())
+
+                .tradeId(post.getPendingTrade().getId())
                 .build();
     }
 

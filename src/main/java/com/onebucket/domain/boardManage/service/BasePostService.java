@@ -1,9 +1,9 @@
 package com.onebucket.domain.boardManage.service;
 
-import com.onebucket.domain.boardManage.dto.internal.board.GetBoardDto;
 import com.onebucket.domain.boardManage.dto.internal.comment.CreateCommentDto;
 import com.onebucket.domain.boardManage.dto.internal.post.*;
-import com.onebucket.domain.boardManage.entity.Comment;
+import com.onebucket.domain.boardManage.dto.parents.PostDto;
+import com.onebucket.domain.boardManage.dto.parents.ValueDto;
 import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,17 +23,17 @@ import org.springframework.web.multipart.MultipartFile;
  */
 public interface BasePostService {
 
-    <D extends CreatePostDto> Long createPost(D dto);
-    void deletePost(DeletePostDto deletePostDto);
+    <D extends PostDto.Create> Long createPost(D dto);
+    void deletePost(ValueDto.FindPost dto);
     void addCommentToPost(CreateCommentDto dto);
-    void deleteCommentFromPost(Long postId, Comment comment);
-    Page<PostThumbnailDto> getPostsByBoard(GetBoardDto dto);
-    PostInfoDto getPost(GetPostDto dto);
-    void increaseViewCount(PostAuthorDto dto);
-    void increaseLikesCount(PostAuthorDto dto);
-    void decreaseLikesCount(PostAuthorDto dto);
+    void deleteCommentFromPost(ValueDto.FindComment dto);
+    Page<PostDto.Thumbnail> getPostsByBoard(ValueDto.PageablePost dto);
+    PostDto.Info getPost(ValueDto.GetPost dto);
+    void increaseViewCount(ValueDto.FindPost dto);
+    void increaseLikesCount(ValueDto.FindPost dto);
+    void decreaseLikesCount(ValueDto.FindPost dto);
     Long getCommentCount(Long postId);
     Long getLikesInRedis(Long postId);
-    boolean isUserLikesPost(PostAuthorDto dto);
+    boolean isUserLikesPost(ValueDto.FindPost dto);
     void saveImage(MultipartFile multipartFile, SaveImageDto dto);
 }

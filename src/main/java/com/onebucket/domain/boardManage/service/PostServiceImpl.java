@@ -6,7 +6,7 @@ import com.onebucket.domain.boardManage.dao.LikesMapRepository;
 import com.onebucket.domain.boardManage.dao.PostRepository;
 
 import com.onebucket.domain.boardManage.dto.internal.comment.GetCommentDto;
-import com.onebucket.domain.boardManage.dto.internal.post.*;
+import com.onebucket.domain.boardManage.dto.parents.PostDto;
 import com.onebucket.domain.boardManage.entity.Board;
 
 import com.onebucket.domain.boardManage.entity.post.Post;
@@ -58,7 +58,7 @@ public class PostServiceImpl extends AbstractPostService<Post, PostRepository> i
     }
 
     @Override
-    protected Post convertCreatePostDtoToPost(CreatePostDto dto) {
+    protected Post convertCreatePostDtoToPost(PostDto.Create dto) {
         Member member = findMember(dto.getUsername());
         Board board = findBoard(dto.getBoardId());
 
@@ -71,7 +71,7 @@ public class PostServiceImpl extends AbstractPostService<Post, PostRepository> i
     }
 
     @Override
-    protected PostThumbnailDto convertPostToThumbnailDto(Post post) {
+    protected PostDto.Thumbnail convertPostToThumbnailDto(Post post) {
 
         String nickname = "(unknown)";
         Member member = post.getAuthor();
@@ -79,7 +79,7 @@ public class PostServiceImpl extends AbstractPostService<Post, PostRepository> i
             nickname = member.getNickname();
         }
 
-        return PostThumbnailDto.builder()
+        return PostDto.Thumbnail.builder()
                 .views(post.getViews())
                 .likes(post.getLikes())
                 .title(post.getTitle())
@@ -93,14 +93,14 @@ public class PostServiceImpl extends AbstractPostService<Post, PostRepository> i
     }
 
     @Override
-    protected PostInfoDto convertPostToPostInfoDto(Post post, List<GetCommentDto> comments) {
+    protected PostDto.Info convertPostToPostInfoDto(Post post, List<GetCommentDto> comments) {
         String nickname = "(unknown)";
         Member member = post.getAuthor();
         if (member != null) {
             nickname = member.getNickname();
         }
 
-        return PostInfoDto.builder()
+        return PostDto.Info.builder()
                 .postId(post.getId())
                 .views(post.getViews())
                 .likes(post.getLikes())
