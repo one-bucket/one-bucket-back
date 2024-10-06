@@ -19,6 +19,7 @@ import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.BoardErrorCode;
 import com.onebucket.global.redis.RedisRepository;
 import com.onebucket.global.utils.SecurityUtils;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,9 +32,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.util.ReflectionTestUtils;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -88,6 +90,15 @@ class PostServiceTest {
 
     @InjectMocks
     private PostServiceImpl postService;
+
+    @BeforeEach
+    void setUp() {
+        ReflectionTestUtils.setField(postService, "MAX_SIZE", 300);
+        ReflectionTestUtils.setField(postService, "EXPIRE_HOUR", 4L);
+    }
+
+
+
 
     //-+-+-+-+-+-+]] createPost [[-+-+-+-+-+-+
     @Test
@@ -434,7 +445,7 @@ class PostServiceTest {
         List<PostDto.Thumbnail> listedThumbnails = thumbnails.getContent();
         assertThat(listedThumbnails.size()).isEqualTo(5);
         assertThat(listedThumbnails)
-                .extracting("id")
+                .extracting("postId")
                 .containsAll(List.of(1L, 2L,3L, 4L, 5L));
     }
 
@@ -464,11 +475,17 @@ class PostServiceTest {
         for(long i = 1L; i <= 5L; i++) {
             comments.add(Comment.builder()
                     .id(i)
+                    .post(mockPost)
+                    .author(mockMember)
+                    .text("text" + i)
+                    .modifiedDate(LocalDateTime.now())
                     .build());
         }
 
         when(postRepository.findById(postId)).thenReturn(Optional.of(mockPost));
         when(mockPost.getComments()).thenReturn(comments);
+        when(mockPost.getId()).thenReturn(postId);
+        when(mockMember.getNickname()).thenReturn("nick");
 
         ValueDto.GetPost dto = ValueDto.GetPost.builder()
                 .postId(postId)
@@ -478,7 +495,7 @@ class PostServiceTest {
         assertThat(result).isNotNull();
         assertThat(result.getPostId()).isEqualTo(postId);
         assertThat(result.getComments())
-                .extracting("id")
+                .extracting("commentId")
                 .containsAll(List.of(1L, 2L, 3L, 4L, 5L));
 
     }
@@ -603,7 +620,7 @@ class PostServiceTest {
                 .userId(userId)
                 .build();
 
-        postService.increaseViewCount(dto);
+        postService.increaseLikesCount(dto);
 
         verify(likesMapRepository, times(1)).save(any(LikesMap.class));
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);

@@ -50,7 +50,7 @@ public class MarketPostController extends AbstractPostController<MarketPostServi
         this.pendingTradeService = pendingTradeService;
     }
 
-    @PreAuthorize("@authorizationService.isUserCanAccessBoard(#dto.boardId)")
+    @PreAuthorize("@authorizationService.isUserCanAccessBoard(#dto.marketPostCreateDto.boardId)")
     @PostMapping("/create")
     public ResponseEntity<SuccessResponseWithIdDto> createPost(@RequestBody @Valid RequestCreateMarketPostDto dto) {
 

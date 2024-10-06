@@ -79,8 +79,13 @@ public class MarketPostServiceImpl extends AbstractPostService<MarketPost, Marke
             nickname = member.getNickname();
         }
 
-        //실제 썸네일에 들어갈 내용에 대해 앞 n 글자만 반환
-        String preText = post.getText().substring(50);
+        String preText = "init text";
+        String text = post.getText();
+        if(text.length() > 50) {
+            preText = post.getText().substring(0, 50);
+        } else {
+            preText = text;
+        }
 
         boolean isImageExist = true;
         String imageUrl = "fail:null image";

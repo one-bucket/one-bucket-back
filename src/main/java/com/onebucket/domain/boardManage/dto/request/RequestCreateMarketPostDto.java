@@ -25,6 +25,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class RequestCreateMarketPostDto {
 
+
     @Valid
     private MarketPostDto.RequestCreate  marketPostCreateDto;
     @Valid

@@ -45,5 +45,5 @@ public interface BasePostRepository<T extends Post> extends JpaRepository<T, Lon
     void addImageUrl(@Param("postId") Long postId, @Param("imageUrl") String imageUrl);
 
     //search query
-    Page<T> titleSearchResult(@Param("keyword") String keyword, Pageable pageable);
+    //Page<T> titleSearchResult(@Param("keyword") String keyword, Pageable pageable);
 }
