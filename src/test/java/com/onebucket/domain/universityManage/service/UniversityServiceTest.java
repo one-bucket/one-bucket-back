@@ -3,11 +3,9 @@ package com.onebucket.domain.universityManage.service;
 
 import com.onebucket.domain.universityManage.dao.UniversityRepository;
 import com.onebucket.domain.universityManage.domain.University;
-import com.onebucket.domain.universityManage.dto.UniversityDto;
+import com.onebucket.domain.universityManage.dto.university.ResponseUniversityDto;
 import com.onebucket.global.exceptionManage.customException.universityManageException.UniversityException;
 import com.onebucket.global.exceptionManage.errorCode.UniversityErrorCode;
-import com.onebucket.global.utils.UniversityEmailValidator;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,14 +48,11 @@ class UniversityServiceTest {
     @Mock
     private UniversityRepository universityRepository;
 
-    @Mock
-    private University university;
-
     @InjectMocks
     private UniversityServiceImpl universityService;
 
-    private UniversityDto createUniversityDto() {
-        return UniversityDto.builder()
+    private ResponseUniversityDto createUniversityDto() {
+        return ResponseUniversityDto.builder()
                 .name("홍익대학교")
                 .address("서울시 마포구 상수동")
                 .email("@hongik.ac.kr")
@@ -76,7 +71,7 @@ class UniversityServiceTest {
     @Test
     @DisplayName("대학교 만들기 성공")
     void createUniversity_success() {
-        UniversityDto dto = createUniversityDto();
+        ResponseUniversityDto dto = createUniversityDto();
         // 대학 생성 서비스 호출
         universityService.createUniversity(dto);
         // 결과 검증
@@ -89,7 +84,7 @@ class UniversityServiceTest {
         universityRepository.save(createUniversity());
         doReturn(Optional.of(createUniversity())).when(universityRepository).findByName("홍익대학교");
 
-        final UniversityDto result = universityService.getUniversity("홍익대학교");
+        final ResponseUniversityDto result = universityService.getUniversity("홍익대학교");
 
         assertThat(result.getName()).isEqualTo("홍익대학교");
         assertThat(result.getAddress()).isEqualTo("서울시 마포구 상수동");

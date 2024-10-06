@@ -9,6 +9,8 @@ import org.springframework.stereotype.Repository;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
+import java.util.Set;
+
 /**
  * <br>package name   : com.onebucket.global.redis
  * <br>file name      : RedisService
@@ -64,7 +66,6 @@ public class RedisRepository {
         stringRedisTemplate.delete(key);
     }
 
-
     // TODO: test case 작성
     public boolean isTokenExists(String key) {
         return Boolean.TRUE.equals(stringRedisTemplate.hasKey(key));
@@ -98,9 +99,13 @@ public class RedisRepository {
     public void decreaseValue(String key) {
         stringRedisTemplate.opsForValue().decrement(key);
     }
-    
+
     public void flushAll() {
         Objects.requireNonNull(
                 stringRedisTemplate.getConnectionFactory()).getConnection().serverCommands().flushAll();
+    }
+
+    public Set<String> keys(String pattern) {
+        return stringRedisTemplate.keys(pattern);
     }
 }

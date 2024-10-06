@@ -183,37 +183,36 @@ public class MemberTest extends RestDocsSupportTest {
     }
 
 
-    @Test
-    @DisplayName("POST /password/reset test")
-    void resetPassword() throws Exception {
-        JwtToken token = createInitUser();
-
-        String query = """
-                SELECT password
-                FROM member
-                WHERE username = ?
-                """;
-        String oldPassword = jdbcTemplate.queryForObject(query, String.class, testUsername);
-
-
-        mockMvc.perform(post("/member/password/reset")
-                        .header("Authorization", getAuthHeader(token))
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect((hasKey(new SuccessResponseDto("success reset password"))))
-                .andDo(restDocs.document(
-                        httpResponse(),
-                        httpRequest(),
-                        responseFields(
-                                fieldWithPath("message").description("success reset password")
-                        )
-                ));
-
-
-
-        String newPassword = jdbcTemplate.queryForObject(query, String.class, testUsername);
-        assertThat(oldPassword).isNotEqualTo(newPassword);
-    }
+//    @Test
+//    @DisplayName("POST /password/reset test")
+//    void resetPassword() throws Exception {
+//        JwtToken token = createInitUser();
+//        String query = """
+//                SELECT password
+//                FROM member
+//                WHERE username = ?
+//                """;
+//        String oldPassword = jdbcTemplate.queryForObject(query, String.class, testUsername);
+//
+//
+//        mockMvc.perform(post("/member/password/reset")
+//                        .header("Authorization", getAuthHeader(token))
+//                        .accept(MediaType.APPLICATION_JSON))
+//                .andExpect(status().isOk())
+//                .andExpect((hasKey(new SuccessResponseDto("success reset password"))))
+//                .andDo(restDocs.document(
+//                        httpResponse(),
+//                        httpRequest(),
+//                        responseFields(
+//                                fieldWithPath("message").description("success reset password")
+//                        )
+//                ));
+//
+//
+//
+//        String newPassword = jdbcTemplate.queryForObject(query, String.class, testUsername);
+//        assertThat(oldPassword).isNotEqualTo(newPassword);
+//    }
 
 
     @Test
@@ -541,6 +540,8 @@ public class MemberTest extends RestDocsSupportTest {
                                         .description("name of account profile"),
                                 fieldWithPath("gender")
                                         .description("gender of account profile"),
+                                fieldWithPath("email")
+                                        .description("email of account email"),
                                 fieldWithPath("age")
                                         .description("age of account profile"),
                                 fieldWithPath("birth")

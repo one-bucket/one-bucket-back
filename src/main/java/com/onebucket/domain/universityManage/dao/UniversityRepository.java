@@ -32,7 +32,6 @@ import java.util.Optional;
 @Repository
 public interface UniversityRepository extends JpaRepository<University, Long> {
     Optional<University> findByName(String name);
-
     @Query("SELECT uv.id FROM University uv")
     List<Long> findAllUniversityIds();
 }

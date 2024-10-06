@@ -1,6 +1,5 @@
-package com.onebucket.domain.universityManage.dto;
+package com.onebucket.domain.universityManage.dto.university;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,7 +21,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-public class UniversityDto {
+public class ResponseUniversityDto {
     @NotBlank(message = "name must not be empty")
     private String name;
 
@@ -30,6 +29,5 @@ public class UniversityDto {
     private String address;
 
     @NotBlank(message = "email must not be empty")
-    @Email(message = "Email should be valid")
     private String email;
 }

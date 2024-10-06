@@ -2,6 +2,8 @@ package com.onebucket.domain.memberManage.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.onebucket.domain.mailManage.dto.EmailMessage;
+import com.onebucket.domain.mailManage.service.MailService;
 import com.onebucket.domain.memberManage.dto.*;
 import com.onebucket.domain.memberManage.service.MemberService;
 import com.onebucket.domain.memberManage.service.ProfileService;
@@ -27,6 +29,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.onebucket.testComponent.testUtils.JsonFieldResultMatcher.hasKey;
 import static com.onebucket.testComponent.testUtils.JsonFieldResultMatcher.hasStatus;
@@ -70,6 +74,9 @@ class MemberControllerTest {
     @Mock
     private SecurityUtils securityUtils;
 
+    @Mock
+    private MailService mailService;
+
     @InjectMocks
     private MemberController memberController;
 
@@ -90,7 +97,11 @@ class MemberControllerTest {
     @Test
     @DisplayName("resetPassword - success")
     void testResetPassword_success() throws Exception {
+        Long id = -1L;
         when(securityUtils.getCurrentUsername()).thenReturn("username");
+        when(memberService.usernameToId("username")).thenReturn(id);
+        when(profileService.readProfile(id)).thenReturn(ReadProfileDto.builder().build());
+        when(memberService.changePassword("username")).thenReturn("password");
         mockMvc.perform(post("/member/password/reset")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .accept(MediaType.APPLICATION_JSON))
@@ -99,6 +110,7 @@ class MemberControllerTest {
                 .andExpect((hasKey(new SuccessResponseDto("success reset password"))));
 
         verify(memberService,  times(1)).changePassword("username");
+        verify(mailService, times(1)).sendEmail(any(EmailMessage.class),anyString(),anyMap());
     }
 
     @Test

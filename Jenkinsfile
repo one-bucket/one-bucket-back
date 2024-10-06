@@ -23,7 +23,6 @@ pipeline {
         MONGO_USER = "springUser"
         MONGO_PWD = "ezAcEOvxX0"
         MINIO_URL = "http://192.168.219.144:9000"
-
    }
 
    stages {
@@ -45,7 +44,14 @@ pipeline {
                     "MONGO_DB=${MONGO_DB}",
                     "MINIO_URL=${MINIO_URL}",
                     "MONGO_USER=${MONGO_USER}",
-                    "MONGO_PWD=${MONGO_PWD}"
+                    "MONGO_PWD=${MONGO_PWD}",
+                    "MAIL_HOST=${MAIL_HOST}",
+                    "MAIL_PASSWORD=${MAIL_PASSWORD}",
+                    "MAIL_PORT=${MAIL_PORT}",
+                    "MAIL_USERNAME=${MAIL_USERNAME}",
+                    "MAIL_PROTOCOL=${MAIL_PROTOCOL}",
+                    "MAIL_SMTP_AUTH=${MAIL_SMTP_AUTH}",
+                    "MAIL_SMTP_STARTTLS_ENABLE=${MAIL_SMTP_STARTTLS_ENABLE}"
                 ]) {
                     sh './gradlew test'
                 }
@@ -103,6 +109,13 @@ pipeline {
                             -e MINIO_URL=${MINIO_URL} \\
                             -e MONGO_USER=${MONGO_USER} \\
                             -e MONGO_PWD=${MONGO_PWD} \\
+                            -e MAIL_HOST=${MAIL_HOST} \\
+                            -e MAIL_PASSWORD=${MAIL_PASSWORD} \\
+                            -e MAIL_PORT=${MAIL_PORT} \\
+                            -e MAIL_USERNAME=${MAIL_USERNAME} \\
+                            -e MAIL_PROTOCOL=${MAIL_PROTOCOL} \\
+                            -e MAIL_SMTP_AUTH=${MAIL_SMTP_AUTH} \\
+                            -e MAIL_SMTP_STARTTLS_ENABLE=${MAIL_SMTP_STARTTLS_ENABLE} \\
                             ${DOCKER_IMAGE}
                         docker system prune -f
                     << EOF

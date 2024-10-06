@@ -1,8 +1,11 @@
 package com.onebucket.domain.memberManage.api;
 
+import com.onebucket.domain.mailManage.dto.EmailMessage;
+import com.onebucket.domain.mailManage.service.MailService;
 import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.domain.memberManage.domain.Profile;
 import com.onebucket.domain.memberManage.dto.*;
+import com.onebucket.domain.memberManage.dto.RequestSetEmailDto.RequestSetEmailDto;
 import com.onebucket.domain.memberManage.dto.internal.SetUniversityDto;
 import com.onebucket.domain.memberManage.dto.request.RequestSetUnivDto;
 import com.onebucket.domain.memberManage.service.MemberService;
@@ -17,6 +20,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * <br>package name   : com.onebucket.domain.memberManage.api
@@ -50,17 +57,26 @@ public class MemberController {
     private final MemberService memberService;
     private final ProfileService profileService;
     private final SecurityUtils securityUtils;
-
+    private final MailService mailService;
     /**
      * 사용자가 비밀번호를 잊었을 때, 임시 비밀번호를 설정한다.
-     * TODO: 이메일 송신 로직을 추가해야 한다. , 권한 문제
+     * TODO: 권한 문제
      * @return 200 code
      * @tested yes
      */
     @PostMapping("/member/password/reset")
     public ResponseEntity<SuccessResponseDto> resetPassword() {
+        // 비밀 번호 변경하기
         String username = securityUtils.getCurrentUsername();
-        memberService.changePassword(username);
+        String temporaryPassword = memberService.changePassword(username);
+
+        // 인증번호 보내기
+        Long id = memberService.usernameToId(username);
+        ReadProfileDto profile = profileService.readProfile(id);
+        EmailMessage emailMessage = EmailMessage.of(profile.getEmail(),"[한바구니] 임시 비밀번호 발급");
+        Map<String, Object> variables = new ConcurrentHashMap<>();
+        variables.put("temporaryPassword", temporaryPassword);
+        mailService.sendEmail(emailMessage,"reset-password",variables);
         return ResponseEntity.ok(new SuccessResponseDto("success reset password"));
     }
 
@@ -212,21 +228,4 @@ public class MemberController {
 
         return ResponseEntity.ok(new SuccessResponseDto(url));
     }
-
-
-    //TODO :  권한 문제 해결하기
-    @PostMapping("/member/univ")
-    public ResponseEntity<SuccessResponseDto> setMemberUniv(@Valid @RequestBody RequestSetUnivDto dto) {
-        String username = securityUtils.getCurrentUsername();
-        SetUniversityDto setUniversityDto = SetUniversityDto.builder()
-                .username(username)
-                .university(dto.getUniversity())
-                .build();
-
-        memberService.setUniversity(setUniversityDto);
-        return ResponseEntity.ok(new SuccessResponseDto("success set university"));
-    }
-
-
-
 }

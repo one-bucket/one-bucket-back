@@ -43,6 +43,7 @@ public class Profile {
 
     private String name;
     private String gender;
+    private String email;
     private Integer age;
     private String email;
     private String description;
