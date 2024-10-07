@@ -43,10 +43,10 @@ public class TradeDto {
     @SuperBuilder
     @NoArgsConstructor
     public static class Create extends BaseTrade {
-        private Long ownerId;
         private Long dueDays;
+        private Long ownerId;
 
-        public static Create of(Requestcreate dto) {
+        public static Create of(RequestCreate dto, Long ownerId) {
             return Create.builder()
                     .item(dto.getItem())
                     .wanted(dto.getWanted())
@@ -55,8 +55,9 @@ public class TradeDto {
                     .location(dto.getLocation())
                     .linkUrl(dto.getLinkUrl())
                     .tag(dto.getTag())
-                    .ownerId(dto.getOwnerId())
                     .dueDays(dto.getDueDays())
+
+                    .ownerId(ownerId)
                     .build();
         }
     }
@@ -64,7 +65,8 @@ public class TradeDto {
     @Getter
     @SuperBuilder
     @NoArgsConstructor
-    public static class Requestcreate extends Create {
+    public static class RequestCreate extends BaseTrade {
+        private Long dueDays;
 
     }
 

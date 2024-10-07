@@ -29,6 +29,6 @@ public class RequestCreateMarketPostDto {
     @Valid
     private MarketPostDto.RequestCreate  marketPostCreateDto;
     @Valid
-    private TradeDto.Requestcreate tradeCreateDto;
+    private TradeDto.RequestCreate tradeCreateDto;
 
 }

@@ -46,4 +46,36 @@ public interface BasePostRepository<T extends Post> extends JpaRepository<T, Lon
 
     //search query
     //Page<T> titleSearchResult(@Param("keyword") String keyword, Pageable pageable);
+    @Query("""
+            SELECT p FROM Post p
+            WHERE p.board.id = :boardId
+            AND (
+                :keyword IS NULL OR p.title Like %:keyword% OR p.text LIKE %:keyword$%
+            )
+        """)
+    Page<T> searchPosts(@Param("keyword") String keyword,
+                        @Param("boardId") Long boardId,
+                        Pageable pageable);
+    @Query("""
+            SELECT p FROM Post p
+            WHERE p.board.id = :boardId
+            AND (
+                :keyword IS NULL OR p.title Like %:keyword%
+            )
+        """)
+    Page<T> searchPostsByTitle(@Param("keyword") String keyword,
+                               @Param("boardId") Long boardId,
+                               Pageable pageable);
+
+    @Query("""
+            SELECT p FROM Post p
+            WHERE p.board.id = :boardId
+            AND (
+                :keyword IS NULL OR p.text Like %:keyword%
+            )
+        """)
+    Page<T> searchPostsByText(@Param("keyword") String keyword,
+                               @Param("boardId") Long boardId,
+                               Pageable pageable);
+
 }
