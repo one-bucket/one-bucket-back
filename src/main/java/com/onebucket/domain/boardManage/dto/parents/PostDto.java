@@ -67,9 +67,8 @@ public class PostDto {
         private Long views;
         private Long likes;
         private Long commentsCount;
+        private List<String> imageUrls;
 
-        private boolean isImageExist;
-        private String thumbnailImage;
     }
 
     @Getter
@@ -77,6 +76,7 @@ public class PostDto {
     @NoArgsConstructor
     public static class Info extends Thumbnail {
         private List<GetCommentDto> comments;
+
     }
 
     @Getter
@@ -99,6 +99,7 @@ public class PostDto {
                     .text(info.getText())
                     .likes(info.getLikes())
                     .views(info.getViews())
+                    .imageUrls(info.getImageUrls())
                     .build();
         }
     }

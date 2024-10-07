@@ -89,6 +89,7 @@ public class PostServiceImpl extends AbstractPostService<Post, PostRepository> i
                 .createdDate(post.getCreatedDate())
                 .modifiedDate(post.getModifiedDate())
                 .postId(post.getId())
+                .imageUrls(post.getImageUrls())
                 .build();
     }
 
@@ -111,6 +112,7 @@ public class PostServiceImpl extends AbstractPostService<Post, PostRepository> i
                 .createdDate(post.getCreatedDate())
                 .modifiedDate(post.getModifiedDate())
                 .comments(comments)
+                .imageUrls(post.getImageUrls())
                 .build();
     }
 }

@@ -107,9 +107,7 @@ public class MarketPostServiceImpl extends AbstractPostService<MarketPost, Marke
                 .views(post.getViews())
                 .createdDate(post.getCreatedDate())
                 .modifiedDate(post.getModifiedDate())
-                .isImageExist(isImageExist)
-                .thumbnailImage(imageUrl)
-
+                .imageUrls(post.getImageUrls())
                 .tradeId(post.getPendingTrade().getId())
                 .build();
     }

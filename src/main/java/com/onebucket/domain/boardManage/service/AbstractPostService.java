@@ -273,6 +273,7 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
     }
 
     @Override
+    @Transactional
     public void saveImage(MultipartFile multipartFile, SaveImageDto dto) {
 
         String url = "/post/" + dto.getPostId() + "/image/" + dto.getImageName();
@@ -284,8 +285,9 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
 
         try {
             minioRepository.uploadFile(multipartFile,minioSaveInfoDto);
-            Post post = repository.findById(dto.getPostId()).orElseThrow();
+            T post = repository.findById(dto.getPostId()).orElseThrow();
             post.addImage(url + "." + dto.getFileExtension());
+            repository.save(post);
         } catch (Exception e) {
             throw new UserBoardException(BoardErrorCode.I_AM_AN_APPLE_PIE, "error occur while save image");
         }

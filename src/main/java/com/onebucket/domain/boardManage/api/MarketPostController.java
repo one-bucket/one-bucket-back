@@ -54,8 +54,9 @@ public class MarketPostController extends AbstractPostController<MarketPostServi
     @PostMapping("/create")
     public ResponseEntity<SuccessResponseWithIdDto> createPost(@RequestBody @Valid RequestCreateMarketPostDto dto) {
 
+
         MarketPostDto.RequestCreate marketPostCreateDto = dto.getMarketPostCreateDto();
-        TradeDto.Requestcreate tradeCreateDto = dto.getTradeCreateDto();
+        TradeDto.RequestCreate tradeCreateDto = dto.getTradeCreateDto();
 
 
         String type = boardService.getType(marketPostCreateDto.getBoardId());
@@ -63,11 +64,13 @@ public class MarketPostController extends AbstractPostController<MarketPostServi
             throw new UserBoardException(BoardErrorCode.MISMATCH_POST_AND_BOARD);
         }
         String username = securityUtils.getCurrentUsername();
+        Long ownerId = memberService.usernameToId(username);
+
         Long univId = securityUtils.getUnivId(username);
 
 
         //PendingTrade 저장
-        TradeDto.Create internalTradeCreateDto = TradeDto.Create.of(tradeCreateDto);
+        TradeDto.Create internalTradeCreateDto = TradeDto.Create.of(tradeCreateDto, ownerId);
         Long tradeId = pendingTradeService.create(internalTradeCreateDto);
 
 
