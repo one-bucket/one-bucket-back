@@ -26,7 +26,6 @@ import com.onebucket.global.minio.MinioSaveInfoDto;
 import com.onebucket.global.redis.RedisRepository;
 import com.onebucket.global.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
-import org.checkerframework.checker.optional.qual.Present;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.cache.annotation.CacheEvict;
@@ -44,13 +43,15 @@ import java.util.List;
  * <br>date           : 2024-09-21
  * <pre>
  * <span style="color: white;">[description]</span>
+ * PostService에 관련된 추상 클래스이다. 이에 대한 구현 클래스는 {@link PostService} 와 {@link MarketPostService} 이다.
+ * 각 메서드는 {@link BasePostService} 에서 정의되어 있으며 이는 유사하나 다른 두 엔티티
+ * {@link Post} 와 {@link com.onebucket.domain.boardManage.entity.post.MarketPost MarketPost} 를 사용한다.
+ * 두 엔티티는 각기 다른 DAO를 가지고 있고 따라서 엔티티와 DAO에 관한 제네릭을 사용하여 정의하였다.
  *
+ * 메서드가 겹치는 경우, 해당 클래스에서 정의하였고, 칼럼의 차이로 안해 변경이 생기는 경우, 이를 추상 메서드로 선언하거나
+ * 동일한 부분을 추출하여 정의한 뒤, protected abstract  메서드를 선언하여 이를 구현하는 구현 클래스에서
+ * 나머지를 채우도록 하였다.
  * </pre>
- * <pre>
- * <span style="color: white;">usage:</span>
- * {@code
- *
- * } </pre>
  */
 
 
@@ -143,8 +144,13 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
         Comment savedComment = comments.stream().filter((comment) -> comment.getId().equals(dto.getCommentId()))
                         .findFirst().orElseThrow(() -> new UserBoardException(BoardErrorCode.UNKNOWN_COMMENT));
 
-        post.deleteComment(savedComment);
-        repository.save(post);
+        if(!savedComment.getReplies().isEmpty()) {
+            savedComment.setText("deleted");
+            commentRepository.save(savedComment);
+        } else {
+            post.deleteComment(savedComment);
+            repository.save(post);
+        }
     }
     @Override
     @Transactional(readOnly = true)

@@ -81,7 +81,6 @@ public abstract class AbstractPostController<S extends BasePostService> {
                 .userId(userId)
                 .build();
 
-        System.out.println("in time 1");
         postService.deletePost(deletePostDto);
 
         return ResponseEntity.ok(new SuccessResponseWithIdDto("success delete post", postId));

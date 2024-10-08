@@ -407,7 +407,9 @@ class PostServiceTest {
                 .extracting(("errorCode"))
                 .isEqualTo(BoardErrorCode.UNKNOWN_COMMENT);
         verify(postRepository, never()).save(mockPost);
-        }
+    }
+
+
 
     //-+-+-+-+-+-+]] getPostsByBoard [[-+-+-+-+-+-+
 
