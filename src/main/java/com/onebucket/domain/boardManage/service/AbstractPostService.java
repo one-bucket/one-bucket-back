@@ -152,11 +152,28 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
                 .map(this::convertPostToThumbnailDto);
     }
 
-//    public Page<PostDto.Thumbnail> getSearchResult(ValueDto.SearchPageablePost dto) {
-//        String keyword = dto.getKeyword();
-//        Integer option = dto.getOption();
-//
-//    }
+    @Override
+    @Transactional(readOnly = true)
+    public Page<PostDto.Thumbnail> getSearchResult(ValueDto.SearchPageablePost dto) {
+        String keyword = dto.getKeyword();
+        //1 is for title, 2 is for text, 3 is for title + text.
+        Integer option = dto.getOption();
+        Page<T> posts;
+        if(option == 1) {
+            posts = repository.searchPostsByTitle(keyword, dto.getBoardId(),dto.getPageable());
+        } else if(option == 2) {
+            posts = repository.searchPostsByText(keyword, dto.getBoardId(), dto.getPageable());
+        } else if(option == 3) {
+            posts = repository.searchPosts(keyword, dto.getBoardId(), dto.getPageable());
+        } else {
+            throw new UserBoardException(BoardErrorCode.UNKNOWN_SEARCH_OPTION);
+        }
+
+        return posts.map(this::convertPostToThumbnailDto);
+
+    }
+
+
 
 
     @Override

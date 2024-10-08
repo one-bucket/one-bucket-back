@@ -36,4 +36,5 @@ public interface BasePostService {
     Long getLikesInRedis(Long postId);
     boolean isUserLikesPost(ValueDto.FindPost dto);
     void saveImage(MultipartFile multipartFile, SaveImageDto dto);
+    Page<PostDto.Thumbnail> getSearchResult(ValueDto.SearchPageablePost dto);
 }

@@ -85,11 +85,21 @@ public class PostController extends AbstractPostController<PostService>{
     protected ResponseEntity<Page<? extends PostDto.Thumbnail>> getPostByBoardInternal(ValueDto.PageablePost getBoardDto) {
         Page<PostDto.Thumbnail> posts = postService.getPostsByBoard(getBoardDto);
 
-        posts.forEach(post -> {
-            Long commentCount = (Long) postService.getCommentCount(post.getPostId());
-            post.setCommentsCount(commentCount);
-            post.setLikes(post.getLikes() + postService.getLikesInRedis(post.getPostId()));
-        });
+        posts.forEach(this::addLikeAndCommentInfoOnThumbnail);
         return ResponseEntity.ok(posts);
+    }
+
+    @Override
+    protected ResponseEntity<Page<? extends PostDto.Thumbnail>> getPostsBySearchInternal(ValueDto.SearchPageablePost dto) {
+        Page<PostDto.Thumbnail> posts = postService.getSearchResult(dto);
+
+        posts.forEach(this::addLikeAndCommentInfoOnThumbnail);
+        return ResponseEntity.ok(posts);
+    }
+
+    private void addLikeAndCommentInfoOnThumbnail(PostDto.Thumbnail dto) {
+        Long commentCount = (Long) postService.getCommentCount(dto.getPostId());
+        dto.setCommentsCount(commentCount);
+        dto.setLikes(dto.getLikes() + postService.getLikesInRedis(dto.getPostId()));
     }
 }

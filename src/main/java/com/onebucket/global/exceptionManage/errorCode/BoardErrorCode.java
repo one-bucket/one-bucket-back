@@ -42,6 +42,7 @@ public enum BoardErrorCode implements ErrorCode {
 
     UNKNOWN_BOARD_TYPE("2104", HttpStatus.BAD_REQUEST, "unknown board type"),
     NOT_EXISTING("2105", HttpStatus.NOT_FOUND, "data not exist."),
+    UNKNOWN_SEARCH_OPTION("2106", HttpStatus.BAD_REQUEST, "option to search is not valid"),
 
     I_AM_AN_APPLE_PIE("2999", HttpStatus.INTERNAL_SERVER_ERROR, "something went wrong in server");
 

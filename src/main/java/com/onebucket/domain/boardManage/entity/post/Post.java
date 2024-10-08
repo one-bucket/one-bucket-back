@@ -3,9 +3,6 @@ package com.onebucket.domain.boardManage.entity.post;
 import com.onebucket.domain.boardManage.entity.Board;
 import com.onebucket.domain.boardManage.entity.Comment;
 import com.onebucket.domain.memberManage.domain.Member;
-import com.onebucket.global.exceptionManage.customException.boardManageException.BoardManageException;
-import com.onebucket.global.exceptionManage.customException.boardManageException.UserBoardException;
-import com.onebucket.global.exceptionManage.errorCode.BoardErrorCode;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -57,7 +54,9 @@ import java.util.List;
 @Table(
         name = "post",
         indexes = {
-                @Index(name = "idx_board_id", columnList = "board_id") // board_id 컬럼에 대한 인덱스 추가
+                @Index(name = "idx_board_id", columnList = "board_id"),
+                @Index(name = "idx_author_id", columnList = "author_id")// board_id 컬럼에 대한 인덱스 추가
+
         }
 )
 
@@ -77,6 +76,9 @@ public class Post {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = true)
     private Member author;
+
+    @Column(name = "author_id", insertable = false, updatable = false)
+    private Long authorId;
 
 
     private String title;

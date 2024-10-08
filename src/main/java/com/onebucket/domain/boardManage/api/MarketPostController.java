@@ -116,17 +116,28 @@ public class MarketPostController extends AbstractPostController<MarketPostServi
         Page<MarketPostDto.Thumbnail> posts = postService.getPostsByBoard(getBoardDto)
                         .map(post -> (MarketPostDto.Thumbnail) post);
 
-        posts.forEach(post -> {
-            Long commentCount = (Long) postService.getCommentCount(post.getPostId());
-            post.setCommentsCount(commentCount);
-            post.setLikes(post.getLikes() + postService.getLikesInRedis(post.getPostId()));
-
-            //tradeInfo 설정하기
-            Long tradeId = post.getTradeId();
-            TradeDto.Info tradeInfo = pendingTradeService.getInfo(tradeId);
-            TradeDto.ResponseInfo responseTradeInfo = TradeDto.ResponseInfo.of(tradeInfo);
-            post.setTradeInfo(responseTradeInfo);
-        });
+        posts.forEach(this::addInfoOnPost);
         return ResponseEntity.ok(posts);
+    }
+
+    @Override
+    protected ResponseEntity<Page<? extends PostDto.Thumbnail>> getPostsBySearchInternal(ValueDto.SearchPageablePost dto) {
+        Page<MarketPostDto.Thumbnail> posts = postService.getSearchResult(dto)
+                        .map(post -> (MarketPostDto.Thumbnail) post);
+
+        posts.forEach(this::addInfoOnPost);
+        return ResponseEntity.ok(posts);
+    }
+
+    private void addInfoOnPost(MarketPostDto.Thumbnail dto) {
+        Long commentCount = (Long) postService.getCommentCount(dto.getPostId());
+        dto.setCommentsCount(commentCount);
+        dto.setLikes(dto.getLikes() + postService.getLikesInRedis(dto.getPostId()));
+
+        //tradeInfo 설정
+        Long tradeId = dto.getTradeId();
+        TradeDto.Info tradeInfo = pendingTradeService.getInfo(tradeId);
+        TradeDto.ResponseInfo responseTradeInfo = TradeDto.ResponseInfo.of(tradeInfo);
+        dto.setTradeInfo(responseTradeInfo);
     }
 }

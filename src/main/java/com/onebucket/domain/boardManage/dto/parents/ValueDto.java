@@ -69,8 +69,28 @@ public class ValueDto {
     @Getter
     @SuperBuilder
     public static class SearchPageablePost extends PageablePost {
+        //1 is for title, 2 is for text, 3 is for title + text
+        //don't know what to do when tag search...
+        //cause no implement yet
         private Integer option;
         private String keyword;
+    }
+
+    @Getter
+    @Builder
+    public static class RequestSearchPost {
+        private Long boardId;
+        private Integer option;
+        private String keyword;
+
+        public static SearchPageablePost of(RequestSearchPost dto, Pageable pageable) {
+            return SearchPageablePost.builder()
+                    .boardId(dto.getBoardId())
+                    .option(dto.getOption())
+                    .keyword(dto.getKeyword())
+                    .pageable(pageable)
+                    .build();
+        }
     }
 
 }

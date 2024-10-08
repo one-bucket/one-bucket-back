@@ -137,6 +137,16 @@ public abstract class AbstractPostController<S extends BasePostService> {
         return ResponseEntity.ok(new SuccessResponseWithIdDto("success save images", index));
     }
 
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<? extends PostDto.Thumbnail>> getPostBySearch(@RequestBody ValueDto.RequestSearchPost dto,
+                                                                             Pageable pageable) {
+        ValueDto.SearchPageablePost searchPageablePost = ValueDto.RequestSearchPost.of(dto, pageable);
+        return getPostsBySearchInternal(searchPageablePost);
+    }
+
+    protected abstract ResponseEntity<Page<? extends PostDto.Thumbnail>> getPostsBySearchInternal(ValueDto.SearchPageablePost dto);
+
     private String getFileNameWithoutExtension(String fileName) {
         if(fileName == null) {
             throw new UserBoardException(CommonErrorCode.ILLEGAL_ARGUMENT, "file name is null");

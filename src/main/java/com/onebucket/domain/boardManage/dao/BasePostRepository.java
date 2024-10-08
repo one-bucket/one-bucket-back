@@ -78,4 +78,7 @@ public interface BasePostRepository<T extends Post> extends JpaRepository<T, Lon
                                @Param("boardId") Long boardId,
                                Pageable pageable);
 
+    Page<T> findByAuthorId(Long authorId, Pageable pageable);
+
+
 }
