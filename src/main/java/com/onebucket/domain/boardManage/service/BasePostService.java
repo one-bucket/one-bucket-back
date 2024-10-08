@@ -29,6 +29,7 @@ public interface BasePostService {
     void deleteCommentFromPost(ValueDto.FindComment dto);
     Page<PostDto.Thumbnail> getPostsByBoard(ValueDto.PageablePost dto);
     PostDto.Info getPost(ValueDto.GetPost dto);
+    Page<PostDto.Thumbnail> getPostByAuthorId(ValueDto.AuthorPageablePost dto);
     void increaseViewCount(ValueDto.FindPost dto);
     void increaseLikesCount(ValueDto.FindPost dto);
     void decreaseLikesCount(ValueDto.FindPost dto);

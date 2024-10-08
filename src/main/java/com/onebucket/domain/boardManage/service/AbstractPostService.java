@@ -26,6 +26,7 @@ import com.onebucket.global.minio.MinioSaveInfoDto;
 import com.onebucket.global.redis.RedisRepository;
 import com.onebucket.global.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.optional.qual.Present;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.cache.annotation.CacheEvict;
@@ -173,6 +174,12 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
 
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Page<PostDto.Thumbnail> getPostByAuthorId(ValueDto.AuthorPageablePost dto) {
+        return repository.findByAuthorId(dto.getUserId(), dto.getPageable())
+                .map(this::convertPostToThumbnailDto);
+    }
 
 
 

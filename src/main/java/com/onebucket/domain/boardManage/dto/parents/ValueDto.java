@@ -67,6 +67,13 @@ public class ValueDto {
     }
 
     @Getter
+    @Builder
+    public static class AuthorPageablePost {
+        private Long userId;
+        private Pageable pageable;
+    }
+
+    @Getter
     @SuperBuilder
     public static class SearchPageablePost extends PageablePost {
         //1 is for title, 2 is for text, 3 is for title + text
