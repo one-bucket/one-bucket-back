@@ -56,6 +56,9 @@ public class Comment {
     @Setter
     private Post post;
 
+    @Column(name = "post_id", insertable = false, updatable = false)
+    private Long postId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_comment_id")
     private Comment parentComment;

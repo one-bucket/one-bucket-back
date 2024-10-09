@@ -142,8 +142,14 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
         T post = findPost(dto.getPostId());
         List<Comment> comments = post.getComments();
         Comment savedComment = comments.stream().filter((comment) -> comment.getId().equals(dto.getCommentId()))
-                        .findFirst().orElseThrow(() -> new UserBoardException(BoardErrorCode.UNKNOWN_COMMENT));
-
+                        .findFirst().orElse(null);//Throw(() -> new UserBoardException(BoardErrorCode.UNKNOWN_COMMENT));
+        if(savedComment == null) {
+            savedComment = commentRepository.findById(dto.getCommentId()).orElseThrow(() ->
+                    new UserBoardException(BoardErrorCode.UNKNOWN_COMMENT));
+            if(!savedComment.getPostId().equals(dto.getPostId())) {
+                throw new UserBoardException(BoardErrorCode.NOT_EXISTING);
+            }
+        }
         if(!savedComment.getReplies().isEmpty()) {
             savedComment.setText("deleted");
             commentRepository.save(savedComment);

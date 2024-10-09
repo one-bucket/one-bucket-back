@@ -70,12 +70,11 @@ public interface BasePostService {
      * @throws com.onebucket.global.exceptionManage.customException.boardManageException.UserBoardException <br>
      *          {@code BoardErrorCode.UNKNOWN_COMMENT} / 부모 댓글의 id를 찾아봤지만 존재하지 않을 때 <br>
      *          {@code BoardErrorCode.COMMENT_LAYER_OVERHEAD} / 대대댓글 혹은 그 이상을 요청한 경우
-
      */
     void addCommentToPost(CreateCommentDto dto);
 
     /**
-     *
+     * 댓글을 지우는 로직. dto로부터 {@code postId} 를 받아서 검색한 뒤에
      * @param dto
      */
     void deleteCommentFromPost(ValueDto.FindComment dto);
