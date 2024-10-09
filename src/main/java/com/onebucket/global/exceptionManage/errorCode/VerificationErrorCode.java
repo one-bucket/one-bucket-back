@@ -28,11 +28,14 @@ import org.springframework.http.HttpStatus;
 @Getter
 @RequiredArgsConstructor
 public enum VerificationErrorCode implements ErrorCode {
+    // 이메일 인증의 경우
     DUPLICATE_EMAIL("4000", HttpStatus.CONFLICT, "Duplicate Email"),
     INVALID_EMAIL("4001", HttpStatus.BAD_REQUEST, "Invalid student email address"),
     INVALID_VERIFICATION_CODE("4002", HttpStatus.BAD_REQUEST, "Invalid verification code"),
     VERIFICATION_CODE_NOT_FOUND("4003", HttpStatus.BAD_REQUEST, "Can't find verification code"),
 
+    // 임시 비밀번호 발급의 경우
+    INVALID_PASSWORD("4004", HttpStatus.BAD_REQUEST, "Invalid password"),
     ;
 
 

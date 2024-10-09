@@ -5,7 +5,8 @@ import com.onebucket.domain.mailManage.service.MailService;
 import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.domain.memberManage.domain.Profile;
 import com.onebucket.domain.memberManage.dto.*;
-import com.onebucket.domain.memberManage.dto.request.RequestResetPasswordDto;
+import com.onebucket.domain.memberManage.dto.internal.SetPasswordDto;
+import com.onebucket.domain.memberManage.dto.request.RequestInitPasswordDto;
 import com.onebucket.domain.memberManage.service.MemberService;
 import com.onebucket.domain.memberManage.service.ProfileService;
 import com.onebucket.global.utils.SecurityUtils;
@@ -19,7 +20,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -63,9 +63,9 @@ public class MemberController {
      * @tested yes
      */
     @PostMapping("/member/password/reset")
-    public ResponseEntity<SuccessResponseDto> resetPassword(@Valid @RequestBody RequestResetPasswordDto dto) {
+    public ResponseEntity<SuccessResponseDto> initPassword(@Valid @RequestBody RequestInitPasswordDto dto) {
         // 비밀 번호 변경하기
-        String temporaryPassword = memberService.changePassword(dto.username());
+        String temporaryPassword = memberService.initPassword(dto.username());
 
         // 인증번호 보내기
         EmailMessage emailMessage = EmailMessage.of(dto.email(),"[한바구니] 임시 비밀번호 발급");
@@ -82,10 +82,14 @@ public class MemberController {
      * @tested yes
      */
     @PostMapping("/member/password/set")
-    public ResponseEntity<SuccessResponseDto> setPassword(@Valid @RequestBody SetPasswordDto dto) {
+    public ResponseEntity<SuccessResponseDto> setPassword(@Valid @RequestBody RequestSetPasswordDto dto) {
         String username = securityUtils.getCurrentUsername();
-        String password = dto.getPassword();
-        memberService.changePassword(username, password);
+        SetPasswordDto setPasswordDto = SetPasswordDto.builder()
+                .username(username)
+                .oldPassword(dto.getOldPassword())
+                .newPassword(dto.getNewPassword())
+                .build();
+        memberService.changePassword(setPasswordDto);
         return ResponseEntity.ok(new SuccessResponseDto("success set password"));
     }
 

@@ -24,7 +24,7 @@ import jakarta.validation.constraints.NotNull;
  * 2024-10-01        SeungHoon              init create
  * </pre>
  */
-public record RequestResetPasswordDto(
+public record RequestInitPasswordDto(
         @NotNull
         String username,
         @Email
