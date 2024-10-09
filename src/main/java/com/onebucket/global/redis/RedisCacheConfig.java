@@ -1,5 +1,6 @@
 package com.onebucket.global.redis;
 
+import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
@@ -20,6 +21,8 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * <br>package name   : com.onebucket.global.redis
@@ -47,30 +50,38 @@ import java.time.Duration;
 @EnableCaching
 public class RedisCacheConfig {
     @Bean
-    public CacheManager cacheManager(RedisConnectionFactory redisConnectionFactory) {
-        // 커스텀 ObjectMapper 생성
-        ObjectMapper objectMapper = new ObjectMapper();
+    public CacheManager contentCacheManager(RedisConnectionFactory cf) {
 
-        // 숫자를 항상 Long으로 역직렬화하도록 설정
-        SimpleModule module = new SimpleModule();
-        module.addDeserializer(Number.class, new JsonDeserializer<Number>() {
+        //customizing object mapper create
+        ObjectMapper objectMapper = new ObjectMapper();
+        SimpleModule simpleModule = new SimpleModule();
+        simpleModule.addDeserializer(Number.class, new JsonDeserializer<Number>() {
             @Override
-            public Number deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-                return p.getNumberValue().longValue(); // 모든 숫자를 Long으로 변환
+            public Number deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JacksonException {
+                return jsonParser.getLongValue();
             }
         });
-        objectMapper.registerModule(module);
-        GenericJackson2JsonRedisSerializer genericSerializer = new GenericJackson2JsonRedisSerializer(objectMapper);
+        //object mapper에 module 등록
+        objectMapper.registerModule(simpleModule);
 
-        // RedisCacheConfiguration 설정
+        //GenericJackson2JsonRedisSerializer 를 커스터마이징
+        GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer(objectMapper);
+
         RedisCacheConfiguration redisCacheConfiguration = RedisCacheConfiguration.defaultCacheConfig()
-                .entryTtl(Duration.ofMinutes(5))
-                .disableCachingNullValues()
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
-                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(genericSerializer));
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(serializer)) // 커스터마이징된 Serializer 사용
+                .entryTtl(Duration.ofMinutes(3L));
 
-        return RedisCacheManager.builder(RedisCacheWriter.nonLockingRedisCacheWriter(redisConnectionFactory))
+        Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
+
+        cacheConfigurations.put("itemTagCache", redisCacheConfiguration.entryTtl(Duration.ofDays(7L)));
+
+        return RedisCacheManager.RedisCacheManagerBuilder.fromConnectionFactory(cf)
                 .cacheDefaults(redisCacheConfiguration)
+                .withInitialCacheConfigurations(cacheConfigurations)
                 .build();
     }
+
+
+
 }

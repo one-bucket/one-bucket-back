@@ -98,7 +98,7 @@ public class PostController extends AbstractPostController<PostService>{
     }
 
     private void addLikeAndCommentInfoOnThumbnail(PostDto.Thumbnail dto) {
-        Long commentCount = (Long) postService.getCommentCount(dto.getPostId());
+        Long commentCount = postService.getCommentCount(dto.getPostId());
         dto.setCommentsCount(commentCount);
         dto.setLikes(dto.getLikes() + postService.getLikesInRedis(dto.getPostId()));
     }
