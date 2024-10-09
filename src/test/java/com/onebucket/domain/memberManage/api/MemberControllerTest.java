@@ -181,11 +181,10 @@ class MemberControllerTest {
         String oldPassword = "!1Password1!";
         String newPassword = "!1Password1!!";
         RequestSetPasswordDto dto = new RequestSetPasswordDto(oldPassword,newPassword);
-        SetPasswordDto setPasswordDto = SetPasswordDto.of(username,dto);
         AuthenticationErrorCode code = AuthenticationErrorCode.UNKNOWN_USER;
         AuthenticationException exception = new AuthenticationException(code);
         when(securityUtils.getCurrentUsername()).thenReturn(username);
-        when(memberService.changePassword(setPasswordDto)).thenThrow(exception);
+        when(memberService.changePassword(any(SetPasswordDto.class))).thenThrow(exception);
 
         mockMvc.perform(post("/member/password/set")
                         .contentType(MediaType.APPLICATION_JSON)

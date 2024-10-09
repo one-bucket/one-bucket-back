@@ -120,12 +120,12 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public String changePassword(SetPasswordDto dto) {
-        Member member = findMember(dto.username());
-        if (!passwordEncoder.matches(dto.oldPassword(), member.getPassword())) {
+        Member member = findMember(dto.getUsername());
+        if (!passwordEncoder.matches(dto.getOldPassword(), member.getPassword())) {
             throw new VerificationException(VerificationErrorCode.INVALID_PASSWORD);
         }
 
-        String newPassword = passwordEncoder.encode(dto.newPassword());
+        String newPassword = passwordEncoder.encode(dto.getNewPassword());
         member.setPassword(newPassword);
         memberRepository.save(member);
         return newPassword;

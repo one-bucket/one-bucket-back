@@ -1,6 +1,9 @@
 package com.onebucket.domain.memberManage.dto.internal;
 
-import com.onebucket.domain.memberManage.dto.RequestSetPasswordDto;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 /**
  * <br>package name   : com.onebucket.domain.memberManage.dto.internal
@@ -23,12 +26,11 @@ import com.onebucket.domain.memberManage.dto.RequestSetPasswordDto;
  * 2024-10-04        SeungHoon              init create
  * </pre>
  */
-public record SetPasswordDto(
-        String username,
-        String oldPassword,
-        String newPassword
-) {
-    public static SetPasswordDto of(String username, RequestSetPasswordDto dto) {
-        return new SetPasswordDto(username, dto.getOldPassword(), dto.getNewPassword());
-    }
+@Getter
+@Builder
+@AllArgsConstructor
+public class SetPasswordDto {
+    private String username;
+    private String oldPassword;
+    private String newPassword;
 }

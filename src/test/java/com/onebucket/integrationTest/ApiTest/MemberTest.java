@@ -234,7 +234,7 @@ public class MemberTest extends RestDocsSupportTest {
         JwtToken token = createInitUser();
 
         String newPassword = "!1NewPassword1!";
-        RequestSetPasswordDto dto = new RequestSetPasswordDto(testPassword, newPassword);
+        RequestSetPasswordDto dto = new RequestSetPasswordDto(testPassword,newPassword);
 
         String query = """
                 SELECT password

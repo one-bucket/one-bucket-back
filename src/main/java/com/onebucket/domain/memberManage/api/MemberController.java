@@ -84,7 +84,11 @@ public class MemberController {
     @PostMapping("/member/password/set")
     public ResponseEntity<SuccessResponseDto> setPassword(@Valid @RequestBody RequestSetPasswordDto dto) {
         String username = securityUtils.getCurrentUsername();
-        SetPasswordDto setPasswordDto = SetPasswordDto.of(username,dto);
+        SetPasswordDto setPasswordDto = SetPasswordDto.builder()
+                .username(username)
+                .oldPassword(dto.getOldPassword())
+                .newPassword(dto.getNewPassword())
+                .build();
         memberService.changePassword(setPasswordDto);
         return ResponseEntity.ok(new SuccessResponseDto("success set password"));
     }

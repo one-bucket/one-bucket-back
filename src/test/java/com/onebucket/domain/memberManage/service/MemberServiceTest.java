@@ -274,8 +274,8 @@ public class MemberServiceTest {
         String newPassword = "newPassword";
         SetPasswordDto dto = new SetPasswordDto(username, oldPassword, newPassword);
         when(memberRepository.findByUsername(username)).thenReturn(Optional.of(mockMember));
-        when(passwordEncoder.matches(dto.oldPassword(),mockMember.getPassword())).thenReturn(true);
-        when(passwordEncoder.encode(dto.newPassword())).thenReturn(newPassword);
+        when(passwordEncoder.matches(dto.getOldPassword(),mockMember.getPassword())).thenReturn(true);
+        when(passwordEncoder.encode(dto.getNewPassword())).thenReturn(newPassword);
         String result = memberService.changePassword(dto);
 
         assertThat(result).isEqualTo(newPassword);
@@ -300,7 +300,7 @@ public class MemberServiceTest {
         String newPassword = "newPassword";
         SetPasswordDto dto = new SetPasswordDto(username, oldPassword, newPassword);
         when(memberRepository.findByUsername(username)).thenReturn(Optional.of(mockMember));
-        when(passwordEncoder.matches(dto.oldPassword(),mockMember.getPassword())).thenReturn(false);
+        when(passwordEncoder.matches(dto.getOldPassword(),mockMember.getPassword())).thenReturn(false);
 
         assertThatThrownBy(() -> memberService.changePassword(dto))
                 .isInstanceOf(VerificationException.class)
