@@ -139,24 +139,17 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
     @Transactional
     @CacheEvict(value = "commentCountCache", key = "#dto.postId")
     public void deleteCommentFromPost(ValueDto.FindComment dto) {
+        Comment comment = commentRepository.findById(dto.getCommentId()).orElseThrow(() ->
+                new UserBoardException(BoardErrorCode.UNKNOWN_COMMENT));
+        Long commentPostId = comment.getPostId();
+        if(!dto.getPostId().equals(commentPostId)) {
+            throw new UserBoardException(BoardErrorCode.UNKNOWN_POST);
+        }
+
         T post = findPost(dto.getPostId());
-        List<Comment> comments = post.getComments();
-        Comment savedComment = comments.stream().filter((comment) -> comment.getId().equals(dto.getCommentId()))
-                        .findFirst().orElse(null);//Throw(() -> new UserBoardException(BoardErrorCode.UNKNOWN_COMMENT));
-        if(savedComment == null) {
-            savedComment = commentRepository.findById(dto.getCommentId()).orElseThrow(() ->
-                    new UserBoardException(BoardErrorCode.UNKNOWN_COMMENT));
-            if(!savedComment.getPostId().equals(dto.getPostId())) {
-                throw new UserBoardException(BoardErrorCode.NOT_EXISTING);
-            }
-        }
-        if(!savedComment.getReplies().isEmpty()) {
-            savedComment.setText("deleted");
-            commentRepository.save(savedComment);
-        } else {
-            post.deleteComment(savedComment);
-            repository.save(post);
-        }
+
+        post.deleteComment(comment);
+        repository.save(post);
     }
     @Override
     @Transactional(readOnly = true)
@@ -195,6 +188,10 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
 
 
 
+    //Maybe caching or not. Think about add comment, increase view or likes.
+    //Seperate method that loading stable data that cannot be changed except update or delete,
+    //and add other data like comment and view...
+    //But this could be same performance becuase need query to search that entity every time.
     @Override
     @Transactional(readOnly = true)
     public PostDto.Info getPost(ValueDto.GetPost dto) {
