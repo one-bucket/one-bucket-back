@@ -7,6 +7,7 @@ import com.onebucket.domain.boardManage.dto.response.ResponseCreateBoardsDto;
 import com.onebucket.global.auth.jwtAuth.domain.JwtToken;
 import com.onebucket.global.utils.SuccessResponseDto;
 import com.onebucket.testComponent.testSupport.RestDocsSupportTest;
+import com.onebucket.testComponent.testSupport.UserRestDocsSupportTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -39,10 +40,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  * } </pre>
  */
-public class BoardTest extends RestDocsSupportTest {
+public class BoardTest extends UserRestDocsSupportTest {
 
     @Test
-    @DisplayName("POST /board/create test")
+    @DisplayName("POST /admin/board/create test")
     @Sql(scripts = "/sql/InitDB.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void createBoard() throws Exception {
         JwtToken jwtToken = createInitUser();
@@ -56,7 +57,7 @@ public class BoardTest extends RestDocsSupportTest {
                 .university("univ1")
                 .build();
 
-        mockMvc.perform(post("/board/create")
+        mockMvc.perform(post("/admin/board/create")
                 .header("Authorization", getAuthHeader(jwtToken))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto))
@@ -88,7 +89,7 @@ public class BoardTest extends RestDocsSupportTest {
     }
 
     @Test
-    @DisplayName("POST /board/creates test")
+    @DisplayName("POST /admin/board/creates test")
     @Sql(scripts = "/sql/InitDB.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void boardCreates() throws Exception {
         JwtToken token = createInitUser();
@@ -212,13 +213,6 @@ public class BoardTest extends RestDocsSupportTest {
                         )
                 ));
     }
-    @Test
-    @DisplayName("GET /post/list/{boardId} test")
-    @Sql(scripts = "/sql/InitDB.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-    public void getPostByBoard() throws Exception {
-        JwtToken token = createInitUser();
-
-    }
 
 
     private void createBoardType(Long id) {
@@ -231,49 +225,17 @@ public class BoardTest extends RestDocsSupportTest {
         jdbcTemplate.update(query, id, description, name);
     }
 
-    private void createUniversity(Long id) {
-        String address = "address" + id;
-        String email = "email@email." + id;
-        String name = "univ" + id;
+    private Long createUniversity() {
+
+        String address = "address" + stackUnivId;
+        String email = "email@email." + stackUnivId;
+        String name = "univ" + stackUnivId;
         String query = """
                 INSERT INTO university (id, address, email, name)
                 VALUES (?, ?, ?, ?)
                 """;
-        jdbcTemplate.update(query, id, address, email, name);
+        jdbcTemplate.update(query, stackUnivId, address, email, name);
     }
 
-    private void createBoard(long count) {
-        for(long i = 1; i <= count; i++) {
-            createBoardType(i);
-            createUniversity(i);
-        }
-        Long index = 1L;
-        String query = """
-                INSERT INTO board (id, description, name, board_type_id, university_id)
-                VALUES (?, ?, ?, ?, ?)
-                """;
-        for(long i = 1; i <= count; i++) {
-            for(long j = 1; j <= count; j++) {
-                String name = "board" + i + j;
-                String description = "description" + i + j;
 
-                jdbcTemplate.update(query, index, description, name, j, i);
-
-                index++;
-            }
-        }
-    }
-
-    private void createPost(long boardId, long count) {
-        LocalDate now = LocalDate.now();
-        createBoard(1);
-
-        for(long i = 1; i<= count ; i++) {
-            String query = """
-                    INSERT INTO post (post_type, board_id, created_date, is_modified, likes, modified_date, text, title, views, is_fin, item, joins, location, wanted, author_id)
-                    VALUES ('post', ?, ?, ?, 0, ?, ?, ?, 0, ?)
-                    """;
-            jdbcTemplate.update(query);
-        }
-    }
 }

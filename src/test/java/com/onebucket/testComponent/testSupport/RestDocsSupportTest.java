@@ -127,136 +127,14 @@ public class RestDocsSupportTest {
 
     }
 
-    @AfterEach
-    void afterEach() {
-        deleteUser();
-        deleteProfile();
-    }
 
 
     protected Attributes.Attribute getFormat (final String value) {
         return key("format").value(value);
     }
 
-    protected JwtToken createInitUser (String username, String password, String nickname, List<String> roles) {
-        String insertMemberQuery = """
-                INSERT INTO member (id, username, password, nickname, university_id, is_account_non_expired, is_account_non_locked, is_credential_non_expired, is_enable)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """;
-
-        jdbcTemplate.update(insertMemberQuery, stackId, username, passwordEncoder.encode(password), nickname, null, true, true, true, true);
-
-
-        String insertRoleQuery = "INSERT INTO member_roles (member_id, roles) VALUES (?, ?)";
-        for (String role : roles) {
-            jdbcTemplate.update(insertRoleQuery, stackId, role);
-        }
-
-        stackId++;
-
-        UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(username, password);
-
-        Authentication authentication = authenticationManager.authenticate(authenticationToken);
-        return jwtProvider.generateToken(authentication);
-    }
-
-    protected JwtToken createInitUser(String username, String password, String nickname) {
-        return createInitUser(username, password, nickname, List.of("GUEST"));
-    }
-
-    protected JwtToken createInitUser(String username, String nickname) {
-        return createInitUser(username,testPassword, nickname);
-    }
-
-    protected JwtToken createInitUser(String username) {
-        return createInitUser(username, testNickname);
-    }
-
-    protected JwtToken createInitUser() {
-        return createInitUser(testUsername);
-    }
-
-    protected void deleteRedisUser(String username) {
-        redisRepository.delete("refreshToken:" + username);
-    }
-
-    protected void deleteUser(String username) {
-        String getIdQuery = """
-                SELECT id
-                FROM member
-                WHERE username = ?
-                """;
-        Long id = Long.parseLong(Optional.ofNullable(jdbcTemplate.queryForObject(getIdQuery, String.class, username)).orElseThrow(RuntimeException::new));
-
-        String deleteRoleQuery = """
-                DELETE FROM member_roles
-                WHERE member_id = ?
-                """;
-        jdbcTemplate.update(deleteRoleQuery, id);
-        String deleteMemberQuery = """
-                DELETE FROM member
-                WHERE username = ?
-                """;
-        jdbcTemplate.update(deleteMemberQuery, username);
-    }
-
-    protected void deleteUser() {
-        String deleteRoleQuery = """
-                DELETE FROM member_roles
-                """;
-        jdbcTemplate.update(deleteRoleQuery);
-        String deleteMemberQuery = """
-                DELETE FROM member
-                """;
-        jdbcTemplate.update(deleteMemberQuery);
-    }
-
-    protected Long createInitProfile(String username) {
-        String query = """
-                INSERT INTO profile (id, name, gender, age, description, birth, is_basic_image, create_at, update_at)
-                SELECT m.id, ?, ?, ?, ? ,?, 1, ?, ?
-                FROM member m
-                WHERE m.username = ?
-                """;
-
-        jdbcTemplate.update(query,
-                initProfileInfo.getName(),
-                initProfileInfo.getGender(),
-                initProfileInfo.getAge(),
-                initProfileInfo.getDescription(),
-                initProfileInfo.getBirth(),
-                Timestamp.valueOf(LocalDateTime.now()),
-                Timestamp.valueOf(LocalDateTime.now()),
-                username
-
-        );
-
-        String getIdQuery = """
-             SELECT id
-             FROM member
-             WHERE username = ?
-             """;
-        return jdbcTemplate.queryForObject(getIdQuery, Long.class, testUsername);
-    }
-
-    protected Long createInitProfile() {
-        return createInitProfile(testUsername);
-    }
-
-    protected void deleteProfile(Long id) {
-        String query = """
-                DELETE FROM profile
-                WHERE id = ?
-                """;
-        jdbcTemplate.update(query, id);
-    }
-
-    protected void deleteProfile() {
-        String query = """
-                DELETE FROM profile
-                """;
-        jdbcTemplate.update(query);
+    protected void flushRedis() {
+        redisRepository.flushAll();;
     }
 
     protected String getAuthHeader(JwtToken jwtToken) {

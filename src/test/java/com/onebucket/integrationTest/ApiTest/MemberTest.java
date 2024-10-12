@@ -6,6 +6,7 @@ import com.onebucket.global.auth.jwtAuth.domain.JwtToken;
 import com.onebucket.global.minio.MinioSaveInfoDto;
 import com.onebucket.global.utils.SuccessResponseDto;
 import com.onebucket.testComponent.testSupport.RestDocsSupportTest;
+import com.onebucket.testComponent.testSupport.UserRestDocsSupportTest;
 import org.junit.jupiter.api.*;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
@@ -36,7 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 
 
-public class MemberTest extends RestDocsSupportTest {
+public class MemberTest extends UserRestDocsSupportTest {
 
 
 
