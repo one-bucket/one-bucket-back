@@ -168,6 +168,12 @@ public class MemberServiceImpl implements MemberService {
         memberRepository.save(member);
     }
 
+    @Override
+    public void addRoleToMember(String username,String auth) {
+        Member member = findMember(username);
+        member.addRoles(auth);
+        memberRepository.save(member);
+    }
 
     private University saveNullUniv() {
 

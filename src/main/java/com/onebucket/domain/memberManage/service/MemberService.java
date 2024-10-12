@@ -43,6 +43,8 @@ public interface MemberService {
 
     void setUniversity(SetUniversityDto dto);
 
+    void addRoleToMember(String username,String auth);
+
     String idToNickname(Long id);
     University usernameToUniversity(String username);
 
