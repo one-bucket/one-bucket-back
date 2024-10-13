@@ -3,11 +3,12 @@ package com.onebucket.global.exceptionManage.exceptionHandler;
 import com.onebucket.global.exceptionManage.ErrorResponse;
 import com.onebucket.global.exceptionManage.errorCode.ValidateErrorCode;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 
 /**
@@ -47,5 +48,12 @@ public class DataExceptionHandler {
         }
         ErrorResponse errorResponse = new ErrorResponse(ValidateErrorCode.INVALID_DATA, errorMessage.toString());
         return new ResponseEntity<>(errorResponse, ValidateErrorCode.INVALID_DATA.getHttpStatus());
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<String> handleMaxSizeException(MaxUploadSizeExceededException e) {
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
+                .body("file is too big. Check if file size is under 10MB");
+
     }
 }
