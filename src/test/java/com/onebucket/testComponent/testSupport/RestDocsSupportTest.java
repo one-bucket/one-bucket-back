@@ -5,6 +5,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.icegreen.greenmail.junit5.GreenMailExtension;
 import com.icegreen.greenmail.configuration.GreenMailConfiguration;
 import com.icegreen.greenmail.util.ServerSetupTest;
+import com.onebucket.domain.mailManage.service.MailService;
+import com.onebucket.domain.mailManage.service.MailServiceImpl;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import com.onebucket.domain.memberManage.dto.UpdateProfileDto;
 import com.onebucket.global.auth.config.SecurityConfig;
@@ -100,9 +102,14 @@ public class RestDocsSupportTest {
     protected String bucketName;
 
     @RegisterExtension
-    protected static GreenMailExtension greenMail = new GreenMailExtension(ServerSetupTest.SMTP)
+    protected static GreenMailExtension greenMail = new GreenMailExtension(ServerSetupTest.SMTP.dynamicPort())
             .withConfiguration(GreenMailConfiguration.aConfig().withUser("dummy", "dummy"))
             .withPerMethodLifecycle(false);
+
+//    @DynamicPropertySource
+//    static void registerGreenMailProperties(DynamicPropertyRegistry registry) {
+//        registry.add("spring.mail.port", () -> greenMail.getSmtp().getPort());
+//    }
 
     protected final String testUsername = "test-user";
     protected final String testPassword = "!1Password1!";
@@ -139,7 +146,6 @@ public class RestDocsSupportTest {
         deleteUser();
         deleteProfile();
     }
-
 
     protected Attributes.Attribute getFormat (final String value) {
         return key("format").value(value);
@@ -270,5 +276,6 @@ public class RestDocsSupportTest {
     protected String getAuthHeader(JwtToken jwtToken) {
         return jwtToken.getGrantType() + " " + jwtToken.getAccessToken();
     }
+
 
 }

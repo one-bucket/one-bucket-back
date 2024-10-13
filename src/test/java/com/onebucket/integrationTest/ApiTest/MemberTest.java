@@ -7,13 +7,13 @@ import com.onebucket.global.auth.jwtAuth.domain.JwtToken;
 import com.onebucket.global.minio.MinioSaveInfoDto;
 import com.onebucket.global.utils.SuccessResponseDto;
 import com.onebucket.testComponent.testSupport.RestDocsSupportTest;
+import jakarta.mail.internet.MimeMessage;
 import org.junit.jupiter.api.*;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.test.web.servlet.MvcResult;
 
-import javax.mail.internet.MimeMessage;
 import java.time.LocalDate;
 import java.util.Optional;
 

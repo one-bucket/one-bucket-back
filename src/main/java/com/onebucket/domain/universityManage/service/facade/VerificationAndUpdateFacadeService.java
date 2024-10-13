@@ -53,6 +53,6 @@ public class VerificationAndUpdateFacadeService {
                 .university(dto.university())
                 .build();
         memberService.setUniversity(setUniversityDto);
-        memberService.addRoleToMember(username,"USER");
+        memberService.addRoleToMember(username,"ROLE_USER");
     }
 }

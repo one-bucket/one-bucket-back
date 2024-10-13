@@ -63,7 +63,8 @@ public class SecurityConfig {
                                 .requestMatchers("/test/create-testuser").permitAll()
                                 .requestMatchers("/ws-stomp/**").permitAll()
                                 .requestMatchers("/member/password/reset").permitAll()
-//                                .requestMatchers("/admin/**").hasRole("ADMIN")
+                       //         .requestMatchers("/admin/**").hasRole("ADMIN")
+                                .requestMatchers("/user/**").hasRole("USER")
                                 .anyRequest().authenticated())
                 .addFilterBefore(new JwtAuthenticationFilter(jwtValidator),
                         UsernamePasswordAuthenticationFilter.class);
