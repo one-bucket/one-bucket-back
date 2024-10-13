@@ -1,9 +1,11 @@
 package com.onebucket.testComponent.testUtils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onebucket.global.exceptionManage.errorCode.ErrorCode;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
@@ -89,24 +91,33 @@ public class JsonFieldResultMatcher implements ResultMatcher {
         return new JsonFieldResultMatcher(matchers);
     }
 
-    public static ResultMatcher hasKey(Object dto) throws IllegalAccessException {
+    public static ResultMatcher hasKey(Object dto) throws JsonProcessingException {
         List<ResultMatcher> matchers = new ArrayList<>();
-        Field[] fields = dto.getClass().getDeclaredFields();
+        ObjectMapper mapper = new ObjectMapper();
 
-        for (Field field : fields) {
-            field.setAccessible(true);
-            Object value = field.get(dto);
+        // 직렬화하여 key-value 형태의 Map으로 변환
+        @SuppressWarnings("unchecked")
+        Map<String, Object> map = mapper.convertValue(dto, Map.class);
+
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+
             if (value != null) {
-                if (value instanceof LocalDate) {
+                if (value instanceof String) {
+                    matchers.add(MockMvcResultMatchers.jsonPath("$." + key).value(value));
+                } else if (value instanceof Integer || value instanceof Long || value instanceof Boolean) {
+                    matchers.add(MockMvcResultMatchers.jsonPath("$." + key).value(value));
+                } else if (value instanceof LocalDate) {
                     DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
                     String formattedDate = ((LocalDate) value).format(formatter);
-                    matchers.add(MockMvcResultMatchers.jsonPath("$." + field.getName()).value(formattedDate));
+                    matchers.add(MockMvcResultMatchers.jsonPath("$." + key).value(formattedDate));
                 } else if (value instanceof LocalDateTime) {
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
                     String formattedDateTime = ((LocalDateTime) value).truncatedTo(ChronoUnit.SECONDS).format(formatter);
-                    matchers.add(MockMvcResultMatchers.jsonPath("$." + field.getName()).value(formattedDateTime));
+                    matchers.add(MockMvcResultMatchers.jsonPath("$." + key).value(formattedDateTime));
                 } else {
-                    matchers.add(MockMvcResultMatchers.jsonPath("$." + field.getName()).value(value));
+                    matchers.add(MockMvcResultMatchers.jsonPath("$." + key).value(value));
                 }
             }
         }
@@ -141,6 +152,53 @@ public class JsonFieldResultMatcher implements ResultMatcher {
                         matchers.add(MockMvcResultMatchers.jsonPath("$[" + i + "]." + entry.getKey()).value(formattedDateTime));
                     } else {
                         matchers.add(MockMvcResultMatchers.jsonPath("$[" + i + "]." + entry.getKey()).value(value));
+                    }
+                }
+            }
+        }
+
+        return new JsonFieldResultMatcher(matchers);
+    }
+
+    public static ResultMatcher hasKey(Page<?> page) throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+
+        List<ResultMatcher> matchers = new ArrayList<>();
+
+        // Page 메타데이터 검증
+        matchers.add(MockMvcResultMatchers.jsonPath("$.totalElements").value(page.getTotalElements()));
+        matchers.add(MockMvcResultMatchers.jsonPath("$.totalPages").value(page.getTotalPages()));
+        matchers.add(MockMvcResultMatchers.jsonPath("$.size").value(page.getSize()));
+        matchers.add(MockMvcResultMatchers.jsonPath("$.number").value(page.getNumber()));
+        matchers.add(MockMvcResultMatchers.jsonPath("$.numberOfElements").value(page.getNumberOfElements()));
+        matchers.add(MockMvcResultMatchers.jsonPath("$.first").value(page.isFirst()));
+        matchers.add(MockMvcResultMatchers.jsonPath("$.last").value(page.isLast()));
+        matchers.add(MockMvcResultMatchers.jsonPath("$.empty").value(page.isEmpty()));
+
+        // Page의 content 리스트 검증
+        List<?> content = page.getContent();
+        matchers.add(MockMvcResultMatchers.jsonPath("$.content.length()").value(content.size()));
+
+        for (int i = 0; i < content.size(); i++) {
+            Object dto = content.get(i);
+
+            @SuppressWarnings("unchecked")
+            Map<String, Object> map = mapper.convertValue(dto, Map.class);
+
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                Object value = entry.getValue();
+
+                if (value != null) {
+                    if (value instanceof LocalDate) {
+                        DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
+                        String formattedDate = ((LocalDate) value).format(formatter);
+                        matchers.add(MockMvcResultMatchers.jsonPath("$.content[" + i + "]." + entry.getKey()).value(formattedDate));
+                    } else if (value instanceof LocalDateTime) {
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+                        String formattedDateTime = ((LocalDateTime) value).truncatedTo(ChronoUnit.SECONDS).format(formatter);
+                        matchers.add(MockMvcResultMatchers.jsonPath("$.content[" + i + "]." + entry.getKey()).value(formattedDateTime));
+                    } else {
+                        matchers.add(MockMvcResultMatchers.jsonPath("$.content[" + i + "]." + entry.getKey()).value(value));
                     }
                 }
             }

@@ -87,14 +87,6 @@ public class MarketPostServiceImpl extends AbstractPostService<MarketPost, Marke
             preText = text;
         }
 
-        boolean isImageExist = true;
-        String imageUrl = "fail:null image";
-        List<String> images = post.getImageUrls();
-        if(images.isEmpty()) {
-            isImageExist = false;
-        } else {
-            imageUrl = images.get(1);
-        }
 
         return MarketPostDto.Thumbnail.builder()
                 //value of post
