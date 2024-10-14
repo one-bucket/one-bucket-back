@@ -2,18 +2,24 @@ package com.onebucket.integrationTest.ApiTest;
 
 import com.onebucket.domain.boardManage.dto.parents.PostDto;
 import com.onebucket.global.auth.jwtAuth.domain.JwtToken;
+import com.onebucket.global.utils.SuccessResponseDto;
+import com.onebucket.global.utils.SuccessResponseWithIdDto;
 import com.onebucket.testComponent.testSupport.BoardRestDocsSupport;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.web.socket.server.standard.TomcatRequestUpgradeStrategy;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.onebucket.testComponent.testUtils.JsonFieldResultMatcher.hasKey;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.ClassBasedNavigableIterableAssert.assertThat;
 import static org.springframework.restdocs.http.HttpDocumentation.httpRequest;
 import static org.springframework.restdocs.http.HttpDocumentation.httpResponse;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
@@ -167,6 +173,115 @@ public class PostTest extends BoardRestDocsSupport {
         Long boardId = createBoard(univId, boardTypeId);
 
         Long postId = createPost(1, boardId, userId);
+
+        String query = """
+                SELECT EXISTS(
+                    SELECT 1
+                    FROM post
+                    WHERE title = ?)
+                """;
+
+        boolean isExist = Boolean.TRUE.equals(jdbcTemplate.queryForObject(query, boolean.class, "title " + postId));
+
+        assertThat(isExist).isEqualTo(true);
+
+        mockMvc.perform(RestDocumentationRequestBuilders.delete("/post/{postId}", postId)
+                .header("Authorization", getAuthHeader(token))
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(hasKey(new SuccessResponseWithIdDto("success delete post", postId)))
+                .andDo(restDocs.document(
+                        httpRequest(),
+                        pathParameters(
+                                parameterWithName("postId").description("postId which to delete")),
+                        httpResponse(),
+                        responseFields(
+                                fieldWithPath("message").description("success delete post"),
+                                fieldWithPath("id").description("postId that deleted")
+                        )
+                ));
+
+        isExist = Boolean.TRUE.equals(jdbcTemplate.queryForObject(query, boolean.class, "title " + postId));
+        assertThat(isExist).isEqualTo(false);
+    }
+
+    @Test
+    @DisplayName("POST /post/{postId}/like")
+    void addLikes() throws Exception {
+        JwtToken token = createInitUser();
+        Long userId = stackId - 1;
+        Long univId = createUniversity(1);
+        setUniversityToUser(userId, univId);
+
+        Long boardTypeId = createBoardType(1);
+        Long boardId = createBoard(univId, boardTypeId);
+        Long postId = createPost(1, boardId, userId);
+
+        mockMvc.perform(RestDocumentationRequestBuilders.post("/post/{postId}/likes", postId)
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", getAuthHeader(token)))
+                .andExpect(status().isOk())
+                .andExpect(hasKey(new SuccessResponseDto("success add likes")))
+                .andDo(restDocs.document(
+                        httpRequest(),
+                        pathParameters(
+                                parameterWithName("postId").description("postId which to add likes")
+                        ),
+                        httpResponse(),
+                        responseFields(
+                                fieldWithPath("message").description("success add likes")
+                        )
+                ));
+
+        String query = """
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM likes_map
+                    WHERE member_id = ? AND post_id = ?)
+                """;
+        Boolean isLikeExist = jdbcTemplate.queryForObject(query, Boolean.class, userId, postId);
+
+        assertThat(isLikeExist).isEqualTo(true);
+    }
+
+    @Test
+    @DisplayName("DELETE /post/{postId}/like")
+    void deleteLikes() throws Exception {
+        JwtToken token = createInitUser();
+        Long userId = stackId - 1;
+        Long univId = createUniversity(1);
+        setUniversityToUser(userId, univId);
+
+        Long boardTypeId = createBoardType(1);
+        Long boardId = createBoard(univId, boardTypeId);
+        Long postId = createPost(1, boardId, userId);
+
+        String addLikeQuery = """
+                
+                """;
+
+
+
+        mockMvc.perform(RestDocumentationRequestBuilders.delete("/post/{postId}/like", postId)
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", getAuthHeader(token)))
+                .andExpect(status().isOk())
+                .andExpect(hasKey(new SuccessResponseDto("success delete likes")))
+                .andDo(restDocs.document(
+                        httpRequest(),
+                        pathParameters(
+                                parameterWithName("postId").description("postId which to delete likes")
+                        ),
+                        httpResponse(),
+                        responseFields(
+                                fieldWithPath("message").description("success delete likes")
+                        )
+
+                ));
+
+
+
+
     }
 
 
