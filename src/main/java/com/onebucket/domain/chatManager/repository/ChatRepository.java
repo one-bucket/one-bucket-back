@@ -37,6 +37,7 @@ public class ChatRepository {
 
     public ChatRoom createChatRoom(String roomName) {
         ChatRoom chatRoom = new ChatRoom().create(roomName);
+        chatRoom.setUserCount(0L);
         chatRoomMap.put(chatRoom.getRoomId(), chatRoom);
         System.out.println(chatRoomMap);
 

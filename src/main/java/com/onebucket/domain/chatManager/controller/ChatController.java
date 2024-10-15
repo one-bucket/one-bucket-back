@@ -36,6 +36,7 @@ public class ChatController {
 
     @MessageMapping("/enterUser")
     public void enterUser(@Payload ChatDto chat, SimpMessageHeaderAccessor headerAccessor) {
+        System.out.println("room id is : "+ chat.getRoomId());
         chatRepository.plusUserCnt(chat.getRoomId());
         String userUUID = chatRepository.addUser(chat.getRoomId(), chat.getSender());
 
@@ -48,6 +49,7 @@ public class ChatController {
 
     @MessageMapping("/sendMessage")
     public void sendMessage(@Payload ChatDto chat) {
+        System.out.println("message is " + chat.getMessage());
         chat.setMessage(chat.getMessage());
         template.convertAndSend("/sub/chat/room/" + chat.getRoomId(), chat);
     }

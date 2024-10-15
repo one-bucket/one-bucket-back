@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STOMP WebSocket Chat</title>
+    <style>
+        #messages {
+            height: 300px;
+            overflow-y: scroll;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        #inputContainer {
+            display: flex;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+<h2>Chat Room</h2>
+<div>
+    <input type="text" id="wsUrlInput" placeholder="Enter WebSocket URL" value="ws://localhost:8080/ws">
+    <input type="text" id="roomIdInput" placeholder="Enter Room ID">
+    <button onclick="connectToRoom()">Connect</button>
+</div>
+<div id="chatContainer" style="display:none;">
+    <div id="messages"></div>
+    <div id="inputContainer">
+        <input type="text" id="messageInput" placeholder="Enter your message">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
+<script>
+    let stompClient = null;
+    let roomId = null;
+
+    function connectToRoom() {
+        const wsUrl = document.getElementById('wsUrlInput').value.trim();
+        roomId = document.getElementById('roomIdInput').value.trim();
+
+        if (wsUrl !== '' && roomId !== '') {
+            stompClient = StompJs.Stomp.client(wsUrl);
+
+            stompClient.connect({}, () => {
+                console.log('Connected to STOMP server');
+                document.getElementById('chatContainer').style.display = 'block';
+
+                // Subscribe to the room
+                stompClient.subscribe(`/sub/chat/room/${roomId}`, (message) => {
+                    console.log('Received message:', message.body);
+                    const chatMessage = JSON.parse(message.body);
+                    displayMessage(chatMessage);
+                });
+
+                // Send an enter message to the server
+                const enterMessage = {
+                    type: 'ENTER',
+                    roomId: roomId,
+                    sender: 'JohnDoe',
+                    message: 'JohnDoe has entered the room.',
+                    time: new Date().toISOString(),
+                };
+                console.log('Sending enter message:', enterMessage);
+                stompClient.publish({ destination: '/pub/enterUser', body: JSON.stringify(enterMessage) });
+            }, (error) => {
+                console.error('STOMP connection error:', error);
+            });
+        } else {
+            alert('Please enter a valid WebSocket URL and Room ID');
+        }
+    }
+
+    function sendMessage() {
+        const messageInput = document.getElementById('messageInput');
+        const messageText = messageInput.value.trim();
+
+        if (messageText !== '' && stompClient && stompClient.connected) {
+            const chatMessage = {
+                type: 'CHAT',
+                roomId: roomId,
+                sender: 'JohnDoe',
+                message: messageText,
+                time: new Date().toISOString(),
+            };
+            console.log('Sending chat message:', chatMessage);
+            stompClient.publish({ destination: '/pub/chat', body: JSON.stringify(chatMessage) });
+            messageInput.value = '';
+        } else {
+            console.log('Message input is empty or STOMP client is not connected, not sending.');
+        }
+    }
+
+    function displayMessage(message) {
+        const messagesDiv = document.getElementById('messages');
+        const newMessage = document.createElement('div');
+        newMessage.innerHTML = `<strong>${message.sender}</strong>: ${message.message} <span style="font-size: 10px; color: gray">${message.time}</span>`;
+        messagesDiv.appendChild(newMessage);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+</script>
+</body>
+</html>
