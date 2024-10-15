@@ -5,15 +5,19 @@ import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.domain.memberManage.dto.CreateMemberRequestDto;
 import com.onebucket.domain.memberManage.dto.NicknameRequestDto;
 import com.onebucket.domain.memberManage.dto.ReadMemberInfoDto;
+import com.onebucket.domain.memberManage.dto.internal.SetPasswordDto;
 import com.onebucket.domain.memberManage.dto.internal.SetUniversityDto;
 import com.onebucket.domain.universityManage.dao.UniversityRepository;
 import com.onebucket.domain.universityManage.domain.University;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.customException.universityManageException.UniversityException;
+import com.onebucket.global.exceptionManage.customException.verificationException.VerificationException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.UniversityErrorCode;
+import com.onebucket.global.exceptionManage.errorCode.VerificationErrorCode;
 import com.onebucket.global.utils.RandomStringUtils;
 import jakarta.transaction.Transactional;
+import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -73,8 +77,7 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public ReadMemberInfoDto readMember(String username) {
-        Member member = memberRepository.findByUsername(username)
-                .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
+        Member member = findMember(username);
         String universityName = Optional.ofNullable(member.getUniversity())
                 .map(University::getName)
                 .orElse("null");
@@ -83,9 +86,7 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public void updateMember(String username, NicknameRequestDto nicknameRequestDTO) {
-        Member member = memberRepository.findByUsername(username)
-                .orElseThrow(()-> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
-
+        Member member = findMember(username);
         member.setNickname(nicknameRequestDTO.getNickname());
         try {
             memberRepository.save(member);
@@ -103,11 +104,14 @@ public class MemberServiceImpl implements MemberService {
 //        memberRepository.save(member);
     }
 
+    /**
+     * 임의의 문자열로 비밀번호 초기화하기
+     * @param username
+     * @return
+     */
     @Override
-    public String changePassword(String username) {
-        Member member = memberRepository.findByUsername(username)
-                .orElseThrow(()-> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
-
+    public String initPassword(String username) {
+        Member member = findMember(username);
         String newPassword = randomStringUtils.generateRandomStr(15);
         member.setPassword(passwordEncoder.encode(newPassword));
         memberRepository.save(member);
@@ -115,11 +119,14 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public String changePassword(String username, String newPassword) {
-        Member member = memberRepository.findByUsername(username)
-                .orElseThrow(()-> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
+    public String changePassword(SetPasswordDto dto) {
+        Member member = findMember(dto.getUsername());
+        if (!passwordEncoder.matches(dto.getOldPassword(), member.getPassword())) {
+            throw new VerificationException(VerificationErrorCode.INVALID_PASSWORD);
+        }
 
-        member.setPassword(passwordEncoder.encode(newPassword));
+        String newPassword = passwordEncoder.encode(dto.getNewPassword());
+        member.setPassword(newPassword);
         memberRepository.save(member);
         return newPassword;
     }
@@ -153,9 +160,7 @@ public class MemberServiceImpl implements MemberService {
     @Transactional
     @Override
     public void setUniversity(SetUniversityDto dto) {
-        Member member = memberRepository.findByUsername(dto.getUsername())
-                .orElseThrow(()-> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
-
+        Member member = findMember(dto.getUsername());
         University university = universityRepository.findByName(dto.getUniversity()).orElseThrow(() ->
                 new UniversityException(UniversityErrorCode.NOT_EXIST_UNIVERSITY));
 
@@ -180,4 +185,8 @@ public class MemberServiceImpl implements MemberService {
         }
     }
 
+    private Member findMember(String username) {
+        return memberRepository.findByUsername(username)
+                .orElseThrow(()-> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
+    }
 }

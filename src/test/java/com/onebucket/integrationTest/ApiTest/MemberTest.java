@@ -2,6 +2,7 @@ package com.onebucket.integrationTest.ApiTest;
 
 import com.onebucket.domain.memberManage.domain.Profile;
 import com.onebucket.domain.memberManage.dto.*;
+import com.onebucket.domain.memberManage.dto.request.RequestInitPasswordDto;
 import com.onebucket.global.auth.jwtAuth.domain.JwtToken;
 import com.onebucket.global.minio.MinioSaveInfoDto;
 import com.onebucket.global.utils.SuccessResponseDto;
@@ -14,6 +15,7 @@ import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MvcResult;
 
+import javax.mail.internet.MimeMessage;
 import java.time.LocalDate;
 import java.util.Optional;
 
@@ -184,36 +186,47 @@ public class MemberTest extends UserRestDocsSupportTest {
     }
 
 
-//    @Test
-//    @DisplayName("POST /password/reset test")
-//    void resetPassword() throws Exception {
-//        JwtToken token = createInitUser();
-//        String query = """
-//                SELECT password
-//                FROM member
-//                WHERE username = ?
-//                """;
-//        String oldPassword = jdbcTemplate.queryForObject(query, String.class, testUsername);
-//
-//
-//        mockMvc.perform(post("/member/password/reset")
-//                        .header("Authorization", getAuthHeader(token))
-//                        .accept(MediaType.APPLICATION_JSON))
-//                .andExpect(status().isOk())
-//                .andExpect((hasKey(new SuccessResponseDto("success reset password"))))
-//                .andDo(restDocs.document(
-//                        httpResponse(),
-//                        httpRequest(),
-//                        responseFields(
-//                                fieldWithPath("message").description("success reset password")
-//                        )
-//                ));
-//
-//
-//
-//        String newPassword = jdbcTemplate.queryForObject(query, String.class, testUsername);
-//        assertThat(oldPassword).isNotEqualTo(newPassword);
-//    }
+    @Test
+    @DisplayName("POST /password/reset test")
+    void resetPassword() throws Exception {
+        String email = "example@gmail.com";
+
+        createInitUser();
+        greenMail.start();
+
+        String query = """
+                SELECT password
+                FROM member
+                WHERE username = ?
+                """;
+        String oldPassword = jdbcTemplate.queryForObject(query, String.class, testUsername);
+
+        RequestInitPasswordDto dto = new RequestInitPasswordDto(testUsername,email);
+
+        mockMvc.perform(post("/member/password/reset")
+                        .content(objectMapper.writeValueAsString(dto))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect((hasKey(new SuccessResponseDto("success reset password and send email. please reset password"))))
+                .andDo(restDocs.document(
+                        httpResponse(),
+                        httpRequest(),
+                        responseFields(
+                                fieldWithPath("message").description("success reset password and send email. please reset password")
+                        )
+                ));
+
+        // GreenMail을 사용하여 이메일이 발송되었는지 확인
+        MimeMessage[] receivedMessages = greenMail.getReceivedMessages();
+        assertThat(receivedMessages).hasSize(1);
+        assertThat(receivedMessages[0].getSubject()).isEqualTo("[한바구니] 임시 비밀번호 발급");
+
+
+        String newPassword = jdbcTemplate.queryForObject(query, String.class, testUsername);
+        assertThat(oldPassword).isNotEqualTo(newPassword);
+        greenMail.stop();
+    }
 
 
     @Test
@@ -222,7 +235,7 @@ public class MemberTest extends UserRestDocsSupportTest {
         JwtToken token = createInitUser();
 
         String newPassword = "!1NewPassword1!";
-        SetPasswordDto dto = new SetPasswordDto(newPassword);
+        RequestSetPasswordDto dto = new RequestSetPasswordDto(testPassword,newPassword);
 
         String query = """
                 SELECT password
@@ -242,7 +255,8 @@ public class MemberTest extends UserRestDocsSupportTest {
                         httpRequest(),
                         httpResponse(),
                         requestFields(
-                                fieldWithPath("password").description("new password of account").attributes(getFormat("하나 이상의 대문자, 소문자, 특수문자, 숫자"))
+                                fieldWithPath("oldPassword").description("old password of account").attributes(getFormat("초기화 하고자 하는 비밀번호")),
+                                fieldWithPath("newPassword").description("new password of account").attributes(getFormat("하나 이상의 대문자, 소문자, 특수문자, 숫자"))
                         ),
                         responseFields(
                                 fieldWithPath("message").description("success set password")

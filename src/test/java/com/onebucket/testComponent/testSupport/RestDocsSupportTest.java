@@ -2,6 +2,10 @@ package com.onebucket.testComponent.testSupport;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.icegreen.greenmail.junit5.GreenMailExtension;
+import com.icegreen.greenmail.configuration.GreenMailConfiguration;
+import com.icegreen.greenmail.util.ServerSetupTest;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import com.onebucket.domain.memberManage.dto.UpdateProfileDto;
 import com.onebucket.global.auth.config.SecurityConfig;
 import com.onebucket.global.auth.jwtAuth.component.JwtProvider;
@@ -89,6 +93,10 @@ public class RestDocsSupportTest {
     @Value("${minio.bucketName}")
     protected String bucketName;
 
+    @RegisterExtension
+    protected static GreenMailExtension greenMail = new GreenMailExtension(ServerSetupTest.SMTP)
+            .withConfiguration(GreenMailConfiguration.aConfig().withUser("dummy", "dummy"))
+            .withPerMethodLifecycle(false);
 
 
     protected final UpdateProfileDto initProfileInfo = UpdateProfileDto.builder()
@@ -113,7 +121,6 @@ public class RestDocsSupportTest {
                 .alwaysDo(MockMvcResultHandlers.print())
                 .addFilters(new CharacterEncodingFilter("UTF-8", true))
                 .build();
-
     }
 
     @AfterEach
@@ -127,8 +134,6 @@ public class RestDocsSupportTest {
         return key("format").value(value);
     }
 
-    protected void flushRedis() {
-        redisRepository.flushAll();;
     }
 
     protected String getAuthHeader(JwtToken jwtToken) {
