@@ -34,6 +34,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import javax.swing.text.html.Option;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -373,9 +374,9 @@ class PostServiceTest {
     void testDeleteCommentFromPost_success() {
         Long postId = 1L;
         Long commentId = 10L;
-        when(postRepository.findById(postId)).thenReturn(Optional.of(mockPost));
-        when(mockPost.getComments()).thenReturn(List.of(mockComment));
-        when(mockComment.getId()).thenReturn(commentId);
+        when(commentRepository.findById(commentId)).thenReturn(Optional.of(mockComment));
+        when(mockComment.getPostId()).thenReturn(postId);
+
 
         ValueDto.FindComment dto = ValueDto.FindComment.builder()
                 .postId(postId)
@@ -383,8 +384,7 @@ class PostServiceTest {
                 .build();
 
         postService.deleteCommentFromPost(dto);
-
-        verify(postRepository, times(1)).save(mockPost);
+        verify(commentRepository, times(1)).delete(mockComment);
     }
 
     @Test
@@ -392,21 +392,20 @@ class PostServiceTest {
     void testDeleteCommentFromPost_fail_noPostToDelete() {
         Long postId = 1L;
         Long commentId = 10L;
-        Long savedCommentId = 11L;
+        when(commentRepository.findById(commentId)).thenReturn(Optional.of(mockComment));
+        when(mockComment.getPostId()).thenReturn(11L);
 
-        when(postRepository.findById(postId)).thenReturn(Optional.of(mockPost));
-        when(mockPost.getComments()).thenReturn(List.of(mockComment));
-        when(mockComment.getId()).thenReturn(savedCommentId);
 
         ValueDto.FindComment dto = ValueDto.FindComment.builder()
-                .postId(1L)
+                .postId(postId)
                 .commentId(commentId)
                 .build();
+
         assertThatThrownBy(() -> postService.deleteCommentFromPost(dto))
                 .isInstanceOf(UserBoardException.class)
                 .extracting(("errorCode"))
-                .isEqualTo(BoardErrorCode.UNKNOWN_COMMENT);
-        verify(postRepository, never()).save(mockPost);
+                .isEqualTo(BoardErrorCode.UNKNOWN_POST);
+        verify(commentRepository, never()).delete(any(Comment.class));
     }
 
 

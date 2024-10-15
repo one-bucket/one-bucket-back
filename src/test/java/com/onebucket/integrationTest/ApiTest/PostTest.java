@@ -181,7 +181,7 @@ public class PostTest extends BoardRestDocsSupport {
                     WHERE title = ?)
                 """;
 
-        boolean isExist = Boolean.TRUE.equals(jdbcTemplate.queryForObject(query, boolean.class, "title " + postId));
+        boolean isExist = Boolean.TRUE.equals(jdbcTemplate.queryForObject(query, boolean.class, "title" + postId));
 
         assertThat(isExist).isEqualTo(true);
 
@@ -217,7 +217,7 @@ public class PostTest extends BoardRestDocsSupport {
         Long boardId = createBoard(univId, boardTypeId);
         Long postId = createPost(1, boardId, userId);
 
-        mockMvc.perform(RestDocumentationRequestBuilders.post("/post/{postId}/likes", postId)
+        mockMvc.perform(RestDocumentationRequestBuilders.post("/post/{postId}/like", postId)
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", getAuthHeader(token)))
                 .andExpect(status().isOk())

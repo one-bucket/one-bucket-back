@@ -2,6 +2,7 @@ package com.onebucket.testComponent.testUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.onebucket.global.exceptionManage.errorCode.ErrorCode;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
@@ -94,6 +95,8 @@ public class JsonFieldResultMatcher implements ResultMatcher {
     public static ResultMatcher hasKey(Object dto) throws JsonProcessingException {
         List<ResultMatcher> matchers = new ArrayList<>();
         ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        mapper.findAndRegisterModules();
 
         // 직렬화하여 key-value 형태의 Map으로 변환
         @SuppressWarnings("unchecked")

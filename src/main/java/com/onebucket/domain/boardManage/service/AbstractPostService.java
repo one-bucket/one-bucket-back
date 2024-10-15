@@ -145,11 +145,7 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
         if(!dto.getPostId().equals(commentPostId)) {
             throw new UserBoardException(BoardErrorCode.UNKNOWN_POST);
         }
-
-        T post = findPost(dto.getPostId());
-
-        post.deleteComment(comment);
-        repository.save(post);
+        commentRepository.delete(comment);
     }
     @Override
     @Transactional(readOnly = true)
