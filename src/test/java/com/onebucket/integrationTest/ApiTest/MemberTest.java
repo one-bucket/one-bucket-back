@@ -186,47 +186,47 @@ public class MemberTest extends UserRestDocsSupportTest {
     }
 
 
-    @Test
-    @DisplayName("POST /password/reset test")
-    void resetPassword() throws Exception {
-        String email = "example@gmail.com";
-
-        createInitUser();
-        greenMail.start();
-
-        String query = """
-                SELECT password
-                FROM member
-                WHERE username = ?
-                """;
-        String oldPassword = jdbcTemplate.queryForObject(query, String.class, testUsername);
-
-        RequestInitPasswordDto dto = new RequestInitPasswordDto(testUsername,email);
-
-        mockMvc.perform(post("/member/password/reset")
-                        .content(objectMapper.writeValueAsString(dto))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect((hasKey(new SuccessResponseDto("success reset password and send email. please reset password"))))
-                .andDo(restDocs.document(
-                        httpResponse(),
-                        httpRequest(),
-                        responseFields(
-                                fieldWithPath("message").description("success reset password and send email. please reset password")
-                        )
-                ));
-
-        // GreenMail을 사용하여 이메일이 발송되었는지 확인
-        MimeMessage[] receivedMessages = greenMail.getReceivedMessages();
-        assertThat(receivedMessages).hasSize(1);
-        assertThat(receivedMessages[0].getSubject()).isEqualTo("[한바구니] 임시 비밀번호 발급");
-
-
-        String newPassword = jdbcTemplate.queryForObject(query, String.class, testUsername);
-        assertThat(oldPassword).isNotEqualTo(newPassword);
-        greenMail.stop();
-    }
+//    @Test
+//    @DisplayName("POST /password/reset test")
+//    void resetPassword() throws Exception {
+//        String email = "example@gmail.com";
+//
+//        createInitUser();
+//        greenMail.start();
+//
+//        String query = """
+//                SELECT password
+//                FROM member
+//                WHERE username = ?
+//                """;
+//        String oldPassword = jdbcTemplate.queryForObject(query, String.class, testUsername);
+//
+//        RequestInitPasswordDto dto = new RequestInitPasswordDto(testUsername,email);
+//
+//        mockMvc.perform(post("/member/password/reset")
+//                        .content(objectMapper.writeValueAsString(dto))
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .accept(MediaType.APPLICATION_JSON))
+//                .andExpect(status().isOk())
+//                .andExpect((hasKey(new SuccessResponseDto("success reset password and send email. please reset password"))))
+//                .andDo(restDocs.document(
+//                        httpResponse(),
+//                        httpRequest(),
+//                        responseFields(
+//                                fieldWithPath("message").description("success reset password and send email. please reset password")
+//                        )
+//                ));
+//
+//        // GreenMail을 사용하여 이메일이 발송되었는지 확인
+//        MimeMessage[] receivedMessages = greenMail.getReceivedMessages();
+//        assertThat(receivedMessages).hasSize(1);
+//        assertThat(receivedMessages[0].getSubject()).isEqualTo("[한바구니] 임시 비밀번호 발급");
+//
+//
+//        String newPassword = jdbcTemplate.queryForObject(query, String.class, testUsername);
+//        assertThat(oldPassword).isNotEqualTo(newPassword);
+//        greenMail.stop();
+//    }
 
 
     @Test

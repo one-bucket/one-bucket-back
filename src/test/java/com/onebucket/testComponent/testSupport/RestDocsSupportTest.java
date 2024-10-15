@@ -128,13 +128,17 @@ public class RestDocsSupportTest {
         flushRedis();
     }
 
+    protected void flushRedis() {
+        redisRepository.flushAll();
+    }
+
 
 
     protected Attributes.Attribute getFormat (final String value) {
         return key("format").value(value);
     }
 
-    }
+
 
     protected String getAuthHeader(JwtToken jwtToken) {
         return jwtToken.getGrantType() + " " + jwtToken.getAccessToken();
