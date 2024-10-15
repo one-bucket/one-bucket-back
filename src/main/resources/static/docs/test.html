@@ -80,14 +80,14 @@
 
         if (messageText !== '' && stompClient && stompClient.connected) {
             const chatMessage = {
-                type: 'CHAT',
+                type: 'TALK',
                 roomId: roomId,
                 sender: 'JohnDoe',
                 message: messageText,
                 time: new Date().toISOString(),
             };
             console.log('Sending chat message:', chatMessage);
-            stompClient.publish({ destination: '/pub/chat', body: JSON.stringify(chatMessage) });
+            stompClient.publish({ destination: '/pub/sendMessage', body: JSON.stringify(chatMessage) });
             messageInput.value = '';
         } else {
             console.log('Message input is empty or STOMP client is not connected, not sending.');

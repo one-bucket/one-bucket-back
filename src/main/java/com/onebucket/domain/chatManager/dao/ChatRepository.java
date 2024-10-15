@@ -1,4 +1,4 @@
-package com.onebucket.domain.chatManager.repository;
+package com.onebucket.domain.chatManager.dao;
 
 import com.onebucket.domain.chatManager.dto.ChatRoom;
 import org.springframework.stereotype.Repository;

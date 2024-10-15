@@ -1,13 +1,10 @@
-package com.onebucket.domain.chatManager.controller;
+package com.onebucket.domain.chatManager.api;
 
 import com.onebucket.domain.chatManager.dto.ChatRoom;
-import com.onebucket.domain.chatManager.repository.ChatRepository;
-import com.onebucket.global.utils.SuccessResponseDto;
-import com.onebucket.global.utils.SuccessResponseWithIdDto;
+import com.onebucket.domain.chatManager.dao.ChatRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
