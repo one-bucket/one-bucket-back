@@ -41,7 +41,7 @@ import java.util.List;
  */
 
 @RestController
-@RequestMapping("/board")
+@RequestMapping("/admin/board")
 @RequiredArgsConstructor
 public class AdminBoardController {
 

@@ -1,6 +1,7 @@
 package com.onebucket.domain.boardManage.service;
 
 import com.onebucket.domain.boardManage.dao.PostRepository;
+import com.onebucket.global.redis.LuaScriptLoader;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.RedisScript;
@@ -31,7 +32,10 @@ public class SyncDataScheduledService {
 
     private final PostRepository postRepository;
     private final StringRedisTemplate stringRedisTemplate;
-    private final RedisScript<List> syncLikeScript;
+
+    private final String syncLikeScriptContent = LuaScriptLoader.loadScript("LuaScript/syncLikes.lua");
+    private final RedisScript<List> syncLikeScript = RedisScript.of(syncLikeScriptContent, List.class);
+
 
     @Scheduled(cron = "0 */3 * * * *")
     @Transactional

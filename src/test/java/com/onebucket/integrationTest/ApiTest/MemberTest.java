@@ -7,10 +7,12 @@ import com.onebucket.global.auth.jwtAuth.domain.JwtToken;
 import com.onebucket.global.minio.MinioSaveInfoDto;
 import com.onebucket.global.utils.SuccessResponseDto;
 import com.onebucket.testComponent.testSupport.RestDocsSupportTest;
+import com.onebucket.testComponent.testSupport.UserRestDocsSupportTest;
 import org.junit.jupiter.api.*;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MvcResult;
 
 import javax.mail.internet.MimeMessage;
@@ -37,8 +39,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * </pre>
  */
 
-
-public class MemberTest extends RestDocsSupportTest {
+@Sql(scripts = "/sql/InitDB.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+public class MemberTest extends UserRestDocsSupportTest {
 
 
 
@@ -121,7 +123,6 @@ public class MemberTest extends RestDocsSupportTest {
                 .andDo(print())
                 .andExpect(hasKey("This is a security endpoint!"));
 
-        deleteRedisUser(testUsername);
 
     }
 
@@ -281,7 +282,6 @@ public class MemberTest extends RestDocsSupportTest {
                         .content(objectMapper.writeValueAsString(newPasswordSignInDto)))
                 .andExpect(status().isOk());
 
-        deleteRedisUser(testUsername);
     }
 
 
@@ -357,7 +357,6 @@ public class MemberTest extends RestDocsSupportTest {
     @DisplayName("POST /profile/update test")
     void updateProfile() throws Exception {
         JwtToken token = createInitUser();
-        createInitProfile();
 
         UpdateProfileDto dto = UpdateProfileDto.builder()
                 .name("john")
@@ -415,7 +414,7 @@ public class MemberTest extends RestDocsSupportTest {
     @DisplayName("POST /profile/image")
     void updateImage() throws Exception {
         JwtToken token = createInitUser();
-        Long id = createInitProfile();
+        Long userId = stackId - 1;
 
         MockMultipartFile mockFile = new MockMultipartFile(
                 "file",
@@ -428,10 +427,8 @@ public class MemberTest extends RestDocsSupportTest {
                         .header("Authorization", getAuthHeader(token))
                         .contentType(MediaType.MULTIPART_FORM_DATA)
                         .accept(MediaType.APPLICATION_JSON))
-                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(hasKey(new SuccessResponseDto("success update image")))
-                .andDo(print())
                 .andDo(restDocs.document(
                         httpRequest(),
                         httpResponse(),
@@ -444,7 +441,7 @@ public class MemberTest extends RestDocsSupportTest {
 
         MinioSaveInfoDto saveInfoDto = MinioSaveInfoDto.builder()
                 .fileExtension("png")
-                .fileName("/profile/" + id + "/profile_image")
+                .fileName("/profile/" + userId + "/profile_image")
                 .bucketName(bucketName)
                 .build();
         byte[] savedImage = minioRepository.getFile(saveInfoDto);
@@ -461,8 +458,7 @@ public class MemberTest extends RestDocsSupportTest {
     @DisplayName("GET /profile/image")
     void getImage() throws Exception {
          JwtToken token = createInitUser();
-         Long id = createInitProfile();
-
+        Long userId = stackId - 1;
          MockMultipartFile mockFile = new MockMultipartFile(
                  "file",
                  "test-image.png",
@@ -472,7 +468,7 @@ public class MemberTest extends RestDocsSupportTest {
 
          MinioSaveInfoDto saveInfoDto = MinioSaveInfoDto.builder()
                  .fileExtension("png")
-                 .fileName("/profile/" + id + "/profile_image")
+                 .fileName("/profile/" + userId + "/profile_image")
                  .bucketName(bucketName)
                  .build();
 
@@ -483,7 +479,7 @@ public class MemberTest extends RestDocsSupportTest {
                  SET is_basic_image = false
                  WHERE id = ?
                  """;
-         jdbcTemplate.update(query, id);
+         jdbcTemplate.update(query, userId);
 
          mockMvc.perform(RestDocumentationRequestBuilders.get("/profile/image")
                  .header("Authorization", getAuthHeader(token))
@@ -502,14 +498,13 @@ public class MemberTest extends RestDocsSupportTest {
     @DisplayName("POST /profile/basic-image")
     void updateBasicImage() throws Exception {
         JwtToken token = createInitUser();
-        Long id = createInitProfile();
-
+        Long userId = stackId - 1;
         String queryToUpdate = """
                 UPDATE profile
                 SET is_basic_image = FALSE
                 WHERE id = ?
                 """;
-        jdbcTemplate.update(queryToUpdate, id);
+        jdbcTemplate.update(queryToUpdate, stackId -1);
 
         mockMvc.perform(post("/profile/basic-image")
                 .header("Authorization", getAuthHeader(token))
@@ -529,7 +524,7 @@ public class MemberTest extends RestDocsSupportTest {
                 WHERE id = ?
                 """;
 
-        String isBasicImage = jdbcTemplate.queryForObject(queryToFind, String.class, id);
+        String isBasicImage = jdbcTemplate.queryForObject(queryToFind, String.class, userId);
         assertThat(isBasicImage).isEqualTo("TRUE");
     }
 
@@ -537,11 +532,7 @@ public class MemberTest extends RestDocsSupportTest {
     @DisplayName("GET /profile")
     void getProfile() throws Exception {
         JwtToken token = createInitUser();
-        Long id = createInitProfile();
-
-
-
-
+        Long userId = stackId - 1;
         MvcResult result = mockMvc.perform(get("/profile")
                         .header("Authorization", getAuthHeader(token))
                         .accept(MediaType.APPLICATION_JSON))
@@ -572,11 +563,9 @@ public class MemberTest extends RestDocsSupportTest {
         String responseContent = result.getResponse().getContentAsString();
         Profile response = objectMapper.readValue(responseContent, Profile.class);
 
-        assertThat(response.getName()).isEqualTo(initProfileInfo.getName());
-        assertThat(response.getBirth()).isEqualTo(initProfileInfo.getBirth());
-        assertThat(response.getAge()).isEqualTo(initProfileInfo.getAge());
-
-
+        assertThat(response.getName()).isEqualTo("name" + userId);
+        assertThat(response.getBirth()).isEqualTo(LocalDate.of(1999,1,1));
+        assertThat(response.getAge()).isEqualTo(26);
     }
 
 

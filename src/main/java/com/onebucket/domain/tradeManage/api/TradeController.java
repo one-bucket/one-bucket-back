@@ -4,12 +4,15 @@ import com.onebucket.domain.memberManage.service.MemberService;
 import com.onebucket.domain.tradeManage.dto.TradeKeyDto;
 
 import com.onebucket.domain.tradeManage.service.PendingTradeService;
+import com.onebucket.domain.tradeManage.service.TradeTagService;
 import com.onebucket.global.utils.SecurityUtils;
 import com.onebucket.global.utils.SuccessResponseDto;
 import com.onebucket.global.utils.SuccessResponseWithIdDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * <br>package name   : com.onebucket.domain.tradeManage.api
@@ -32,6 +35,7 @@ import org.springframework.web.bind.annotation.*;
 public class TradeController {
 
     private final PendingTradeService pendingTradeService;
+    private final TradeTagService tradeTagService;
     private final MemberService memberService;
     private final SecurityUtils securityUtils;
 
@@ -72,6 +76,12 @@ public class TradeController {
         pendingTradeService.makeFinish(finishDto);
 
         return ResponseEntity.ok(new SuccessResponseDto("success finish trade"));
+    }
+
+    @GetMapping("/tag/list")
+    public ResponseEntity<List<String>> getTagList() {
+        List<String> tagList = tradeTagService.getTagList();
+        return ResponseEntity.ok(tagList);
     }
 
 

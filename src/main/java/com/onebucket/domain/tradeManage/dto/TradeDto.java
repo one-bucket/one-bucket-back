@@ -79,13 +79,13 @@ public class TradeDto {
         private LocalDateTime dueDate;
 
         private Long joins;
-        private List<Long> memberIds;
+        private List<String> nickNames;
         private boolean isFin;
 
         private LocalDateTime startTradeAt;
 
         public static Info of(PendingTrade entity) {
-            List<Long> ids = entity.getMembers().stream().map(Member::getId).toList();
+            List<String> nicknames = entity.getMembers().stream().map(Member::getNickname).toList();
 
             return Info.builder()
                     .item(entity.getItem())
@@ -100,7 +100,7 @@ public class TradeDto {
                     .location(entity.getLocation())
                     .dueDate(entity.getDueDate())
                     .joins(entity.getJoins())
-                    .memberIds(ids)
+                    .nickNames(nicknames)
                     .isFin(entity.isFin())
                     .startTradeAt(entity.getStartTradeAt())
                     .build();
@@ -126,7 +126,7 @@ public class TradeDto {
                     .location(dto.getLocation())
                     .dueDate(dto.getDueDate())
                     .joins(dto.getJoins())
-                    .memberIds(dto.getMemberIds())
+                    .nickNames(dto.getNickNames())
                     .isFin(dto.isFin())
                     .startTradeAt(dto.getStartTradeAt())
                     .build();

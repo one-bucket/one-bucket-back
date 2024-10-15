@@ -6,13 +6,12 @@ import com.onebucket.domain.boardManage.dto.response.ResponseBoardIdAndNameDto;
 import com.onebucket.domain.boardManage.dto.response.ResponseCreateBoardsDto;
 import com.onebucket.global.auth.jwtAuth.domain.JwtToken;
 import com.onebucket.global.utils.SuccessResponseDto;
-import com.onebucket.testComponent.testSupport.RestDocsSupportTest;
+import com.onebucket.testComponent.testSupport.BoardRestDocsSupport;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,24 +38,24 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  * } </pre>
  */
-public class BoardTest extends RestDocsSupportTest {
+@Sql(scripts = "/sql/InitDB.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+public class BoardTest extends BoardRestDocsSupport {
 
     @Test
-    @DisplayName("POST /board/create test")
-    @Sql(scripts = "/sql/InitDB.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-    void createBoard() throws Exception {
+    @DisplayName("POST /admin/board/create test")
+    void boardCreate() throws Exception {
         JwtToken jwtToken = createInitUser();
-        createBoardType(1L);
-        createUniversity(1L);
+        Long boardTypeId = createBoardType(1);
+        Long univId = createUniversity(1);
 
         RequestCreateBoardDto dto = RequestCreateBoardDto.builder()
-                .boardType("type1")
+                .boardType("type" + boardTypeId)
                 .description("description")
                 .name("board")
-                .university("univ1")
+                .university("univ" + univId)
                 .build();
 
-        mockMvc.perform(post("/board/create")
+        mockMvc.perform(post("/admin/board/create")
                 .header("Authorization", getAuthHeader(jwtToken))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto))
@@ -88,25 +87,25 @@ public class BoardTest extends RestDocsSupportTest {
     }
 
     @Test
-    @DisplayName("POST /board/creates test")
-    @Sql(scripts = "/sql/InitDB.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    @DisplayName("POST /admin/board/creates test")
     void boardCreates() throws Exception {
         JwtToken token = createInitUser();
         List<ResponseCreateBoardsDto> results = new ArrayList<>();
-        for(long i = 1L; i <= 3L; i++) {
-            createBoardType(i);
-            createUniversity(i);
-            for(long j = 1L; j <= 3L; j++) {
+
+        Long startBoardTypeId = createBoardType(3);
+        Long startUnivId = createUniversity(3);
+
+        for(int i = 0; i < 3; i++) {
+            for(int j = 0; j < 3; j++) {
                 ResponseCreateBoardsDto result = ResponseCreateBoardsDto.builder()
-                        .university("univ" + i)
-                        .boardType("type" + j)
+                        .university("univ" + (startUnivId + i))
+                        .boardType("type" + (startBoardTypeId + j))
                         .build();
                 results.add(result);
             }
         }
 
-
-        mockMvc.perform(post("/board/creates")
+        mockMvc.perform(post("/admin/board/creates")
                 .header("Authorization", getAuthHeader(token))
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -131,7 +130,7 @@ public class BoardTest extends RestDocsSupportTest {
     }
 
     @Test
-    @DisplayName("POST /board/type test")
+    @DisplayName("POST /admin/board/type test")
     @Sql(scripts = "/sql/InitDB.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void boardTypeCreates() throws Exception {
         JwtToken token = createInitUser();
@@ -142,7 +141,7 @@ public class BoardTest extends RestDocsSupportTest {
                 .type("Post")
                 .build();
 
-        mockMvc.perform(post("/board/type")
+        mockMvc.perform(post("/admin/board/type")
                 .header("Authorization", getAuthHeader(token))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto)))
@@ -176,25 +175,28 @@ public class BoardTest extends RestDocsSupportTest {
     @Sql(scripts = "/sql/InitDB.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     public void getBoardList() throws Exception {
         JwtToken token = createInitUser();
-        createBoard(5);
+        Long univId = createUniversity(1);
+        Long boardTypeId = createBoardType(4);
+        List<Long> boardIds = new ArrayList<>();
+        for(int i = 0; i < 4; i++) {
+            boardIds.add(createBoard(univId, boardTypeId + i));
+        }
 
         String setUnivQuery = """
                 UPDATE member
-                SET university_id = 1
+                SET university_id = ?
                 WHERE username = ?
                 """;
-        jdbcTemplate.update(setUnivQuery, testUsername);
+        jdbcTemplate.update(setUnivQuery, univId, testUsername);
 
 
         List<ResponseBoardIdAndNameDto> results = new ArrayList<>();
-        long index = 1;
-        for(long i = 1; i <= 5; i++) {
+        for(int i = 0; i < 4; i++) {
                 ResponseBoardIdAndNameDto result = ResponseBoardIdAndNameDto.builder()
-                    .id(index)
-                    .name("board1" + i)
+                    .id(boardIds.get(i))
+                    .name("board" + boardIds.get(i))
                     .build();
             results.add(result);
-            index++;
         }
 
         mockMvc.perform(get("/board/list")
@@ -212,68 +214,7 @@ public class BoardTest extends RestDocsSupportTest {
                         )
                 ));
     }
-    @Test
-    @DisplayName("GET /post/list/{boardId} test")
-    @Sql(scripts = "/sql/InitDB.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-    public void getPostByBoard() throws Exception {
-        JwtToken token = createInitUser();
-
-    }
 
 
-    private void createBoardType(Long id) {
-        String description = "description" + id;
-        String name = "type" + id;
-        String query = """
-                INSERT INTO board_type (id, description, name)
-                VALUES (?, ?, ?)
-                """;
-        jdbcTemplate.update(query, id, description, name);
-    }
 
-    private void createUniversity(Long id) {
-        String address = "address" + id;
-        String email = "email@email." + id;
-        String name = "univ" + id;
-        String query = """
-                INSERT INTO university (id, address, email, name)
-                VALUES (?, ?, ?, ?)
-                """;
-        jdbcTemplate.update(query, id, address, email, name);
-    }
-
-    private void createBoard(long count) {
-        for(long i = 1; i <= count; i++) {
-            createBoardType(i);
-            createUniversity(i);
-        }
-        Long index = 1L;
-        String query = """
-                INSERT INTO board (id, description, name, board_type_id, university_id)
-                VALUES (?, ?, ?, ?, ?)
-                """;
-        for(long i = 1; i <= count; i++) {
-            for(long j = 1; j <= count; j++) {
-                String name = "board" + i + j;
-                String description = "description" + i + j;
-
-                jdbcTemplate.update(query, index, description, name, j, i);
-
-                index++;
-            }
-        }
-    }
-
-    private void createPost(long boardId, long count) {
-        LocalDate now = LocalDate.now();
-        createBoard(1);
-
-        for(long i = 1; i<= count ; i++) {
-            String query = """
-                    INSERT INTO post (post_type, board_id, created_date, is_modified, likes, modified_date, text, title, views, is_fin, item, joins, location, wanted, author_id)
-                    VALUES ('post', ?, ?, ?, 0, ?, ?, ?, 0, ?)
-                    """;
-            jdbcTemplate.update(query);
-        }
-    }
 }
