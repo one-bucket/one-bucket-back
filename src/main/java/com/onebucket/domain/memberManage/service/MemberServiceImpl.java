@@ -17,11 +17,11 @@ import com.onebucket.global.exceptionManage.errorCode.UniversityErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.VerificationErrorCode;
 import com.onebucket.global.utils.RandomStringUtils;
 import jakarta.transaction.Transactional;
-import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
 
 import java.util.Optional;
 
@@ -65,7 +65,7 @@ public class MemberServiceImpl implements MemberService {
                 .nickname(createMemberRequestDto.getNickname())
                 .university(saveNullUniv())
                 .build();
-        member.addRoles("GUEST");
+        member.addRoles("ROLE_GUEST");
         try {
             Member newMember = memberRepository.save(member);
             return newMember.getId();
