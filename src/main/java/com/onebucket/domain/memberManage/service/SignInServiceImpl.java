@@ -1,5 +1,7 @@
 package com.onebucket.domain.memberManage.service;
 
+import com.onebucket.domain.memberManage.dao.MemberRepository;
+import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.global.auth.jwtAuth.component.JwtProvider;
 import com.onebucket.global.auth.jwtAuth.component.JwtValidator;
 import com.onebucket.global.auth.jwtAuth.domain.JwtToken;
@@ -50,7 +52,7 @@ public class SignInServiceImpl implements SignInService{
     private final AuthenticationManager authenticationManager;
     private final JwtProvider jwtProvider;
     private final JwtValidator jwtValidator;
-
+    private final MemberRepository memberRepository;
     /**
      * @param username id to sign in
      * @param password password to sign in

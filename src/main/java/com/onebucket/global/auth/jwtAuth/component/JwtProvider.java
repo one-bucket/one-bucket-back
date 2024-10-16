@@ -1,6 +1,10 @@
 package com.onebucket.global.auth.jwtAuth.component;
 
+import com.onebucket.domain.memberManage.dao.MemberRepository;
+import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.global.auth.jwtAuth.domain.JwtToken;
+import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
+import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -51,6 +55,7 @@ public class JwtProvider {
     private final long expireDateAccessToken;
     private final long expireDateRefreshToken;
 
+    private final MemberRepository memberRepository;
 
     /**
      * Constructor of JwtProvider class.  Parameters of constructor are from {@code application.properties}.
@@ -62,12 +67,14 @@ public class JwtProvider {
     @Autowired
     public JwtProvider(@Value("${jwt.secret}") String secretKey,
                        @Value("${jwt.expireDate.accessToken}") long expireDateAccessToken,
-                       @Value("${jwt.expireDate.refreshToken}") long expireDateRefreshToken) {
+                       @Value("${jwt.expireDate.refreshToken}") long expireDateRefreshToken,
+                       MemberRepository memberRepository) {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         this.key = Keys.hmacShaKeyFor(keyBytes);
 
         this.expireDateAccessToken = expireDateAccessToken;
         this.expireDateRefreshToken = expireDateRefreshToken;
+        this.memberRepository = memberRepository;
     }
 
     /**
@@ -112,13 +119,20 @@ public class JwtProvider {
     private String generateAccessToken(Authentication authentication, long date) {
         Date tokenExpiration = new Date(date + expireDateAccessToken);
         String authorities = getAuthoritiesFromAuthentication(authentication);
-
+        Long univId = getUnivId(authentication);
         return Jwts.builder()
                 .setSubject(authentication.getName())
                 .setIssuedAt(Calendar.getInstance().getTime())
                 .setExpiration(tokenExpiration)
                 .claim("auth", authorities)
+                .claim("univId",univId)
                 .signWith(key, SignatureAlgorithm.HS256).compact();
+    }
+
+    private Long getUnivId(Authentication authentication) {
+        String username = authentication.getName();
+        Member member = memberRepository.findByUsername(username).orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
+        return member.getUniversity().getId();
     }
 
     /**
