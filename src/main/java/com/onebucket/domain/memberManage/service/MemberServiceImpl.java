@@ -25,6 +25,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+import static com.onebucket.global.auth.springSecurity.Role.*;
+
 
 /**
  * <br>package name   : com.onebucket.domain.service
@@ -65,7 +67,7 @@ public class MemberServiceImpl implements MemberService {
                 .nickname(createMemberRequestDto.getNickname())
                 .university(saveNullUniv())
                 .build();
-        member.addRoles("ROLE_GUEST");
+        member.addRoles(GUEST.getRole());
         try {
             Member newMember = memberRepository.save(member);
             return newMember.getId();
