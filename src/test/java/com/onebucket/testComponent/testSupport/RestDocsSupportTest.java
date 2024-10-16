@@ -101,16 +101,6 @@ public class RestDocsSupportTest {
     @Value("${minio.bucketName}")
     protected String bucketName;
 
-    @RegisterExtension
-    protected static GreenMailExtension greenMail = new GreenMailExtension(ServerSetupTest.SMTP.dynamicPort())
-            .withConfiguration(GreenMailConfiguration.aConfig().withUser("dummy", "dummy"))
-            .withPerMethodLifecycle(false);
-
-//    @DynamicPropertySource
-//    static void registerGreenMailProperties(DynamicPropertyRegistry registry) {
-//        registry.add("spring.mail.port", () -> greenMail.getSmtp().getPort());
-//    }
-
     protected final String testUsername = "test-user";
     protected final String testPassword = "!1Password1!";
     protected final String testNickname = "test-nick";

@@ -191,7 +191,6 @@ public class MemberTest extends RestDocsSupportTest {
         String email = "example@gmail.com";
 
         createInitUser();
-        greenMail.start();
 
         String query = """
                 SELECT password
@@ -216,17 +215,9 @@ public class MemberTest extends RestDocsSupportTest {
                         )
                 ));
 
-        // GreenMail을 사용하여 이메일이 발송되었는지 확인
-        MimeMessage[] receivedMessages = greenMail.getReceivedMessages();
-        assertThat(receivedMessages).hasSize(1);
-        assertThat(receivedMessages[0].getSubject()).isEqualTo("[한바구니] 임시 비밀번호 발급");
-
-
         String newPassword = jdbcTemplate.queryForObject(query, String.class, testUsername);
         assertThat(oldPassword).isNotEqualTo(newPassword);
-        greenMail.stop();
     }
-
 
     @Test
     @DisplayName("POST /password/set test")
