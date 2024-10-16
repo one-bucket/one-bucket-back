@@ -84,7 +84,7 @@ class AdminBoardControllerTest {
                 .name("name")
                 .description("description")
                 .build();
-        mockMvc.perform(post("/board/create")
+        mockMvc.perform(post("/admin/board/create")
                 .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
                 .andExpect(hasKey("message", "success create board"))
@@ -103,7 +103,7 @@ class AdminBoardControllerTest {
                 .build();
 
         ValidateErrorCode code = ValidateErrorCode.INVALID_DATA;
-        mockMvc.perform(post("/board/create")
+        mockMvc.perform(post("/admin/board/create")
                 .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(hasStatus(code))
                 .andExpect(hasKey(code))
@@ -128,7 +128,7 @@ class AdminBoardControllerTest {
         when(boardService.createBoard(any(CreateBoardDto.class)))
                 .thenThrow(exception);
 
-        mockMvc.perform(post("/board/create")
+        mockMvc.perform(post("/admin/board/create")
                 .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(hasStatus(code))
                 .andExpect(hasKey(code));
@@ -149,7 +149,7 @@ class AdminBoardControllerTest {
 
         when(boardService.createBoards()).thenReturn(results);
 
-        mockMvc.perform(post("/board/creates"))
+        mockMvc.perform(post("/admin/board/creates"))
                 .andExpect(status().isOk());
 
     }

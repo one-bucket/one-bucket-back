@@ -56,7 +56,7 @@ public class BoardTest extends RestDocsSupportTest {
                 .university("univ1")
                 .build();
 
-        mockMvc.perform(post("/board/create")
+        mockMvc.perform(post("/admin/board/create")
                 .header("Authorization", getAuthHeader(jwtToken))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto))
@@ -106,7 +106,7 @@ public class BoardTest extends RestDocsSupportTest {
         }
 
 
-        mockMvc.perform(post("/board/creates")
+        mockMvc.perform(post("/admin/board/creates")
                 .header("Authorization", getAuthHeader(token))
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -142,7 +142,7 @@ public class BoardTest extends RestDocsSupportTest {
                 .type("Post")
                 .build();
 
-        mockMvc.perform(post("/board/type")
+        mockMvc.perform(post("/admin/board/type")
                 .header("Authorization", getAuthHeader(token))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto)))
