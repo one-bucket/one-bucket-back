@@ -1,7 +1,8 @@
 package com.onebucket.domain.chatManager.dto;
 
-import lombok.Builder;
-import lombok.Getter;
+import com.onebucket.domain.chatManager.entity.ChatRoomMember;
+import com.onebucket.domain.tradeManage.entity.PendingTrade;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
@@ -27,9 +28,20 @@ public class ChatRoomDto {
     @Builder
     @Getter
     public static class MemberInfo {
+        private Long id;
         private String nickname;
         private LocalDateTime joinedAt;
         private String role;
+
+        public static MemberInfo of(ChatRoomMember entity) {
+            return MemberInfo.builder()
+                    .id(entity.getMember().getId())
+                    .nickname(entity.getMember().getNickname())
+                    .joinedAt(entity.getJoinedAt())
+                    .role(entity.getRole())
+                    .build();
+        }
+
     }
 
     @Builder
@@ -38,19 +50,44 @@ public class ChatRoomDto {
         private String name;
         private Long memberId;
         private Long tradeId;
+    }
 
+
+    @Builder
+    @Getter
+    public static class ManageMember {
+        private String roomId;
+        private Long memberId;
+    }
+
+
+    @Builder
+    @Getter
+    public static class ChangeRoomName {
+        private String name;
+        private String roomId;
     }
 
     @SuperBuilder
     @Getter
+    @Setter
     public static class GetTradeInfo {
         private String authorNickname;
         private String item;
         private Long price;
-        private String imageUrl;
         private String tag;
         private Long count;
 
         private List<MemberInfo> memberList;
+
+        public static GetTradeInfo of(PendingTrade pendingTrade) {
+            return GetTradeInfo.builder()
+                    .authorNickname(pendingTrade.getOwner().getNickname())
+                    .item(pendingTrade.getItem())
+                    .price(pendingTrade.getPrice())
+                    .tag(pendingTrade.getTradeTag().getName())
+                    .count(pendingTrade.getCount())
+                    .build();
+        }
     }
 }

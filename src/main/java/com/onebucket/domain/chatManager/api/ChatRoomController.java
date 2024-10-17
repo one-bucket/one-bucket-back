@@ -1,7 +1,10 @@
 package com.onebucket.domain.chatManager.api;
 
-import com.onebucket.domain.chatManager.dto.ChatRoom;
-import com.onebucket.domain.chatManager.dao.ChatRepository;
+import com.onebucket.domain.chatManager.dto.ChatRoomDto;
+import com.onebucket.domain.chatManager.service.ChatRoomService;
+import com.onebucket.domain.memberManage.service.MemberService;
+import com.onebucket.global.utils.SecurityUtils;
+import com.onebucket.global.utils.SuccessResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -28,25 +31,25 @@ import java.util.List;
 @RestController
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping("/chat/room")
+@RequestMapping("/chat")
 public class ChatRoomController {
-    private final ChatRepository chatRepository;
+    private final ChatRoomService chatRoomService;
+    private final SecurityUtils securityUtils;
+    private final MemberService memberService;
 
-    @GetMapping("/")
-    public ResponseEntity<List<ChatRoom>> goChatRoom() {
-        List<ChatRoom> chatRooms = chatRepository.findAllRoom();
-        return ResponseEntity.ok(chatRooms);
-    }
 
     @PostMapping("/room")
-    public ResponseEntity<ChatRoom> createRoom(@RequestParam String name) {
-        ChatRoom room = chatRepository.createChatRoom(name);
-        return ResponseEntity.ok(room);
+    public ResponseEntity<SuccessResponseDto> createRoom(@RequestParam String name) {
+        String username = securityUtils.getCurrentUsername();
+        Long userId = memberService.usernameToId(username);
+        ChatRoomDto.CreateRoom dto = ChatRoomDto.CreateRoom.builder()
+                .memberId(userId)
+                .name(name)
+                .build();
+        String id = chatRoomService.createRoom(dto);
+
+        return ResponseEntity.ok(new SuccessResponseDto(id));
 
     }
 
-    @GetMapping("/userList")
-    public ArrayList<String> userList(String roomId) {
-        return chatRepository.getUserList(roomId);
-    }
 }

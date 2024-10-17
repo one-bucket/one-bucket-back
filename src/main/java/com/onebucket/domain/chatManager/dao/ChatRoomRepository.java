@@ -19,7 +19,7 @@ import org.springframework.stereotype.Repository;
  * } </pre>
  */
 @Repository
-public interface ChatRoomRepository extends JpaRepository<String, ChatRoom> {
+public interface ChatRoomRepository extends JpaRepository<ChatRoom, String> {
 
 
 }

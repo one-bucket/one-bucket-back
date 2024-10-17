@@ -1,11 +1,9 @@
 package com.onebucket.domain.chatManager.entity;
 
+import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.domain.tradeManage.entity.PendingTrade;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.util.ArrayList;
@@ -26,6 +24,7 @@ import java.util.List;
  * } </pre>
  */
 @Getter
+@Setter
 @Entity
 @Builder
 @NoArgsConstructor
@@ -34,13 +33,32 @@ import java.util.List;
 public class ChatRoom {
 
     @Id
-    private Long id;
+    private String id;
 
     private String name;
 
     @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default // 기본값 설정
     private List<ChatRoomMember> members = new ArrayList<>();
+
+    public void addMember(Member member) {
+        ChatRoomMember chatRoomMember = ChatRoomMember.builder()
+                .member(member)
+                .chatRoom(this)
+                .build();
+
+        this.members.add(chatRoomMember);
+    }
+
+    public void quitMember(Member member) {
+        ChatRoomMember chatRoomMember = ChatRoomMember.builder()
+                .member(member)
+                .chatRoom(this)
+                .build();
+
+        this.members.remove(chatRoomMember);
+    }
+
 
     @OneToOne(mappedBy = "chatRoom")
     private PendingTrade pendingTrade;
