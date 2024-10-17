@@ -61,6 +61,7 @@ public class SecurityConfig {
                                 .requestMatchers("/refresh-token").permitAll()
                                 .requestMatchers("/docs/**").permitAll()
                                 .requestMatchers("/test/create-testuser").permitAll()
+                                .requestMatchers("/member/password/reset").permitAll()
 //                                .requestMatchers("/admin/**").hasRole("ADMIN")
                                 .requestMatchers("/ws").permitAll()
                                 .anyRequest().authenticated())
