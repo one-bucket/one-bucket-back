@@ -113,7 +113,7 @@ public class ChatInterceptor implements ChannelInterceptor {
         }
         throw new IllegalArgumentException("Invalid destination format: " + destination);
     }
-    private String getUserIdBySessionId(String sessionId) {
+    public String getUserIdBySessionId(String sessionId) {
         return sessionUserMap.get(sessionId);
     }
 
