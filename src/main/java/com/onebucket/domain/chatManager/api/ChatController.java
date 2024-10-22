@@ -48,4 +48,5 @@ public class ChatController {
         chatService.saveMessage(chat);
         template.convertAndSend("/sub/chat/room/" + chat.getRoomId(), chat);
     }
+
 }

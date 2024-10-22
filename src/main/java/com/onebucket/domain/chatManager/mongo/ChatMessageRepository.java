@@ -1,9 +1,12 @@
 package com.onebucket.domain.chatManager.mongo;
 
+import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
-import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import org.springframework.stereotype.Repository;
-import reactor.core.publisher.Flux;
+
+
+import java.util.Date;
+import java.util.List;
 
 /**
  * <br>package name   : com.onebucket.domain.chatManager.mongo
@@ -20,8 +23,8 @@ import reactor.core.publisher.Flux;
  * } </pre>
  */
 @Repository
-public interface ChatLogsRepository extends ReactiveMongoRepository<ChatLog, String> {
-    @Query("{ 'roomId': ?0, 'messages.timestamp': { $gt: ?1 } }")
-    Flux<ChatMessage> findMessagesAfterTimestamp(String roomId, String timestamp);
+public interface ChatMessageRepository extends MongoRepository<ChatMessage, String> {
+    @Query("{ 'roomId': ?0, 'timestamp': { $gt: ?1 } }")
+    List<ChatMessage> findMessagesAfterTimestamp(String roomId, Date timestamp);
 
 }

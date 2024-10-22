@@ -1,7 +1,10 @@
 package com.onebucket.domain.chatManager.api;
 
 import com.onebucket.domain.chatManager.dto.ChatRoomDto;
+import com.onebucket.domain.chatManager.dto.TimeStampDto;
+import com.onebucket.domain.chatManager.mongo.ChatMessage;
 import com.onebucket.domain.chatManager.service.ChatRoomService;
+import com.onebucket.domain.chatManager.service.ChatServiceImpl;
 import com.onebucket.domain.memberManage.service.MemberService;
 import com.onebucket.global.utils.SecurityUtils;
 import com.onebucket.global.utils.SuccessResponseDto;
@@ -34,6 +37,7 @@ import java.util.List;
 @RequestMapping("/chat")
 public class ChatRoomController {
     private final ChatRoomService chatRoomService;
+    private final ChatServiceImpl chatService;
     private final SecurityUtils securityUtils;
     private final MemberService memberService;
 
@@ -85,4 +89,9 @@ public class ChatRoomController {
         return ResponseEntity.ok(chatRoomService.getMemberList(roomId));
     }
 
+    @GetMapping("/logs")
+    public ResponseEntity<List<ChatMessage>> getLogs(@RequestBody TimeStampDto dto) {
+        List<ChatMessage> messages = chatService.getMessageAfterTimestamp(dto.getRoomId(), dto.getTime());
+        return ResponseEntity.ok(messages);
+    }
 }
