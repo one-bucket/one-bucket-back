@@ -45,7 +45,6 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     private final ChatRoomRepository chatRoomRepository;
     private final ChatRoomMemberRepository chatRoomMemberRepository;
-    private final PendingTradeRepository pendingTradeRepository;
     private final MemberRepository memberRepository;
 
     @Override

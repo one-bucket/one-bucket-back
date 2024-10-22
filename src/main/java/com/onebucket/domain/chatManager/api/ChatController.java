@@ -2,6 +2,7 @@ package com.onebucket.domain.chatManager.api;
 
 import com.onebucket.domain.chatManager.dto.ChatDto;
 
+import com.onebucket.domain.chatManager.service.ChatServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -28,17 +29,23 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 public class ChatController {
     private final SimpMessageSendingOperations template;
+    private final ChatServiceImpl chatService;
 
 
     @MessageMapping("/enterUser")
     public void enterUser(@Payload ChatDto chat) {
         chat.setMessage(chat.getSender() + "님이 입장하였습니다.");
+
+        chatService.saveMessage(chat);
+
         template.convertAndSend("/sub/chat/room/" + chat.getRoomId(), chat);
     }
 
     @MessageMapping("/sendMessage")
     public void sendMessage(@Payload ChatDto chat) {
         chat.setMessage(chat.getMessage());
+
+        chatService.saveMessage(chat);
         template.convertAndSend("/sub/chat/room/" + chat.getRoomId(), chat);
     }
 }
