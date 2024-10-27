@@ -2,9 +2,11 @@ package com.onebucket.domain.chatManager.api;
 
 import com.onebucket.domain.chatManager.dto.ChatRoomDto;
 import com.onebucket.domain.chatManager.dto.TimeStampDto;
+import com.onebucket.domain.chatManager.entity.ChatRoomMemberId;
 import com.onebucket.domain.chatManager.mongo.ChatMessage;
 import com.onebucket.domain.chatManager.service.ChatRoomService;
 import com.onebucket.domain.chatManager.service.ChatServiceImpl;
+import com.onebucket.domain.chatManager.service.SSEChatListServiceImpl;
 import com.onebucket.domain.memberManage.service.MemberService;
 import com.onebucket.global.utils.SecurityUtils;
 import com.onebucket.global.utils.SuccessResponseDto;
@@ -13,7 +15,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -40,6 +47,7 @@ public class ChatRoomController {
     private final ChatServiceImpl chatService;
     private final SecurityUtils securityUtils;
     private final MemberService memberService;
+    private final SSEChatListServiceImpl sseChatListService;
 
 
     @PostMapping("/room")
@@ -93,5 +101,41 @@ public class ChatRoomController {
     public ResponseEntity<List<ChatMessage>> getLogs(@RequestBody TimeStampDto dto) {
         List<ChatMessage> messages = chatService.getMessageAfterTimestamp(dto.getRoomId(), dto.getTime());
         return ResponseEntity.ok(messages);
+    }
+
+    @GetMapping("/sse/chatList")
+    public SseEmitter subscribe() {
+        String username = securityUtils.getCurrentUsername();
+        Long userId = memberService.usernameToId(username);
+
+
+        List<ChatRoomDto.ChatRoomInfo> chatRoomInfos =
+                chatRoomService.getRoomIds(userId).stream().map((roomId) -> {
+                    ChatRoomMemberId id = ChatRoomMemberId.builder()
+                            .member(userId)
+                            .chatRoom(roomId)
+                            .build();
+                    LocalDateTime localDateTimeDisconnectAt = chatRoomService.getDisconnectTime(id);
+                    Date disconnectAt = Date.from(localDateTimeDisconnectAt.atZone(ZoneId.systemDefault()).toInstant());
+
+                    ChatRoomDto.InfoAfterTime dto = ChatRoomDto.InfoAfterTime.builder()
+                            .roomId(roomId)
+                            .timestamp(disconnectAt)
+                            .build();
+
+                    return chatRoomService.getRoomInfo(dto);
+                }).toList();
+
+
+        SseEmitter emitter = sseChatListService.subscribe(userId);
+        try {
+            emitter.send(SseEmitter.event()
+                    .name("initial-room-list")
+                    .data(chatRoomInfos));
+        } catch (IOException e) {
+            emitter.complete();
+        }
+
+        return emitter;
     }
 }

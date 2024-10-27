@@ -17,6 +17,7 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -42,6 +43,7 @@ public class ChatInterceptor implements ChannelInterceptor {
     private final MemberService memberService;
 
     private final Map<String, String> sessionUserMap = new ConcurrentHashMap<>();
+    private final Map<String, String> sessionRoomMap = new ConcurrentHashMap<>();
 
     @Override
     public Message<?> preSend(@NotNull Message<?> message, @NotNull MessageChannel channel) {
@@ -61,8 +63,8 @@ public class ChatInterceptor implements ChannelInterceptor {
 
             String username = jwtValidator.getAuthentication(jwtToken).getName();
             String sessionId = accessor.getSessionId();
-            sessionUserMap.put(sessionId, username);
 
+            sessionUserMap.put(sessionId, username);
         }
 
         if (StompCommand.SUBSCRIBE.equals(accessor.getCommand())) {
@@ -79,6 +81,7 @@ public class ChatInterceptor implements ChannelInterceptor {
             if (username == null) {
                 throw new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER, "CON before SUB");
             }
+            sessionRoomMap.put(sessionId, roomId);
 
             Long userId = memberService.usernameToId(username);
             ChatRoomDto.ManageMember findMember = ChatRoomDto.ManageMember.builder()
@@ -89,7 +92,7 @@ public class ChatInterceptor implements ChannelInterceptor {
             if (!chatRoomService.isMemberOfChatRoom(findMember)) {
                 throw new ChatRoomException(ChatErrorCode.USER_NOT_IN_ROOM);
             }
-            System.out.println("sub pass fin");
+
         }
 
         return message;
@@ -102,7 +105,27 @@ public class ChatInterceptor implements ChannelInterceptor {
         // DISCONNECT 시 세션 정보 삭제
         if (StompCommand.DISCONNECT.equals(accessor.getCommand())) {
             String sessionId = accessor.getSessionId();
-            sessionUserMap.remove(sessionId);  // 세션 종료 시 정보 제거
+
+            String username = getUserIdBySessionId(sessionId);
+            if(username == null) {
+                return;
+            }
+            Long userId = memberService.usernameToId(username);
+            LocalDateTime disconnectedAt = LocalDateTime.now();
+            String roomId = sessionRoomMap.get(sessionId);
+            if(roomId == null) {
+                return;
+            }
+
+            ChatRoomDto.SetDisconnectTime dto = ChatRoomDto.SetDisconnectTime.builder()
+                    .roomId(roomId)
+                    .disconnectAt(disconnectedAt)
+                    .userId(userId)
+                    .build();
+            chatRoomService.setDisconnectTime(dto);
+            sessionUserMap.remove(sessionId);
+            sessionRoomMap.remove(sessionId);
+
         }
     }
 

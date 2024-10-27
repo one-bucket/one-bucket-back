@@ -6,9 +6,10 @@ import com.onebucket.domain.chatManager.dto.ChatRoomDto;
 import com.onebucket.domain.chatManager.entity.ChatRoom;
 import com.onebucket.domain.chatManager.entity.ChatRoomMember;
 import com.onebucket.domain.chatManager.entity.ChatRoomMemberId;
+import com.onebucket.domain.chatManager.mongo.ChatMessage;
+import com.onebucket.domain.chatManager.mongo.ChatMessageRepository;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
-import com.onebucket.domain.tradeManage.dao.PendingTradeRepository;
 import com.onebucket.domain.tradeManage.entity.PendingTrade;
 import com.onebucket.global.exceptionManage.customException.TradeManageException.PendingTradeException;
 import com.onebucket.global.exceptionManage.customException.chatManageException.Exceptions.ChatRoomException;
@@ -20,7 +21,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.beans.Transient;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -46,6 +48,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
     private final ChatRoomMemberRepository chatRoomMemberRepository;
     private final MemberRepository memberRepository;
+    private final ChatMessageRepository chatMessageRepository;
 
     @Override
     public boolean existsById(String roomId) {
@@ -63,6 +66,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
+    @Transactional
     public List<ChatRoomDto.MemberInfo> getMemberList(String roomId) {
         ChatRoom chatRoom = findChatRoom(roomId);
         List<ChatRoomMember> members = chatRoom.getMembers();
@@ -141,6 +145,65 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         int memberCount = savedChatRoom.getMembers().size();
         return (long) memberCount;
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ChatRoomDto.ChatRoomInfo getRoomInfo(ChatRoomDto.InfoAfterTime dto) {
+        ChatRoom room = findChatRoom(dto.getRoomId());
+        String roomName = room.getName();
+        Long memberCount = (long) room.getMembers().size();
+        Long stackMessage = chatMessageRepository.countMessagesAfterTimestamp(dto.getRoomId(), dto.getTimestamp());
+
+        ChatMessage recentMessage = chatMessageRepository.findTopByRoomIdOrderByTimestampDesc(dto.getRoomId());
+        if(recentMessage == null) {
+            recentMessage = ChatMessage.builder()
+                    .message(null)
+                    .sender(null)
+                    .id(dto.getRoomId())
+                    .timestamp(null)
+                    .build();
+        }
+        String recentMessageText = recentMessage.getMessage();
+        Date recentMessageTime = recentMessage.getTimestamp();
+
+        return ChatRoomDto.ChatRoomInfo.builder()
+                .roomId(room.getId())
+                .roomName(roomName)
+                .memberCount(memberCount)
+                .stackMessage(stackMessage)
+                .recentMessage(recentMessageText)
+                .recentMessageTime(recentMessageTime)
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public void setDisconnectTime(ChatRoomDto.SetDisconnectTime dto) {
+        ChatRoomMemberId id = ChatRoomMemberId.builder()
+                .member(dto.getUserId())
+                .chatRoom(dto.getRoomId())
+                .build();
+        ChatRoomMember chatRoomMember = chatRoomMemberRepository.findById(id).orElseThrow(() ->
+                new ChatRoomException(ChatErrorCode.NOT_EXIST_ROOM));
+
+        chatRoomMember.setDisconnectAt(dto.getDisconnectAt());
+        chatRoomMemberRepository.save(chatRoomMember);
+    }
+
+    @Override
+    @Transactional
+    public LocalDateTime getDisconnectTime(ChatRoomMemberId id) {
+        return chatRoomMemberRepository.findById(id).orElseThrow(() -> new ChatRoomException(ChatErrorCode.NOT_EXIST_ROOM))
+                .getDisconnectAt();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<String> getRoomIds(Long userId) {
+        return chatRoomMemberRepository.findChatRoomIdByMemberId(userId);
+    }
+
+
 
     private ChatRoom findChatRoom(String roomId) {
         return chatRoomRepository.findById(roomId)

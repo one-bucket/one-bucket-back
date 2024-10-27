@@ -3,6 +3,7 @@ package com.onebucket.domain.chatManager.api;
 import com.onebucket.domain.chatManager.dto.ChatDto;
 
 import com.onebucket.domain.chatManager.service.ChatServiceImpl;
+import com.onebucket.domain.chatManager.service.SSEChatListServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -30,7 +31,7 @@ import org.springframework.web.bind.annotation.*;
 public class ChatController {
     private final SimpMessageSendingOperations template;
     private final ChatServiceImpl chatService;
-
+    private final SSEChatListServiceImpl sseChatListService;
 
     @MessageMapping("/enterUser")
     public void enterUser(@Payload ChatDto chat) {
@@ -39,6 +40,7 @@ public class ChatController {
         chatService.saveMessage(chat);
 
         template.convertAndSend("/sub/chat/room/" + chat.getRoomId(), chat);
+
     }
 
     @MessageMapping("/sendMessage")
@@ -47,6 +49,7 @@ public class ChatController {
 
         chatService.saveMessage(chat);
         template.convertAndSend("/sub/chat/room/" + chat.getRoomId(), chat);
+        sseChatListService.notifyRoomUpdate(chat);
     }
 
 }

@@ -2,10 +2,7 @@ package com.onebucket.domain.chatManager.entity;
 
 import com.onebucket.domain.memberManage.domain.Member;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -26,6 +23,7 @@ import java.time.LocalDateTime;
 @Entity
 @Builder
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @IdClass(ChatRoomMemberId.class)
@@ -47,6 +45,8 @@ public class ChatRoomMember {
     private ChatRoom chatRoom;
 
     private LocalDateTime joinedAt;
+
+    private LocalDateTime disconnectAt;
 
     private String role;
 }

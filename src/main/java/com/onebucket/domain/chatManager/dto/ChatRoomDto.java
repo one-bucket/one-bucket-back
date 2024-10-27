@@ -6,6 +6,7 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -42,6 +43,36 @@ public class ChatRoomDto {
                     .build();
         }
 
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ChatRoomInfo {
+        private String roomId;
+        private String roomName;
+        private Long memberCount;
+        private Long stackMessage;
+        private String recentMessage;
+        private Date recentMessageTime;
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class InfoAfterTime {
+        private String roomId;
+        private Date timestamp;
+    }
+
+    @Builder
+    @Getter
+    public static class SetDisconnectTime {
+        private String roomId;
+        private LocalDateTime disconnectAt;
+        private Long userId;
     }
 
     @Builder

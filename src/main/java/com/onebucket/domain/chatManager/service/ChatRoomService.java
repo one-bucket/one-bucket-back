@@ -1,7 +1,9 @@
 package com.onebucket.domain.chatManager.service;
 
 import com.onebucket.domain.chatManager.dto.ChatRoomDto;
+import com.onebucket.domain.chatManager.entity.ChatRoomMemberId;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -60,18 +62,21 @@ public interface ChatRoomService {
      */
     String createRoom(ChatRoomDto.CreateRoom dto);
 
-    /**
-     * 해당 채팅방의 거래 정보를 조회한다.
-     * @param roomId
-     * @return
-     */
     ChatRoomDto.GetTradeInfo getTradeInfo(String roomId);
 
     void changeRoomName(ChatRoomDto.ChangeRoomName dto);
 
     void deleteRoom(String roomId);
 
+    ChatRoomDto.ChatRoomInfo getRoomInfo(ChatRoomDto.InfoAfterTime dto);
+
+    List<String> getRoomIds(Long userId);
+
+    void setDisconnectTime(ChatRoomDto.SetDisconnectTime dto);
+
     Long addMember(ChatRoomDto.ManageMember dto);
 
     Long quitMember(ChatRoomDto.ManageMember dto);
+
+    LocalDateTime getDisconnectTime(ChatRoomMemberId id);
 }

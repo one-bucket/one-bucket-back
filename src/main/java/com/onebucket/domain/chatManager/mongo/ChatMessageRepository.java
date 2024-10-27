@@ -27,4 +27,9 @@ public interface ChatMessageRepository extends MongoRepository<ChatMessage, Stri
     @Query("{ 'roomId': ?0, 'timestamp': { $gt: ?1 } }")
     List<ChatMessage> findMessagesAfterTimestamp(String roomId, Date timestamp);
 
+    @Query(value = "{ 'roomId' : ?0, 'timestamp' :  { $gt:  ?1} }", count = true)
+    long countMessagesAfterTimestamp(String roomId, Date timestamp);
+
+    ChatMessage findTopByRoomIdOrderByTimestampDesc(String roomId);
+
 }
