@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
+
 /**
  * <br>package name   : com.onebucket.domain.chatManager.dto
  * <br>file name      : RoomUpdateDto
@@ -25,5 +27,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class RoomUpdateDto {
     private String roomId;
-    private String latestMessage;
+    private String recentMessage;
+    private Date recentMessageTime;
 }

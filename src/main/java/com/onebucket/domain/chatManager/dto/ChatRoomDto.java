@@ -58,14 +58,28 @@ public class ChatRoomDto {
         private Date recentMessageTime;
     }
 
-    @Builder
+    @SuperBuilder
     @Getter
     @NoArgsConstructor
-    @AllArgsConstructor
     public static class InfoAfterTime {
         private String roomId;
         private Date timestamp;
+
+        public static InfoAfterTime of(RequestInfoAfterTime dto) {
+            return InfoAfterTime.builder()
+                    .roomId(dto.getRoomId())
+                    .timestamp(dto.getTimestamp())
+                    .build();
+        }
     }
+
+    @SuperBuilder
+    @Getter
+    @NoArgsConstructor
+    public static class RequestInfoAfterTime extends InfoAfterTime {
+
+    }
+
 
     @Builder
     @Getter

@@ -6,8 +6,6 @@ import com.onebucket.domain.chatManager.mongo.ChatMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.List;
 
 /**
  * <br>package name   : com.onebucket.domain.chatManager.service
@@ -25,10 +23,11 @@ import java.util.List;
  */
 @Service
 @RequiredArgsConstructor
-public class ChatServiceImpl {
+public class ChatServiceImpl implements ChatService {
     private final ChatMessageRepository chatMessageRepository;
 
 
+    @Override
     public void saveMessage(ChatDto chatDto) {
         // 새로운 ChatMessage 도큐먼트 생성
         ChatMessage newMessage = ChatMessage.builder()
@@ -41,10 +40,6 @@ public class ChatServiceImpl {
         chatMessageRepository.save(newMessage);
     }
 
-    public List<ChatMessage> getMessageAfterTimestamp(String roomId, Date timestamp) {
-        // 동기적으로 메시지 조회
-        return chatMessageRepository.findMessagesAfterTimestamp(roomId, timestamp);
-    }
 
 
 }

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,7 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Service
 @RequiredArgsConstructor
-public class SSEChatListServiceImpl {
+public class SSEChatListServiceImpl implements SSEChatListService{
 
     private final ChatRoomService chatRoomService;
 
@@ -44,7 +45,8 @@ public class SSEChatListServiceImpl {
 
     public void notifyRoomUpdate(ChatDto chat) {
         String roomId = chat.getRoomId();
-        String latestMessage = chat.getMessage();
+        String recentMessage = chat.getMessage();
+        Date recentMessageTime = chat.getTime();
 
         List<Long> userIds = chatRoomService.getMemberList(roomId)
                 .stream().map(ChatRoomDto.MemberInfo::getId).toList();
@@ -57,7 +59,8 @@ public class SSEChatListServiceImpl {
                             .name("room-update")
                             .data(RoomUpdateDto.builder()
                                     .roomId(roomId)
-                                    .latestMessage(latestMessage)
+                                    .recentMessage(recentMessage)
+                                    .recentMessageTime(recentMessageTime)
                                     .build()));
                 } catch(IOException e) {
                     emitter.complete();

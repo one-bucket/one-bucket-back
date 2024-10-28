@@ -48,51 +48,57 @@ public class ChatInterceptor implements ChannelInterceptor {
     @Override
     public Message<?> preSend(@NotNull Message<?> message, @NotNull MessageChannel channel) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
+        try {
 
-        if(StompCommand.CONNECT.equals(accessor.getCommand())) {
-            String jwtToken = accessor.getFirstNativeHeader("Authorization");
-            if(jwtToken != null && jwtToken.startsWith("Bearer ")) {
-                jwtToken = jwtToken.substring(7);
-            } else {
-                throw new AuthenticationException(AuthenticationErrorCode.NON_VALID_TOKEN);
+            if(StompCommand.CONNECT.equals(accessor.getCommand())) {
+                String jwtToken = accessor.getFirstNativeHeader("Authorization");
+                if(jwtToken != null && jwtToken.startsWith("Bearer ")) {
+                    jwtToken = jwtToken.substring(7);
+                } else {
+                    throw new AuthenticationException(AuthenticationErrorCode.NON_VALID_TOKEN);
+                }
+
+                if(!jwtValidator.isTokenValid(jwtToken)) {
+                    throw new AuthenticationException(AuthenticationErrorCode.NON_VALID_TOKEN);
+                }
+
+                String username = jwtValidator.getAuthentication(jwtToken).getName();
+                String sessionId = accessor.getSessionId();
+
+                sessionUserMap.put(sessionId, username);
             }
 
-            if(!jwtValidator.isTokenValid(jwtToken)) {
-                throw new AuthenticationException(AuthenticationErrorCode.NON_VALID_TOKEN);
+            if (StompCommand.SUBSCRIBE.equals(accessor.getCommand())) {
+
+                // 구독하려는 채팅방 ID 추출
+                String destination = accessor.getDestination();
+                assert destination != null;
+                String roomId = extractRoomIdFromDestination(destination);
+
+                // 세션 ID를 통해 사용자 ID 가져오기
+                String sessionId = accessor.getSessionId();
+                String username = getUserIdBySessionId(sessionId);  // CONNECT 시 저장된 사용자 정보 활용
+
+                if (username == null) {
+                    throw new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER, "CON before SUB");
+                }
+                sessionRoomMap.put(sessionId, roomId);
+
+                Long userId = memberService.usernameToId(username);
+                ChatRoomDto.ManageMember findMember = ChatRoomDto.ManageMember.builder()
+                        .memberId(userId)
+                        .roomId(roomId)
+                        .build();
+                // 사용자가 해당 채팅방의 멤버인지 확인
+                if (!chatRoomService.isMemberOfChatRoom(findMember)) {
+                    throw new ChatRoomException(ChatErrorCode.USER_NOT_IN_ROOM);
+                }
+
             }
 
-            String username = jwtValidator.getAuthentication(jwtToken).getName();
-            String sessionId = accessor.getSessionId();
-
-            sessionUserMap.put(sessionId, username);
-        }
-
-        if (StompCommand.SUBSCRIBE.equals(accessor.getCommand())) {
-
-            // 구독하려는 채팅방 ID 추출
-            String destination = accessor.getDestination();
-            assert destination != null;
-            String roomId = extractRoomIdFromDestination(destination);
-
-            // 세션 ID를 통해 사용자 ID 가져오기
-            String sessionId = accessor.getSessionId();
-            String username = getUserIdBySessionId(sessionId);  // CONNECT 시 저장된 사용자 정보 활용
-
-            if (username == null) {
-                throw new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER, "CON before SUB");
-            }
-            sessionRoomMap.put(sessionId, roomId);
-
-            Long userId = memberService.usernameToId(username);
-            ChatRoomDto.ManageMember findMember = ChatRoomDto.ManageMember.builder()
-                    .memberId(userId)
-                    .roomId(roomId)
-                    .build();
-            // 사용자가 해당 채팅방의 멤버인지 확인
-            if (!chatRoomService.isMemberOfChatRoom(findMember)) {
-                throw new ChatRoomException(ChatErrorCode.USER_NOT_IN_ROOM);
-            }
-
+        } catch (Exception e) {
+            System.out.println("Fail to pre - processing when sending message");
+            return null;
         }
 
         return message;
@@ -101,32 +107,38 @@ public class ChatInterceptor implements ChannelInterceptor {
     @Override
     public void postSend(@NotNull Message<?> message, @NotNull MessageChannel channel, boolean sent) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
+        try {
+            // DISCONNECT 시 세션 정보 삭제
+            if (StompCommand.DISCONNECT.equals(accessor.getCommand())) {
+                String sessionId = accessor.getSessionId();
 
-        // DISCONNECT 시 세션 정보 삭제
-        if (StompCommand.DISCONNECT.equals(accessor.getCommand())) {
-            String sessionId = accessor.getSessionId();
+                String username = getUserIdBySessionId(sessionId);
+                if(username == null) {
+                    return;
+                }
+                Long userId = memberService.usernameToId(username);
+                LocalDateTime disconnectedAt = LocalDateTime.now();
+                String roomId = sessionRoomMap.get(sessionId);
+                if(roomId == null) {
+                    return;
+                }
 
-            String username = getUserIdBySessionId(sessionId);
-            if(username == null) {
-                return;
+                ChatRoomDto.SetDisconnectTime dto = ChatRoomDto.SetDisconnectTime.builder()
+                        .roomId(roomId)
+                        .disconnectAt(disconnectedAt)
+                        .userId(userId)
+                        .build();
+                chatRoomService.setDisconnectTime(dto);
+                sessionUserMap.remove(sessionId);
+                sessionRoomMap.remove(sessionId);
+
             }
-            Long userId = memberService.usernameToId(username);
-            LocalDateTime disconnectedAt = LocalDateTime.now();
-            String roomId = sessionRoomMap.get(sessionId);
-            if(roomId == null) {
-                return;
-            }
-
-            ChatRoomDto.SetDisconnectTime dto = ChatRoomDto.SetDisconnectTime.builder()
-                    .roomId(roomId)
-                    .disconnectAt(disconnectedAt)
-                    .userId(userId)
-                    .build();
-            chatRoomService.setDisconnectTime(dto);
-            sessionUserMap.remove(sessionId);
-            sessionRoomMap.remove(sessionId);
-
+        } catch (Exception e) {
+            System.out.println("Fail to post - processing when terminate websocket session");
+            return;
         }
+
+
     }
 
     private String extractRoomIdFromDestination(String destination) {

@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -193,8 +194,9 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     @Override
     @Transactional
     public LocalDateTime getDisconnectTime(ChatRoomMemberId id) {
-        return chatRoomMemberRepository.findById(id).orElseThrow(() -> new ChatRoomException(ChatErrorCode.NOT_EXIST_ROOM))
+        LocalDateTime time =  chatRoomMemberRepository.findById(id).orElseThrow(() -> new ChatRoomException(ChatErrorCode.NOT_EXIST_ROOM))
                 .getDisconnectAt();
+        return Objects.requireNonNullElseGet(time, () -> LocalDateTime.of(0, 1, 1, 0, 0));
     }
 
     @Override
@@ -203,7 +205,10 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         return chatRoomMemberRepository.findChatRoomIdByMemberId(userId);
     }
 
-
+    @Override
+    public List<ChatMessage> getMessageAfterTimestamp(ChatRoomDto.InfoAfterTime dto) {
+        return chatMessageRepository.findMessagesAfterTimestamp(dto.getRoomId(), dto.getTimestamp());
+    }
 
     private ChatRoom findChatRoom(String roomId) {
         return chatRoomRepository.findById(roomId)
