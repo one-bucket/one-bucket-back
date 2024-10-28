@@ -5,9 +5,9 @@ import lombok.*;
 import java.util.Date;
 
 /**
- * <br>package name   : com.onebucket.domain.chatManager.entity
- * <br>file name      : ChatMessage
- * <br>date           : 2024-09-16
+ * <br>package name   : com.onebucket.domain.chatManager.mongo
+ * <br>file name      : TimeStampDto
+ * <br>date           : 2024-10-22
  * <pre>
  * <span style="color: white;">[description]</span>
  *
@@ -18,21 +18,12 @@ import java.util.Date;
  *
  * } </pre>
  */
-
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChatDto {
-
-    public enum MessageType {
-        ENTER, TALK, LEAVE
-    }
-    private MessageType type;
+public class TimeStampDto {
     private String roomId;
-    private String sender;
-    private String message;
     private Date time;
-
 }

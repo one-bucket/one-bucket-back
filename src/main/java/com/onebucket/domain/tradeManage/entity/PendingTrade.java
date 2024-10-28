@@ -1,5 +1,6 @@
 package com.onebucket.domain.tradeManage.entity;
 
+import com.onebucket.domain.chatManager.entity.ChatRoom;
 import com.onebucket.domain.memberManage.domain.Member;
 import jakarta.persistence.*;
 import lombok.*;
@@ -61,6 +62,10 @@ public class PendingTrade {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "tag_id", nullable = false)
     private TradeTag tradeTag;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "chat_room_id")
+    private ChatRoom chatRoom;
 
     private String linkUrl;
 

@@ -1,13 +1,21 @@
 package com.onebucket.domain.chatManager.api;
 
 import com.onebucket.domain.chatManager.dto.ChatDto;
-import com.onebucket.domain.chatManager.dao.ChatRepository;
+
+import com.onebucket.domain.chatManager.dto.ChatRoomDto;
+import com.onebucket.domain.chatManager.service.ChatRoomService;
+import com.onebucket.domain.chatManager.service.ChatService;
+import com.onebucket.domain.chatManager.service.SSEChatListService;
+import com.onebucket.domain.memberManage.service.MemberService;
+import com.onebucket.global.exceptionManage.customException.chatManageException.ChatManageException;
+import com.onebucket.global.exceptionManage.errorCode.ChatErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -29,25 +37,54 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 public class ChatController {
     private final SimpMessageSendingOperations template;
-    private final ChatRepository chatRepository;
+    private final ChatService chatService;
+    private final ChatRoomService chatRoomService;
+    private final SSEChatListService sseChatListService;
+    private final MemberService memberService;
 
-    @MessageMapping("/enterUser")
-    public void enterUser(@Payload ChatDto chat, SimpMessageHeaderAccessor headerAccessor) {
-        System.out.println("room id is : "+ chat.getRoomId());
-        chatRepository.plusUserCnt(chat.getRoomId());
-        String userUUID = chatRepository.addUser(chat.getRoomId(), chat.getSender());
+    @MessageMapping("/message")
+    public void message(@Payload ChatDto chat, SimpMessageHeaderAccessor headerAccessor) {
+        switch (chat.getType()) {
+            case ENTER -> enterUser(chat);
+            case TALK -> sendMessage(chat);
+            case LEAVE -> leaveUser(chat, headerAccessor);
+            default -> throw new ChatManageException(ChatErrorCode.MESSAGING_ERROR);
+        }
+    }
 
-        headerAccessor.getSessionAttributes().put("userUUID", userUUID);
-        headerAccessor.getSessionAttributes().put("roomId", chat.getRoomId());
-
+    private void enterUser(ChatDto chat) {
         chat.setMessage(chat.getSender() + "님이 입장하였습니다.");
+
+        chatService.saveMessage(chat);
+
         template.convertAndSend("/sub/chat/room/" + chat.getRoomId(), chat);
     }
 
-    @MessageMapping("/sendMessage")
-    public void sendMessage(@Payload ChatDto chat) {
-        System.out.println("message is " + chat.getMessage());
+    private void sendMessage(ChatDto chat) {
         chat.setMessage(chat.getMessage());
+
+        chatService.saveMessage(chat);
         template.convertAndSend("/sub/chat/room/" + chat.getRoomId(), chat);
+        sseChatListService.notifyRoomUpdate(chat);
     }
+
+    private void leaveUser(ChatDto chat, SimpMessageHeaderAccessor headerAccessor) {
+        chat.setMessage(chat.getSender() + "님이 퇴장하였습니다.");
+        chatService.saveMessage(chat);
+        template.convertAndSend("/sub/chat/room/" + chat.getRoomId(),chat);
+
+        Authentication authentication = (Authentication) headerAccessor.getUser();
+        if(authentication != null) {
+            String username = authentication.getName();
+            Long userId = memberService.usernameToId(username);
+
+            ChatRoomDto.ManageMember dto = ChatRoomDto.ManageMember.builder()
+                    .roomId(chat.getRoomId())
+                    .memberId(userId)
+                    .build();
+
+            chatRoomService.quitMember(dto);
+        }
+    }
+
 }

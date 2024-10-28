@@ -1,14 +1,13 @@
 package com.onebucket.domain.chatManager.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import com.onebucket.domain.memberManage.domain.Member;
+import com.onebucket.domain.tradeManage.entity.PendingTrade;
+import jakarta.persistence.*;
+import lombok.*;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <br>package name   : com.onebucket.domain.chatManager.entity
@@ -25,6 +24,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
  * } </pre>
  */
 @Getter
+@Setter
 @Entity
 @Builder
 @NoArgsConstructor
@@ -33,8 +33,34 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 public class ChatRoom {
 
     @Id
-    private Long id;
-    private Long userCount;
+    private String id;
 
+    private String name;
+
+    @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default // 기본값 설정
+    private List<ChatRoomMember> members = new ArrayList<>();
+
+    public void addMember(Member member) {
+        ChatRoomMember chatRoomMember = ChatRoomMember.builder()
+                .member(member)
+                .chatRoom(this)
+                .build();
+
+        this.members.add(chatRoomMember);
+    }
+
+    public void quitMember(Member member) {
+        ChatRoomMember chatRoomMember = ChatRoomMember.builder()
+                .member(member)
+                .chatRoom(this)
+                .build();
+
+        this.members.remove(chatRoomMember);
+    }
+
+
+    @OneToOne(mappedBy = "chatRoom")
+    private PendingTrade pendingTrade;
 
 }

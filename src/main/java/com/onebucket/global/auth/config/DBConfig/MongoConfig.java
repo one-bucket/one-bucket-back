@@ -34,7 +34,7 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
  */
 @Configuration
 @RequiredArgsConstructor
-@EnableMongoRepositories(basePackages = "com.onebucket.domain.chatManage.dao")
+@EnableMongoRepositories(basePackages = "com.onebucket.domain.chatManager.mongo")
 public class MongoConfig {
 
     private final MongoMappingContext mongoMappingContext;
