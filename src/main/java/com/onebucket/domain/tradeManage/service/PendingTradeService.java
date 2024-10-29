@@ -36,5 +36,6 @@ public interface PendingTradeService {
     Long terminate(TradeKeyDto.FindTrade dto);
 
     LocalDateTime extendDueDate(TradeKeyDto.ExtendDate dto);
+    void setChatRoom(TradeKeyDto.SettingChatRoom dto);
 
 }

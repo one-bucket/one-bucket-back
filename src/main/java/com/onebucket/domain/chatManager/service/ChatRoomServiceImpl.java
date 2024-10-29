@@ -10,6 +10,7 @@ import com.onebucket.domain.chatManager.mongo.ChatMessage;
 import com.onebucket.domain.chatManager.mongo.ChatMessageRepository;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
+import com.onebucket.domain.tradeManage.dao.PendingTradeRepository;
 import com.onebucket.domain.tradeManage.entity.PendingTrade;
 import com.onebucket.global.exceptionManage.customException.TradeManageException.PendingTradeException;
 import com.onebucket.global.exceptionManage.customException.chatManageException.Exceptions.ChatRoomException;
@@ -50,6 +51,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     private final ChatRoomMemberRepository chatRoomMemberRepository;
     private final MemberRepository memberRepository;
     private final ChatMessageRepository chatMessageRepository;
+    private final PendingTradeRepository pendingTradeRepository;
 
     @Override
     public boolean existsById(String roomId) {
@@ -80,14 +82,14 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     @Transactional
     public String createRoom(ChatRoomDto.CreateRoom dto) {
         String id = UUID.randomUUID().toString();
-//        PendingTrade pendingTrade = pendingTradeRepository.findById(dto.getTradeId())
-//                .orElseThrow(() -> new PendingTradeException(TradeErrorCode.UNKNOWN_TRADE));
+        PendingTrade pendingTrade = pendingTradeRepository.findById(dto.getTradeId())
+                .orElseThrow(() -> new PendingTradeException(TradeErrorCode.UNKNOWN_TRADE));
         Member member = findMember(dto.getMemberId());
 
         ChatRoom chatRoom = ChatRoom.builder()
                 .id(id)
                 .name(dto.getName())
-               // .pendingTrade(pendingTrade)
+                .pendingTrade(pendingTrade)
                 .build();
 
         chatRoom.addMember(member);

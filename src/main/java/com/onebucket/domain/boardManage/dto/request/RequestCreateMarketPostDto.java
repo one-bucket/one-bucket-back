@@ -31,4 +31,6 @@ public class RequestCreateMarketPostDto {
     @Valid
     private TradeDto.RequestCreate tradeCreateDto;
 
+    private String chatRoomName;
+
 }

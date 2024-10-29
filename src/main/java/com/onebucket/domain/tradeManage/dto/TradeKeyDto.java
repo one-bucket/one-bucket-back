@@ -37,6 +37,13 @@ public class TradeKeyDto {
     @Getter
     @SuperBuilder
     @NoArgsConstructor
+    public static class SettingChatRoom extends FindTrade {
+        private String chatRoomId;
+    }
+
+    @Getter
+    @SuperBuilder
+    @NoArgsConstructor
     public static class Finish extends FindTrade {
         private boolean fin;
 
