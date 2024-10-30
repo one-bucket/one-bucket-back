@@ -26,18 +26,18 @@ pipeline {
    }
 
    stages {
-        stage('Checkout') {
-            steps {
-                //source code checkout
-                checkout scm
-            }
-        }
-
         stage('Git Cleanup') {
             steps {
                 sh 'git remote prune origin'
                 sh 'git fetch --all'
                 sh 'git reset --hard origin/master'
+            }
+        }
+       
+        stage('Checkout') {
+            steps {
+                //source code checkout
+                checkout scm
             }
         }
 
