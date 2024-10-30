@@ -159,6 +159,8 @@ public class PendingTradeServiceImpl implements PendingTradeService {
                 .startTradeAt(pendingTrade.getStartTradeAt())
                 .memberIds(memberIds)
                 .build();
+
+        pendingTradeRepository.delete(pendingTrade);
         return closeTradeRepository.save(closeTrade).getId();
     }
     @Override

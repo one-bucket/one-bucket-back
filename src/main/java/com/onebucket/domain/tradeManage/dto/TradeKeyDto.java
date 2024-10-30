@@ -66,6 +66,20 @@ public class TradeKeyDto {
     @NoArgsConstructor
     public static class ExtendDate extends FindTrade {
         private Long date;
+
+        public static ExtendDate of(RequestExtendDate dto) {
+            return ExtendDate.builder()
+                    .tradeId(dto.getTradeId())
+                    .date(dto.getDate())
+                    .build();
+        }
+    }
+
+    @Getter
+    @SuperBuilder
+    @NoArgsConstructor
+    public static class RequestExtendDate extends ExtendDate {
+
     }
 
 
