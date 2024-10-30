@@ -11,6 +11,7 @@ import com.onebucket.domain.tradeManage.dto.TradeKeyDto;
 import com.onebucket.domain.tradeManage.service.PendingTradeService;
 import com.onebucket.global.exceptionManage.customException.chatManageException.ChatManageException;
 import com.onebucket.global.exceptionManage.errorCode.ChatErrorCode;
+import com.onebucket.global.utils.ImageUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -44,6 +45,8 @@ public class ChatController {
     private final SSEChatListService sseChatListService;
     private final MemberService memberService;
     private final PendingTradeService pendingTradeService;
+
+    private final ImageUtils imageUtils;
 
     @MessageMapping("/message")
     public void message(@Payload ChatDto chat, SimpMessageHeaderAccessor headerAccessor) {
@@ -97,6 +100,17 @@ public class ChatController {
 
             chatRoomService.quitMember(dto);
         }
+    }
+
+    private void imageMessage(ChatDto chat) {
+        String message = chat.getMessage();
+        String imageFormat = imageUtils.getFileExtensionFromMessage(message);
+        String fileName = imageUtils.getFileNameFromMessage(message);
+
+        ChatRoomDto.SaveImage saveImageDto = ChatRoomDto.SaveImage.builder()
+                .format(imageFormat)
+                .build();
+
     }
 
 }
