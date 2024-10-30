@@ -33,6 +33,14 @@ pipeline {
             }
         }
 
+        stage('Git Cleanup') {
+            steps {
+                sh 'git remote prune origin'
+                sh 'git fetch --all'
+                sh 'git reset --hard origin/master'
+            }
+        }
+
         stage('Test') {
             steps {
                 withEnv([
