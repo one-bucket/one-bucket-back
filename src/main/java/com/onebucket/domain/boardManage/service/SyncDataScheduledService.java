@@ -3,6 +3,7 @@ package com.onebucket.domain.boardManage.service;
 import com.onebucket.domain.boardManage.dao.PostRepository;
 import com.onebucket.global.redis.LuaScriptLoader;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -39,6 +40,7 @@ public class SyncDataScheduledService {
 
     @Scheduled(cron = "0 */3 * * * *")
     @Transactional
+    @ConditionalOnProperty(name = "batch.enabled", havingValue = "true", matchIfMissing = true)
     public void syncLikesFromRedisToPost() {
 
         List<List<String>> result = stringRedisTemplate.execute(syncLikeScript, List.of());
