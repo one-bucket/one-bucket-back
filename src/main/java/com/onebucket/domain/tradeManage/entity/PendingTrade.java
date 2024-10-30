@@ -2,7 +2,6 @@ package com.onebucket.domain.tradeManage.entity;
 
 import com.onebucket.domain.chatManager.entity.ChatRoom;
 import com.onebucket.domain.memberManage.domain.Member;
-import com.onebucket.domain.memberManage.domain.MemberGroup;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -39,10 +38,6 @@ public class PendingTrade {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = true)
     private Member owner;
-
-    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
-    @JoinColumn(name = "member_group_id", referencedColumnName = "id")
-    private MemberGroup memberGroup;
 
     @ManyToMany
     @JoinTable(
