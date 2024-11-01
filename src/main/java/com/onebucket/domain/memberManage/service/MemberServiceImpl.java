@@ -55,6 +55,7 @@ public class MemberServiceImpl implements MemberService {
      * @return 사용자의 id를 반환한다.
      */
     @Override
+    @Transactional
     public Long createMember(CreateMemberRequestDto createMemberRequestDto) {
 
 
@@ -85,6 +86,7 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
+    @Transactional
     public void updateMember(String username, NicknameRequestDto nicknameRequestDTO) {
         Member member = findMember(username);
         member.setNickname(nicknameRequestDTO.getNickname());
@@ -96,6 +98,7 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
+    @Transactional
     public void quitMember(String username) {
 //        Member member = memberRepository.findByUsername(username)
 //                .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
@@ -110,6 +113,7 @@ public class MemberServiceImpl implements MemberService {
      * @return
      */
     @Override
+    @Transactional
     public String initPassword(String username) {
         Member member = findMember(username);
         String newPassword = randomStringUtils.generateRandomStr(15);
@@ -119,6 +123,7 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
+    @Transactional
     public String changePassword(SetPasswordDto dto) {
         Member member = findMember(dto.getUsername());
         if (!passwordEncoder.matches(dto.getOldPassword(), member.getPassword())) {
