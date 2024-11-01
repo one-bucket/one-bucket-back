@@ -23,6 +23,8 @@ pipeline {
         MONGO_USER = "springUser"
         MONGO_PWD = "ezAcEOvxX0"
         MINIO_URL = "http://192.168.219.144:9000"
+
+         JAVA_TOOL_OPTIONS = "-Duser.timezone=Asia/Seoul"
    }
 
    stages {

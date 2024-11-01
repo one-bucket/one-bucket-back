@@ -117,6 +117,7 @@ public class ChatRoomDto {
     @Getter
     @Setter
     public static class GetTradeInfo {
+        private Long id;
         private String authorNickname;
         private String item;
         private Long price;
@@ -127,6 +128,7 @@ public class ChatRoomDto {
 
         public static GetTradeInfo of(PendingTrade pendingTrade) {
             return GetTradeInfo.builder()
+                    .id(pendingTrade.getId())
                     .authorNickname(pendingTrade.getOwner().getNickname())
                     .item(pendingTrade.getItem())
                     .price(pendingTrade.getPrice())
@@ -134,5 +136,13 @@ public class ChatRoomDto {
                     .count(pendingTrade.getCount())
                     .build();
         }
+    }
+
+    @Builder
+    @Getter
+    public static class SaveImage {
+        private String name;
+        private String format;
+        private String roomId;
     }
 }

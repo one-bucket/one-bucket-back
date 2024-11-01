@@ -27,7 +27,7 @@ import java.util.Date;
 public class ChatDto {
 
     public enum MessageType {
-        ENTER, TALK, LEAVE
+        ENTER, TALK, LEAVE, IMAGE
     }
     private MessageType type;
     private String roomId;

@@ -6,8 +6,11 @@ import com.onebucket.domain.boardManage.dto.parents.ValueDto;
 import com.onebucket.domain.boardManage.dto.request.RequestCreateMarketPostDto;
 import com.onebucket.domain.boardManage.service.BoardService;
 import com.onebucket.domain.boardManage.service.MarketPostService;
+import com.onebucket.domain.chatManager.dto.ChatRoomDto;
+import com.onebucket.domain.chatManager.service.ChatRoomService;
 import com.onebucket.domain.memberManage.service.MemberService;
 import com.onebucket.domain.tradeManage.dto.TradeDto;
+import com.onebucket.domain.tradeManage.dto.TradeKeyDto;
 import com.onebucket.domain.tradeManage.service.PendingTradeService;
 import com.onebucket.global.exceptionManage.customException.boardManageException.UserBoardException;
 import com.onebucket.global.exceptionManage.errorCode.BoardErrorCode;
@@ -41,19 +44,21 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/market-post")
 public class MarketPostController extends AbstractPostController<MarketPostService> {
     private final PendingTradeService pendingTradeService;
+    private final ChatRoomService chatRoomService;
 
 
     public MarketPostController(MarketPostService postService, SecurityUtils securityUtils,
                                 MemberService memberService, BoardService boardService,
-                                PendingTradeService pendingTradeService) {
+                                PendingTradeService pendingTradeService,
+                                ChatRoomService chatRoomService){
         super(postService, securityUtils, memberService, boardService);
         this.pendingTradeService = pendingTradeService;
+        this.chatRoomService = chatRoomService;
     }
 
     @PreAuthorize("@authorizationService.isUserCanAccessBoard(#dto.marketPostCreateDto.boardId)")
     @PostMapping("/create")
     public ResponseEntity<SuccessResponseWithIdDto> createPost(@RequestBody @Valid RequestCreateMarketPostDto dto) {
-
 
         MarketPostDto.RequestCreate marketPostCreateDto = dto.getMarketPostCreateDto();
         TradeDto.RequestCreate tradeCreateDto = dto.getTradeCreateDto();
@@ -79,6 +84,23 @@ public class MarketPostController extends AbstractPostController<MarketPostServi
                 .of(marketPostCreateDto, username, univId, tradeId);
 
         Long savedId = postService.createPost(internalMarketPostCreateDto);
+
+        //채팅방 생성
+        String chatRoomName = dto.getChatRoomName();
+        ChatRoomDto.CreateRoom createRoomDto = ChatRoomDto.CreateRoom.builder()
+                .name(chatRoomName)
+                .memberId(ownerId)
+                .tradeId(tradeId)
+                .build();
+        String chatRoomId = chatRoomService.createRoom(createRoomDto);
+
+        //pendingTrade에 저장
+        TradeKeyDto.SettingChatRoom settingChatRoom = TradeKeyDto.SettingChatRoom.builder()
+                .chatRoomId(chatRoomId)
+                .tradeId(tradeId)
+                .build();
+        pendingTradeService.setChatRoom(settingChatRoom);
+
         return ResponseEntity.ok(new SuccessResponseWithIdDto("success create post", savedId));
     }
 

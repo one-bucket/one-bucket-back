@@ -40,8 +40,7 @@ public class AuthorizationService {
 
     public boolean isUserCanAccessBoard(Long boardId) {
         String username = securityUtils.getCurrentUsername();
-        Member member = memberRepository.findByUsername(username).orElseThrow(() ->
-                new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
+        Member member = findMember(username);
 
         Board board = boardRepository.findById(boardId).orElseThrow(() ->
                 new UserBoardException(BoardErrorCode.UNKNOWN_BOARD));
@@ -58,11 +57,8 @@ public class AuthorizationService {
 
     public boolean isUserCanAccessPost(Long postId) {
         String username = securityUtils.getCurrentUsername();
-        Member member = memberRepository.findByUsername(username).orElseThrow(() ->
-                new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
-
-        Post post = postRepository.findById(postId).orElseThrow(() ->
-                new UserBoardException(BoardErrorCode.UNKNOWN_POST));
+        Member member = findMember(username);
+        Post post = findPost(postId);
 
         Board board = post.getBoard();
 
@@ -73,6 +69,25 @@ public class AuthorizationService {
         } else {
             throw new AuthenticationException(AuthenticationErrorCode.UNAUTHORIZED_ACCESS);
         }
+    }
+
+    public boolean isUserOwnerOfPost(Long postId) {
+        String username = securityUtils.getCurrentUsername();
+        Long userId = findMember(username).getId();
+
+        Post post = findPost(postId);
+
+        return post.getAuthorId().equals(userId);
+    }
+
+    private Member findMember(String username) {
+        return memberRepository.findByUsername(username).orElseThrow(() ->
+                new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
+    }
+
+    private Post findPost(Long postId) {
+        return postRepository.findById(postId).orElseThrow(() ->
+                new UserBoardException(BoardErrorCode.UNKNOWN_POST));
     }
 
 }
