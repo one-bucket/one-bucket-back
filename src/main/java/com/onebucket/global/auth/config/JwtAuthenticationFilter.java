@@ -88,6 +88,7 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
             } else {
                 throw new NullJwtException("no token");
             }
+
             filterChain.doFilter(servletRequest, servletResponse);
         }  catch(JwtException e) {
             handleException(httpResponse, e);

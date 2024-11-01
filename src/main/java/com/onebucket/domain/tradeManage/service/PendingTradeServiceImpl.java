@@ -1,5 +1,7 @@
 package com.onebucket.domain.tradeManage.service;
 
+import com.onebucket.domain.chatManager.dao.ChatRoomRepository;
+import com.onebucket.domain.chatManager.entity.ChatRoom;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.domain.tradeManage.dao.CloseTradeRepository;
@@ -11,11 +13,12 @@ import com.onebucket.domain.tradeManage.entity.CloseTrade;
 import com.onebucket.domain.tradeManage.entity.PendingTrade;
 import com.onebucket.domain.tradeManage.entity.TradeTag;
 import com.onebucket.global.exceptionManage.customException.TradeManageException.PendingTradeException;
+import com.onebucket.global.exceptionManage.customException.chatManageException.Exceptions.ChatRoomException;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
+import com.onebucket.global.exceptionManage.errorCode.ChatErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.TradeErrorCode;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.validator.internal.constraintvalidators.bv.AssertTrueValidator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,6 +49,7 @@ public class PendingTradeServiceImpl implements PendingTradeService {
     private final TradeTagRepository tradeTagRepository;
     private final CloseTradeRepository closeTradeRepository;
     private final MemberRepository memberRepository;
+    private final ChatRoomRepository chatRoomRepository;
 
     @Override
     public Long create(TradeDto.Create dto) {
@@ -104,6 +108,11 @@ public class PendingTradeServiceImpl implements PendingTradeService {
         }
 
         pendingTrade.addMember(member);
+
+        //chatRoom에 멤버 추가
+        ChatRoom chatRoom = pendingTrade.getChatRoom();
+        chatRoom.addMember(member);
+
         return pendingTradeRepository.save(pendingTrade).getId();
     }
 
@@ -119,6 +128,10 @@ public class PendingTradeServiceImpl implements PendingTradeService {
             throw new PendingTradeException(TradeErrorCode.OWNER_CANNOT_QUIT);
         }
         pendingTrade.deleteMember(member);
+
+        //chatRoom에서 삭제
+        ChatRoom chatRoom = pendingTrade.getChatRoom();
+        chatRoom.quitMember(member);
         pendingTradeRepository.save(pendingTrade);
     }
     @Override
@@ -146,6 +159,8 @@ public class PendingTradeServiceImpl implements PendingTradeService {
                 .startTradeAt(pendingTrade.getStartTradeAt())
                 .memberIds(memberIds)
                 .build();
+
+        pendingTradeRepository.delete(pendingTrade);
         return closeTradeRepository.save(closeTrade).getId();
     }
     @Override
@@ -155,6 +170,16 @@ public class PendingTradeServiceImpl implements PendingTradeService {
         pendingTrade.extendDueDate(dto.getDate());
 
         return pendingTradeRepository.save(pendingTrade).getDueDate();
+    }
+
+    @Override
+    public void setChatRoom(TradeKeyDto.SettingChatRoom dto) {
+        PendingTrade pendingTrade = findPendingTrade(dto.getTradeId());
+        ChatRoom chatRoom = findChatRoom(dto.getChatRoomId());
+
+        pendingTrade.setChatRoom(chatRoom);
+
+        pendingTradeRepository.save(pendingTrade);
     }
 
 
@@ -171,5 +196,10 @@ public class PendingTradeServiceImpl implements PendingTradeService {
     private TradeTag findTag(String tag) {
         return tradeTagRepository.findById(tag).orElseThrow(() ->
                 new PendingTradeException(TradeErrorCode.UNKNOWN_TAG));
+    }
+
+    private ChatRoom findChatRoom(String chatRoomId) {
+        return chatRoomRepository.findById(chatRoomId).orElseThrow(() ->
+                new ChatRoomException(ChatErrorCode.NOT_EXIST_ROOM));
     }
 }

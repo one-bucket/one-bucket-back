@@ -86,6 +86,7 @@ public abstract class AbstractPostController<S extends BasePostService> {
         return ResponseEntity.ok(new SuccessResponseWithIdDto("success delete post", postId));
     }
 
+
     @PostMapping("/{postId}/like")
     @PreAuthorize("@authorizationService.isUserCanAccessPost(#postId)")
     public ResponseEntity<SuccessResponseDto> addLikes(@PathVariable Long postId) {
@@ -164,6 +165,7 @@ public abstract class AbstractPostController<S extends BasePostService> {
         postService.increaseViewCount(dto);
     }
     protected abstract ResponseEntity<? extends PostDto.ResponseInfo> getPostInternal(ValueDto.FindPost dto);
+
 
 
 

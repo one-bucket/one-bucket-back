@@ -10,8 +10,10 @@ import com.onebucket.global.utils.SuccessResponseDto;
 import com.onebucket.global.utils.SuccessResponseWithIdDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -82,6 +84,14 @@ public class TradeController {
     public ResponseEntity<List<String>> getTagList() {
         List<String> tagList = tradeTagService.getTagList();
         return ResponseEntity.ok(tagList);
+    }
+
+    @PostMapping("/date/extend")
+    @PreAuthorize("@authorizationService.isUserOwnerOfPost(extendDate.tradeId)")
+    public ResponseEntity<SuccessResponseDto> extendDueDate(TradeKeyDto.RequestExtendDate extendDate) {
+        LocalDateTime time = pendingTradeService.extendDueDate(TradeKeyDto.ExtendDate.of(extendDate));
+
+        return ResponseEntity.ok(new SuccessResponseDto(time.toString()));
     }
 
 

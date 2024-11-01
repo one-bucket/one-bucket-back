@@ -1,6 +1,7 @@
 package com.onebucket.domain.chatManager.service;
 
 import com.onebucket.domain.chatManager.dto.ChatDto;
+import com.onebucket.domain.chatManager.dto.ChatRoomDto;
 
 
 /**
@@ -20,5 +21,6 @@ import com.onebucket.domain.chatManager.dto.ChatDto;
 public interface ChatService {
 
     void saveMessage(ChatDto chatDto);
+    String saveImage(String base64Image, ChatRoomDto.SaveImage dto);
 
 }

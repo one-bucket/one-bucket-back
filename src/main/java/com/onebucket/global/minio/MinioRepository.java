@@ -7,9 +7,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Base64;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -73,6 +75,42 @@ public class MinioRepository {
              throw new RuntimeException("Error occur : " + e.getMessage());
          }
      }
+
+    public String uploadFile(String base64Image, MinioSaveInfoDto dto) {
+        try {
+            // 버킷이 존재하는지 확인하고 없으면 생성
+            boolean isExist = minioClient.bucketExists(BucketExistsArgs.builder()
+                    .bucket(dto.getBucketName()).build());
+            if (!isExist) {
+                minioClient.makeBucket(MakeBucketArgs.builder().bucket(dto.getBucketName()).build());
+                minioClient.setBucketPolicy(
+                        SetBucketPolicyArgs.builder()
+                                .bucket(dto.getBucketName())
+                                .config("public")
+                                .build()
+                );
+            }
+
+            // Base64 문자열을 디코딩하여 InputStream으로 변환
+            String[] parts = base64Image.split(",");
+            byte[] imageBytes = Base64.getDecoder().decode(parts[1]); // "data:image/png;base64," 부분 이후만 사용
+            try (InputStream inputStream = new ByteArrayInputStream(imageBytes)) {
+                minioClient.putObject(
+                        PutObjectArgs.builder()
+                                .bucket(dto.getBucketName())
+                                .object(dto.getFileName() + "." + dto.getFileExtension())
+                                .stream(inputStream, imageBytes.length, -1)
+                                .contentType("image/" + dto.getFileExtension()) // 적절한 Content-Type 설정
+                                .build()
+                );
+            }
+
+            return dto.getBucketName() + "/" + dto.getFileName() + "." + dto.getFileExtension();
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error occurred : " + e.getMessage());
+        }
+    }
 
      public byte[] getFile(MinioSaveInfoDto dto) {
          try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
