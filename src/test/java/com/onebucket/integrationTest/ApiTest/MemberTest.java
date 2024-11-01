@@ -40,7 +40,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 public class MemberTest extends RestDocsSupportTest {
 
-
+    @AfterEach
+    void afterEach() {
+        deleteUser();
+        deleteProfile();
+        deleteUniversity();
+    }
 
     @Test
     @DisplayName("POST /register test")
@@ -134,7 +139,7 @@ public class MemberTest extends RestDocsSupportTest {
         ReadMemberInfoDto result = ReadMemberInfoDto.builder()
                 .username(testUsername)
                 .nickname(testNickname)
-                .university("null")
+                .university("univ1")
                 .build();
 
         mockMvc.perform(get("/member/info")
@@ -569,8 +574,4 @@ public class MemberTest extends RestDocsSupportTest {
 
 
     }
-
-
-
-
 }

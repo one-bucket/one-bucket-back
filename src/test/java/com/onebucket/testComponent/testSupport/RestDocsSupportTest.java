@@ -131,24 +131,19 @@ public class RestDocsSupportTest {
                 .build();
     }
 
-    @AfterEach
-    void afterEach() {
-        deleteUser();
-        deleteProfile();
-    }
-
     protected Attributes.Attribute getFormat (final String value) {
         return key("format").value(value);
     }
 
     protected JwtToken createInitUser (String username, String password, String nickname, List<String> roles) {
+        createUniversity(1L);
+
         String insertMemberQuery = """
                 INSERT INTO member (id, username, password, nickname, university_id, is_account_non_expired, is_account_non_locked, is_credential_non_expired, is_enable)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """;
 
-        jdbcTemplate.update(insertMemberQuery, stackId, username, passwordEncoder.encode(password), nickname, null, true, true, true, true);
-
+        jdbcTemplate.update(insertMemberQuery, stackId, username, passwordEncoder.encode(password), nickname, 1L, true, true, true, true);
 
         String insertRoleQuery = "INSERT INTO member_roles (member_id, roles) VALUES (?, ?)";
         for (String role : roles) {
@@ -164,8 +159,19 @@ public class RestDocsSupportTest {
         return jwtProvider.generateToken(authentication);
     }
 
+    protected void createUniversity(Long id) {
+        String address = "address" + id;
+        String email = "email@email." + id;
+        String name = "univ" + id;
+        String query = """
+                INSERT INTO university (id, address, email, name)
+                VALUES (?, ?, ?, ?)
+                """;
+        jdbcTemplate.update(query, id, address, email, name);
+    }
+
     protected JwtToken createInitUser(String username, String password, String nickname) {
-        return createInitUser(username, password, nickname, List.of("GUEST"));
+        return createInitUser(username, password, nickname, List.of("ROLE_GUEST", "ROLE_USER"));
     }
 
     protected JwtToken createInitUser(String username, String nickname) {
@@ -261,6 +267,13 @@ public class RestDocsSupportTest {
                 DELETE FROM profile
                 """;
         jdbcTemplate.update(query);
+    }
+
+    protected void deleteUniversity() {
+        String deleteUniversityQuery = """
+                DELETE FROM university
+                """;
+        jdbcTemplate.update(deleteUniversityQuery);
     }
 
     protected String getAuthHeader(JwtToken jwtToken) {

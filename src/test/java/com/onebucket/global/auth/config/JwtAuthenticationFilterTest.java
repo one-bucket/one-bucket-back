@@ -66,6 +66,8 @@ class JwtAuthenticationFilterTest {
     @MockBean
     private MemberService memberService;
 
+    @MockBean
+    private GuestOnlyAuthorizationManager guestOnlyAuthorizationManager;
 
     @Test
     @DisplayName("필터 내 토큰 검증")

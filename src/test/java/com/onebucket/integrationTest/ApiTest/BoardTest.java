@@ -7,6 +7,7 @@ import com.onebucket.domain.boardManage.dto.response.ResponseCreateBoardsDto;
 import com.onebucket.global.auth.jwtAuth.domain.JwtToken;
 import com.onebucket.global.utils.SuccessResponseDto;
 import com.onebucket.testComponent.testSupport.RestDocsSupportTest;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -41,14 +42,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 public class BoardTest extends RestDocsSupportTest {
 
+    @AfterEach
+    void afterEach() {
+        deleteUser();
+        deleteProfile();
+    }
+
+
     @Test
     @DisplayName("POST /board/create test")
     @Sql(scripts = "/sql/InitDB.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void createBoard() throws Exception {
         JwtToken jwtToken = createInitUser();
         createBoardType(1L);
-        createUniversity(1L);
-
         RequestCreateBoardDto dto = RequestCreateBoardDto.builder()
                 .boardType("type1")
                 .description("description")
@@ -95,7 +101,7 @@ public class BoardTest extends RestDocsSupportTest {
         List<ResponseCreateBoardsDto> results = new ArrayList<>();
         for(long i = 1L; i <= 3L; i++) {
             createBoardType(i);
-            createUniversity(i);
+            if(i!=1L) createUniversity(i);
             for(long j = 1L; j <= 3L; j++) {
                 ResponseCreateBoardsDto result = ResponseCreateBoardsDto.builder()
                         .university("univ" + i)
@@ -231,20 +237,11 @@ public class BoardTest extends RestDocsSupportTest {
         jdbcTemplate.update(query, id, description, name);
     }
 
-    private void createUniversity(Long id) {
-        String address = "address" + id;
-        String email = "email@email." + id;
-        String name = "univ" + id;
-        String query = """
-                INSERT INTO university (id, address, email, name)
-                VALUES (?, ?, ?, ?)
-                """;
-        jdbcTemplate.update(query, id, address, email, name);
-    }
-
     private void createBoard(long count) {
         for(long i = 1; i <= count; i++) {
             createBoardType(i);
+        }
+        for(long i = 2; i <= count; i++) {
             createUniversity(i);
         }
         Long index = 1L;
