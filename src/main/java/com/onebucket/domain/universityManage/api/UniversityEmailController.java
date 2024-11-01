@@ -40,7 +40,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/univ")
+@RequestMapping("/guest/univ")
 public class UniversityEmailController {
 
     private final UniversityEmailVerificationService universityEmailVerificationService;
