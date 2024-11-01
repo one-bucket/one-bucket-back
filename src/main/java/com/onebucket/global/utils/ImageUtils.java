@@ -55,7 +55,7 @@ public class ImageUtils {
         }
     }
 
-    public static String getBase64FromMessage(String message) {
+    public String getBase64FromMessage(String message) {
         // 파일 이름 제거 (예: "[image-name].png")
         int base64StartIdx = message.indexOf("]") + 1;
 

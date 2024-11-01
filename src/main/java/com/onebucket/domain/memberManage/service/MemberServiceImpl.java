@@ -38,7 +38,6 @@ import java.util.Optional;
  * @tested true
  */
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class MemberServiceImpl implements MemberService {
     private final MemberRepository memberRepository;
@@ -56,8 +55,6 @@ public class MemberServiceImpl implements MemberService {
      */
     @Override
     public Long createMember(CreateMemberRequestDto createMemberRequestDto) {
-
-
 
         Member member = Member.builder()
                 .username(createMemberRequestDto.getUsername())

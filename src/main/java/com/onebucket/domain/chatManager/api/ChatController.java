@@ -54,6 +54,7 @@ public class ChatController {
             case ENTER -> enterUser(chat);
             case TALK -> sendMessage(chat);
             case LEAVE -> leaveUser(chat, headerAccessor);
+            case IMAGE -> imageMessage(chat);
             default -> throw new ChatManageException(ChatErrorCode.MESSAGING_ERROR);
         }
     }
@@ -106,11 +107,20 @@ public class ChatController {
         String message = chat.getMessage();
         String imageFormat = imageUtils.getFileExtensionFromMessage(message);
         String fileName = imageUtils.getFileNameFromMessage(message);
+        String base64Image = imageUtils.getBase64FromMessage(message);
 
         ChatRoomDto.SaveImage saveImageDto = ChatRoomDto.SaveImage.builder()
                 .format(imageFormat)
+                .roomId(chat.getRoomId())
+                .name(fileName)
                 .build();
 
+        String url = chatService.saveImage(base64Image, saveImageDto);
+
+        chat.setMessage(url);
+        chatService.saveMessage(chat);
+        template.convertAndSend("/sub/chat/room/" + chat.getRoomId(), chat);
+        sseChatListService.notifyRoomUpdate(chat);
     }
 
 }

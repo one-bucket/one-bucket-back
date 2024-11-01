@@ -194,7 +194,6 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
-    @Transactional
     public LocalDateTime getDisconnectTime(ChatRoomMemberId id) {
         LocalDateTime time =  chatRoomMemberRepository.findById(id).orElseThrow(() -> new ChatRoomException(ChatErrorCode.NOT_EXIST_ROOM))
                 .getDisconnectAt();
@@ -202,7 +201,6 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<String> getRoomIds(Long userId) {
         return chatRoomMemberRepository.findChatRoomIdByMemberId(userId);
     }
