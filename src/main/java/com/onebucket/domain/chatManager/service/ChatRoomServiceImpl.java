@@ -89,12 +89,12 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         ChatRoom chatRoom = ChatRoom.builder()
                 .id(id)
                 .name(dto.getName())
-                .pendingTrade(pendingTrade)
                 .build();
 
         chatRoom.addMember(member);
 
-        chatRoomRepository.save(chatRoom);
+        pendingTrade.setChatRoom(chatRoom);
+        pendingTradeRepository.save(pendingTrade);
         return id;
     }
 
