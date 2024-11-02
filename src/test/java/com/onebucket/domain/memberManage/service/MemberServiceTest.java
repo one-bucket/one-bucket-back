@@ -7,6 +7,7 @@ import com.onebucket.domain.memberManage.dto.CreateMemberRequestDto;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -32,6 +33,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
@@ -373,8 +376,8 @@ public class MemberServiceTest {
     }
 
     @Test
-    @DisplayName("usernameToUniversity - success / null university")
-    void testUsernameToUniversity_success_nullUniversity() {
+    @DisplayName("usernameToUniversity - fail / null university")
+    void testUsernameToUniversity_fail_nullUniversity() {
         String username = "username";
         when(memberRepository.findByUsername(username)).thenReturn(Optional.of(mockMember));
         when(mockMember.getUniversity()).thenReturn(null);
@@ -414,6 +417,25 @@ public class MemberServiceTest {
                 .isInstanceOf(UniversityException.class)
                 .extracting("errorCode")
                 .isEqualTo(UniversityErrorCode.NOT_EXIST_UNIVERSITY);
+    }
+
+    @Test
+    @DisplayName("addRoleToMember - success")
+    void testAddRoleToMember_success(){
+        String username = "username";
+        String auth = "ROLE_USER";
+        List<String> roles = new ArrayList<>();
+        roles.add("GUEST");
+        Member member = Member.builder()
+                        .username(username)
+                        .password("password")
+                        .nickname("nickname")
+                        .roles(roles)
+                        .build();
+        when(memberRepository.findByUsername(username)).thenReturn(Optional.of(member));
+        memberService.addRoleToMember(username,auth);
+        assertTrue(member.getRoles().contains(auth), "Member should have the added role");
+        verify(memberRepository).save(member);
     }
 
 }

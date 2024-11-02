@@ -5,9 +5,12 @@ import com.onebucket.domain.memberManage.service.MemberService;
 import com.onebucket.domain.memberManage.service.ProfileService;
 import com.onebucket.domain.universityManage.dto.verifiedCode.internal.VerifiedCodeCheckDto;
 import com.onebucket.domain.universityManage.dto.verifiedCode.request.RequestCodeCheckDto;
-import com.onebucket.domain.universityManage.service.UniversityEmailVerificationServiceImpl;
+import com.onebucket.domain.universityManage.service.UniversityEmailVerificationService;
+import com.onebucket.global.auth.springSecurity.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import static com.onebucket.global.auth.springSecurity.Role.USER;
 
 /**
  * <br>package name   : com.onebucket.global.auth.verification.service
@@ -16,7 +19,7 @@ import org.springframework.stereotype.Service;
  * <pre>
  * <span style="color: white;">[description]</span>
  * universityController 에서 사용하며 인증코드가 유효하면 member,profile의 대학교, 이메일 필드를 채워준다.
- * 순환참조가 일어나지 않도록 해야 한다.
+ * Facade 메서드의 의도대로 순환참조가 일어나지 않도록 해야 한다.
  * </pre>
  * <pre>
  * <span style="color: white;">usage:</span>
@@ -35,14 +38,14 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class VerificationAndUpdateFacadeService {
 
-    private final UniversityEmailVerificationServiceImpl universityEmailVerificationServiceImpl;
+    private final UniversityEmailVerificationService universityEmailVerificationService;
     private final ProfileService profileService;
     private final MemberService memberService;
 
     public void verifyAndUpdateProfileAndMember(String username, RequestCodeCheckDto dto) {
         // 인증 코드 검증
         VerifiedCodeCheckDto verifiedCodeCheckDto = VerifiedCodeCheckDto.of(username, dto);
-        universityEmailVerificationServiceImpl.verifyCode(verifiedCodeCheckDto);
+        universityEmailVerificationService.verifyCode(verifiedCodeCheckDto);
 
         // 프로필 이메일 업데이트
         profileService.updateProfileEmail(username, dto.universityEmail());
@@ -53,5 +56,6 @@ public class VerificationAndUpdateFacadeService {
                 .university(dto.university())
                 .build();
         memberService.setUniversity(setUniversityDto);
+        memberService.addRoleToMember(username, USER.getRole());
     }
 }

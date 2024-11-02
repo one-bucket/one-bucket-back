@@ -17,13 +17,15 @@ import com.onebucket.global.exceptionManage.errorCode.UniversityErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.VerificationErrorCode;
 import com.onebucket.global.utils.RandomStringUtils;
 import jakarta.transaction.Transactional;
-import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+
 import java.util.Optional;
+
+import static com.onebucket.global.auth.springSecurity.Role.*;
 
 
 /**
@@ -63,7 +65,7 @@ public class MemberServiceImpl implements MemberService {
                 .nickname(createMemberRequestDto.getNickname())
                 .university(saveNullUniv())
                 .build();
-        member.addRoles("GUEST");
+        member.addRoles(GUEST.getRole());
         try {
             Member newMember = memberRepository.save(member);
             return newMember.getId();
@@ -170,6 +172,12 @@ public class MemberServiceImpl implements MemberService {
         memberRepository.save(member);
     }
 
+    @Override
+    public void addRoleToMember(String username,String auth) {
+        Member member = findMember(username);
+        member.addRoles(auth);
+        memberRepository.save(member);
+    }
 
     private University saveNullUniv() {
 

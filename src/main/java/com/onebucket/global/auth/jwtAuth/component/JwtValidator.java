@@ -91,11 +91,11 @@ public class JwtValidator {
             throw new AuthenticationException(AuthenticationErrorCode.NOT_EXIST_AUTHENTICATION_IN_TOKEN, "can't validate");
         }
 
+        // '.'으로 구분된 권한을 List 로 생성. hasRole 권한 처리를 위함.
         Collection<? extends GrantedAuthority> authorities = Arrays.stream(
-                claims.get(AUTHORITIES_KEY).toString().split(","))
-                .map(SimpleGrantedAuthority::new)
-                .toList();
-
+                        claims.get(AUTHORITIES_KEY).toString().split("\\."))
+                        .map(SimpleGrantedAuthority::new)
+                        .toList();
 
         UserDetails principal = new User(claims.getSubject(), "", authorities);
         return new UsernamePasswordAuthenticationToken(principal, "", authorities);

@@ -90,6 +90,7 @@ public class SignInController {
         //access 토큰 검증에 대한 예외(AuthenticationErrorCode.NON_VALID_TOKEN) - JwtExpiredToken 제외.
        Authentication authentication = signInService.getAuthenticationAndValidHeader(accessToken);
        String username = authentication.getName();
+
        RefreshToken token2Validate = new RefreshToken(username, refreshToken);
 
         if(refreshToken != null &&

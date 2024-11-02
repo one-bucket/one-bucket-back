@@ -21,7 +21,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-public class ResponseUniversityDto {
+public class RequestUniversityDto {
     @NotBlank(message = "name must not be empty")
     private String name;
 

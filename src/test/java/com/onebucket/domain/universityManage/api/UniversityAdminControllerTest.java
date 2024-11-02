@@ -2,7 +2,7 @@ package com.onebucket.domain.universityManage.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.onebucket.domain.universityManage.dto.university.ResponseUniversityDto;
+import com.onebucket.domain.universityManage.dto.university.RequestUniversityDto;
 import com.onebucket.domain.universityManage.dto.university.UpdateUniversityDto;
 import com.onebucket.domain.universityManage.service.UniversityService;
 import com.onebucket.global.exceptionManage.customException.universityManageException.UniversityException;
@@ -84,8 +84,8 @@ class UniversityAdminControllerTest {
     @Test
     @DisplayName("createUniversity - success")
     void testCreateUniversity_success() throws Exception {
-        ResponseUniversityDto dto = getDto();
-        when(universityService.createUniversity(any(ResponseUniversityDto.class))).thenReturn(1L);
+        RequestUniversityDto dto = getDto();
+        when(universityService.createUniversity(any(RequestUniversityDto.class))).thenReturn(1L);
 
         mockMvc.perform(post("/admin/univ")
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -99,12 +99,12 @@ class UniversityAdminControllerTest {
     @Test
     @DisplayName("createUniversity - fail / duplicate university")
     void testCreateUniversity_fail_duplicateUniv() throws Exception {
-        ResponseUniversityDto dto = getDto();
+        RequestUniversityDto dto = getDto();
 
         UniversityErrorCode code = UniversityErrorCode.DUPLICATE_UNIVERSITY;
         UniversityException exception = new UniversityException(code);
 
-        when(universityService.createUniversity(any(ResponseUniversityDto.class))).thenThrow(exception);
+        when(universityService.createUniversity(any(RequestUniversityDto.class))).thenThrow(exception);
 
         mockMvc.perform(post("/admin/univ")
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -121,7 +121,7 @@ class UniversityAdminControllerTest {
     @DisplayName("getAllUniversity - success")
     void testGetAllUniversity_success() throws Exception {
 
-        List<ResponseUniversityDto> responses = IntStream.rangeClosed(1, 10)
+        List<RequestUniversityDto> responses = IntStream.rangeClosed(1, 10)
                 .mapToObj(i -> getDto("name" + i))
                 .toList();
 
@@ -140,7 +140,7 @@ class UniversityAdminControllerTest {
     @Test
     @DisplayName("GetAllUniversity - success / blank DB")
     void testGetAllUniversity_success_blankDB() throws Exception {
-        ResponseUniversityDto defaultDto = ResponseUniversityDto.builder()
+        RequestUniversityDto defaultDto = RequestUniversityDto.builder()
                 .name("not insert")
                 .address("data")
                 .email("yet")
@@ -164,7 +164,7 @@ class UniversityAdminControllerTest {
     void testGetUniversity_success() throws Exception {
 
         String name = "name";
-        ResponseUniversityDto dto = getDto(name);
+        RequestUniversityDto dto = getDto(name);
         when(universityService.getUniversity(name)).thenReturn(dto);
 
         mockMvc.perform(get("/admin/univ/{name}", name)
@@ -241,19 +241,19 @@ class UniversityAdminControllerTest {
 
 
 
-    private ResponseUniversityDto getDto(String name, String address, String email) {
-        return ResponseUniversityDto.builder()
+    private RequestUniversityDto getDto(String name, String address, String email) {
+        return RequestUniversityDto.builder()
                 .name(name)
                 .address(address)
                 .email(email)
                 .build();
     }
 
-    private ResponseUniversityDto getDto(String name) {
+    private RequestUniversityDto getDto(String name) {
         return getDto(name, "address", "email@email.com");
     }
 
-    private ResponseUniversityDto getDto() {
+    private RequestUniversityDto getDto() {
         return getDto("name");
     }
 }

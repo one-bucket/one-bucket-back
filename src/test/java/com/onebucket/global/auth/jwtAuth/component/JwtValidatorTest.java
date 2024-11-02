@@ -54,7 +54,7 @@ class JwtValidatorTest {
 
     private String createToken(long expireDate, List<String> authorities, String inKey) {
         Key key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(inKey));
-        String authoritiesString = String.join(",", authorities);
+        String authoritiesString = String.join(".", authorities);
 
         return Jwts.builder()
                 .setSubject("testuser")
@@ -114,7 +114,6 @@ class JwtValidatorTest {
         String token = createToken(10000, Arrays.asList("ROLE_USER", "ROLE_ADMIN"), secretKey);
         UsernamePasswordAuthenticationToken authentication =
                 (UsernamePasswordAuthenticationToken) jwtValidator.getAuthentication(token);
-
 
         assertNotNull(authentication);
         assertEquals("testuser",((UserDetails) authentication.getPrincipal()).getUsername());

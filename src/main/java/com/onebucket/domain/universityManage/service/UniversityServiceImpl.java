@@ -3,7 +3,7 @@ package com.onebucket.domain.universityManage.service;
 import com.onebucket.domain.universityManage.dao.UniversityRepository;
 import com.onebucket.domain.universityManage.domain.University;
 import com.onebucket.domain.universityManage.dto.university.DeleteUniversityDto;
-import com.onebucket.domain.universityManage.dto.university.ResponseUniversityDto;
+import com.onebucket.domain.universityManage.dto.university.RequestUniversityDto;
 import com.onebucket.domain.universityManage.dto.university.UpdateUniversityDto;
 import com.onebucket.global.exceptionManage.customException.universityManageException.UniversityException;
 import com.onebucket.global.exceptionManage.errorCode.UniversityErrorCode;
@@ -47,17 +47,17 @@ public class UniversityServiceImpl implements UniversityService {
 
     /**
      * 새로운 대학 정보를 만들고 만든 대학 정보를 반환한다. 같은 이름을 가진 대학교는 추가할 수 없음.
-     * @param responseUniversityDto 생성하고자 하는 대학의 정보를 담는다.
+     * @param requestUniversityDto 생성하고자 하는 대학의 정보를 담는다.
      * @return University 의 id
      */
     @Override
     @Transactional
-    public Long createUniversity(ResponseUniversityDto responseUniversityDto) {
+    public Long createUniversity(RequestUniversityDto requestUniversityDto) {
 
         University university = University.builder()
-                .name(responseUniversityDto.getName())
-                .address(responseUniversityDto.getAddress())
-                .email(responseUniversityDto.getEmail())
+                .name(requestUniversityDto.getName())
+                .address(requestUniversityDto.getAddress())
+                .email(requestUniversityDto.getEmail())
                 .build();
         try {
             universityRepository.save(university);
@@ -72,10 +72,10 @@ public class UniversityServiceImpl implements UniversityService {
      * @return DB에 존재하는 모든 대학 정보 출력
      */
     @Override
-    public List<ResponseUniversityDto> findAllUniversity() {
+    public List<RequestUniversityDto> findAllUniversity() {
         List<University> universities = universityRepository.findAll();
         if (universities.isEmpty()) {
-            ResponseUniversityDto defaultDto = ResponseUniversityDto.builder()
+            RequestUniversityDto defaultDto = RequestUniversityDto.builder()
                     .name("not insert")
                     .address("data")
                     .email("yet")
@@ -83,7 +83,7 @@ public class UniversityServiceImpl implements UniversityService {
             return List.of(defaultDto);
         }
         return universities.stream()
-                .map(university -> ResponseUniversityDto.builder()
+                .map(university -> RequestUniversityDto.builder()
                         .name(university.getName())
                         .address(university.getAddress())
                         .email(university.getEmail())
@@ -96,10 +96,10 @@ public class UniversityServiceImpl implements UniversityService {
      * @return 특정 이름을 가진 대학교 정보 출력
      */
     @Override
-    public ResponseUniversityDto getUniversity(String name) {
+    public RequestUniversityDto getUniversity(String name) {
         University university = universityRepository.findByName(name)
                 .orElseThrow(()-> new UniversityException(UniversityErrorCode.NOT_EXIST_UNIVERSITY));
-        return ResponseUniversityDto.builder()
+        return RequestUniversityDto.builder()
                 .name(university.getName())
                 .address(university.getAddress())
                 .email(university.getEmail())

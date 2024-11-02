@@ -1,7 +1,7 @@
 package com.onebucket.domain.universityManage.api;
 
 import com.onebucket.domain.universityManage.dto.university.DeleteUniversityDto;
-import com.onebucket.domain.universityManage.dto.university.ResponseUniversityDto;
+import com.onebucket.domain.universityManage.dto.university.RequestUniversityDto;
 import com.onebucket.domain.universityManage.dto.university.UpdateUniversityDto;
 import com.onebucket.domain.universityManage.service.UniversityService;
 import com.onebucket.global.utils.SuccessResponseDto;
@@ -40,21 +40,21 @@ public class UniversityAdminController {
     private final UniversityService universityService;
 
     @PostMapping("/univ")
-    public ResponseEntity<SuccessResponseDto> createUniversity(@Valid @RequestBody ResponseUniversityDto responseUniversityDto) {
-        Long id = universityService.createUniversity(responseUniversityDto);
+    public ResponseEntity<SuccessResponseDto> createUniversity(@Valid @RequestBody RequestUniversityDto requestUniversityDto) {
+        Long id = universityService.createUniversity(requestUniversityDto);
         return ResponseEntity.ok(new SuccessResponseDto("success create university / id is " + id));
     }
 
     @GetMapping("/univs")
-    public ResponseEntity<List<ResponseUniversityDto>> getAllUniversity() {
-        List<ResponseUniversityDto> universities = universityService.findAllUniversity();
+    public ResponseEntity<List<RequestUniversityDto>> getAllUniversity() {
+        List<RequestUniversityDto> universities = universityService.findAllUniversity();
         return ResponseEntity.ok(universities);
     }
 
     @GetMapping("/univ/{name}")
-    public ResponseEntity<ResponseUniversityDto> getUniversity(@PathVariable String name) {
-        ResponseUniversityDto responseUniversityDto = universityService.getUniversity(name);
-        return ResponseEntity.ok(responseUniversityDto);
+    public ResponseEntity<RequestUniversityDto> getUniversity(@PathVariable String name) {
+        RequestUniversityDto requestUniversityDto = universityService.getUniversity(name);
+        return ResponseEntity.ok(requestUniversityDto);
     }
 
     @DeleteMapping("/univs")
