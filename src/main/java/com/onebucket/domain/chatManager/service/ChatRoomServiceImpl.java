@@ -69,7 +69,6 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
-    @Transactional
     public List<ChatRoomDto.MemberInfo> getMemberList(String roomId) {
         ChatRoom chatRoom = findChatRoom(roomId);
         List<ChatRoomMember> members = chatRoom.getMembers();
@@ -150,7 +149,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public ChatRoomDto.ChatRoomInfo getRoomInfo(ChatRoomDto.InfoAfterTime dto) {
         ChatRoom room = findChatRoom(dto.getRoomId());
         String roomName = room.getName();

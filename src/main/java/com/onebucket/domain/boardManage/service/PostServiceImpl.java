@@ -79,7 +79,7 @@ public class PostServiceImpl extends AbstractPostService<Post, PostRepository> i
             nickname = member.getNickname();
         }
 
-        return PostDto.Thumbnail.builder()
+        PostDto.Thumbnail val =  PostDto.Thumbnail.builder()
                 .views(post.getViews())
                 .likes(post.getLikes())
                 .title(post.getTitle())
@@ -91,6 +91,8 @@ public class PostServiceImpl extends AbstractPostService<Post, PostRepository> i
                 .postId(post.getId())
                 .imageUrls(post.getImageUrls())
                 .build();
+
+        return val;
     }
 
     @Override
