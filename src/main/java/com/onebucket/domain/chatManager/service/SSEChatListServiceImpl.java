@@ -5,6 +5,7 @@ import com.onebucket.domain.chatManager.dto.ChatRoomDto;
 import com.onebucket.domain.chatManager.dto.RoomUpdateDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
@@ -43,6 +44,7 @@ public class SSEChatListServiceImpl implements SSEChatListService{
         return emitter;
     }
 
+    @Transactional
     public void notifyRoomUpdate(ChatDto chat) {
         String roomId = chat.getRoomId();
         String recentMessage = chat.getMessage();
