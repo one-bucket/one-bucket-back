@@ -10,7 +10,7 @@ pipeline {
         JENKINS_MYSQL_HOST = "172.20.0.5"
         JENKINS_MYSQL_USER = "root"
         JENKINS_MYSQL_PASSWORD = "m7128226"
-        JENKINS_REDIS_HOST = "172.20.0.4"
+        JENKINS_REDIS_HOST = "192.168.219.101"
 
 
         //main server env
