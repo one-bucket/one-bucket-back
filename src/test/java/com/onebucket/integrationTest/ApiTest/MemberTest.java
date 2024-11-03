@@ -6,7 +6,6 @@ import com.onebucket.domain.memberManage.dto.request.RequestInitPasswordDto;
 import com.onebucket.global.auth.jwtAuth.domain.JwtToken;
 import com.onebucket.global.minio.MinioSaveInfoDto;
 import com.onebucket.global.utils.SuccessResponseDto;
-import com.onebucket.testComponent.testSupport.RestDocsSupportTest;
 import com.onebucket.testComponent.testSupport.UserRestDocsSupportTest;
 import org.junit.jupiter.api.*;
 import org.springframework.http.MediaType;

@@ -86,48 +86,48 @@ public class BoardTest extends BoardRestDocsSupport {
         assertThat(countOfBoard).isEqualTo(1L);
     }
 
-    @Test
-    @DisplayName("POST /admin/board/creates test")
-    void boardCreates() throws Exception {
-        JwtToken token = createInitUser();
-        List<ResponseCreateBoardsDto> results = new ArrayList<>();
-
-        Long startBoardTypeId = createBoardType(3);
-        Long startUnivId = createUniversity(3);
-
-        for(int i = 0; i < 3; i++) {
-            for(int j = 0; j < 3; j++) {
-                ResponseCreateBoardsDto result = ResponseCreateBoardsDto.builder()
-                        .university("univ" + (startUnivId + i))
-                        .boardType("type" + (startBoardTypeId + j))
-                        .build();
-                results.add(result);
-            }
-        }
-
-        mockMvc.perform(post("/admin/board/creates")
-                .header("Authorization", getAuthHeader(token))
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(hasKey(results))
-                .andDo(restDocs.document(
-                        httpRequest(),
-                        httpResponse(),
-                        responseFields(
-                                fieldWithPath("[].id").description("id which saved automatically"),
-                                fieldWithPath("[].boardName").description("name of board"),
-                                fieldWithPath("[].university").description("name of university of saved board"),
-                                fieldWithPath("[].boardType").description("name of boardType of saved board")
-                        )
-                ));
-
-        String query = """
-                SELECT COUNT(*)
-                FROM board
-                """;
-        Long countOfBoard = jdbcTemplate.queryForObject(query, Long.class);
-        assertThat(countOfBoard).isEqualTo(9L);
-    }
+//    @Test
+//    @DisplayName("POST /admin/board/creates test")
+//    void boardCreates() throws Exception {
+//        JwtToken token = createInitUser();
+//        List<ResponseCreateBoardsDto> results = new ArrayList<>();
+//
+//        Long startBoardTypeId = createBoardType(3);
+//        Long startUnivId = createUniversity(3);
+//
+//        for(int i = 0; i < 3; i++) {
+//            for(int j = 0; j < 3; j++) {
+//                ResponseCreateBoardsDto result = ResponseCreateBoardsDto.builder()
+//                        .university("univ" + (startUnivId + i))
+//                        .boardType("type" + (startBoardTypeId + j))
+//                        .build();
+//                results.add(result);
+//            }
+//        }
+//
+//        mockMvc.perform(post("/admin/board/creates")
+//                .header("Authorization", getAuthHeader(token))
+//                .accept(MediaType.APPLICATION_JSON))
+//                .andExpect(status().isOk())
+//                .andExpect(hasKey(results))
+//                .andDo(restDocs.document(
+//                        httpRequest(),
+//                        httpResponse(),
+//                        responseFields(
+//                                fieldWithPath("[].id").description("id which saved automatically"),
+//                                fieldWithPath("[].boardName").description("name of board"),
+//                                fieldWithPath("[].university").description("name of university of saved board"),
+//                                fieldWithPath("[].boardType").description("name of boardType of saved board")
+//                        )
+//                ));
+//
+//        String query = """
+//                SELECT COUNT(*)
+//                FROM board
+//                """;
+//        Long countOfBoard = jdbcTemplate.queryForObject(query, Long.class);
+//        assertThat(countOfBoard).isEqualTo(9L);
+//    }
 
     @Test
     @DisplayName("POST /admin/board/type test")

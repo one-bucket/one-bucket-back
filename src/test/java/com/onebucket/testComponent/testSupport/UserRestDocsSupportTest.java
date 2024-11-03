@@ -27,7 +27,6 @@ public class UserRestDocsSupportTest extends RestDocsSupportTest {
 
     protected Long stackId = 1L;
 
-
     @Override
     @AfterEach
     protected void after() {
@@ -37,6 +36,12 @@ public class UserRestDocsSupportTest extends RestDocsSupportTest {
     }
 
     protected JwtToken createInitUser() {
+        Long initUnivId = 0L;
+        String insertInitUniversityQuery = """
+                INSERT INTO university (id, address, email, name)
+                VALUES (?, ?, ?, ?)
+                """;
+        jdbcTemplate.update(insertInitUniversityQuery,initUnivId,"null","null","null");
 
         String insertMemberQuery = """
                 INSERT INTO member (id, username, password, nickname, university_id, is_account_non_expired, is_account_non_locked, is_credential_non_expired, is_enable)
@@ -44,10 +49,11 @@ public class UserRestDocsSupportTest extends RestDocsSupportTest {
                 """;
 
         jdbcTemplate.update(insertMemberQuery,
-                stackId, testUsername, passwordEncoder.encode(testPassword), testNickname, null, true, true, true, true);
+                stackId, testUsername, passwordEncoder.encode(testPassword), testNickname, initUnivId, true, true, true, true);
 
         String insertRoleQuery = "INSERT INTO member_roles (member_id, roles) VALUES (?, ?)";
-        jdbcTemplate.update(insertRoleQuery, stackId, "GUEST");
+        jdbcTemplate.update(insertRoleQuery, stackId, "ROLE_GUEST");
+        jdbcTemplate.update(insertRoleQuery, stackId, "ROLE_USER");
 
         String insertProfileQuery = """
                 INSERT INTO profile (id, age, birth, create_at, description, gender, image_url, is_basic_image, name, update_at)
