@@ -15,7 +15,7 @@ public class GuestOnlyAuthorizationManager implements AuthorizationManager<Reque
     @Override
     public AuthorizationDecision check(Supplier<Authentication> authentication, RequestAuthorizationContext context) {
         String url = context.getRequest().getRequestURI();
-        // 권한이 GUEST 만 가지고 있는 경우
+        // 권한이 GUEST 만 가지고 있고, 접근 url 에 "/guest/" 가 포함되지 않은 경우
         boolean isGuestOnly = authentication.get().getAuthorities().stream()
                 .anyMatch(auth -> auth.getAuthority().equals("ROLE_GUEST")) &&
                 authentication.get().getAuthorities().size() == 1;

@@ -65,8 +65,8 @@ public class SecurityConfig {
                                 .requestMatchers("/test/create-testuser").permitAll()
                                 .requestMatchers("/member/password/reset").permitAll()
                                 .requestMatchers("/ws").permitAll()
-                                .requestMatchers("/guest/**").hasRole(String.valueOf(Role.GUEST))
-       //                         .requestMatchers("/admin/**").hasRole(String.valueOf(Role.ADMIN))
+                                .requestMatchers("/guest/**").hasRole(String.valueOf(Role.GUEST.getRole()))
+       //                         .requestMatchers("/admin/**").hasRole(String.valueOf(Role.ADMIN.getRole()))
                                 .anyRequest().access(guestOnlyAuthorizationManager))
                 .addFilterBefore(new JwtAuthenticationFilter(jwtValidator),
                         UsernamePasswordAuthenticationFilter.class);
