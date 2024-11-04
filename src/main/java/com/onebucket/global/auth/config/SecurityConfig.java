@@ -65,6 +65,7 @@ public class SecurityConfig {
                                 .requestMatchers("/test/create-testuser").permitAll()
                                 .requestMatchers("/member/password/reset").permitAll()
                                 .requestMatchers("/ws").permitAll()
+                                .requestMatchers("/dev/**").permitAll()
                                 .requestMatchers("/guest/**").hasRole(String.valueOf(Role.GUEST))
        //                         .requestMatchers("/admin/**").hasRole(String.valueOf(Role.ADMIN))
                                 .anyRequest().access(guestOnlyAuthorizationManager))
