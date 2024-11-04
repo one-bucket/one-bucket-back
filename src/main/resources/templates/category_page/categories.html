@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>카테고리 리스트</title>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            background-color: white;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 600px;
+            margin: 50px auto;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 8px 12px;
+            background-color: #007bff; /* 파란색 */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #0056b3; /* 호버 시 진한 파란색 */
+        }
+
+        .search-form {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .search-form input[type="text"] {
+            width: 200px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .search-form button {
+            padding: 8px 12px;
+            margin-left: 5px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .search-form button:hover {
+            background-color: #0056b3;
+        }
+
+        .sort-buttons {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .sort-buttons a {
+            display: inline-block;
+            padding: 6px 12px;
+            margin: 5px;
+            border: 1px solid black;
+            border-radius: 20px; /* 타원형 */
+            background-color: white;
+            color: black;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .sort-buttons a.selected {
+            background-color: #007bff;
+            color: white;
+            border: 1px solid #007bff;
+        }
+
+        .category-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .category-item {
+            padding: 10px;
+            border-bottom: 1px solid #ddd; /* 연한 구분선 */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .category-item:last-child {
+            border-bottom: none;
+        }
+
+        .delete-btn {
+            background-color: #e0e0e0; /* 연한 회색 */
+            border: none;
+            border-radius: 5px;
+            padding: 5px 8px;
+            cursor: pointer;
+            font-size: 12px;
+            color: red;
+        }
+
+        .delete-btn:hover {
+            background-color: #d5d5d5;
+        }
+
+    </style>
+</head>
+<body>
+
+<button onclick="window.location.href='/dev/category/'" class="back-btn">뒤로가기</button>
+
+<div class="container">
+
+    <div class="search-form">
+        <form method="get" th:action="@{/dev/category/list}">
+            <input type="text" name="search" placeholder="검색" th:value="${search}">
+            <button type="submit">검색</button>
+        </form>
+    </div>
+
+    <div class="sort-buttons">
+        <a th:href="@{/dev/category/list(sort='name', order=${order == 'asc' && sort == 'name' ? 'desc' : 'asc'}, search=${search})}"
+           th:classappend="${sort == 'name' ? 'selected' : ''}">
+            이름 <span th:text="${sort == 'name' ? (order == 'asc' ? '↑' : '↓') : ''}"></span>
+        </a>
+        <a th:href="@{/dev/category/list(sort='createdAt', order=${order == 'asc' && sort == 'createdAt' ? 'desc' : 'asc'}, search=${search})}"
+           th:classappend="${sort == 'createdAt' ? 'selected' : ''}">
+            추가된 시간 <span th:text="${sort == 'createdAt' ? (order == 'asc' ? '↑' : '↓') : ''}"></span>
+        </a>
+    </div>
+
+    <ul class="category-list">
+        <li th:each="category : ${categories}" class="category-item">
+            <div>
+                <strong th:text="${category.name}"></strong>
+                <div th:text="${#temporals.format(category.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></div>
+            </div>
+            <form th:action="@{'/dev/category/delete/id/' + ${category.id}}" method="post">
+                <button type="submit" class="delete-btn">X</button>
+            </form>
+        </li>
+    </ul>
+
+</div>
+
+</body>
+</html>
