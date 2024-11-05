@@ -37,4 +37,6 @@ public class PushMessageLog {
 
     private LocalDateTime sendAt;
 
+    private String sendTo;
+
 }

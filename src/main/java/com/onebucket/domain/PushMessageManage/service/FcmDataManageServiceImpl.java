@@ -34,13 +34,14 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class FcmDataManageServiceImpl {
+public class FcmDataManageServiceImpl implements FcmDataManageService {
 
     private final MemberRepository memberRepository;
     private final DeviceTokenRepository deviceTokenRepository;
     private final PushMessageLogRepository pushMessageLogRepository;
 
     @Transactional
+    @Override
     public void updateDeviceToken(TokenDto.Info dto) {
         String token = dto.getToken();
         Member member = findMember(dto.getUserId());
@@ -67,6 +68,8 @@ public class FcmDataManageServiceImpl {
         }
     }
 
+    @Transactional
+    @Override
     public void saveMessageLog(MessageLogDto.Info dto) {
         LocalDateTime now = LocalDateTime.now();
         PushMessageLog pushMessageLog = PushMessageLog.builder()
@@ -75,6 +78,8 @@ public class FcmDataManageServiceImpl {
                 .image(dto.getImage())
                 .sendAt(now)
                 .build();
+
+        pushMessageLogRepository.save(pushMessageLog);
     }
 
     private Member findMember(Long userId) {

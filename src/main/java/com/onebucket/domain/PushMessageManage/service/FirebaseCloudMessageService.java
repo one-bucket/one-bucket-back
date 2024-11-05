@@ -37,28 +37,43 @@ public class FirebaseCloudMessageService {
                                    "one-bucket/messages:send";
     private final ObjectMapper objectMapper;
 
-    public void sendMessageTo(String targetToken, String title, String body) throws IOException {
-        String message = makeMessage(targetToken, title, body);
+    public void sendMessageToToken(String targetToken, String title, String body) throws IOException {
+        String message = makeMessageToToken(targetToken, title, body);
+
+        Request request = makeRequest(message);
 
         OkHttpClient client = new OkHttpClient();
+        Response response = client.newCall(request).execute();
+
+        System.out.println(response.body().string());
+    }
+
+    public void sendMessageToTopic(String topic, String title, String body) throws IOException {
+        String message = makeMessageToTopic(topic, title, body);
+
+        Request request = makeRequest(message);
+
+        OkHttpClient client = new OkHttpClient();
+        Response response = client.newCall(request).execute();
+
+        System.out.println(response.body().string());
+    }
+
+    private Request makeRequest(String message) throws IOException {
         RequestBody requestBody = RequestBody.create(
                 message,
                 MediaType.get("application/json; charset=utf-8")
         );
 
-        Request request = new Request.Builder()
+        return new Request.Builder()
                 .url(API_URL)
                 .post(requestBody)
                 .addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + getAccessToken())
                 .addHeader(HttpHeaders.CONTENT_TYPE, "application/json; UTF-8")
                 .build();
-
-        Response response = client.newCall(request).execute();
-        assert response.body() != null;
-        System.out.println(response.body().string());
     }
 
-    private String makeMessage(String targetToken, String title, String body)
+    private String makeMessageToToken(String targetToken, String title, String body)
             throws JsonParseException, JsonProcessingException {
         FcmMessage fcmMessage = FcmMessage.builder()
                 .message((FcmMessage.Message.builder()
@@ -69,6 +84,23 @@ public class FirebaseCloudMessageService {
                                 .image(null)
                                 .build())
                         .build()))
+                .validateOnly(false)
+                .build();
+
+        return objectMapper.writeValueAsString(fcmMessage);
+    }
+
+    private String makeMessageToTopic(String topic, String title, String body)
+            throws JsonParseException, JsonProcessingException {
+        FcmMessage fcmMessage = FcmMessage.builder()
+                .message(FcmMessage.Message.builder()
+                        .topic(topic)
+                        .notification(FcmMessage.Notification.builder()
+                                .title(title)
+                                .body(body)
+                                .image(null)
+                                .build())
+                        .build())
                 .validateOnly(false)
                 .build();
 
