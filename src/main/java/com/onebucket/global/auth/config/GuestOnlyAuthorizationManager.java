@@ -7,6 +7,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.stereotype.Component;
 
+/**
+ * GUEST 권한만 가지고 있는 유저가 접근하려는 url 에 "/guest/" 가 포함되지 않은 경우 403 에러를 반환한다.
+ */
 @Component
 public class GuestOnlyAuthorizationManager implements AuthorizationManager<RequestAuthorizationContext> {
     private static final AuthorizationDecision DENY = new AuthorizationDecision(false);
@@ -15,13 +18,14 @@ public class GuestOnlyAuthorizationManager implements AuthorizationManager<Reque
     @Override
     public AuthorizationDecision check(Supplier<Authentication> authentication, RequestAuthorizationContext context) {
         String url = context.getRequest().getRequestURI();
-        // 권한이 GUEST 만 가지고 있고, 접근 url 에 "/guest/" 가 포함되지 않은 경우
-        boolean isGuestOnly = authentication.get().getAuthorities().stream()
+        boolean hasGuestOnly = authentication.get().getAuthorities().stream()
                 .anyMatch(auth -> auth.getAuthority().equals("ROLE_GUEST")) &&
                 authentication.get().getAuthorities().size() == 1;
-        if(isGuestOnly && !url.startsWith("/guest/")) {
+
+        if(hasGuestOnly && !url.startsWith("/guest/")) {
             return DENY;
         }
+
         return ALLOW;
     }
 }
