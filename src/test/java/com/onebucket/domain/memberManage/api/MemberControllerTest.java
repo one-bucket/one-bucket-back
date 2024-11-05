@@ -477,7 +477,7 @@ class MemberControllerTest {
         when(securityUtils.getCurrentUsername()).thenReturn("username");
         when(memberService.usernameToId("username")).thenReturn(1L);
 
-        mockMvc.perform(post("/profile/update")
+        mockMvc.perform(post("/guest/profile/update")
                         .contentType(MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8)
                         .content(objectMapper.writeValueAsString(dto))
@@ -506,7 +506,7 @@ class MemberControllerTest {
         AuthenticationException exception = new AuthenticationException(code, internalMessage);
         when(securityUtils.getCurrentUsername()).thenThrow(exception);
 
-        mockMvc.perform(post("/profile/update")
+        mockMvc.perform(post("/guest/profile/update")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -534,7 +534,7 @@ class MemberControllerTest {
         when(securityUtils.getCurrentUsername()).thenReturn(username);
         when(memberService.usernameToId(username)).thenThrow(exception);
 
-        mockMvc.perform(post("/profile/update")
+        mockMvc.perform(post("/guest/profile/update")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
                         .accept(MediaType.APPLICATION_JSON)
@@ -564,7 +564,7 @@ class MemberControllerTest {
         when(memberService.usernameToId(username)).thenReturn(1L);
         doThrow(exception).when(profileService).updateProfile(eq(1L), any(UpdateProfileDto.class));
 
-        mockMvc.perform(post("/profile/update")
+        mockMvc.perform(post("/guest/profile/update")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -591,7 +591,7 @@ class MemberControllerTest {
 
         ValidateErrorCode code = ValidateErrorCode.INVALID_DATA;
         // when & then
-        mockMvc.perform(post("/profile/update")
+        mockMvc.perform(post("/guest/profile/update")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
                         .characterEncoding(StandardCharsets.UTF_8)

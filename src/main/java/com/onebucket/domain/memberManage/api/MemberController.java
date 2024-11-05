@@ -149,7 +149,7 @@ public class MemberController {
      * @return 성공 시 "success update profile" 과 200 code 를 반환한다.
      * @tested yes
      */
-    @PostMapping("/profile/update")
+    @PostMapping("/guest/profile/update")
     public ResponseEntity<SuccessResponseDto> updateProfile(@Valid @RequestBody UpdateProfileDto dto) {
         String username = securityUtils.getCurrentUsername();
         Long id = memberService.usernameToId(username);
