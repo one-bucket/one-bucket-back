@@ -127,6 +127,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
+    @Transactional
     public Long addMember(ChatRoomDto.ManageMember dto) {
         Member member = findMember(dto.getMemberId());
         ChatRoom chatRoom = findChatRoom(dto.getRoomId());
@@ -138,6 +139,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
+    @Transactional
     public Long quitMember(ChatRoomDto.ManageMember dto) {
         Member member = findMember(dto.getMemberId());
         ChatRoom chatRoom = findChatRoom(dto.getRoomId());
@@ -193,6 +195,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
+    @Transactional
     public LocalDateTime getDisconnectTime(ChatRoomMemberId id) {
         LocalDateTime time =  chatRoomMemberRepository.findById(id).orElseThrow(() -> new ChatRoomException(ChatErrorCode.NOT_EXIST_ROOM))
                 .getDisconnectAt();
@@ -200,11 +203,13 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
+    @Transactional
     public List<String> getRoomIds(Long userId) {
         return chatRoomMemberRepository.findChatRoomIdByMemberId(userId);
     }
 
     @Override
+    @Transactional
     public List<ChatMessage> getMessageAfterTimestamp(ChatRoomDto.InfoAfterTime dto) {
         return chatMessageRepository.findMessagesAfterTimestamp(dto.getRoomId(), dto.getTimestamp());
     }
