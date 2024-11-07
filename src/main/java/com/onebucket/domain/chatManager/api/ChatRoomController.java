@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
@@ -94,8 +96,13 @@ public class ChatRoomController {
     }
 
     @GetMapping("/logs")
-    public ResponseEntity<List<ChatMessage>> getLogs(@RequestBody ChatRoomDto.RequestInfoAfterTime dto) {
-        ChatRoomDto.InfoAfterTime infoAfterTime = ChatRoomDto.InfoAfterTime.of(dto);
+    public ResponseEntity<List<ChatMessage>> getLogs(@RequestParam String roomId, @RequestParam String timestamp) {
+        Instant instant = Instant.parse(timestamp);
+        Date dateTimestamp = Date.from(instant);
+        ChatRoomDto.InfoAfterTime infoAfterTime = ChatRoomDto.InfoAfterTime.builder()
+                .roomId(roomId)
+                .timestamp(dateTimestamp)
+                .build();
         List<ChatMessage> messages = chatRoomService.getMessageAfterTimestamp(infoAfterTime);
         return ResponseEntity.ok(messages);
     }
