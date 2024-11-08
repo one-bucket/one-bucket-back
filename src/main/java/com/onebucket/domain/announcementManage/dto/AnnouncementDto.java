@@ -86,14 +86,16 @@ public class AnnouncementDto {
     public static class RequestCreate {
         private String title;
         private String text;
+        private Boolean sendPushMessage;
     }
 
     @Builder
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class Create extends RequestCreate {
-
+    public static class Create {
+        private String title;
+        private String text;
     }
 
 
