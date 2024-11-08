@@ -14,6 +14,8 @@ import com.onebucket.domain.tradeManage.dao.PendingTradeRepository;
 import com.onebucket.global.minio.MinioRepository;
 import com.onebucket.global.redis.RedisRepository;
 import com.onebucket.global.utils.SecurityUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -37,6 +39,7 @@ public class MarketPostServiceImpl extends AbstractPostService<MarketPost, Marke
 
 
     private final PendingTradeRepository pendingTradeRepository;
+    private final MarketPostRepository marketPostRepository;
 
     public MarketPostServiceImpl(MarketPostRepository repository,
                                  BoardRepository boardRepository,
@@ -46,10 +49,17 @@ public class MarketPostServiceImpl extends AbstractPostService<MarketPost, Marke
                                  RedisRepository redisRepository,
                                  LikesMapRepository likesMapRepository,
                                  MinioRepository minioRepository,
-                                 PendingTradeRepository pendingTradeRepository) {
+                                 PendingTradeRepository pendingTradeRepository, MarketPostRepository marketPostRepository) {
         super(repository, boardRepository, memberRepository, securityUtils,
                 commentRepository, redisRepository, likesMapRepository, minioRepository);
         this.pendingTradeRepository = pendingTradeRepository;
+        this.marketPostRepository = marketPostRepository;
+    }
+
+    @Override
+    public Page<MarketPostDto.Thumbnail> getPostByTradeIdList(List<Long> tradeIds, Pageable pageable) {
+        return repository.findByPendingTradeIds(tradeIds, pageable)
+                .map(this::convertPostToThumbnailDto);
     }
 
     @Override

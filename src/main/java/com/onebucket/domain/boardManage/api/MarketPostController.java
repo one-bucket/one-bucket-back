@@ -15,15 +15,14 @@ import com.onebucket.domain.tradeManage.service.PendingTradeService;
 import com.onebucket.global.exceptionManage.customException.boardManageException.UserBoardException;
 import com.onebucket.global.exceptionManage.errorCode.BoardErrorCode;
 import com.onebucket.global.utils.SecurityUtils;
-import com.onebucket.global.utils.SuccessResponseWithIdDto;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * <br>package name   : com.onebucket.domain.boardManage.api
@@ -58,7 +57,7 @@ public class MarketPostController extends AbstractPostController<MarketPostServi
 
     @PreAuthorize("@authorizationService.isUserCanAccessBoard(#dto.marketPostCreateDto.boardId)")
     @PostMapping("/create")
-    public ResponseEntity<SuccessResponseWithIdDto> createPost(@RequestBody @Valid RequestCreateMarketPostDto dto) {
+    public ResponseEntity<MarketPostDto.ResponseCreatePostDto> createPost(@RequestBody @Valid RequestCreateMarketPostDto dto) {
 
         MarketPostDto.RequestCreate marketPostCreateDto = dto.getMarketPostCreateDto();
         TradeDto.RequestCreate tradeCreateDto = dto.getTradeCreateDto();
@@ -101,7 +100,22 @@ public class MarketPostController extends AbstractPostController<MarketPostServi
                 .build();
         pendingTradeService.setChatRoom(settingChatRoom);
 
-        return ResponseEntity.ok(new SuccessResponseWithIdDto("success create post", savedId));
+        MarketPostDto.ResponseCreatePostDto response = MarketPostDto.ResponseCreatePostDto.builder()
+                .postId(savedId)
+                .chatRoomId(chatRoomId)
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/list/joins")
+    public ResponseEntity<Page<MarketPostDto.Thumbnail>> getJoinsMarketPost(Pageable pageable) {
+        String username = securityUtils.getCurrentUsername();
+        Long userId = memberService.usernameToId(username);
+        List<Long> tradeIds = pendingTradeService.getJoinedTradeExceptOwner(userId);
+
+        return ResponseEntity.ok(postService.getPostByTradeIdList(tradeIds, pageable));
+
     }
 
     @Override

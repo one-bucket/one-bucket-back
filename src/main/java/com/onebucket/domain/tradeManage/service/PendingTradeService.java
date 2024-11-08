@@ -5,6 +5,7 @@ import com.onebucket.domain.tradeManage.dto.TradeKeyDto;
 
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * <br>package name   : com.onebucket.domain.tradeManage.service
@@ -27,7 +28,7 @@ public interface PendingTradeService {
 
     void update(TradeDto.Update dto);
 
-    Long addMember(TradeKeyDto.UserTrade dto);
+    TradeDto.ResponseJoinTrade addMember(TradeKeyDto.UserTrade dto);
 
     void quitMember(TradeKeyDto.UserTrade dto);
 
@@ -37,5 +38,6 @@ public interface PendingTradeService {
 
     LocalDateTime extendDueDate(TradeKeyDto.ExtendDate dto);
     void setChatRoom(TradeKeyDto.SettingChatRoom dto);
+    List<Long> getJoinedTradeExceptOwner(Long userId);
 
 }

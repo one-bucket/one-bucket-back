@@ -56,6 +56,8 @@ public class ChatRoomDto {
         private Long stackMessage;
         private String recentMessage;
         private Date recentMessageTime;
+
+        private Long ownerId;
     }
 
     @SuperBuilder

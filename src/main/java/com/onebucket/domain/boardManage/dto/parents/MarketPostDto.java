@@ -2,9 +2,7 @@ package com.onebucket.domain.boardManage.dto.parents;
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.onebucket.domain.tradeManage.dto.TradeDto;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 /**
@@ -98,6 +96,15 @@ public class MarketPostDto {
                     .build();
         }
 
+    }
+
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ResponseCreatePostDto {
+        private Long postId;
+        private String chatRoomId;
     }
 
 }

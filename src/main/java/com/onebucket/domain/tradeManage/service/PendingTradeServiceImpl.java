@@ -1,7 +1,9 @@
 package com.onebucket.domain.tradeManage.service;
 
+import com.onebucket.domain.chatManager.dao.ChatRoomMemberRepository;
 import com.onebucket.domain.chatManager.dao.ChatRoomRepository;
 import com.onebucket.domain.chatManager.entity.ChatRoom;
+import com.onebucket.domain.chatManager.entity.ChatRoomMemberId;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.domain.tradeManage.dao.CloseTradeRepository;
@@ -50,6 +52,7 @@ public class PendingTradeServiceImpl implements PendingTradeService {
     private final CloseTradeRepository closeTradeRepository;
     private final MemberRepository memberRepository;
     private final ChatRoomRepository chatRoomRepository;
+    private final ChatRoomMemberRepository chatRoomMemberRepository;
 
     @Override
     public Long create(TradeDto.Create dto) {
@@ -84,7 +87,7 @@ public class PendingTradeServiceImpl implements PendingTradeService {
     }
     @Override
     //새로운 유저가 해당 거래에 참여
-    public Long addMember(TradeKeyDto.UserTrade dto) {
+    public TradeDto.ResponseJoinTrade addMember(TradeKeyDto.UserTrade dto) {
         Long userId = dto.getUserId();
         Long tradeId = dto.getTradeId();
 
@@ -113,7 +116,12 @@ public class PendingTradeServiceImpl implements PendingTradeService {
         ChatRoom chatRoom = pendingTrade.getChatRoom();
         chatRoom.addMember(member);
 
-        return pendingTradeRepository.save(pendingTrade).getId();
+        Long savedTradeId = pendingTradeRepository.save(pendingTrade).getId();
+
+        return TradeDto.ResponseJoinTrade.builder()
+                .tradeId(tradeId)
+                .chatRoomId(chatRoom.getId())
+                .build();
     }
 
     //참여해 있던 유저가 탈퇴
@@ -130,8 +138,12 @@ public class PendingTradeServiceImpl implements PendingTradeService {
         pendingTrade.deleteMember(member);
 
         //chatRoom에서 삭제
-        ChatRoom chatRoom = pendingTrade.getChatRoom();
-        chatRoom.quitMember(member);
+        String chatRoomId = pendingTrade.getChatRoom().getId();
+        ChatRoomMemberId chatRoomMemberId = ChatRoomMemberId.builder()
+                .member(userId)
+                .chatRoom(chatRoomId)
+                .build();
+        chatRoomMemberRepository.deleteById(chatRoomMemberId);
         pendingTradeRepository.save(pendingTrade);
     }
     @Override
@@ -182,6 +194,9 @@ public class PendingTradeServiceImpl implements PendingTradeService {
         pendingTradeRepository.save(pendingTrade);
     }
 
+    public List<Long> getJoinedTradeExceptOwner(Long userId) {
+        return pendingTradeRepository.findPendingTradeIdsWhereUserIsParticipant(userId);
+    }
 
     private Member findMember(Long userId) {
         return memberRepository.findById(userId).orElseThrow(() ->

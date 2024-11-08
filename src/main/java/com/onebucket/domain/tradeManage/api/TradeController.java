@@ -1,13 +1,13 @@
 package com.onebucket.domain.tradeManage.api;
 
 import com.onebucket.domain.memberManage.service.MemberService;
+import com.onebucket.domain.tradeManage.dto.TradeDto;
 import com.onebucket.domain.tradeManage.dto.TradeKeyDto;
 
 import com.onebucket.domain.tradeManage.service.PendingTradeService;
 import com.onebucket.domain.tradeManage.service.TradeTagService;
 import com.onebucket.global.utils.SecurityUtils;
 import com.onebucket.global.utils.SuccessResponseDto;
-import com.onebucket.global.utils.SuccessResponseWithIdDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -42,7 +42,7 @@ public class TradeController {
     private final SecurityUtils securityUtils;
 
     @PostMapping("/join/{tradeId}")
-    public ResponseEntity<SuccessResponseWithIdDto> joinTrade(@PathVariable Long tradeId) {
+    public ResponseEntity<TradeDto.ResponseJoinTrade> joinTrade(@PathVariable Long tradeId) {
         String username = securityUtils.getCurrentUsername();
         Long userId = memberService.usernameToId(username);
 
@@ -51,9 +51,9 @@ public class TradeController {
                 .userId(userId)
                 .build();
 
-        Long id = pendingTradeService.addMember(userTradeDto);
+        TradeDto.ResponseJoinTrade response = pendingTradeService.addMember(userTradeDto);
 
-        return ResponseEntity.ok(new SuccessResponseWithIdDto("success join trade", id));
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/quit/{tradeId}")

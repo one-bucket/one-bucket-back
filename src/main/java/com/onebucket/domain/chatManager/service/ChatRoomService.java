@@ -3,6 +3,7 @@ package com.onebucket.domain.chatManager.service;
 import com.onebucket.domain.chatManager.dto.ChatRoomDto;
 import com.onebucket.domain.chatManager.entity.ChatRoomMemberId;
 import com.onebucket.domain.chatManager.mongo.ChatMessage;
+import com.onebucket.domain.tradeManage.dto.TradeDto;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -77,8 +78,10 @@ public interface ChatRoomService {
 
     Long addMember(ChatRoomDto.ManageMember dto);
 
-    Long quitMember(ChatRoomDto.ManageMember dto);
+    void quitMember(ChatRoomDto.ManageMember dto);
 
     LocalDateTime getDisconnectTime(ChatRoomMemberId id);
     List<ChatMessage> getMessageAfterTimestamp(ChatRoomDto.InfoAfterTime dto);
+    TradeDto.Info getTradeInfoOfChatRoom(String chatRoomId);
+    void bombRoomByOwner(ChatRoomDto.ManageMember dto);
 }

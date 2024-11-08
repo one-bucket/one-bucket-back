@@ -145,6 +145,19 @@ public abstract class AbstractPostController<S extends BasePostService> {
         return getPostsBySearchInternal(searchPageablePost);
     }
 
+    @GetMapping("/list/my")
+    public ResponseEntity<Page<? extends PostDto.Thumbnail>> getAuthorsPost(Pageable pageable) {
+        String username = securityUtils.getCurrentUsername();
+        Long userId = memberService.usernameToId(username);
+        ValueDto.AuthorPageablePost dto = ValueDto.AuthorPageablePost.builder()
+                .pageable(pageable)
+                .userId(userId)
+                .build();
+
+        return ResponseEntity.ok(postService.getPostByAuthorId(dto));
+    }
+
+
     protected abstract ResponseEntity<Page<? extends PostDto.Thumbnail>> getPostsBySearchInternal(ValueDto.SearchPageablePost dto);
 
     private String getFileNameWithoutExtension(String fileName) {

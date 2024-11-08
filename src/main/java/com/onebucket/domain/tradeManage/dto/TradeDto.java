@@ -3,6 +3,8 @@ package com.onebucket.domain.tradeManage.dto;
 import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.domain.tradeManage.entity.PendingTrade;
 import com.onebucket.domain.tradeManage.entity.TradeTag;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -138,6 +140,15 @@ public class TradeDto {
     @NoArgsConstructor
     public static class Update extends BaseTrade {
         private Long id;
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ResponseJoinTrade {
+        private Long tradeId;
+        private String chatRoomId;
     }
 
     public static PendingTrade to(Create dto, Member member, TradeTag tag) {
