@@ -194,6 +194,9 @@ public class PendingTradeServiceImpl implements PendingTradeService {
         pendingTradeRepository.save(pendingTrade);
     }
 
+    public List<Long> getJoinedTradeExceptOwner(Long userId) {
+        return pendingTradeRepository.findPendingTradeIdsWhereUserIsParticipant(userId);
+    }
 
     private Member findMember(Long userId) {
         return memberRepository.findById(userId).orElseThrow(() ->

@@ -17,12 +17,12 @@ import com.onebucket.global.exceptionManage.errorCode.BoardErrorCode;
 import com.onebucket.global.utils.SecurityUtils;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * <br>package name   : com.onebucket.domain.boardManage.api
@@ -106,6 +106,16 @@ public class MarketPostController extends AbstractPostController<MarketPostServi
                 .build();
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/list/joins")
+    public ResponseEntity<Page<MarketPostDto.Thumbnail>> getJoinsMarketPost(Pageable pageable) {
+        String username = securityUtils.getCurrentUsername();
+        Long userId = memberService.usernameToId(username);
+        List<Long> tradeIds = pendingTradeService.getJoinedTradeExceptOwner(userId);
+
+        return ResponseEntity.ok(postService.getPostByTradeIdList(tradeIds, pageable));
+
     }
 
     @Override

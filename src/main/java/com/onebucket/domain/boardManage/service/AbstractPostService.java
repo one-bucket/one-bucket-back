@@ -324,8 +324,6 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
     }
 
 
-
-
     protected Board findBoard(Long id) {
         return boardRepository.findById(id).orElseThrow(() ->
                 new BoardManageException(BoardErrorCode.UNKNOWN_BOARD));
