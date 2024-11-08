@@ -93,9 +93,7 @@ class BoardControllerTest {
 
             boardIdAndNameDtoList.add(boardIdAndNameDto);
         }
-        when(securityUtils.getCurrentUsername()).thenReturn("test user");
-        when(memberService.usernameToUniversity("test user")).thenReturn(mockUniversity);
-        when(mockUniversity.getId()).thenReturn(1L);
+        when(securityUtils.getUnivId()).thenReturn(anyLong());
         when(boardService.getBoardList(1L)).thenReturn(boardIdAndNameDtoList);
 
         mockMvc.perform(get("/board/list"))
@@ -107,9 +105,7 @@ class BoardControllerTest {
     @Test
     @DisplayName("getBoardList - success / but no board exist")
     void testGetBoardList_success_noBoardReturn() throws Exception {
-        when(securityUtils.getCurrentUsername()).thenReturn("test user");
-        when(memberService.usernameToUniversity("test user")).thenReturn(mockUniversity);
-        when(mockUniversity.getId()).thenReturn(1L);
+        when(securityUtils.getUnivId()).thenReturn(anyLong());
         when(boardService.getBoardList(1L)).thenReturn(Collections.emptyList());
 
         mockMvc.perform(get("/board/list"))
@@ -122,8 +118,8 @@ class BoardControllerTest {
     void testGetBoardList_fail_invalidUniv() throws Exception {
         UniversityErrorCode code = UniversityErrorCode.NOT_EXIST_UNIVERSITY;
         UniversityException exception = new UniversityException(code);
-        when(securityUtils.getCurrentUsername()).thenReturn("test user");
-        when(memberService.usernameToUniversity("test user")).thenThrow(exception);
+
+        when(securityUtils.getUnivId()).thenThrow(exception);
 
         mockMvc.perform(get("/board/list"))
                 .andExpect(hasStatus(code))

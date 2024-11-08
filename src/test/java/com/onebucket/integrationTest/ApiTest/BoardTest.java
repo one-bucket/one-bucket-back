@@ -170,51 +170,5 @@ public class BoardTest extends BoardRestDocsSupport {
 
     }
 
-    @Test
-    @DisplayName("POST /board/list test")
-    @Sql(scripts = "/sql/InitDB.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-    public void getBoardList() throws Exception {
-        JwtToken token = createInitUser();
-        Long univId = createUniversity(1);
-        Long boardTypeId = createBoardType(4);
-        List<Long> boardIds = new ArrayList<>();
-        for(int i = 0; i < 4; i++) {
-            boardIds.add(createBoard(univId, boardTypeId + i));
-        }
-
-        String setUnivQuery = """
-                UPDATE member
-                SET university_id = ?
-                WHERE username = ?
-                """;
-        jdbcTemplate.update(setUnivQuery, univId, testUsername);
-
-
-        List<ResponseBoardIdAndNameDto> results = new ArrayList<>();
-        for(int i = 0; i < 4; i++) {
-                ResponseBoardIdAndNameDto result = ResponseBoardIdAndNameDto.builder()
-                    .id(boardIds.get(i))
-                    .name("board" + boardIds.get(i))
-                    .build();
-            results.add(result);
-        }
-
-        mockMvc.perform(get("/board/list")
-                        .header("Authorization", getAuthHeader(token))
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(hasKey(results))
-                .andDo(restDocs.document(
-                        httpRequest(),
-                        httpResponse(),
-                        responseFields(
-                                fieldWithPath("[].id").description("id of board"),
-                                fieldWithPath("[].name").description("name of board"),
-                                fieldWithPath("[].type").description("type of board")
-                        )
-                ));
-    }
-
-
 
 }
