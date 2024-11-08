@@ -4,6 +4,7 @@ import com.onebucket.domain.boardManage.dao.BoardRepository;
 import com.onebucket.domain.boardManage.entity.Board;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
+import com.onebucket.global.auth.springSecurity.CustomAuthentication;
 import com.onebucket.global.exceptionManage.customException.boardManageException.BoardManageException;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.MemberManageException;
@@ -51,6 +52,27 @@ public class SecurityUtils {
         }
         return authentication.getName();
     }
+
+    public Long getUserId() {
+        final CustomAuthentication authentication = (CustomAuthentication) SecurityContextHolder.getContext().getAuthentication();
+
+        if(authentication == null || authentication.getUserId() == null) {
+            throw new AuthenticationException(AuthenticationErrorCode.NON_EXIST_AUTHENTICATION,
+                    "Not exist Authentication in ContextHolder");
+        }
+        return authentication.getUserId();
+    }
+
+    public Long getUnivId() {
+        final CustomAuthentication authentication = (CustomAuthentication) SecurityContextHolder.getContext().getAuthentication();
+
+        if(authentication == null || authentication.getUnivId() == null) {
+            throw new AuthenticationException(AuthenticationErrorCode.NON_EXIST_AUTHENTICATION,
+                    "Not exist Authentication in ContextHolder");
+        }
+        return authentication.getUnivId();
+    }
+
 
     public void isUserUniversityMatchingBoard(String username, Long boardId) {
         Board board = boardRepository.findById(boardId).orElseThrow(() ->

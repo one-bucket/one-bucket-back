@@ -2,6 +2,7 @@ package com.onebucket.global.auth.config;
 
 import com.onebucket.domain.memberManage.service.MemberService;
 import com.onebucket.global.auth.jwtAuth.component.JwtValidator;
+import com.onebucket.global.auth.springSecurity.CustomAuthentication;
 import com.onebucket.testComponent.testController.AuthTestController;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Header;
@@ -17,8 +18,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -74,7 +73,7 @@ class JwtAuthenticationFilterTest {
     void testValidToken() throws Exception {
         //given
         UserDetails userDetails = new User("user", "", Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")));
-        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+        CustomAuthentication authentication = new CustomAuthentication(userDetails, "", userDetails.getAuthorities(),1L,1L);
 
         when(jwtValidator.isTokenValid(anyString())).thenReturn(true);
         when(jwtValidator.getAuthentication(anyString())).thenReturn(authentication);      //when & then

@@ -2,6 +2,7 @@ package com.onebucket.global.auth.config;
 
 import com.onebucket.global.auth.jwtAuth.component.JwtValidator;
 import com.onebucket.global.auth.jwtAuth.exception.NullJwtException;
+import com.onebucket.global.auth.springSecurity.CustomAuthentication;
 import io.jsonwebtoken.ClaimJwtException;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -81,7 +82,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             String token = resolveToken(servletRequest);
             if(token != null && jwtValidator.isTokenValid(token)) {
-                Authentication authentication = jwtValidator.getAuthentication(token);
+                CustomAuthentication authentication = jwtValidator.getAuthentication(token);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } else {
                 throw new NullJwtException("no token");

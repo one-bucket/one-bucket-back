@@ -1,5 +1,6 @@
 package com.onebucket.global.auth.jwtAuth.component;
 
+import com.onebucket.global.auth.springSecurity.CustomAuthentication;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import io.jsonwebtoken.Claims;
@@ -9,8 +10,6 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -85,7 +84,7 @@ public class JwtValidator {
      * @throws NullPointerException when claims are empty.
      * @throws io.jsonwebtoken.JwtException when token is invalid.
      */
-    public Authentication getAuthentication(String accessToken) {
+    public CustomAuthentication getAuthentication(String accessToken) {
         Claims claims = parseClaims(accessToken);
         if(claims.get(AUTHORITIES_KEY) == null) {
             throw new AuthenticationException(AuthenticationErrorCode.NOT_EXIST_AUTHENTICATION_IN_TOKEN, "can't validate");
@@ -96,9 +95,11 @@ public class JwtValidator {
                         claims.get(AUTHORITIES_KEY).toString().split("\\."))
                         .map(SimpleGrantedAuthority::new)
                         .toList();
+        Long userId = claims.get("userId", Long.class);
+        Long univId = claims.get("univId", Long.class);
 
         UserDetails principal = new User(claims.getSubject(), "", authorities);
-        return new UsernamePasswordAuthenticationToken(principal, "", authorities);
+        return new CustomAuthentication(principal, "", authorities, userId, univId);
     }
 
     private Claims parseClaims(String accessToken) {

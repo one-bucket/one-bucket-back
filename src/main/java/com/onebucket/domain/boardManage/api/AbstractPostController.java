@@ -59,8 +59,7 @@ public abstract class AbstractPostController<S extends BasePostService> {
     @GetMapping("/{postId}")
     @PreAuthorize("@authorizationService.isUserCanAccessPost(#postId)")
     public ResponseEntity<? extends PostDto.ResponseInfo> getPostById(@PathVariable Long postId) {
-        String username = securityUtils.getCurrentUsername();
-        Long userId = memberService.usernameToId(username);
+        Long userId = securityUtils.getUserId();
 
         ValueDto.FindPost findPost = ValueDto.FindPost.builder()
                 .postId(postId)
@@ -73,8 +72,7 @@ public abstract class AbstractPostController<S extends BasePostService> {
 
     @DeleteMapping("/{postId}")
     public ResponseEntity<SuccessResponseWithIdDto> deletePost(@PathVariable Long postId) {
-        String username = securityUtils.getCurrentUsername();
-        Long userId = memberService.usernameToId(username);
+        Long userId = securityUtils.getUserId();
 
         ValueDto.FindPost deletePostDto = ValueDto.FindPost.builder()
                 .postId(postId)
@@ -90,8 +88,7 @@ public abstract class AbstractPostController<S extends BasePostService> {
     @PostMapping("/{postId}/like")
     @PreAuthorize("@authorizationService.isUserCanAccessPost(#postId)")
     public ResponseEntity<SuccessResponseDto> addLikes(@PathVariable Long postId) {
-        String username = securityUtils.getCurrentUsername();
-        Long userId = memberService.usernameToId(username);
+        Long userId = securityUtils.getUserId();
         ValueDto.FindPost dto = ValueDto.FindPost.builder()
                 .userId(userId)
                 .postId(postId)
@@ -104,8 +101,7 @@ public abstract class AbstractPostController<S extends BasePostService> {
     @DeleteMapping("/{postId}/like")
     @PreAuthorize("@authorizationService.isUserCanAccessPost(#postId)")
     public ResponseEntity<SuccessResponseDto> deleteLikes(@PathVariable Long postId) {
-        String username = securityUtils.getCurrentUsername();
-        Long userId = memberService.usernameToId(username);
+        Long userId = securityUtils.getUserId();
         ValueDto.FindPost dto = ValueDto.FindPost.builder()
                 .userId(userId)
                 .postId(postId)
