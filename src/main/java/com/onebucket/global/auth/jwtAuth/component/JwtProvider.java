@@ -120,12 +120,14 @@ public class JwtProvider {
         Date tokenExpiration = new Date(date + expireDateAccessToken);
         String authorities = getAuthoritiesFromAuthentication(authentication);
         Long univId = getUnivId(authentication);
+        Long userId = getUserId(authentication);
         return Jwts.builder()
                 .setSubject(authentication.getName())
                 .setIssuedAt(Calendar.getInstance().getTime())
                 .setExpiration(tokenExpiration)
                 .claim("auth", authorities)
                 .claim("univId",univId)
+                .claim("userId",userId)
                 .signWith(key, SignatureAlgorithm.HS256).compact();
     }
 
@@ -135,6 +137,10 @@ public class JwtProvider {
         return member.getUniversity().getId();
     }
 
+    private Long getUserId(Authentication authentication) {
+        String username = authentication.getName();
+        return memberRepository.findIdByUsername(username).orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
+    }
     /**
      * <p>
      *     Generate refresh Token by given now date. Sign with given key in {@code application.properties} with HS256.
