@@ -9,6 +9,7 @@ import com.onebucket.domain.memberManage.dto.internal.SetPasswordDto;
 import com.onebucket.domain.memberManage.dto.internal.SetUniversityDto;
 import com.onebucket.domain.universityManage.dao.UniversityRepository;
 import com.onebucket.domain.universityManage.domain.University;
+import com.onebucket.global.auth.springSecurity.Role;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.customException.universityManageException.UniversityException;
 import com.onebucket.global.exceptionManage.customException.verificationException.VerificationException;
@@ -24,8 +25,6 @@ import org.springframework.stereotype.Service;
 
 
 import java.util.Optional;
-
-import static com.onebucket.global.auth.springSecurity.Role.*;
 
 
 /**
@@ -65,7 +64,7 @@ public class MemberServiceImpl implements MemberService {
                 .nickname(createMemberRequestDto.getNickname())
                 .university(saveNullUniv())
                 .build();
-        member.addRoles(GUEST.getRole());
+        member.addRoles(Role.GUEST.getRole());
         try {
             Member newMember = memberRepository.save(member);
             return newMember.getId();

@@ -1,7 +1,6 @@
 package com.onebucket.global.auth.config;
 
 import com.onebucket.global.auth.jwtAuth.component.JwtValidator;
-import com.onebucket.global.auth.springSecurity.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -65,9 +64,10 @@ public class SecurityConfig {
                                 .requestMatchers("/test/create-testuser").permitAll()
                                 .requestMatchers("/member/password/reset").permitAll()
                                 .requestMatchers("/ws").permitAll()
+                                .requestMatchers("/error").permitAll()
+       //                         .requestMatchers("/guest/**").hasRole("GUEST")
+       //                         .requestMatchers("/admin/**").hasRole("ADMIN")
                                 .requestMatchers("/dev/**").permitAll()
-                                .requestMatchers("/guest/**").hasRole(String.valueOf(Role.GUEST))
-       //                         .requestMatchers("/admin/**").hasRole(String.valueOf(Role.ADMIN))
                                 .anyRequest().access(guestOnlyAuthorizationManager))
                 .addFilterBefore(new JwtAuthenticationFilter(jwtValidator),
                         UsernamePasswordAuthenticationFilter.class);

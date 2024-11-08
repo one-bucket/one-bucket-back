@@ -10,8 +10,6 @@ import com.onebucket.global.auth.springSecurity.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import static com.onebucket.global.auth.springSecurity.Role.USER;
-
 /**
  * <br>package name   : com.onebucket.global.auth.verification.service
  * <br>file name      : VerificationService
@@ -56,6 +54,6 @@ public class VerificationAndUpdateFacadeService {
                 .university(dto.university())
                 .build();
         memberService.setUniversity(setUniversityDto);
-        memberService.addRoleToMember(username, USER.getRole());
+        memberService.addRoleToMember(username, Role.USER.getRole());
     }
 }

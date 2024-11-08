@@ -355,7 +355,7 @@ public class MemberTest extends UserRestDocsSupportTest {
                 .description("hello")
                 .build();
 
-        mockMvc.perform(post("/profile/update")
+        mockMvc.perform(post("/guest/profile/update")
                 .header("Authorization", getAuthHeader(token))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto))

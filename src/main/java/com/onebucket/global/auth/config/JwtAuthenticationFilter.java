@@ -9,19 +9,18 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
-import org.springframework.web.filter.GenericFilterBean;
 
 import java.io.IOException;
 import java.util.List;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
  * <br>package name   : com.onebucket.global.auth.config
@@ -48,7 +47,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @Slf4j
-public class JwtAuthenticationFilter extends GenericFilterBean {
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtValidator jwtValidator;
 
@@ -69,12 +68,10 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
     );
 
     @Override
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
-            throws IOException, ServletException {
+    protected void doFilterInternal(@NotNull HttpServletRequest servletRequest, @NotNull HttpServletResponse servletResponse, @NotNull FilterChain filterChain)
+            throws ServletException, IOException {
 
-        HttpServletResponse httpResponse = (HttpServletResponse) servletResponse;
-
-        String url = ((HttpServletRequest) servletRequest).getRequestURI();
+        String url = servletRequest.getRequestURI();
 
         if(isExcluded(url)) {
             filterChain.doFilter(servletRequest, servletResponse);
@@ -82,7 +79,7 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
         }
 
         try {
-            String token = resolveToken((HttpServletRequest) servletRequest);
+            String token = resolveToken(servletRequest);
             if(token != null && jwtValidator.isTokenValid(token)) {
                 Authentication authentication = jwtValidator.getAuthentication(token);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -92,7 +89,7 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
 
             filterChain.doFilter(servletRequest, servletResponse);
         }  catch(JwtException e) {
-            handleException(httpResponse, e);
+            handleException(servletResponse, e);
         }
     }
 
