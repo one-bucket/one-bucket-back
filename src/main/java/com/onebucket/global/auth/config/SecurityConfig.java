@@ -68,7 +68,8 @@ public class SecurityConfig {
        //                         .requestMatchers("/guest/**").hasRole("GUEST")
        //                         .requestMatchers("/admin/**").hasRole("ADMIN")
                                 .requestMatchers("/dev/**").permitAll()
-                                .anyRequest().access(guestOnlyAuthorizationManager))
+       //                         .anyRequest().access(guestOnlyAuthorizationManager))
+                                .anyRequest().authenticated())
                 .addFilterBefore(new JwtAuthenticationFilter(jwtValidator),
                         UsernamePasswordAuthenticationFilter.class);
 
