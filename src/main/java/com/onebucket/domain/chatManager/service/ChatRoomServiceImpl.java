@@ -11,6 +11,7 @@ import com.onebucket.domain.chatManager.mongo.ChatMessageRepository;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.domain.tradeManage.dao.PendingTradeRepository;
+import com.onebucket.domain.tradeManage.dto.TradeDto;
 import com.onebucket.domain.tradeManage.entity.PendingTrade;
 import com.onebucket.global.exceptionManage.customException.TradeManageException.PendingTradeException;
 import com.onebucket.global.exceptionManage.customException.chatManageException.Exceptions.ChatRoomException;
@@ -45,6 +46,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ChatRoomServiceImpl implements ChatRoomService {
 
     private final ChatRoomRepository chatRoomRepository;
@@ -78,7 +80,6 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
-    @Transactional
     public String createRoom(ChatRoomDto.CreateRoom dto) {
         String id = UUID.randomUUID().toString();
         PendingTrade pendingTrade = pendingTradeRepository.findById(dto.getTradeId())
@@ -87,6 +88,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
         ChatRoom chatRoom = ChatRoom.builder()
                 .id(id)
+                .ownerId(member.getId())
                 .name(dto.getName())
                 .build();
 
@@ -140,14 +142,13 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     @Override
     @Transactional
-    public Long quitMember(ChatRoomDto.ManageMember dto) {
-        Member member = findMember(dto.getMemberId());
-        ChatRoom chatRoom = findChatRoom(dto.getRoomId());
+    public void quitMember(ChatRoomDto.ManageMember dto) {
+        ChatRoomMemberId chatRoomMemberId = ChatRoomMemberId.builder()
+                .chatRoom(dto.getRoomId())
+                .member(dto.getMemberId())
+                .build();
 
-        chatRoom.quitMember(member);
-        ChatRoom savedChatRoom = chatRoomRepository.save(chatRoom);
-        int memberCount = savedChatRoom.getMembers().size();
-        return (long) memberCount;
+        chatRoomMemberRepository.deleteById(chatRoomMemberId);
     }
 
     @Override
@@ -157,7 +158,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         String roomName = room.getName();
         Long memberCount = (long) room.getMembers().size();
         Long stackMessage = chatMessageRepository.countMessagesAfterTimestamp(dto.getRoomId(), dto.getTimestamp());
-
+        Long ownerId = room.getOwnerId();
         ChatMessage recentMessage = chatMessageRepository.findTopByRoomIdOrderByTimestampDesc(dto.getRoomId());
         if(recentMessage == null) {
             recentMessage = ChatMessage.builder()
@@ -177,6 +178,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                 .stackMessage(stackMessage)
                 .recentMessage(recentMessageText)
                 .recentMessageTime(recentMessageTime)
+                .ownerId(ownerId)
                 .build();
     }
 
@@ -212,6 +214,28 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     @Transactional
     public List<ChatMessage> getMessageAfterTimestamp(ChatRoomDto.InfoAfterTime dto) {
         return chatMessageRepository.findMessagesAfterTimestamp(dto.getRoomId(), dto.getTimestamp());
+    }
+
+    @Override
+    @Transactional
+    public TradeDto.Info getTradeInfoOfChatRoom(String chatRoomId) {
+        ChatRoom chatRoom = findChatRoom(chatRoomId);
+        PendingTrade pendingTrade = chatRoom.getPendingTrade();
+        if(pendingTrade != null) {
+            return TradeDto.Info.of(pendingTrade);
+        } else {
+            throw new PendingTradeException(TradeErrorCode.UNKNOWN_TRADE);
+        }
+    }
+
+    @Transactional
+    @Override
+    public void bombRoomByOwner(ChatRoomDto.ManageMember dto) {
+        ChatRoom chatRoom = findChatRoom(dto.getRoomId());
+        PendingTrade pendingTrade = chatRoom.getPendingTrade();
+        if(chatRoom.getOwnerId().equals(dto.getMemberId())) {
+            pendingTradeRepository.delete(pendingTrade);
+        }
     }
 
     private ChatRoom findChatRoom(String roomId) {

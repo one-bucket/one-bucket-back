@@ -5,6 +5,7 @@ import com.onebucket.domain.chatManager.entity.ChatRoomMemberId;
 import com.onebucket.domain.chatManager.mongo.ChatMessage;
 import com.onebucket.domain.chatManager.service.*;
 import com.onebucket.domain.memberManage.service.MemberService;
+import com.onebucket.domain.tradeManage.dto.TradeDto;
 import com.onebucket.global.utils.SecurityUtils;
 import com.onebucket.global.utils.SuccessResponseDto;
 import com.onebucket.global.utils.SuccessResponseWithIdDto;
@@ -15,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -77,7 +77,7 @@ public class ChatRoomController {
     }
 
     @DeleteMapping("/quit")
-    public ResponseEntity<SuccessResponseWithIdDto> quitRoom(@RequestParam String roomId) {
+    public ResponseEntity<SuccessResponseDto> quitRoom(@RequestParam String roomId) {
         String username = securityUtils.getCurrentUsername();
         Long userId = memberService.usernameToId(username);
         ChatRoomDto.ManageMember dto = ChatRoomDto.ManageMember.builder()
@@ -85,9 +85,9 @@ public class ChatRoomController {
                 .memberId(userId)
                 .build();
 
-        Long count = chatRoomService.quitMember(dto);
+        chatRoomService.quitMember(dto);
 
-        return ResponseEntity.ok(new SuccessResponseWithIdDto("success quit member", count));
+        return ResponseEntity.ok(new SuccessResponseDto("success quit member"));
     }
 
     @GetMapping("/memberList")
@@ -105,6 +105,24 @@ public class ChatRoomController {
                 .build();
         List<ChatMessage> messages = chatRoomService.getMessageAfterTimestamp(infoAfterTime);
         return ResponseEntity.ok(messages);
+    }
+
+    @GetMapping("/trade/{chatRoomId}")
+    public ResponseEntity<TradeDto.ResponseInfo> getTradeInfo(@PathVariable("chatRoomId") String chatRoomId) {
+        return ResponseEntity.ok(TradeDto.ResponseInfo.of(chatRoomService.getTradeInfoOfChatRoom(chatRoomId)));
+    }
+
+    @DeleteMapping("/bomb/{chatRoomId}")
+    public ResponseEntity<SuccessResponseDto> bombRoom(@PathVariable("chatRoomId") String chatRoomId) {
+        String username = securityUtils.getCurrentUsername();
+        Long userId = memberService.usernameToId(username);
+
+        ChatRoomDto.ManageMember dto = ChatRoomDto.ManageMember.builder()
+                .roomId(chatRoomId)
+                .memberId(userId)
+                .build();
+        chatRoomService.bombRoomByOwner(dto);
+        return ResponseEntity.ok(new SuccessResponseDto("success bomb"));
     }
 
     @GetMapping("/sse/chatList")

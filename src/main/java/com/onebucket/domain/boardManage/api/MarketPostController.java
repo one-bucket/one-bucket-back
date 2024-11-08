@@ -15,7 +15,6 @@ import com.onebucket.domain.tradeManage.service.PendingTradeService;
 import com.onebucket.global.exceptionManage.customException.boardManageException.UserBoardException;
 import com.onebucket.global.exceptionManage.errorCode.BoardErrorCode;
 import com.onebucket.global.utils.SecurityUtils;
-import com.onebucket.global.utils.SuccessResponseWithIdDto;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -58,7 +57,7 @@ public class MarketPostController extends AbstractPostController<MarketPostServi
 
     @PreAuthorize("@authorizationService.isUserCanAccessBoard(#dto.marketPostCreateDto.boardId)")
     @PostMapping("/create")
-    public ResponseEntity<SuccessResponseWithIdDto> createPost(@RequestBody @Valid RequestCreateMarketPostDto dto) {
+    public ResponseEntity<MarketPostDto.ResponseCreatePostDto> createPost(@RequestBody @Valid RequestCreateMarketPostDto dto) {
 
         MarketPostDto.RequestCreate marketPostCreateDto = dto.getMarketPostCreateDto();
         TradeDto.RequestCreate tradeCreateDto = dto.getTradeCreateDto();
@@ -101,7 +100,12 @@ public class MarketPostController extends AbstractPostController<MarketPostServi
                 .build();
         pendingTradeService.setChatRoom(settingChatRoom);
 
-        return ResponseEntity.ok(new SuccessResponseWithIdDto("success create post", savedId));
+        MarketPostDto.ResponseCreatePostDto response = MarketPostDto.ResponseCreatePostDto.builder()
+                .postId(savedId)
+                .chatRoomId(chatRoomId)
+                .build();
+
+        return ResponseEntity.ok(response);
     }
 
     @Override

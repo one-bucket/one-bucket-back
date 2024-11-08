@@ -9,14 +9,16 @@ import com.onebucket.domain.chatManager.service.SSEChatListService;
 import com.onebucket.domain.memberManage.service.MemberService;
 import com.onebucket.domain.tradeManage.dto.TradeKeyDto;
 import com.onebucket.domain.tradeManage.service.PendingTradeService;
+import com.onebucket.global.auth.jwtAuth.component.JwtValidator;
 import com.onebucket.global.exceptionManage.customException.chatManageException.ChatManageException;
+import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
+import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.ChatErrorCode;
 import com.onebucket.global.utils.ImageUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -45,15 +47,16 @@ public class ChatController {
     private final SSEChatListService sseChatListService;
     private final MemberService memberService;
     private final PendingTradeService pendingTradeService;
+    private final JwtValidator jwtValidator;
 
     private final ImageUtils imageUtils;
 
     @MessageMapping("/message")
-    public void message(@Payload ChatDto chat, SimpMessageHeaderAccessor headerAccessor) {
+    public void message(@Payload ChatDto chat) {
         switch (chat.getType()) {
             case ENTER -> enterUser(chat);
             case TALK -> sendMessage(chat);
-            case LEAVE -> leaveUser(chat, headerAccessor);
+            case LEAVE -> leaveUser(chat);
             case IMAGE -> imageMessage(chat);
             default -> throw new ChatManageException(ChatErrorCode.MESSAGING_ERROR);
         }
@@ -75,12 +78,17 @@ public class ChatController {
         sseChatListService.notifyRoomUpdate(chat);
     }
 
-    private void leaveUser(ChatDto chat, SimpMessageHeaderAccessor headerAccessor) {
+    private void leaveUser(ChatDto chat) {
+        String token = chat.getMessage();
         chat.setMessage(chat.getSender() + "님이 퇴장하였습니다.");
         chatService.saveMessage(chat);
         template.convertAndSend("/sub/chat/room/" + chat.getRoomId(),chat);
 
-        Authentication authentication = (Authentication) headerAccessor.getUser();
+        token = tokenResolver(token);
+        if(!jwtValidator.isTokenValid(token)) {
+            throw new AuthenticationException(AuthenticationErrorCode.NON_VALID_TOKEN);
+        }
+        Authentication authentication = jwtValidator.getAuthentication(token);
         if(authentication != null) {
             String username = authentication.getName();
             Long userId = memberService.usernameToId(username);
@@ -89,6 +97,7 @@ public class ChatController {
                     .roomId(chat.getRoomId())
                     .memberId(userId)
                     .build();
+            chatRoomService.quitMember(dto);
 
             //거래 정보에서도 삭제
             ChatRoomDto.GetTradeInfo tradeInfo = chatRoomService.getTradeInfo(chat.getRoomId());
@@ -99,8 +108,8 @@ public class ChatController {
                     .build();
             pendingTradeService.quitMember(userTrade);
 
-            chatRoomService.quitMember(dto);
         }
+
     }
 
     private void imageMessage(ChatDto chat) {
@@ -121,6 +130,14 @@ public class ChatController {
         chatService.saveMessage(chat);
         template.convertAndSend("/sub/chat/room/" + chat.getRoomId(), chat);
         sseChatListService.notifyRoomUpdate(chat);
+    }
+
+    private String tokenResolver(String token) {
+        if(token.startsWith("Bearer ")) {
+            return token.substring(7);
+        } else {
+            throw new AuthenticationException(AuthenticationErrorCode.NON_VALID_TOKEN);
+        }
     }
 
 }

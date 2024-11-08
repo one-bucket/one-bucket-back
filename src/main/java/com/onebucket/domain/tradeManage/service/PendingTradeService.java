@@ -27,7 +27,7 @@ public interface PendingTradeService {
 
     void update(TradeDto.Update dto);
 
-    Long addMember(TradeKeyDto.UserTrade dto);
+    TradeDto.ResponseJoinTrade addMember(TradeKeyDto.UserTrade dto);
 
     void quitMember(TradeKeyDto.UserTrade dto);
 

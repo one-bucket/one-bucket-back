@@ -37,6 +37,8 @@ public class ChatRoom {
 
     private String name;
 
+    private Long ownerId;
+
     @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default // 기본값 설정
     private List<ChatRoomMember> members = new ArrayList<>();
@@ -50,14 +52,7 @@ public class ChatRoom {
         this.members.add(chatRoomMember);
     }
 
-    public void quitMember(Member member) {
-        ChatRoomMember chatRoomMember = ChatRoomMember.builder()
-                .member(member)
-                .chatRoom(this)
-                .build();
 
-        this.members.remove(chatRoomMember);
-    }
 
 
     @OneToOne(mappedBy = "chatRoom")
