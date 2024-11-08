@@ -19,9 +19,15 @@ public class Test11Controller {
     private final SecurityUtils securityUtils;
     private final MinioRepository minioRepository;
 
-    @GetMapping("/test/hello")
-    public String hello() {
-        return "hello";
+    @GetMapping("/hello")
+    public void hello() {
+        String username = securityUtils.getCurrentUsername();
+        Long userId = securityUtils.getUserId();
+        Long univId = securityUtils.getUnivId();
+
+        System.out.println("username is " + username);
+        System.out.println("userId is " + userId);
+        System.out.println("univId is " + univId);
     }
 
     @GetMapping("/member-info")

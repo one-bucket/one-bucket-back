@@ -43,8 +43,7 @@ public class BoardController {
      */
     @GetMapping("/list")
     public ResponseEntity<List<ResponseBoardIdAndNameDto>> getBoardList() {
-        String username = securityUtils.getCurrentUsername();
-        Long univId = memberService.usernameToUniversity(username).getId();
+        Long univId = securityUtils.getUnivId();
 
         List<BoardIdAndNameDto> boardLists = boardService.getBoardList(univId);
 

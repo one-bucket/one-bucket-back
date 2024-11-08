@@ -3,6 +3,7 @@ package com.onebucket.domain.memberManage.service;
 import com.onebucket.global.auth.jwtAuth.component.JwtProvider;
 import com.onebucket.global.auth.jwtAuth.component.JwtValidator;
 import com.onebucket.global.auth.jwtAuth.domain.JwtToken;
+import com.onebucket.global.auth.springSecurity.CustomAuthentication;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import org.junit.jupiter.api.Assertions;
@@ -113,7 +114,7 @@ class SignInServiceTest {
     @DisplayName("getAuthenticationAndValidHeader - success")
     void testGetAuthenticationAndValidHeader_success() {
         String headerString = "Bearer access-token";
-        Authentication authentication = mock(Authentication.class);
+        CustomAuthentication authentication = mock(CustomAuthentication.class);
         when(jwtValidator.getAuthentication("access-token")).thenReturn(authentication);
 
 
