@@ -40,16 +40,23 @@ public class MarketPostDto {
     public static class Create extends PostDto.Create {
         private Long tradeId;
 
-        public static Create of(RequestCreate dto, String username, Long univId, Long tradeId) {
+        public static Create of(RequestCreate dto, Long userId, Long univId, Long tradeId) {
             return Create.builder()
                     .boardId(dto.getBoardId())
                     .text(dto.getText())
                     .title(dto.getTitle())
-                    .username(username)
+                    .userId(userId)
                     .univId(univId)
                     .tradeId(tradeId)
                     .build();
         }
+    }
+
+    @Getter
+    @SuperBuilder
+    @NoArgsConstructor
+    public static class Update extends PostDto.Update {
+
     }
 
     @Getter

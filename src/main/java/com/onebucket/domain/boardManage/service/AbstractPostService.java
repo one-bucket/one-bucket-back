@@ -35,6 +35,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -78,6 +79,7 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
 
 
     @Override
+    @Transactional
     public <D extends PostDto.Create> Long createPost(D dto) {
 
         T post = convertCreatePostDtoToPost(dto);
@@ -85,7 +87,20 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
 
         return savedPost.getId();
     }
+
     @Override
+    @Transactional
+    public <D extends PostDto.Update> Long updatePost(D dto) {
+        T post = findPost(dto.getPostId());
+        post.setTitle(dto.getTitle());
+        post.setText(dto.getText());
+        post.setModified(true);
+        post.setModifiedDate(LocalDateTime.now());
+
+        return repository.save(post).getId();
+    }
+    @Override
+    @Transactional
     public void deletePost(ValueDto.FindPost dto) {
         T findPost = findPost(dto.getPostId());
         Member author = findPost.getAuthor();
@@ -360,6 +375,5 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
     protected abstract <D extends PostDto.Create> T convertCreatePostDtoToPost(D dto);
     protected abstract PostDto.Thumbnail convertPostToThumbnailDto(T post);
     protected abstract PostDto.Info convertPostToPostInfoDto(T post, List<GetCommentDto> comments);
-
 
 }

@@ -1,6 +1,7 @@
 package com.onebucket.domain.boardManage.dto.parents;
 
 import com.onebucket.domain.boardManage.dto.internal.comment.GetCommentDto;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -49,8 +50,16 @@ public class PostDto {
     @Getter
     @SuperBuilder
     public static class Create extends BasePost {
-        private String username;
+        private Long userId;
         private Long univId;
+    }
+
+    @Getter
+    @SuperBuilder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class Update extends BasePost {
+        private Long postId;
     }
 
     @Getter

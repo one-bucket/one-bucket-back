@@ -59,7 +59,7 @@ public class PostServiceImpl extends AbstractPostService<Post, PostRepository> i
 
     @Override
     protected Post convertCreatePostDtoToPost(PostDto.Create dto) {
-        Member member = findMember(dto.getUsername());
+        Member member = findMember(dto.getUserId());
         Board board = findBoard(dto.getBoardId());
 
         return Post.builder()

@@ -72,7 +72,7 @@ public class PendingTradeServiceImpl implements PendingTradeService {
     }
     @Override
     public void update(TradeDto.Update dto) {
-        PendingTrade pendingTrade = findPendingTrade(dto.getId());
+        PendingTrade pendingTrade = findPendingTrade(dto.getTradeId());
         TradeTag tag = findTag(dto.getTag());
 
         pendingTrade.setItem(dto.getItem());
@@ -116,6 +116,9 @@ public class PendingTradeServiceImpl implements PendingTradeService {
 
         //chatRoom에 멤버 추가
         ChatRoom chatRoom = pendingTrade.getChatRoom();
+        if(chatRoom == null) {
+            throw new ChatRoomException(ChatErrorCode.NOT_EXIST_ROOM);
+        }
         chatRoom.addMember(member);
 
         pendingTradeRepository.save(pendingTrade);

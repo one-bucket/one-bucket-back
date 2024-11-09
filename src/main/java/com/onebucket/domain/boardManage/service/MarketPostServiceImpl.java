@@ -11,6 +11,8 @@ import com.onebucket.domain.memberManage.domain.Member;
 
 import com.onebucket.domain.tradeManage.entity.PendingTrade;
 import com.onebucket.domain.tradeManage.dao.PendingTradeRepository;
+import com.onebucket.global.exceptionManage.customException.TradeManageException.TradeException;
+import com.onebucket.global.exceptionManage.errorCode.TradeErrorCode;
 import com.onebucket.global.minio.MinioRepository;
 import com.onebucket.global.redis.RedisRepository;
 import com.onebucket.global.utils.SecurityUtils;
@@ -64,7 +66,7 @@ public class MarketPostServiceImpl extends AbstractPostService<MarketPost, Marke
 
     @Override
     protected <D extends PostDto.Create> MarketPost convertCreatePostDtoToPost(D dto) {
-        Member member = findMember(dto.getUsername());
+        Member member = findMember(dto.getUserId());
         Board board = findBoard(dto.getBoardId());
 
         MarketPostDto.Create marketDto = (MarketPostDto.Create) dto;
