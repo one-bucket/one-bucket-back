@@ -3,7 +3,9 @@ package com.onebucket.global.minio;
 import io.minio.*;
 import io.minio.errors.MinioException;
 import io.minio.http.Method;
+import io.minio.messages.Item;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.web.embedded.TomcatVirtualThreadsWebServerFactoryCustomizer;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -42,7 +44,7 @@ public class MinioRepository {
 
      private final MinioClient minioClient;
 
-     public String uploadFile(MultipartFile multipartFile, MinioSaveInfoDto dto) {
+    public String uploadFile(MultipartFile multipartFile, MinioInfoDto dto) {
          try {
              boolean isExist = minioClient.bucketExists(BucketExistsArgs.builder()
                      .bucket(dto.getBucketName()).build());
@@ -76,7 +78,7 @@ public class MinioRepository {
          }
      }
 
-    public String uploadFile(String base64Image, MinioSaveInfoDto dto) {
+    public String uploadFile(String base64Image, MinioInfoDto dto) {
         try {
             // 버킷이 존재하는지 확인하고 없으면 생성
             boolean isExist = minioClient.bucketExists(BucketExistsArgs.builder()
@@ -112,7 +114,7 @@ public class MinioRepository {
         }
     }
 
-     public byte[] getFile(MinioSaveInfoDto dto) {
+     public byte[] getFile(MinioInfoDto dto) {
          try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
              try (InputStream stream = minioClient.getObject(
                      GetObjectArgs.builder()
@@ -133,7 +135,7 @@ public class MinioRepository {
          }
      }
 
-     public void deleteFile(MinioSaveInfoDto dto) {
+     public void deleteFile(MinioInfoDto dto) {
          try{
              minioClient.removeObject(
                      RemoveObjectArgs.builder()
@@ -148,7 +150,32 @@ public class MinioRepository {
          }
      }
 
-     public String getUrl(MinioSaveInfoDto dto) {
+     public void deleteDirectory(MinioInfoDto dto) {
+         try {
+             Iterable<Result<Item>> objects = minioClient.listObjects(
+                     ListObjectsArgs.builder()
+                             .bucket(dto.getBucketName())
+                             .prefix(dto.getFileName())
+                             .recursive(true)
+                             .build()
+             );
+             for(Result<Item> result : objects) {
+                 Item item = result.get();
+                 minioClient.removeObject(
+                         RemoveObjectArgs.builder()
+                                 .bucket(dto.getBucketName())
+                                 .object(item.objectName())
+                                 .build()
+                 );
+             }
+         } catch (MinioException | IOException e) {
+             throw new RuntimeException("Error Occurred while deleting directory");
+         } catch (Exception e) {
+             throw new RuntimeException("Unknown exception in MinioRepository.class");
+         }
+     }
+
+     public String getUrl(MinioInfoDto dto) {
          try {
              return minioClient.getPresignedObjectUrl(
                      GetPresignedObjectUrlArgs.builder()

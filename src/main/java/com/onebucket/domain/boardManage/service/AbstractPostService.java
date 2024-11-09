@@ -22,7 +22,7 @@ import com.onebucket.global.exceptionManage.customException.memberManageExceptoi
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.BoardErrorCode;
 import com.onebucket.global.minio.MinioRepository;
-import com.onebucket.global.minio.MinioSaveInfoDto;
+import com.onebucket.global.minio.MinioInfoDto;
 import com.onebucket.global.redis.RedisRepository;
 import com.onebucket.global.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
@@ -76,6 +76,10 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
     @Value("${board.views.expireHour}")
     private long EXPIRE_HOUR;
 
+    @NestedConfigurationProperty
+    @Value("${minio.bucketName}")
+    private String BUCKET_NAME;
+
 
 
     @Override
@@ -111,11 +115,18 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
 
         if(authorId.equals(dto.getUserId())) {
             repository.delete(findPost);
+
+            initPostImage(dto.getPostId());
+
         } else {
             throw new AuthenticationException(AuthenticationErrorCode.UNAUTHORIZED_ACCESS,
                     "you are not allowed to edit this post");
         }
+    }
 
+    @Override
+    public void deleteImageOnPost(Long postId) {
+        initPostImage(postId);
     }
     @Override
     @Transactional
@@ -320,15 +331,15 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
     @Transactional
     public void saveImage(MultipartFile multipartFile, SaveImageDto dto) {
 
-        String url = "/post/" + dto.getPostId() + "/image/" + dto.getImageName();
-        MinioSaveInfoDto minioSaveInfoDto = MinioSaveInfoDto.builder()
-                .bucketName("one-bucket")
+        String url = "post/" + dto.getPostId() + "/image/" + dto.getImageName();
+        MinioInfoDto minioInfoDto = MinioInfoDto.builder()
+                .bucketName(BUCKET_NAME)
                 .fileName(url)
                 .fileExtension(dto.getFileExtension())
                 .build();
 
         try {
-            minioRepository.uploadFile(multipartFile,minioSaveInfoDto);
+            minioRepository.uploadFile(multipartFile, minioInfoDto);
             T post = repository.findById(dto.getPostId()).orElseThrow();
             post.addImage(url + "." + dto.getFileExtension());
             repository.save(post);
@@ -338,6 +349,13 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
 
     }
 
+    private void initPostImage(Long postId) {
+        MinioInfoDto deleteDto = MinioInfoDto.builder()
+                .bucketName(BUCKET_NAME)
+                .fileName("post/"+ postId + "/image/")
+                .build();
+        minioRepository.deleteDirectory(deleteDto);
+    }
 
     protected Board findBoard(Long id) {
         return boardRepository.findById(id).orElseThrow(() ->

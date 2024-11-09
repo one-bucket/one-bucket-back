@@ -28,7 +28,7 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class MinioSaveInfoDto {
+public class MinioInfoDto {
 
     private String bucketName;
     private String fileName;

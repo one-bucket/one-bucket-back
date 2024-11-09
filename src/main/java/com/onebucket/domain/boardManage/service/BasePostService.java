@@ -52,6 +52,8 @@ public interface BasePostService {
      */
     void deletePost(ValueDto.FindPost dto);
 
+    void deleteImageOnPost(Long postId);
+
     /**
      * 게시글에 댓글을 추가하는 로직. 혹은 기존에 존재하는 댓글에 대하여 대댓글을 추가하는 로직을 포함한다.
      * 기본적으로 댓글과 대댓글은 허용되지만, 그 이상 즉 대대댓글을 허용하지 않는다.
