@@ -4,6 +4,7 @@ import com.onebucket.domain.boardManage.dto.parents.MarketPostDto;
 import com.onebucket.domain.boardManage.dto.parents.PostDto;
 import com.onebucket.domain.boardManage.dto.parents.ValueDto;
 import com.onebucket.domain.boardManage.dto.request.RequestCreateMarketPostDto;
+import com.onebucket.domain.boardManage.dto.request.RequestUpdateMarketPostDto;
 import com.onebucket.domain.boardManage.service.BoardService;
 import com.onebucket.domain.boardManage.service.MarketPostService;
 import com.onebucket.domain.chatManager.dto.ChatRoomDto;
@@ -15,6 +16,7 @@ import com.onebucket.domain.tradeManage.service.PendingTradeService;
 import com.onebucket.global.exceptionManage.customException.boardManageException.UserBoardException;
 import com.onebucket.global.exceptionManage.errorCode.BoardErrorCode;
 import com.onebucket.global.utils.SecurityUtils;
+import com.onebucket.global.utils.SuccessResponseWithIdDto;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -67,10 +69,8 @@ public class MarketPostController extends AbstractPostController<MarketPostServi
         if(!type.equals("marketPost")) {
             throw new UserBoardException(BoardErrorCode.MISMATCH_POST_AND_BOARD);
         }
-        String username = securityUtils.getCurrentUsername();
-        Long ownerId = memberService.usernameToId(username);
-
-        Long univId = securityUtils.getUnivId(username);
+        Long ownerId = securityUtils.getUserId();
+        Long univId = securityUtils.getUnivId();
 
 
         //PendingTrade 저장
@@ -80,7 +80,7 @@ public class MarketPostController extends AbstractPostController<MarketPostServi
 
         //MarketPost 저장
         MarketPostDto.Create internalMarketPostCreateDto = MarketPostDto.Create
-                .of(marketPostCreateDto, username, univId, tradeId);
+                .of(marketPostCreateDto, ownerId, univId, tradeId);
 
         Long savedId = postService.createPost(internalMarketPostCreateDto);
 
@@ -106,6 +106,22 @@ public class MarketPostController extends AbstractPostController<MarketPostServi
                 .build();
 
         return ResponseEntity.ok(response);
+    }
+
+    @PreAuthorize("@authorizationService.isUserCanAccessPost(#dto.marketPostUpdateDto.postId)")
+    @PostMapping("/update")
+    public ResponseEntity<SuccessResponseWithIdDto> updatePost(@RequestBody @Valid RequestUpdateMarketPostDto dto) {
+
+        MarketPostDto.Update marketPostUpdateDto = dto.getMarketPostUpdateDto();
+        TradeDto.Update tradeUpdateDto = dto.getTradeUpdateDto();
+
+        //PendingTrade update
+        pendingTradeService.update(tradeUpdateDto);
+
+        //MarketPost update
+        postService.updatePost(marketPostUpdateDto);
+
+        return ResponseEntity.ok(new SuccessResponseWithIdDto("success update post", marketPostUpdateDto.getPostId()));
     }
 
     @GetMapping("/list/joins")

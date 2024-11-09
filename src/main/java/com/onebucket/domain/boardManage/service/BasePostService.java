@@ -35,6 +35,8 @@ public interface BasePostService {
      */
     <D extends PostDto.Create> Long createPost(D dto);
 
+    <D extends PostDto.Update> Long updatePost(D dto);
+
     /**
      * 기존에 존재하는 post를 삭제한다. {@link ValueDto.FindPost}는 {@code userId}와 {@code postId}
      * 가 존재하는데, postId를 통해 특정 post를 불러와 매개변수로 받은 userId와 비교한다.

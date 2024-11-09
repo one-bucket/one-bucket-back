@@ -139,8 +139,9 @@ public class TradeDto {
     @SuperBuilder
     @NoArgsConstructor
     public static class Update extends BaseTrade {
-        private Long id;
+        private Long tradeId;
     }
+
 
     @Builder
     @Getter

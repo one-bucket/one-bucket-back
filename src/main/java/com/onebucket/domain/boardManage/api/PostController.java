@@ -1,10 +1,13 @@
 package com.onebucket.domain.boardManage.api;
 
+import com.onebucket.domain.boardManage.dto.parents.MarketPostDto;
 import com.onebucket.domain.boardManage.dto.parents.PostDto;
 import com.onebucket.domain.boardManage.dto.parents.ValueDto;
+import com.onebucket.domain.boardManage.dto.request.RequestUpdateMarketPostDto;
 import com.onebucket.domain.boardManage.service.BoardService;
 import com.onebucket.domain.boardManage.service.PostService;
 import com.onebucket.domain.memberManage.service.MemberService;
+import com.onebucket.domain.tradeManage.dto.TradeDto;
 import com.onebucket.global.exceptionManage.customException.boardManageException.UserBoardException;
 import com.onebucket.global.exceptionManage.errorCode.BoardErrorCode;
 import com.onebucket.global.utils.SecurityUtils;
@@ -66,19 +69,29 @@ public class PostController extends AbstractPostController<PostService>{
         if(!type.equals("post")) {
             throw new UserBoardException(BoardErrorCode.MISMATCH_POST_AND_BOARD);
         }
-        String username = securityUtils.getCurrentUsername();
-        Long univId = securityUtils.getUnivId(username);
+        Long userId = securityUtils.getUserId();
+        Long univId = securityUtils.getUnivId();
 
         PostDto.Create createPostDto = PostDto.Create.builder()
                 .boardId(dto.getBoardId())
                 .text(dto.getText())
                 .title(dto.getTitle())
-                .username(username)
+                .userId(userId)
                 .univId(univId)
                 .build();
 
         Long savedId = postService.createPost(createPostDto);
         return ResponseEntity.ok(new SuccessResponseWithIdDto("success create post", savedId));
+    }
+
+    @PreAuthorize("@authorizationService.isUserCanAccessPost(#dto.postId)")
+    @PostMapping("/update")
+    public ResponseEntity<SuccessResponseWithIdDto> updatePost(@RequestBody @Valid PostDto.Update dto) {
+
+        //MarketPost update
+        postService.updatePost(dto);
+
+        return ResponseEntity.ok(new SuccessResponseWithIdDto("success update post", dto.getPostId()));
     }
 
     @Override
