@@ -17,6 +17,7 @@ import com.onebucket.global.exceptionManage.customException.boardManageException
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.BoardErrorCode;
+import com.onebucket.global.minio.MinioRepository;
 import com.onebucket.global.redis.RedisRepository;
 import com.onebucket.global.utils.SecurityUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,7 +35,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import javax.swing.text.html.Option;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -88,6 +88,8 @@ class PostServiceTest {
     private Board mockBoard;
     @Mock
     private BoardType mockBoardType;
+    @Mock
+    private MinioRepository minioRepository;
 
     @InjectMocks
     private PostServiceImpl postService;
@@ -106,17 +108,17 @@ class PostServiceTest {
     @DisplayName("createPost - success")
     void testCreatePost_success() {
 
-        String username = "username";
+        Long userId = 1L;
         Long univId = 1L;
         Long boardId = 1L;
         PostDto.Create createDto = PostDto.Create.builder()
                 .boardId(boardId)
                 .univId(univId)
-                .username(username)
+                .userId(userId)
                 .title("title")
                 .text("text")
                 .build();
-        when(memberRepository.findByUsername(username)).thenReturn(Optional.of(mockMember));
+        when(memberRepository.findById(userId)).thenReturn(Optional.of(mockMember));
         when(boardRepository.findById(boardId)).thenReturn(Optional.of(mockBoard));
 
         when(postRepository.save(any(Post.class))).thenReturn(mockPost);
@@ -132,17 +134,17 @@ class PostServiceTest {
     @Test
     @DisplayName("createPost - fail / unknown board")
     void testCreateBoard_fail_unknownBoard() {
-        String username = "username";
+        Long userId = 1L;
         Long univId = 1L;
         Long boardId = 1L;
         PostDto.Create createDto = PostDto.Create.builder()
                 .boardId(boardId)
                 .univId(univId)
-                .username(username)
+                .userId(userId)
                 .title("title")
                 .text("text")
                 .build();
-        when(memberRepository.findByUsername(username)).thenReturn(Optional.of(mockMember));
+        when(memberRepository.findById(userId)).thenReturn(Optional.of(mockMember));
         when(boardRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> postService.createPost(createDto))

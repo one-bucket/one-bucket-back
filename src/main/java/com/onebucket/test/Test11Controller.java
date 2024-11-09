@@ -2,7 +2,7 @@ package com.onebucket.test;
 
 
 import com.onebucket.global.minio.MinioRepository;
-import com.onebucket.global.minio.MinioSaveInfoDto;
+import com.onebucket.global.minio.MinioInfoDto;
 import com.onebucket.global.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +37,7 @@ public class Test11Controller {
 
     @PostMapping("/test/upload")
     public ResponseEntity<String> uploadFile(@RequestParam("file")MultipartFile file) {
-        MinioSaveInfoDto dto = MinioSaveInfoDto.builder()
+        MinioInfoDto dto = MinioInfoDto.builder()
                 .fileName("testFile")
                 .fileExtension("png")
                 .bucketName("test-bucket")

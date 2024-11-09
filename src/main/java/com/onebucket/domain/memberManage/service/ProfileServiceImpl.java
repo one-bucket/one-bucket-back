@@ -11,7 +11,7 @@ import com.onebucket.global.exceptionManage.customException.memberManageExceptoi
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.CommonErrorCode;
 import com.onebucket.global.minio.MinioRepository;
-import com.onebucket.global.minio.MinioSaveInfoDto;
+import com.onebucket.global.minio.MinioInfoDto;
 import com.onebucket.global.utils.EntityUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -111,7 +111,7 @@ public class ProfileServiceImpl implements ProfileService {
         } else {
             fileName = "/profile/" + id + "/profile_image";
         }
-        MinioSaveInfoDto dto = MinioSaveInfoDto.builder()
+        MinioInfoDto dto = MinioInfoDto.builder()
                 .bucketName(bucketName)
                 .fileName(fileName)
                 .fileExtension("png")
@@ -141,7 +141,7 @@ public class ProfileServiceImpl implements ProfileService {
     public void updateImage(Long id, MultipartFile file) {
         Profile profile = getprofile(id);
 
-        MinioSaveInfoDto minioDto = MinioSaveInfoDto.builder()
+        MinioInfoDto minioDto = MinioInfoDto.builder()
                 .bucketName(bucketName)
                 .fileName("profile/" + id + "/" + "profile_image")
                 .fileExtension("png")
@@ -186,7 +186,7 @@ public class ProfileServiceImpl implements ProfileService {
     @Override
     public String getImageUrl(Long id) {
 
-        MinioSaveInfoDto minioDto = MinioSaveInfoDto.builder()
+        MinioInfoDto minioDto = MinioInfoDto.builder()
                 .bucketName(bucketName)
                 .fileName("profile/" + id + "/" + "profile_image")
                 .fileExtension("png")

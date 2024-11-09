@@ -7,7 +7,7 @@ import com.onebucket.domain.chatManager.mongo.ChatMessage;
 import com.onebucket.global.exceptionManage.customException.chatManageException.Exceptions.ChatRoomException;
 import com.onebucket.global.exceptionManage.errorCode.ChatErrorCode;
 import com.onebucket.global.minio.MinioRepository;
-import com.onebucket.global.minio.MinioSaveInfoDto;
+import com.onebucket.global.minio.MinioInfoDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -49,14 +49,14 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public String saveImage(String base64Image, ChatRoomDto.SaveImage dto) {
         String url = "/chat/" + dto.getRoomId() + "/image/" + dto.getName();
-        MinioSaveInfoDto minioSaveInfoDto = MinioSaveInfoDto.builder()
+        MinioInfoDto minioInfoDto = MinioInfoDto.builder()
                 .fileExtension(dto.getFormat())
                 .fileName(url)
                 .bucketName("one-bucket")
                 .build();
 
         try {
-            minioRepository.uploadFile(base64Image, minioSaveInfoDto);
+            minioRepository.uploadFile(base64Image, minioInfoDto);
             return url;
         } catch (Exception e) {
             throw new ChatRoomException(ChatErrorCode.CHAT_IMAGE_ERROR);

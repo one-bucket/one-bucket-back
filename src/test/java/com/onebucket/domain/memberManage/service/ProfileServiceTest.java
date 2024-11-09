@@ -5,12 +5,11 @@ import com.onebucket.domain.memberManage.dao.ProfileRepository;
 import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.domain.memberManage.domain.Profile;
 import com.onebucket.domain.memberManage.dto.ReadProfileDto;
-import com.onebucket.domain.memberManage.dto.RequestSetEmailDto.RequestSetEmailDto;
 import com.onebucket.domain.memberManage.dto.UpdateProfileDto;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import com.onebucket.global.minio.MinioRepository;
-import com.onebucket.global.minio.MinioSaveInfoDto;
+import com.onebucket.global.minio.MinioInfoDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -147,14 +146,14 @@ class ProfileServiceTest {
         when(mockProfile.isBasicImage()).thenReturn(true);
 
         byte[] expectedBytes = new byte[]{1, 2, 3};
-        when(minioRepository.getFile(any(MinioSaveInfoDto.class))).thenReturn(expectedBytes);
+        when(minioRepository.getFile(any(MinioInfoDto.class))).thenReturn(expectedBytes);
 
         byte[] result = profileService.readProfileImage(id);
 
         //then
-        ArgumentCaptor<MinioSaveInfoDto> captor = ArgumentCaptor.forClass(MinioSaveInfoDto.class);
+        ArgumentCaptor<MinioInfoDto> captor = ArgumentCaptor.forClass(MinioInfoDto.class);
         verify(minioRepository).getFile(captor.capture());
-        MinioSaveInfoDto captureDto = captor.getValue();
+        MinioInfoDto captureDto = captor.getValue();
 
         assertThat(captureDto).isNotNull();
         assertThat(captureDto.getFileName()).isEqualTo("/profile/basic_profile_image");
@@ -170,14 +169,14 @@ class ProfileServiceTest {
         when(mockProfile.isBasicImage()).thenReturn(false);
 
         byte[] expectedBytes = new byte[]{1, 2, 3};
-        when(minioRepository.getFile(any(MinioSaveInfoDto.class))).thenReturn(expectedBytes);
+        when(minioRepository.getFile(any(MinioInfoDto.class))).thenReturn(expectedBytes);
 
         byte[] result = profileService.readProfileImage(id);
 
         //then
-        ArgumentCaptor<MinioSaveInfoDto> captor = ArgumentCaptor.forClass(MinioSaveInfoDto.class);
+        ArgumentCaptor<MinioInfoDto> captor = ArgumentCaptor.forClass(MinioInfoDto.class);
         verify(minioRepository).getFile(captor.capture());
-        MinioSaveInfoDto captureDto = captor.getValue();
+        MinioInfoDto captureDto = captor.getValue();
 
         assertThat(captureDto).isNotNull();
         assertThat(captureDto.getFileName()).isEqualTo("/profile/" + id + "/profile_image");
@@ -191,7 +190,7 @@ class ProfileServiceTest {
         Long id = 1L;
         when(profileRepository.findById(id)).thenReturn(Optional.of(mockProfile));
         when(mockProfile.isBasicImage()).thenReturn(false);
-        when(minioRepository.getFile(any(MinioSaveInfoDto.class))).thenThrow(new RuntimeException("error occur while fetching file"));
+        when(minioRepository.getFile(any(MinioInfoDto.class))).thenThrow(new RuntimeException("error occur while fetching file"));
 
         assertThatThrownBy(() -> profileService.readProfileImage(id))
                 .isInstanceOf(AuthenticationException.class)
@@ -322,7 +321,7 @@ class ProfileServiceTest {
 
         when(profileRepository.findById(id)).thenReturn(Optional.of(mockProfile));
         doThrow(new RuntimeException("error occur : message")).when(minioRepository)
-                .uploadFile(any(MultipartFile.class), any(MinioSaveInfoDto.class));
+                .uploadFile(any(MultipartFile.class), any(MinioInfoDto.class));
 
         assertThatThrownBy(() -> profileService.updateImage(id, mockFile))
                 .isInstanceOf(AuthenticationException.class)

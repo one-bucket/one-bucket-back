@@ -133,6 +133,53 @@ public abstract class AbstractPostController<S extends BasePostService> {
         return ResponseEntity.ok(new SuccessResponseWithIdDto("success save images", index));
     }
 
+    @PostMapping("/update/image/{type}/{postId}")
+    @PreAuthorize("@authorizationService.isUserCanAccessPost(#postId)")
+    public ResponseEntity<?> updateImage(
+            @PathVariable String type,
+            @PathVariable Long postId,
+            @RequestParam(value = "file", required = false) List<MultipartFile> files
+    ) {
+        Long index = 0L;
+        if(type.equals("add")) {
+            if(files == null || files.isEmpty()) {
+                return ResponseEntity.badRequest().body("파일이 필요합니다.");
+            }
+            index += addImageData(postId, files);
+        } else if(type.equals("delete")) {
+            initImageData(postId);
+        } else if(type.equals("update")) {
+            if(files == null || files.isEmpty()) {
+                return ResponseEntity.badRequest().body("파일이 필요합니다.");
+            }
+            initImageData(postId);
+            index = addImageData(postId, files);
+        }
+
+        return ResponseEntity.ok(new SuccessResponseWithIdDto("success save images", index));
+    }
+
+    private void initImageData(Long postId) {
+        postService.deleteImageOnPost(postId);
+    }
+
+    private Long addImageData(Long postId, List<MultipartFile> files) {
+        Long index = 0L;
+        for(MultipartFile file : files) {
+            String originFileName = file.getOriginalFilename();
+            String fileName = getFileNameWithoutExtension(originFileName);
+            String extension = getFileExtension(originFileName);
+            SaveImageDto dto = SaveImageDto.builder()
+                    .postId(postId)
+                    .imageName(fileName)
+                    .fileExtension(extension)
+                    .build();
+            postService.saveImage(file, dto);
+            index++;
+        }
+
+        return index;
+    }
 
     @GetMapping("/search")
     public ResponseEntity<Page<? extends PostDto.Thumbnail>> getPostBySearch(
