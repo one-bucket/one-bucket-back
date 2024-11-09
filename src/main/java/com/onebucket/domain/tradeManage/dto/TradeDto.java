@@ -87,7 +87,7 @@ public class TradeDto {
         private LocalDateTime startTradeAt;
 
         public static Info of(PendingTrade entity) {
-            List<String> nicknames = entity.getMembers().stream().map(Member::getNickname).toList();
+            List<String> nicknames = entity.getJoiners().stream().map(Member::getNickname).toList();
 
             return Info.builder()
                     .item(entity.getItem())

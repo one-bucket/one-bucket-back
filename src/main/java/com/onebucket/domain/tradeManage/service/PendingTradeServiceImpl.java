@@ -94,15 +94,15 @@ public class PendingTradeServiceImpl implements PendingTradeService {
         Member member = findMember(userId);
         PendingTrade pendingTrade = findPendingTrade(tradeId);
 
-        List<Member> members = pendingTrade.getMembers();
+        List<Member> joiners = pendingTrade.getJoiners();
         Long wanted = pendingTrade.getWanted();
         LocalDateTime dueDate = pendingTrade.getDueDate();
         Member owner = pendingTrade.getOwner();
 
-        if(members.size() >= wanted) {
+        if(joiners.size() >= wanted) {
             throw new PendingTradeException(TradeErrorCode.FULL_TRADE);
         }
-        if(member == owner || members.contains(member)) {
+        if(member == owner || joiners.contains(member)) {
             throw new PendingTradeException(TradeErrorCode.ALREADY_JOIN);
         }
         if(pendingTrade.isFin()) {
@@ -118,7 +118,7 @@ public class PendingTradeServiceImpl implements PendingTradeService {
         ChatRoom chatRoom = pendingTrade.getChatRoom();
         chatRoom.addMember(member);
 
-        Long savedTradeId = pendingTradeRepository.save(pendingTrade).getId();
+        pendingTradeRepository.save(pendingTrade);
 
         return TradeDto.ResponseJoinTrade.builder()
                 .tradeId(tradeId)
@@ -165,7 +165,7 @@ public class PendingTradeServiceImpl implements PendingTradeService {
     public Long terminate(TradeKeyDto.FindTrade dto) {
         PendingTrade pendingTrade = findPendingTrade(dto.getTradeId());
 
-        List<Long> memberIds = pendingTrade.getMembers().stream().map(Member::getId).toList();
+        List<Long> memberIds = pendingTrade.getJoiners().stream().map(Member::getId).toList();
 
         CloseTrade closeTrade = CloseTrade.builder()
                 .item(pendingTrade.getItem())

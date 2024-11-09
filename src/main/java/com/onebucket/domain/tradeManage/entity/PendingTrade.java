@@ -46,15 +46,15 @@ public class PendingTrade {
             inverseJoinColumns = @JoinColumn(name = "member_id")
     )
     @Builder.Default
-    private List<Member> members = new ArrayList<>();
+    private List<Member> joiners = new ArrayList<>();
 
     public void addMember(Member member) {
-        if (!members.contains(member)) {
-            members.add(member);
+        if (!joiners.contains(member)) {
+            joiners.add(member);
         }
     }
     public void deleteMember(Member member) {
-        members.remove(member);
+        joiners.remove(member);
     }
 
     private String item;

@@ -26,7 +26,7 @@ import java.util.List;
 public interface PendingTradeRepository extends JpaRepository<PendingTrade, Long> {
 
     @Query("SELECT p.id FROM PendingTrade p " +
-           "JOIN p.members m " +
+           "JOIN p.joiners m " +
            "WHERE m.id = :userId AND p.owner.id <> :userId")
     List<Long> findPendingTradeIdsWhereUserIsParticipant(Long userId);
 }
