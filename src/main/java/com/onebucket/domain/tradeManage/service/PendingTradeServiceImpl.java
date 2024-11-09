@@ -97,10 +97,12 @@ public class PendingTradeServiceImpl implements PendingTradeService {
         List<Member> members = pendingTrade.getMembers();
         Long wanted = pendingTrade.getWanted();
         LocalDateTime dueDate = pendingTrade.getDueDate();
+        Member owner = pendingTrade.getOwner();
+
         if(members.size() >= wanted) {
             throw new PendingTradeException(TradeErrorCode.FULL_TRADE);
         }
-        if(members.contains(member)) {
+        if(member == owner || members.contains(member)) {
             throw new PendingTradeException(TradeErrorCode.ALREADY_JOIN);
         }
         if(pendingTrade.isFin()) {
