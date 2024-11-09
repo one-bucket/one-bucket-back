@@ -82,22 +82,4 @@ public class ValueDto {
         private Integer option;
         private String keyword;
     }
-
-    @Getter
-    @Builder
-    public static class RequestSearchPost {
-        private Long boardId;
-        private Integer option;
-        private String keyword;
-
-        public static SearchPageablePost of(RequestSearchPost dto, Pageable pageable) {
-            return SearchPageablePost.builder()
-                    .boardId(dto.getBoardId())
-                    .option(dto.getOption())
-                    .keyword(dto.getKeyword())
-                    .pageable(pageable)
-                    .build();
-        }
-    }
-
 }

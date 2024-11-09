@@ -58,7 +58,6 @@ public class MemberController {
     private final MailService mailService;
     /**
      * 사용자가 비밀번호를 잊었을 때, 임시 비밀번호를 설정한다.
-     * TODO: 권한 문제
      * @return 200 code
      * @tested yes
      */

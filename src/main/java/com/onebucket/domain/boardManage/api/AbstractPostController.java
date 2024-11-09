@@ -135,9 +135,17 @@ public abstract class AbstractPostController<S extends BasePostService> {
 
 
     @GetMapping("/search")
-    public ResponseEntity<Page<? extends PostDto.Thumbnail>> getPostBySearch(@RequestBody ValueDto.RequestSearchPost dto,
-                                                                             Pageable pageable) {
-        ValueDto.SearchPageablePost searchPageablePost = ValueDto.RequestSearchPost.of(dto, pageable);
+    public ResponseEntity<Page<? extends PostDto.Thumbnail>> getPostBySearch(
+            @RequestParam Long boardId,
+            @RequestParam Integer option,
+            @RequestParam String keyword,
+            Pageable pageable) {
+        ValueDto.SearchPageablePost searchPageablePost = ValueDto.SearchPageablePost.builder()
+                .boardId(boardId)
+                .option(option)
+                .keyword(keyword)
+                .pageable(pageable)
+                .build();
         return getPostsBySearchInternal(searchPageablePost);
     }
 
