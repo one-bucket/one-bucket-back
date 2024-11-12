@@ -44,8 +44,9 @@ public class SSEChatListServiceImpl implements SSEChatListService{
         return emitter;
     }
 
-    @Transactional
-    public void notifyRoomUpdate(ChatDto chat) {
+
+
+    public synchronized void notifyRoomUpdate(ChatDto chat) {
         String roomId = chat.getRoomId();
         String recentMessage = chat.getMessage();
         Date recentMessageTime = chat.getTime();

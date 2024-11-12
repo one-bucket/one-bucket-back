@@ -23,6 +23,9 @@ import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
+import java.util.Date;
+
 /**
  * <br>package name   : com.onebucket.domain.chatManager.controller
  * <br>file name      : ChatController
@@ -64,6 +67,7 @@ public class ChatController {
 
     private void enterUser(ChatDto chat) {
         chat.setMessage(chat.getSender() + "님이 입장하였습니다.");
+        chat.setTime(Date.from(Instant.now()));
 
         chatService.saveMessage(chat);
 
@@ -72,7 +76,7 @@ public class ChatController {
 
     private void sendMessage(ChatDto chat) {
         chat.setMessage(chat.getMessage());
-
+        chat.setTime(Date.from(Instant.now()));
         chatService.saveMessage(chat);
         template.convertAndSend("/sub/chat/room/" + chat.getRoomId(), chat);
         sseChatListService.notifyRoomUpdate(chat);
@@ -81,6 +85,7 @@ public class ChatController {
     private void leaveUser(ChatDto chat) {
         String token = chat.getMessage();
         chat.setMessage(chat.getSender() + "님이 퇴장하였습니다.");
+        chat.setTime(Date.from(Instant.now()));
         chatService.saveMessage(chat);
         template.convertAndSend("/sub/chat/room/" + chat.getRoomId(),chat);
 
@@ -139,5 +144,7 @@ public class ChatController {
             throw new AuthenticationException(AuthenticationErrorCode.NON_VALID_TOKEN);
         }
     }
+
+
 
 }

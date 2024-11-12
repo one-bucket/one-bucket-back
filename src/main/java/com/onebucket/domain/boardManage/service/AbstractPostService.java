@@ -125,8 +125,13 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
     }
 
     @Override
+    @Transactional
     public void deleteImageOnPost(Long postId) {
         initPostImage(postId);
+
+        T post = findPost(postId);
+        post.initImage();
+        repository.save(post);
     }
     @Override
     @Transactional
@@ -355,6 +360,8 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
                 .fileName("post/"+ postId + "/image/")
                 .build();
         minioRepository.deleteDirectory(deleteDto);
+
+
     }
 
     protected Board findBoard(Long id) {
@@ -389,6 +396,7 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
                 .replies(replies)
                 .build();
     }
+
 
     protected abstract <D extends PostDto.Create> T convertCreatePostDtoToPost(D dto);
     protected abstract PostDto.Thumbnail convertPostToThumbnailDto(T post);
