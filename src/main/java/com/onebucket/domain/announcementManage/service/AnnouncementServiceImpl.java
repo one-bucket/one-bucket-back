@@ -5,12 +5,17 @@ import com.onebucket.domain.announcementManage.dto.AnnouncementDto;
 import com.onebucket.domain.announcementManage.entity.Announcement;
 import com.onebucket.global.exceptionManage.customException.CommonException;
 import com.onebucket.global.exceptionManage.errorCode.CommonErrorCode;
+import com.onebucket.global.minio.MinioRepository;
+import com.onebucket.global.minio.MinioSaveInfoDto;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import org.springframework.web.multipart.MultipartFile;
 
 
 /**
@@ -32,6 +37,8 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class AnnouncementServiceImpl  implements AnnouncementService {
     private final AnnouncementRepository announcementRepository;
+    private final MinioRepository minioRepository;
+
     @Override
     public Page<AnnouncementDto.Thumbnail> getAnnouncementList(Pageable pageable) {
         Page<Announcement> pageAnnounce =  announcementRepository.findAll(pageable);
@@ -41,11 +48,18 @@ public class AnnouncementServiceImpl  implements AnnouncementService {
     }
 
     @Override
-    public Long createAnnouncement(AnnouncementDto.Create dto) {
+    public Long createAnnouncement(AnnouncementDto.Create dto, List<MultipartFile> images, List<MultipartFile> files) {
+        List<String> imageUrls = saveImagesInMinio(images);
+        // 현재 pdf 형식이 아니라면 에러가 발생함
+        List<String> fileUrls = saveFilesInMinio(files);
+
         Announcement announcement = Announcement.builder()
                 .title(dto.getTitle())
-                .text(dto.getText())
+                .content(dto.getContent())
                 .createAt(LocalDateTime.now())
+                .images(imageUrls)
+                .files(fileUrls)
+                .noticeType(dto.getNoticeType())
                 .build();
 
         return announcementRepository.save(announcement).getId();
@@ -64,4 +78,35 @@ public class AnnouncementServiceImpl  implements AnnouncementService {
         return AnnouncementDto.Info.of(announcement);
     }
 
+    private List<String> saveImagesInMinio(List<MultipartFile> images) {
+        List<String> urls = new ArrayList<>();
+        saveInMinio(images, urls, "announcement/images");
+        return urls;
+    }
+
+    private List<String> saveFilesInMinio(List<MultipartFile> files) {
+        List<String> urls = new ArrayList<>();
+        saveInMinio(files, urls,"announcement/files");
+        return urls;
+    }
+
+    private void saveInMinio(List<MultipartFile> images, List<String> urls, String path) {
+        if(images == null || images.isEmpty()) {
+            return;
+        }
+        for (MultipartFile image : images) {
+            String originalFilename = image.getOriginalFilename();
+            MinioSaveInfoDto minioSaveInfoDto = MinioSaveInfoDto.builder()
+                            .fileName(path + "/" + originalFilename.split("\\.")[0])
+                                    .fileExtension(originalFilename.split("\\.")[1])
+                                            .bucketName("one-bucket")
+                                                    .build();
+            try {
+                String url = minioRepository.uploadFile(image, minioSaveInfoDto);
+                urls.add(url);
+            } catch (Exception e) {
+                throw new RuntimeException(e.getMessage());
+            }
+        }
+    }
 }

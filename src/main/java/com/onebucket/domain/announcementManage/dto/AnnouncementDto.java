@@ -1,6 +1,7 @@
 package com.onebucket.domain.announcementManage.dto;
 
 import com.onebucket.domain.announcementManage.entity.Announcement;
+import com.onebucket.domain.announcementManage.entity.NoticeType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -35,7 +36,7 @@ public class AnnouncementDto {
         private Long id;
         private String title;
 
-        private String text;
+        private String content;
         private LocalDateTime createAt;
         private LocalDateTime updateAt;
 
@@ -44,15 +45,16 @@ public class AnnouncementDto {
     @SuperBuilder
     @Getter
     @NoArgsConstructor
-    @AllArgsConstructor
     public static class Thumbnail extends Base {
 
+
+        // 썸네일 이므로 제목은 첨가하고 내용은 일부분만 첨가하자
         public static Thumbnail of(Announcement entity) {
 
             return Thumbnail.builder()
                     .id(entity.getId())
                     .title(entity.getTitle())
-                    .text(entity.getText())
+                    .content(entity.getContent())
                     .createAt(entity.getCreateAt())
                     .updateAt(entity.getUpdateAt())
                     .build();
@@ -69,33 +71,30 @@ public class AnnouncementDto {
             return Info.builder()
                     .id(entity.getId())
                     .title(entity.getTitle())
-                    .text(entity.getText())
+                    .content(entity.getContent())
                     .createAt(entity.getCreateAt())
                     .updateAt(entity.getUpdateAt())
-                    .images(entity.getImage())
+                    .images(entity.getImages())
                     .files(entity.getFiles())
                     .build();
         }
     }
 
 
-    @Builder
+    @SuperBuilder
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
     public static class RequestCreate {
         private String title;
-        private String text;
-        private Boolean sendPushMessage;
+        private String content;
+        private NoticeType noticeType;
     }
 
-    @Builder
+    @SuperBuilder
     @Getter
     @NoArgsConstructor
-    @AllArgsConstructor
-    public static class Create {
-        private String title;
-        private String text;
+    public static class Create extends RequestCreate {
     }
 
 

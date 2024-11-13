@@ -1,8 +1,10 @@
 package com.onebucket.domain.announcementManage.service;
 
 import com.onebucket.domain.announcementManage.dto.AnnouncementDto;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
 
 /**
@@ -21,7 +23,7 @@ import org.springframework.data.domain.Pageable;
  */
 public interface AnnouncementService {
     Page<AnnouncementDto.Thumbnail> getAnnouncementList(Pageable pageable);
-    Long createAnnouncement(AnnouncementDto.Create dto);
+    Long createAnnouncement(AnnouncementDto.Create dto, List<MultipartFile> images,List<MultipartFile> files);
     void deleteAnnouncement(Long id);
     AnnouncementDto.Info getAnnouncement(Long id);
 

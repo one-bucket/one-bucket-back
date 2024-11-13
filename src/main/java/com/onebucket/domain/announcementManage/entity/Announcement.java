@@ -40,8 +40,9 @@ public class Announcement {
     private Long id;
 
     private String title;
+
     @Column(columnDefinition = "TEXT")
-    private String text;
+    private String content;
 
     @CreatedDate
     private LocalDateTime createAt;
@@ -49,7 +50,7 @@ public class Announcement {
     private LocalDateTime updateAt;
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "announcement_iamges",
+    @CollectionTable(name = "announcement_images",
             joinColumns = @JoinColumn(name = "announcement_id"))
     @Column(name = "image_url")
     @Builder.Default
