@@ -9,6 +9,9 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 /**
  * <br>package name   : com.onebucket.domain.anouncementManage.entity
@@ -29,16 +32,20 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
+@EntityListeners(AuditingEntityListener.class)
 public class Announcement {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     private String title;
     @Column(columnDefinition = "TEXT")
     private String text;
 
+    @CreatedDate
     private LocalDateTime createAt;
+    @LastModifiedDate
     private LocalDateTime updateAt;
 
     @ElementCollection(fetch = FetchType.EAGER)
@@ -46,7 +53,7 @@ public class Announcement {
             joinColumns = @JoinColumn(name = "announcement_id"))
     @Column(name = "image_url")
     @Builder.Default
-    private List<String> image = new ArrayList<>();
+    private List<String> images = new ArrayList<>();
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "announcement_files",
@@ -55,4 +62,6 @@ public class Announcement {
     @Builder.Default
     private List<String> files = new ArrayList<>();
 
+    @Enumerated(EnumType.STRING)
+    private NoticeType noticeType;
 }
