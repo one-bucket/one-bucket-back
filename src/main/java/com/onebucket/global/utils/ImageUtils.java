@@ -21,14 +21,14 @@ import java.util.List;
  */
 @Component
 public class ImageUtils {
-    List<String> supportImageFormat = new ArrayList<>(List.of(
+    private static List<String> supportImageFormat = new ArrayList<>(List.of(
             "png",
             "jpg",
             "gif"
     ));
 
 
-    public String getFileExtensionFromMessage(String base64) {
+    public static String getFileExtensionFromMessage(String base64) {
         // "data:image/png;base64,z"와 같은 접두사가 포함된 경우 이를 분리
         String[] parts = base64.split(",");
         if (parts.length > 1) {
@@ -45,7 +45,7 @@ public class ImageUtils {
         }
     }
 
-    public String getFileNameFromMessage(String message) {
+    public static String getFileNameFromMessage(String message) {
         int startIndex = message.indexOf("[") + 1;
         int endIndex = message.indexOf("]");
         if (startIndex > 0 && endIndex > startIndex) {
@@ -55,7 +55,7 @@ public class ImageUtils {
         }
     }
 
-    public String getBase64FromMessage(String message) {
+    public static String getBase64FromMessage(String message) {
         // 파일 이름 제거 (예: "[image-name].png")
         int base64StartIdx = message.indexOf("]") + 1;
 

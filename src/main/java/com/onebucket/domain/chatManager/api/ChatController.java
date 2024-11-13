@@ -46,8 +46,6 @@ public class ChatController {
     private final MemberService memberService;
     private final PendingTradeService pendingTradeService;
 
-    private final ImageUtils imageUtils;
-
     @MessageMapping("/message")
     public void message(@Payload ChatDto chat, SimpMessageHeaderAccessor headerAccessor) {
         switch (chat.getType()) {
@@ -105,9 +103,9 @@ public class ChatController {
 
     private void imageMessage(ChatDto chat) {
         String message = chat.getMessage();
-        String imageFormat = imageUtils.getFileExtensionFromMessage(message);
-        String fileName = imageUtils.getFileNameFromMessage(message);
-        String base64Image = imageUtils.getBase64FromMessage(message);
+        String imageFormat = ImageUtils.getFileExtensionFromMessage(message);
+        String fileName = ImageUtils.getFileNameFromMessage(message);
+        String base64Image = ImageUtils.getBase64FromMessage(message);
 
         ChatRoomDto.SaveImage saveImageDto = ChatRoomDto.SaveImage.builder()
                 .format(imageFormat)
