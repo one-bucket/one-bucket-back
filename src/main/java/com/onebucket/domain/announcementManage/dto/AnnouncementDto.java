@@ -46,7 +46,8 @@ public class AnnouncementDto {
     @Getter
     @NoArgsConstructor
     public static class Thumbnail extends Base {
-
+        private static final Integer MAX_LENGTH_THUMBNAIL_CONTENT = 50;
+        private String imageUrl;
 
         // 썸네일 이므로 제목은 첨가하고 내용은 일부분만 첨가하자
         public static Thumbnail of(Announcement entity) {
@@ -54,17 +55,31 @@ public class AnnouncementDto {
             return Thumbnail.builder()
                     .id(entity.getId())
                     .title(entity.getTitle())
-                    .content(entity.getContent())
+                    .content(getThumbnailContent(entity.getContent()))
+                    .imageUrl(getThumbnailImage(entity.getImages()))
                     .createAt(entity.getCreateAt())
                     .updateAt(entity.getUpdateAt())
                     .build();
         }
+
+        private static String getThumbnailContent(String content) {
+            if (content != null && content.length() > MAX_LENGTH_THUMBNAIL_CONTENT) {
+                return content.substring(0, MAX_LENGTH_THUMBNAIL_CONTENT) + "...";
+            }
+            return content;
+        }
+
+        private static String getThumbnailImage(List<String> images) {
+            if(images == null || images.isEmpty())
+                return "";
+            return images.get(0);
+        }
     }
 
     @SuperBuilder
+    @Getter
     public static class Info extends Base {
         private List<String> images;
-
         private List<String> files;
 
         public static Info of(Announcement entity) {
