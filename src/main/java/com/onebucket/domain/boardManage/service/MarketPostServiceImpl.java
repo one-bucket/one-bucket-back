@@ -39,7 +39,6 @@ public class MarketPostServiceImpl extends AbstractPostService<MarketPost, Marke
 
 
     private final GroupTradeRepository groupTradeRepository;
-    private final MarketPostRepository marketPostRepository;
 
     public MarketPostServiceImpl(MarketPostRepository repository,
                                  BoardRepository boardRepository,
@@ -53,7 +52,6 @@ public class MarketPostServiceImpl extends AbstractPostService<MarketPost, Marke
         super(repository, boardRepository, memberRepository, securityUtils,
                 commentRepository, redisRepository, likesMapRepository, minioRepository);
         this.groupTradeRepository = groupTradeRepository;
-        this.marketPostRepository = marketPostRepository;
     }
 
     @Override

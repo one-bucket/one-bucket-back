@@ -45,7 +45,8 @@ import java.util.List;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class PendingTradeServiceImpl implements PendingTradeService {
+public class PendingTradeServiceImpl
+        implements PendingTradeService {
 
     private final GroupTradeRepository groupTradeRepository;
     private final TradeTagRepository tradeTagRepository;

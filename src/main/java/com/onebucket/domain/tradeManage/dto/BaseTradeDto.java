@@ -2,12 +2,11 @@ package com.onebucket.domain.tradeManage.dto;
 
 import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.domain.tradeManage.entity.BaseTrade;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.onebucket.domain.tradeManage.entity.TradeTag;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import javax.annotation.processing.SupportedOptions;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -30,18 +29,19 @@ public class BaseTradeDto {
     @Getter
     @SuperBuilder
     @NoArgsConstructor
+    @AllArgsConstructor
     public static class Base {
         private String item;
         private Long price;
         private String location;
         private String linkUrl;
-        private String tag;
     }
 
     @SuperBuilder
     @Getter
     @NoArgsConstructor
     public static class Create extends Base {
+        private String tag;
         private Long dueDate;
         private Long ownerId;
     }
@@ -52,15 +52,16 @@ public class BaseTradeDto {
         private Long id;
         private Long userId;
         private LocalDateTime dueDate;
-
+        private String tag;
         private JoinMember joinMember;
         private boolean isFin;
 
-        private LocalDateTime startTradeAt;
+        private LocalDateTime createAt;
+        private LocalDateTime updateAt;
 
         @Getter
         @Builder
-        private static class JoinMember {
+        public static class JoinMember {
             private Long id;
             private String nickname;
             private String imageUrl;
@@ -70,6 +71,22 @@ public class BaseTradeDto {
     @Getter
     @SuperBuilder
     public static class Update extends Base {
+        private String tag;
         private Long tradeId;
     }
+
+    @Getter
+    public static class UpdateTrade extends Base {
+
+        private BaseTrade trade;
+        private TradeTag tag;
+
+        public UpdateTrade(Base base, BaseTrade trade, TradeTag tag) {
+            super(base.getItem(), base.getPrice(), base.getLocation(), base.getLinkUrl());
+            this.trade = trade;
+            this.tag = tag;
+        }
+    }
+
+
 }
