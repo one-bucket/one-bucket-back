@@ -10,9 +10,9 @@ import com.onebucket.domain.chatManager.mongo.ChatMessage;
 import com.onebucket.domain.chatManager.mongo.ChatMessageRepository;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
-import com.onebucket.domain.tradeManage.dao.PendingTradeRepository;
+import com.onebucket.domain.tradeManage.dao.pendingTrade.GroupTradeRepository;
 import com.onebucket.domain.tradeManage.dto.TradeDto;
-import com.onebucket.domain.tradeManage.entity.PendingTrade;
+import com.onebucket.domain.tradeManage.entity.GroupTrade;
 import com.onebucket.global.exceptionManage.customException.TradeManageException.PendingTradeException;
 import com.onebucket.global.exceptionManage.customException.chatManageException.Exceptions.ChatRoomException;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
@@ -53,7 +53,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     private final ChatRoomMemberRepository chatRoomMemberRepository;
     private final MemberRepository memberRepository;
     private final ChatMessageRepository chatMessageRepository;
-    private final PendingTradeRepository pendingTradeRepository;
+    private final GroupTradeRepository groupTradeRepository;
 
     @Override
     public boolean existsById(String roomId) {
@@ -82,7 +82,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     @Override
     public String createRoom(ChatRoomDto.CreateRoom dto) {
         String id = UUID.randomUUID().toString();
-        PendingTrade pendingTrade = pendingTradeRepository.findById(dto.getTradeId())
+        GroupTrade groupTrade = groupTradeRepository.findById(dto.getTradeId())
                 .orElseThrow(() -> new PendingTradeException(TradeErrorCode.UNKNOWN_TRADE));
         Member member = findMember(dto.getMemberId());
 
@@ -94,8 +94,8 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
         chatRoom.addMember(member);
 
-        pendingTrade.setChatRoom(chatRoom);
-        pendingTradeRepository.save(pendingTrade);
+        groupTrade.setChatRoom(chatRoom);
+        groupTradeRepository.save(groupTrade);
         return id;
     }
 
@@ -103,14 +103,14 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     public ChatRoomDto.GetTradeInfo getTradeInfo(String roomId) {
         ChatRoom chatRoom = findChatRoom(roomId);
 
-        PendingTrade pendingTrade = chatRoom.getPendingTrade();
-        if(pendingTrade == null) {
+        GroupTrade groupTrade = chatRoom.getGroupTrade();
+        if(groupTrade == null) {
             throw new PendingTradeException(TradeErrorCode.UNKNOWN_TRADE);
         }
 
         List<ChatRoomDto.MemberInfo> members = chatRoom.getMembers().stream().map(ChatRoomDto.MemberInfo::of).toList();
 
-        ChatRoomDto.GetTradeInfo info =  ChatRoomDto.GetTradeInfo.of(pendingTrade);
+        ChatRoomDto.GetTradeInfo info =  ChatRoomDto.GetTradeInfo.of(groupTrade);
         info.setMemberList(members);
 
         return info;
@@ -220,9 +220,9 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     @Transactional
     public TradeDto.Info getTradeInfoOfChatRoom(String chatRoomId) {
         ChatRoom chatRoom = findChatRoom(chatRoomId);
-        PendingTrade pendingTrade = chatRoom.getPendingTrade();
-        if(pendingTrade != null) {
-            return TradeDto.Info.of(pendingTrade);
+        GroupTrade groupTrade = chatRoom.getGroupTrade();
+        if(groupTrade != null) {
+            return TradeDto.Info.of(groupTrade);
         } else {
             throw new PendingTradeException(TradeErrorCode.UNKNOWN_TRADE);
         }
@@ -232,9 +232,9 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     @Override
     public void bombRoomByOwner(ChatRoomDto.ManageMember dto) {
         ChatRoom chatRoom = findChatRoom(dto.getRoomId());
-        PendingTrade pendingTrade = chatRoom.getPendingTrade();
+        GroupTrade groupTrade = chatRoom.getGroupTrade();
         if(chatRoom.getOwnerId().equals(dto.getMemberId())) {
-            pendingTradeRepository.delete(pendingTrade);
+            groupTradeRepository.delete(groupTrade);
         }
     }
 

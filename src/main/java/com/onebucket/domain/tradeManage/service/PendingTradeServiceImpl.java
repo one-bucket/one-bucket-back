@@ -6,13 +6,13 @@ import com.onebucket.domain.chatManager.entity.ChatRoom;
 import com.onebucket.domain.chatManager.entity.ChatRoomMemberId;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
-import com.onebucket.domain.tradeManage.dao.CloseTradeRepository;
-import com.onebucket.domain.tradeManage.dao.PendingTradeRepository;
+import com.onebucket.domain.tradeManage.dao.closedTrade.ClosedGroupTradeRepository;
+import com.onebucket.domain.tradeManage.dao.pendingTrade.GroupTradeRepository;
 import com.onebucket.domain.tradeManage.dao.TradeTagRepository;
 import com.onebucket.domain.tradeManage.dto.TradeDto;
 import com.onebucket.domain.tradeManage.dto.TradeKeyDto;
-import com.onebucket.domain.tradeManage.entity.CloseTrade;
-import com.onebucket.domain.tradeManage.entity.PendingTrade;
+import com.onebucket.domain.tradeManage.entity.ClosedGroupTrade;
+import com.onebucket.domain.tradeManage.entity.GroupTrade;
 import com.onebucket.domain.tradeManage.entity.TradeTag;
 import com.onebucket.global.exceptionManage.customException.TradeManageException.PendingTradeException;
 import com.onebucket.global.exceptionManage.customException.chatManageException.Exceptions.ChatRoomException;
@@ -47,9 +47,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PendingTradeServiceImpl implements PendingTradeService {
 
-    private final PendingTradeRepository pendingTradeRepository;
+    private final GroupTradeRepository groupTradeRepository;
     private final TradeTagRepository tradeTagRepository;
-    private final CloseTradeRepository closeTradeRepository;
+    private final ClosedGroupTradeRepository closedGroupTradeRepository;
     private final MemberRepository memberRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final ChatRoomMemberRepository chatRoomMemberRepository;
@@ -59,31 +59,31 @@ public class PendingTradeServiceImpl implements PendingTradeService {
         Member member = findMember(dto.getOwnerId());
         TradeTag tag = findTag(dto.getTag());
 
-        PendingTrade pendingTrade = TradeDto.to(dto, member, tag);
+        GroupTrade groupTrade = TradeDto.to(dto, member, tag);
 
-        return pendingTradeRepository.save(pendingTrade).getId();
+        return groupTradeRepository.save(groupTrade).getId();
     }
     @Override
     public TradeDto.Info getInfo(Long tradeId) {
 
-        PendingTrade pendingTrade = findPendingTrade(tradeId);
+        GroupTrade groupTrade = findPendingTrade(tradeId);
 
-        return TradeDto.Info.of(pendingTrade);
+        return TradeDto.Info.of(groupTrade);
     }
     @Override
     public void update(TradeDto.Update dto) {
-        PendingTrade pendingTrade = findPendingTrade(dto.getTradeId());
+        GroupTrade groupTrade = findPendingTrade(dto.getTradeId());
         TradeTag tag = findTag(dto.getTag());
 
-        pendingTrade.setItem(dto.getItem());
-        pendingTrade.setWanted(dto.getWanted());
-        pendingTrade.setPrice(dto.getPrice());
-        pendingTrade.setCount(dto.getCount());
-        pendingTrade.setLocation(dto.getLocation());
-        pendingTrade.setLinkUrl(dto.getLinkUrl());
-        pendingTrade.setTradeTag(tag);
+        groupTrade.setItem(dto.getItem());
+        groupTrade.setWanted(dto.getWanted());
+        groupTrade.setPrice(dto.getPrice());
+        groupTrade.setCount(dto.getCount());
+        groupTrade.setLocation(dto.getLocation());
+        groupTrade.setLinkUrl(dto.getLinkUrl());
+        groupTrade.setTradeTag(tag);
 
-        pendingTradeRepository.save(pendingTrade);
+        groupTradeRepository.save(groupTrade);
     }
     @Override
     //새로운 유저가 해당 거래에 참여
@@ -92,12 +92,12 @@ public class PendingTradeServiceImpl implements PendingTradeService {
         Long tradeId = dto.getTradeId();
 
         Member member = findMember(userId);
-        PendingTrade pendingTrade = findPendingTrade(tradeId);
+        GroupTrade groupTrade = findPendingTrade(tradeId);
 
-        List<Member> joiners = pendingTrade.getJoiners();
-        Long wanted = pendingTrade.getWanted();
-        LocalDateTime dueDate = pendingTrade.getDueDate();
-        Member owner = pendingTrade.getOwner();
+        List<Member> joiners = groupTrade.getJoiners();
+        Long wanted = groupTrade.getWanted();
+        LocalDateTime dueDate = groupTrade.getDueDate();
+        Member owner = groupTrade.getOwner();
 
         if(joiners.size() >= wanted) {
             throw new PendingTradeException(TradeErrorCode.FULL_TRADE);
@@ -105,23 +105,23 @@ public class PendingTradeServiceImpl implements PendingTradeService {
         if(member == owner || joiners.contains(member)) {
             throw new PendingTradeException(TradeErrorCode.ALREADY_JOIN);
         }
-        if(pendingTrade.isFin()) {
+        if(groupTrade.isFin()) {
             throw new PendingTradeException(TradeErrorCode.FINISH_TRADE);
         }
         if(dueDate.isBefore(LocalDateTime.now())) {
             throw new PendingTradeException(TradeErrorCode.DUE_DATE_OVER);
         }
 
-        pendingTrade.addMember(member);
+        groupTrade.addMember(member);
 
         //chatRoom에 멤버 추가
-        ChatRoom chatRoom = pendingTrade.getChatRoom();
+        ChatRoom chatRoom = groupTrade.getChatRoom();
         if(chatRoom == null) {
             throw new ChatRoomException(ChatErrorCode.NOT_EXIST_ROOM);
         }
         chatRoom.addMember(member);
 
-        pendingTradeRepository.save(pendingTrade);
+        groupTradeRepository.save(groupTrade);
 
         return TradeDto.ResponseJoinTrade.builder()
                 .tradeId(tradeId)
@@ -136,71 +136,62 @@ public class PendingTradeServiceImpl implements PendingTradeService {
         Long tradeId = dto.getTradeId();
 
         Member member = findMember(userId);
-        PendingTrade pendingTrade = findPendingTrade(tradeId);
-        if(pendingTrade.getOwner().equals(member)) {
+        GroupTrade groupTrade = findPendingTrade(tradeId);
+        if(groupTrade.getOwner().equals(member)) {
             throw new PendingTradeException(TradeErrorCode.OWNER_CANNOT_QUIT);
         }
-        pendingTrade.deleteMember(member);
+        groupTrade.deleteMember(member);
 
         //chatRoom에서 삭제
-        String chatRoomId = pendingTrade.getChatRoom().getId();
+        String chatRoomId = groupTrade.getChatRoom().getId();
         ChatRoomMemberId chatRoomMemberId = ChatRoomMemberId.builder()
                 .member(userId)
                 .chatRoom(chatRoomId)
                 .build();
         chatRoomMemberRepository.deleteById(chatRoomMemberId);
-        pendingTradeRepository.save(pendingTrade);
+        groupTradeRepository.save(groupTrade);
     }
     @Override
     public boolean makeFinish(TradeKeyDto.Finish dto) {
         Long tradeId = dto.getTradeId();
         boolean isFin = dto.isFin();
-        PendingTrade pendingTrade = findPendingTrade(tradeId);
+        GroupTrade groupTrade = findPendingTrade(tradeId);
 
-        pendingTrade.setFin(isFin);
+        groupTrade.setFin(isFin);
 
-        PendingTrade savedPendingTrade = pendingTradeRepository.save(pendingTrade);
-        return savedPendingTrade.isFin();
+        GroupTrade savedGroupTrade = groupTradeRepository.save(groupTrade);
+        return savedGroupTrade.isFin();
     }
 
     //TODO: 종료 프로토콜 좀 더 다듬어봐야 할듯
     @Override
     public Long terminate(TradeKeyDto.FindTrade dto) {
-        PendingTrade pendingTrade = findPendingTrade(dto.getTradeId());
+        GroupTrade groupTrade = findPendingTrade(dto.getTradeId());
 
-        List<Long> memberIds = pendingTrade.getJoiners().stream().map(Member::getId).toList();
-
-        CloseTrade closeTrade = CloseTrade.builder()
-                .item(pendingTrade.getItem())
-                .finishTradeAt(pendingTrade.getFinishTradeAt())
-                .startTradeAt(pendingTrade.getStartTradeAt())
-                .memberIds(memberIds)
-                .build();
-
-        pendingTradeRepository.delete(pendingTrade);
-        return closeTradeRepository.save(closeTrade).getId();
+        groupTradeRepository.delete(groupTrade);
+        return closedGroupTradeRepository.save((ClosedGroupTrade) groupTrade).getId();
     }
     @Override
     public LocalDateTime extendDueDate(TradeKeyDto.ExtendDate dto) {
-        PendingTrade pendingTrade = findPendingTrade(dto.getTradeId());
+        GroupTrade groupTrade = findPendingTrade(dto.getTradeId());
 
-        pendingTrade.extendDueDate(dto.getDate());
+        groupTrade.extendDueDate(dto.getDate());
 
-        return pendingTradeRepository.save(pendingTrade).getDueDate();
+        return groupTradeRepository.save(groupTrade).getDueDate();
     }
 
     @Override
     public void setChatRoom(TradeKeyDto.SettingChatRoom dto) {
-        PendingTrade pendingTrade = findPendingTrade(dto.getTradeId());
+        GroupTrade groupTrade = findPendingTrade(dto.getTradeId());
         ChatRoom chatRoom = findChatRoom(dto.getChatRoomId());
 
-        pendingTrade.setChatRoom(chatRoom);
+        groupTrade.setChatRoom(chatRoom);
 
-        pendingTradeRepository.save(pendingTrade);
+        groupTradeRepository.save(groupTrade);
     }
 
     public List<Long> getJoinedTradeExceptOwner(Long userId) {
-        return pendingTradeRepository.findPendingTradeIdsWhereUserIsParticipant(userId);
+        return groupTradeRepository.findPendingTradeIdsWhereUserIsParticipant(userId);
     }
 
     private Member findMember(Long userId) {
@@ -209,8 +200,8 @@ public class PendingTradeServiceImpl implements PendingTradeService {
     }
 
 
-    private PendingTrade findPendingTrade(Long tradeId) {
-        return pendingTradeRepository.findById(tradeId).orElseThrow(() ->
+    private GroupTrade findPendingTrade(Long tradeId) {
+        return groupTradeRepository.findById(tradeId).orElseThrow(() ->
                 new PendingTradeException(TradeErrorCode.UNKNOWN_TRADE));
     }
     private TradeTag findTag(String tag) {

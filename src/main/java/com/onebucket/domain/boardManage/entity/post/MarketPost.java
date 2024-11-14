@@ -1,7 +1,7 @@
 package com.onebucket.domain.boardManage.entity.post;
 
 
-import com.onebucket.domain.tradeManage.entity.PendingTrade;
+import com.onebucket.domain.tradeManage.entity.GroupTrade;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -40,5 +40,5 @@ import lombok.experimental.SuperBuilder;
 public class MarketPost extends Post {
 
     @OneToOne(cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
-    private PendingTrade pendingTrade;
+    private GroupTrade groupTrade;
 }

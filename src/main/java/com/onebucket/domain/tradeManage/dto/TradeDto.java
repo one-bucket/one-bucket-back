@@ -1,7 +1,7 @@
 package com.onebucket.domain.tradeManage.dto;
 
 import com.onebucket.domain.memberManage.domain.Member;
-import com.onebucket.domain.tradeManage.entity.PendingTrade;
+import com.onebucket.domain.tradeManage.entity.GroupTrade;
 import com.onebucket.domain.tradeManage.entity.TradeTag;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -86,7 +86,7 @@ public class TradeDto {
 
         private LocalDateTime startTradeAt;
 
-        public static Info of(PendingTrade entity) {
+        public static Info of(GroupTrade entity) {
             List<String> nicknames = entity.getJoiners().stream().map(Member::getNickname).toList();
 
             return Info.builder()
@@ -152,9 +152,9 @@ public class TradeDto {
         private String chatRoomId;
     }
 
-    public static PendingTrade to(Create dto, Member member, TradeTag tag) {
+    public static GroupTrade to(Create dto, Member member, TradeTag tag) {
         LocalDateTime now = LocalDateTime.now();
-        return PendingTrade.builder()
+        return com.onebucket.domain.tradeManage.entity.GroupTrade.builder()
                 .owner(member)
                 .item(dto.getItem())
                 .tradeTag(tag)

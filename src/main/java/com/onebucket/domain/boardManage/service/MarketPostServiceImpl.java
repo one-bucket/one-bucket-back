@@ -9,10 +9,8 @@ import com.onebucket.domain.boardManage.entity.post.MarketPost;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
 
-import com.onebucket.domain.tradeManage.entity.PendingTrade;
-import com.onebucket.domain.tradeManage.dao.PendingTradeRepository;
-import com.onebucket.global.exceptionManage.customException.TradeManageException.TradeException;
-import com.onebucket.global.exceptionManage.errorCode.TradeErrorCode;
+import com.onebucket.domain.tradeManage.dao.pendingTrade.GroupTradeRepository;
+import com.onebucket.domain.tradeManage.entity.GroupTrade;
 import com.onebucket.global.minio.MinioRepository;
 import com.onebucket.global.redis.RedisRepository;
 import com.onebucket.global.utils.SecurityUtils;
@@ -40,7 +38,7 @@ import java.util.List;
 public class MarketPostServiceImpl extends AbstractPostService<MarketPost, MarketPostRepository> implements MarketPostService {
 
 
-    private final PendingTradeRepository pendingTradeRepository;
+    private final GroupTradeRepository groupTradeRepository;
     private final MarketPostRepository marketPostRepository;
 
     public MarketPostServiceImpl(MarketPostRepository repository,
@@ -51,10 +49,10 @@ public class MarketPostServiceImpl extends AbstractPostService<MarketPost, Marke
                                  RedisRepository redisRepository,
                                  LikesMapRepository likesMapRepository,
                                  MinioRepository minioRepository,
-                                 PendingTradeRepository pendingTradeRepository, MarketPostRepository marketPostRepository) {
+                                 GroupTradeRepository groupTradeRepository, MarketPostRepository marketPostRepository) {
         super(repository, boardRepository, memberRepository, securityUtils,
                 commentRepository, redisRepository, likesMapRepository, minioRepository);
-        this.pendingTradeRepository = pendingTradeRepository;
+        this.groupTradeRepository = groupTradeRepository;
         this.marketPostRepository = marketPostRepository;
     }
 
@@ -71,14 +69,14 @@ public class MarketPostServiceImpl extends AbstractPostService<MarketPost, Marke
 
         MarketPostDto.Create marketDto = (MarketPostDto.Create) dto;
 
-        PendingTrade pendingTrade = pendingTradeRepository.getReferenceById(marketDto.getTradeId());
+        GroupTrade groupTrade = groupTradeRepository.getReferenceById(marketDto.getTradeId());
 
         return MarketPost.builder()
                 .board(board)
                 .author(member)
                 .title(dto.getTitle())
                 .text(dto.getText())
-                .pendingTrade(pendingTrade)
+                .groupTrade(groupTrade)
                 .build();
     }
 
@@ -112,7 +110,7 @@ public class MarketPostServiceImpl extends AbstractPostService<MarketPost, Marke
                 .createdDate(post.getCreatedDate())
                 .modifiedDate(post.getModifiedDate())
                 .imageUrls(post.getImageUrls())
-                .tradeId(post.getPendingTrade().getId())
+                .tradeId(post.getGroupTrade().getId())
                 .build();
     }
 
@@ -136,7 +134,7 @@ public class MarketPostServiceImpl extends AbstractPostService<MarketPost, Marke
                 .createdDate(post.getCreatedDate())
                 .modifiedDate(post.getModifiedDate())
 
-                .tradeId(post.getPendingTrade().getId())
+                .tradeId(post.getGroupTrade().getId())
                 .build();
     }
 

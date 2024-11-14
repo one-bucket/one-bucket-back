@@ -1,7 +1,7 @@
 package com.onebucket.domain.chatManager.entity;
 
 import com.onebucket.domain.memberManage.domain.Member;
-import com.onebucket.domain.tradeManage.entity.PendingTrade;
+import com.onebucket.domain.tradeManage.entity.GroupTrade;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -56,6 +56,6 @@ public class ChatRoom {
 
 
     @OneToOne(mappedBy = "chatRoom")
-    private PendingTrade pendingTrade;
+    private GroupTrade groupTrade;
 
 }

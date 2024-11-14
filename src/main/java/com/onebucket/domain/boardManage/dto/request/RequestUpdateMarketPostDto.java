@@ -2,7 +2,6 @@ package com.onebucket.domain.boardManage.dto.request;
 
 import com.onebucket.domain.boardManage.dto.parents.MarketPostDto;
 import com.onebucket.domain.tradeManage.dto.TradeDto;
-import com.onebucket.domain.tradeManage.entity.PendingTrade;
 import jakarta.validation.Valid;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

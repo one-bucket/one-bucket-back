@@ -1,7 +1,7 @@
 package com.onebucket.domain.chatManager.dto;
 
 import com.onebucket.domain.chatManager.entity.ChatRoomMember;
-import com.onebucket.domain.tradeManage.entity.PendingTrade;
+import com.onebucket.domain.tradeManage.entity.GroupTrade;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -128,14 +128,14 @@ public class ChatRoomDto {
 
         private List<MemberInfo> memberList;
 
-        public static GetTradeInfo of(PendingTrade pendingTrade) {
+        public static GetTradeInfo of(GroupTrade groupTrade) {
             return GetTradeInfo.builder()
-                    .id(pendingTrade.getId())
-                    .authorNickname(pendingTrade.getOwner().getNickname())
-                    .item(pendingTrade.getItem())
-                    .price(pendingTrade.getPrice())
-                    .tag(pendingTrade.getTradeTag().getName())
-                    .count(pendingTrade.getCount())
+                    .id(groupTrade.getId())
+                    .authorNickname(groupTrade.getOwner().getNickname())
+                    .item(groupTrade.getItem())
+                    .price(groupTrade.getPrice())
+                    .tag(groupTrade.getTradeTag().getName())
+                    .count(groupTrade.getCount())
                     .build();
         }
     }

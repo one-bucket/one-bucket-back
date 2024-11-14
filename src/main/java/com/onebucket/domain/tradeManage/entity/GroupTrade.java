@@ -4,8 +4,8 @@ import com.onebucket.domain.chatManager.entity.ChatRoom;
 import com.onebucket.domain.memberManage.domain.Member;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,20 +24,12 @@ import java.util.List;
  * } </pre>
  */
 @Entity
-//@Table(name = "pending_trade")
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @Getter
+@NoArgsConstructor
+@SuperBuilder
+@DiscriminatorValue("GroupTrade")
 @Setter
-public class PendingTrade {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "owner_id", nullable = true)
-    private Member owner;
+public class GroupTrade extends BaseTrade {
 
     @ManyToMany
     @JoinTable(
@@ -57,40 +49,14 @@ public class PendingTrade {
         joiners.remove(member);
     }
 
-    private String item;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "tag_id", nullable = false)
-    private TradeTag tradeTag;
-
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "chat_room_id")
     private ChatRoom chatRoom;
 
-    private String linkUrl;
 
     private Long wanted;
 
     private Long joins;
 
-    private LocalDateTime startTradeAt;
-
-    private LocalDateTime finishTradeAt;
-
-    private Long price;
-
     private Long count;
-
-    private LocalDateTime dueDate;
-
-    public void extendDueDate(Long date) {
-        if(dueDate != null) {
-            this.dueDate = dueDate.plusDays(date);
-        }
-    }
-
-    private String location;
-
-    private boolean isFin;
-
 }

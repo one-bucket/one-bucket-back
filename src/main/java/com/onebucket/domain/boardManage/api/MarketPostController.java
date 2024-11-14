@@ -73,7 +73,7 @@ public class MarketPostController extends AbstractPostController<MarketPostServi
         Long univId = securityUtils.getUnivId();
 
 
-        //PendingTrade 저장
+        //GroupTrade 저장
         TradeDto.Create internalTradeCreateDto = TradeDto.Create.of(tradeCreateDto, ownerId);
         Long tradeId = pendingTradeService.create(internalTradeCreateDto);
 
@@ -115,7 +115,7 @@ public class MarketPostController extends AbstractPostController<MarketPostServi
         MarketPostDto.Update marketPostUpdateDto = dto.getMarketPostUpdateDto();
         TradeDto.Update tradeUpdateDto = dto.getTradeUpdateDto();
 
-        //PendingTrade update
+        //GroupTrade update
         pendingTradeService.update(tradeUpdateDto);
 
         //MarketPost update
