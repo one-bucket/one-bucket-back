@@ -22,6 +22,7 @@ import lombok.experimental.SuperBuilder;
 
 @Entity
 @Getter
+@Setter
 @NoArgsConstructor
 @SuperBuilder
 @DiscriminatorValue("UsedTrade")
@@ -30,6 +31,4 @@ public class UsedTrade extends BaseTrade {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "joiner_id", nullable = true)
     private Member joiner;
-
-
 }

@@ -12,7 +12,6 @@ import com.onebucket.domain.chatManager.service.ChatRoomService;
 import com.onebucket.domain.memberManage.service.MemberService;
 import com.onebucket.domain.tradeManage.dto.TradeDto;
 import com.onebucket.domain.tradeManage.dto.TradeKeyDto;
-import com.onebucket.domain.tradeManage.service.PendingTradeService;
 import com.onebucket.global.exceptionManage.customException.boardManageException.UserBoardException;
 import com.onebucket.global.exceptionManage.errorCode.BoardErrorCode;
 import com.onebucket.global.utils.SecurityUtils;
