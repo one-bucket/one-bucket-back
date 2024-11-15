@@ -6,7 +6,7 @@ import com.onebucket.domain.announcementManage.entity.Announcement;
 import com.onebucket.global.exceptionManage.customException.CommonException;
 import com.onebucket.global.exceptionManage.errorCode.CommonErrorCode;
 import com.onebucket.global.minio.MinioRepository;
-import com.onebucket.global.minio.MinioSaveInfoDto;
+import com.onebucket.global.minio.MinioInfoDto;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -96,7 +96,7 @@ public class AnnouncementServiceImpl  implements AnnouncementService {
         }
         for (MultipartFile image : images) {
             String originalFilename = image.getOriginalFilename();
-            MinioSaveInfoDto minioSaveInfoDto = MinioSaveInfoDto.builder()
+            MinioInfoDto minioSaveInfoDto = MinioInfoDto.builder()
                             .fileName(path + "/" + originalFilename.split("\\.")[0])
                                     .fileExtension(originalFilename.split("\\.")[1])
                                             .bucketName("one-bucket")
