@@ -95,11 +95,12 @@ public class SignInServiceImpl implements SignInService{
     @Override
     public Authentication getAuthenticationAndValidHeader(String headerString) {
 
-        if (!(headerString != null && headerString.startsWith("Bearer "))) {
+        if (headerString == null || !headerString.startsWith("Bearer")) {
             throw new AuthenticationException(AuthenticationErrorCode.NON_VALID_TOKEN,
                     "can't access access token");
         }
-        String accessToken = headerString.substring(7);
+        // 왜 Bearer 하고 공백이 사라지는건지 모르겠 7->6으로 변경
+        String accessToken = headerString.substring(6);
         try {
             jwtValidator.isTokenValid(accessToken);
         } catch (ExpiredJwtException ignore) {
