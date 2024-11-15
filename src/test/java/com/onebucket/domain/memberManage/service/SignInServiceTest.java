@@ -113,7 +113,7 @@ class SignInServiceTest {
     @Test
     @DisplayName("getAuthenticationAndValidHeader - success")
     void testGetAuthenticationAndValidHeader_success() {
-        String headerString = "Beareraccess-token";
+        String headerString = "Bearer access-token";
         CustomAuthentication authentication = mock(CustomAuthentication.class);
         when(jwtValidator.getAuthentication("access-token")).thenReturn(authentication);
 

@@ -1,7 +1,5 @@
 package com.onebucket.domain.memberManage.service;
 
-import com.onebucket.domain.memberManage.dao.MemberRepository;
-import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.global.auth.jwtAuth.component.JwtProvider;
 import com.onebucket.global.auth.jwtAuth.component.JwtValidator;
 import com.onebucket.global.auth.jwtAuth.domain.JwtToken;
@@ -52,7 +50,6 @@ public class SignInServiceImpl implements SignInService{
     private final AuthenticationManager authenticationManager;
     private final JwtProvider jwtProvider;
     private final JwtValidator jwtValidator;
-    private final MemberRepository memberRepository;
     /**
      * @param username id to sign in
      * @param password password to sign in
@@ -94,13 +91,11 @@ public class SignInServiceImpl implements SignInService{
      */
     @Override
     public Authentication getAuthenticationAndValidHeader(String headerString) {
-
-        if (headerString == null || !headerString.startsWith("Bearer")) {
+        if (headerString == null || !headerString.startsWith("Bearer ")) {
             throw new AuthenticationException(AuthenticationErrorCode.NON_VALID_TOKEN,
                     "can't access access token");
         }
-        // 왜 Bearer 하고 공백이 사라지는건지 모르겠 7->6으로 변경
-        String accessToken = headerString.substring(6);
+        String accessToken = headerString.substring(7);
         try {
             jwtValidator.isTokenValid(accessToken);
         } catch (ExpiredJwtException ignore) {

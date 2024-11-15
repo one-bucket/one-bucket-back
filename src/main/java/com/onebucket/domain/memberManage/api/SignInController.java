@@ -84,7 +84,6 @@ public class SignInController {
         String accessToken = request.getHeader("Authorization");
         String refreshToken = refreshTokenDto.getRefreshToken();
 
-
         //access 토큰 검증 및 예외 처리 로직
         //access 토큰 존재 여부에 대한 예외(AuthenticationErrorCode.NON_VALID_TOKEN)
         //access 토큰 검증에 대한 예외(AuthenticationErrorCode.NON_VALID_TOKEN) - JwtExpiredToken 제외.
