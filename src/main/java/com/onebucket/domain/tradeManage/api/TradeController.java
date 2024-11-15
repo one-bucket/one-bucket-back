@@ -1,10 +1,8 @@
 package com.onebucket.domain.tradeManage.api;
 
 import com.onebucket.domain.memberManage.service.MemberService;
-import com.onebucket.domain.tradeManage.dto.TradeDto;
 import com.onebucket.domain.tradeManage.dto.TradeKeyDto;
 
-import com.onebucket.domain.tradeManage.service.PendingTradeService;
 import com.onebucket.domain.tradeManage.service.TradeTagService;
 import com.onebucket.global.utils.SecurityUtils;
 import com.onebucket.global.utils.SuccessResponseDto;
@@ -36,7 +34,6 @@ import java.util.List;
 @RequestMapping("/trade")
 public class TradeController {
 
-    private final PendingTradeService pendingTradeService;
     private final TradeTagService tradeTagService;
     private final MemberService memberService;
     private final SecurityUtils securityUtils;
