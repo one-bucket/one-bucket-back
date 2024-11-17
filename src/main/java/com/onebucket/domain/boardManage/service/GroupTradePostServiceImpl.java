@@ -2,20 +2,22 @@ package com.onebucket.domain.boardManage.service;
 
 import com.onebucket.domain.boardManage.dao.BoardRepository;
 import com.onebucket.domain.boardManage.dao.CommentRepository;
+import com.onebucket.domain.boardManage.dao.GroupTradePostRepository;
 import com.onebucket.domain.boardManage.dao.LikesMapRepository;
-import com.onebucket.domain.boardManage.dao.MarketPostRepository;
-import com.onebucket.domain.boardManage.dto.internal.comment.GetCommentDto;
+import com.onebucket.domain.boardManage.dto.postDto.GroupTradePostDto;
 import com.onebucket.domain.boardManage.dto.postDto.PostDto;
 import com.onebucket.domain.boardManage.entity.Board;
 import com.onebucket.domain.boardManage.entity.post.GroupTradePost;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.domain.tradeManage.dao.pendingTrade.GroupTradeRepository;
+import com.onebucket.domain.tradeManage.entity.GroupTrade;
 import com.onebucket.global.minio.MinioRepository;
 import com.onebucket.global.redis.RedisRepository;
 import com.onebucket.global.utils.SecurityUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Service;
 
-import java.util.List;
 
 /**
  * <br>package name   : com.onebucket.domain.boardManage.service
@@ -31,10 +33,13 @@ import java.util.List;
  *
  * } </pre>
  */
-public class GroupTradePostServiceImpl extends AbstractPostService<GroupTradePost, MarketPostRepository> {
+
+@Service
+public class GroupTradePostServiceImpl extends AbstractPostService<GroupTradePost, GroupTradePostRepository>
+implements GroupTradePostService {
 
     private final GroupTradeRepository groupTradeRepository;
-    public GroupTradePostServiceImpl(MarketPostRepository repository,
+    public GroupTradePostServiceImpl(GroupTradePostRepository repository,
                                      BoardRepository boardRepository,
                                      MemberRepository memberRepository,
                                      SecurityUtils securityUtils,
@@ -49,22 +54,35 @@ public class GroupTradePostServiceImpl extends AbstractPostService<GroupTradePos
     }
 
     @Override
+    protected GroupTradePostDto.InternalThumbnail setThumbnailForOtherInfo(PostDto.InternalThumbnail dto, GroupTradePost post) {
+        GroupTradePostDto.InternalThumbnail groupTradePostInfo = (GroupTradePostDto.InternalThumbnail) dto;
+        groupTradePostInfo.setTrade(post.getGroupTradeId());
+
+        return groupTradePostInfo;
+    }
+
+    @Override
     protected <D extends PostDto.Create> GroupTradePost convertCreatePostDtoToPost(D dto) {
 
-        Member member = findMember(dto.getUserId());
-        Board board = findBoard(dto.getBoardId());
+        GroupTradePostDto.Create createDto = (GroupTradePostDto.Create) dto;
 
+        Member member = findMember(createDto.getUserId());
+        Board board = findBoard(createDto.getBoardId());
 
-        return null;
+        GroupTrade groupTrade = groupTradeRepository.getReferenceById(createDto.getTradeId());
+
+        return GroupTradePost.builder()
+                .board(board)
+                .author(member)
+                .title(createDto.getTitle())
+                .text(createDto.getText())
+                .groupTrade(groupTrade)
+                .build();
     }
 
     @Override
-    protected PostDto.Thumbnail convertPostToThumbnailDto(GroupTradePost post) {
-        return null;
-    }
-
-    @Override
-    protected PostDto.Info convertPostToPostInfoDto(GroupTradePost post, List<GetCommentDto> comments) {
-        return null;
+    public Page<GroupTradePostDto.InternalThumbnail> getPostByTradeIdList(GroupTradePostDto.TradeIdsPageDto dto) {
+        return repository.findByPendingTradeIds(dto.getTradeIds(), dto.getPageable())
+                .map((post) -> (GroupTradePostDto.InternalThumbnail) convertPostToThumbnail(post));
     }
 }

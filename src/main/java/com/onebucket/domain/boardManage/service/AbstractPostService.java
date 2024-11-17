@@ -82,7 +82,7 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
     private String BUCKET_NAME;
 
 
-
+    //CREATE
     @Override
     @Transactional
     public <D extends PostDto.Create> Long createPost(D dto) {
@@ -93,102 +93,18 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
         return savedPost.getId();
     }
 
-    @Override
-    @Transactional
-    public <D extends PostDto.Update> Long updatePost(D dto) {
-        T post = findPost(dto.getPostId());
-        post.setTitle(dto.getTitle());
-        post.setText(dto.getText());
-        post.setModified(true);
-        post.setModifiedDate(LocalDateTime.now());
-
-        return repository.save(post).getId();
-    }
-    @Override
-    @Transactional
-    public void deletePost(ValueDto.FindPost dto) {
-        T findPost = findPost(dto.getPostId());
-        Member author = findPost.getAuthor();
-        if (author == null) {
-            throw new UserBoardException(BoardErrorCode.I_AM_AN_APPLE_PIE, "maybe, author is null");
-        }
-        Long authorId = author.getId();
-
-        if(authorId.equals(dto.getUserId())) {
-            repository.delete(findPost);
-
-            initPostImage(dto.getPostId());
-
-        } else {
-            throw new AuthenticationException(AuthenticationErrorCode.UNAUTHORIZED_ACCESS,
-                    "you are not allowed to edit this post");
-        }
-    }
-
-    @Override
-    @Transactional
-    public void deleteImageOnPost(Long postId) {
-        initPostImage(postId);
-
-        T post = findPost(postId);
-        post.initImage();
-        repository.save(post);
-    }
-    @Override
-    @Transactional
-    @CacheEvict(value = "commentCountCache", key = "#dto.postId")
-    public void addCommentToPost(CreateCommentDto dto) {
-        T post = findPost(dto.getPostId());
-        Member member = findMember(dto.getUsername());
-
-        Comment comment = Comment.builder()
-                .author(member)
-                .text(dto.getText())
-                .isModified(false)
-                .build();
-
-        // If parent comment exists, handle it first
-        if (dto.getParentCommentId() != null) {
-            Comment parentComment = post.getComments().stream()
-                    .filter(findComment -> findComment.getId().equals(dto.getParentCommentId()))
-                    .findFirst()
-                    .orElseThrow(() -> new UserBoardException(BoardErrorCode.UNKNOWN_COMMENT));
-
-            if(parentComment.getLayer() != 0) {
-                throw new UserBoardException(BoardErrorCode.COMMENT_LAYER_OVERHEAD);
-            }
-            comment.setLayer(1);
-            comment.setParentComment(parentComment);
-            parentComment.addReply(comment);
-            commentRepository.save(parentComment); // Save the parent with the new reply
-
-        } else {
-            post.addComment(comment);
-            repository.save(post);
-        }
-    }
-    @Override
-    @Transactional
-    @CacheEvict(value = "commentCountCache", key = "#dto.postId")
-    public void deleteCommentFromPost(ValueDto.FindComment dto) {
-        Comment comment = commentRepository.findById(dto.getCommentId()).orElseThrow(() ->
-                new UserBoardException(BoardErrorCode.UNKNOWN_COMMENT));
-        Long commentPostId = comment.getPostId();
-        if(!dto.getPostId().equals(commentPostId)) {
-            throw new UserBoardException(BoardErrorCode.UNKNOWN_POST);
-        }
-        commentRepository.delete(comment);
-    }
+    //READ
     @Override
     @Transactional(readOnly = true)
-    public Page<PostDto.Thumbnail> getPostsByBoard(ValueDto.PageablePost dto) {
+    public Page<PostDto.InternalThumbnail> getPostsByBoard(ValueDto.PageablePost dto) {
         return repository.findByBoardId(dto.getBoardId(), dto.getPageable())
-                .map(this::convertPostToThumbnailDto);
+                .map(this::convertPostToThumbnail);
     }
+
 
     @Override
     @Transactional(readOnly = true)
-    public Page<PostDto.Thumbnail> getSearchResult(ValueDto.SearchPageablePost dto) {
+    public Page<PostDto.InternalThumbnail> getSearchResult(ValueDto.SearchPageablePost dto) {
         String keyword = dto.getKeyword();
         //1 is for title, 2 is for text, 3 is for title + text.
         Integer option = dto.getOption();
@@ -203,36 +119,44 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
             throw new UserBoardException(BoardErrorCode.UNKNOWN_SEARCH_OPTION);
         }
 
-        return posts.map(this::convertPostToThumbnailDto);
+        return posts.map(this::convertPostToThumbnailDtoInternal);
 
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<PostDto.Thumbnail> getPostByAuthorId(ValueDto.AuthorPageablePost dto) {
+    public Page<PostDto.InternalThumbnail> getPostByAuthorId(ValueDto.AuthorPageablePost dto) {
         return repository.findByAuthorId(dto.getUserId(), dto.getPageable())
-                .map(this::convertPostToThumbnailDto);
+                .map(this::convertPostToThumbnailDtoInternal);
     }
 
-
-
-    //Maybe caching or not. Think about add comment, increase view or likes.
-    //Seperate method that loading stable data that cannot be changed except update or delete,
-    //and add other data like comment and view...
-    //But this could be same performance becuase need query to search that entity every time.
     @Override
     @Transactional(readOnly = true)
     public PostDto.Info getPost(ValueDto.GetPost dto) {
         T post = findPost(dto.getPostId());
 
         List<GetCommentDto> comments = post.getComments().stream()
-                .filter(comment -> comment.getParentComment() == null)  // 부모 댓글이 없는(즉, 직접적인 댓글)만 필터링
+                .filter(comment -> comment.getParentComment() == null)
                 .map(this::convertToGetCommentDto)
                 .toList();
 
-        return convertPostToPostInfoDto(post, comments);
+        return convertPostToInfo(post, comments);
 
     }
+
+    //UPDATE
+    @Override
+    @Transactional
+    public <D extends PostDto.Update> Long updatePost(D dto) {
+        T post = findPost(dto.getPostId());
+        post.setTitle(dto.getTitle());
+        post.setText(dto.getText());
+        post.setModified(true);
+        post.setModifiedDate(LocalDateTime.now());
+
+        return repository.save(post).getId();
+    }
+
     @Override
     @Transactional
     public void increaseViewCount(ValueDto.FindPost dto) {
@@ -306,6 +230,85 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
         redisRepository.decreaseValue("post:likes:" + dto.getPostId());
 
     }
+
+    //DELETE
+    @Override
+    @Transactional
+    public void deletePost(ValueDto.FindPost dto) {
+        T findPost = findPost(dto.getPostId());
+        Member author = findPost.getAuthor();
+        if (author == null) {
+            throw new UserBoardException(BoardErrorCode.I_AM_AN_APPLE_PIE, "maybe, author is null");
+        }
+        Long authorId = author.getId();
+
+        if(authorId.equals(dto.getUserId())) {
+            repository.delete(findPost);
+
+            initPostImage(dto.getPostId());
+
+        } else {
+            throw new AuthenticationException(AuthenticationErrorCode.UNAUTHORIZED_ACCESS,
+                    "you are not allowed to edit this post");
+        }
+    }
+
+    @Override
+    @Transactional
+    public void deleteImageOnPost(Long postId) {
+        initPostImage(postId);
+
+        T post = findPost(postId);
+        post.initImage();
+        repository.save(post);
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(value = "commentCountCache", key = "#dto.postId")
+    public void addCommentToPost(CreateCommentDto dto) {
+        T post = findPost(dto.getPostId());
+        Member member = findMember(dto.getUsername());
+
+        Comment comment = Comment.builder()
+                .author(member)
+                .text(dto.getText())
+                .isModified(false)
+                .build();
+
+        // If parent comment exists, handle it first
+        if (dto.getParentCommentId() != null) {
+            Comment parentComment = post.getComments().stream()
+                    .filter(findComment -> findComment.getId().equals(dto.getParentCommentId()))
+                    .findFirst()
+                    .orElseThrow(() -> new UserBoardException(BoardErrorCode.UNKNOWN_COMMENT));
+
+            if(parentComment.getLayer() != 0) {
+                throw new UserBoardException(BoardErrorCode.COMMENT_LAYER_OVERHEAD);
+            }
+            comment.setLayer(1);
+            comment.setParentComment(parentComment);
+            parentComment.addReply(comment);
+            commentRepository.save(parentComment); // Save the parent with the new reply
+
+        } else {
+            post.addComment(comment);
+            repository.save(post);
+        }
+    }
+    @Override
+    @Transactional
+    @CacheEvict(value = "commentCountCache", key = "#dto.postId")
+    public void deleteCommentFromPost(ValueDto.FindComment dto) {
+        Comment comment = commentRepository.findById(dto.getCommentId()).orElseThrow(() ->
+                new UserBoardException(BoardErrorCode.UNKNOWN_COMMENT));
+        Long commentPostId = comment.getPostId();
+        if(!dto.getPostId().equals(commentPostId)) {
+            throw new UserBoardException(BoardErrorCode.UNKNOWN_POST);
+        }
+        commentRepository.delete(comment);
+    }
+
 
     @Override
     @Cacheable(value = "commentCountCache", key = "#postId")
@@ -398,9 +401,55 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
                 .build();
     }
 
+    protected PostDto.InternalThumbnail convertPostToThumbnail(T post) {
+        PostDto.InternalThumbnail thumbnail = convertPostToThumbnailDtoInternal(post);
+        String text = thumbnail.getText();
+        if(text.length() > 50) {
+            text = text.substring(0, 50);
+        }
+        thumbnail.setText(text);
+        return thumbnail;
+    }
+
+    protected PostDto.Info convertPostToInfo(T post, List<GetCommentDto> comments) {
+        PostDto.Info info = (PostDto.Info) convertPostToThumbnailDtoInternal(post);
+        info.setComments(comments);
+
+        return info;
+    }
+
+    protected PostDto.InternalThumbnail convertPostToThumbnailDtoInternal(T post) {
+        Long authorId = -1L;
+        String authorNickname = "(unknown)";
+        if(post.getAuthor() != null) {
+            authorId = post.getAuthorId();
+            authorNickname = post.getAuthor().getNickname();
+        }
+        String text = post.getText();
+        if(text.length() > 50) {
+            text = post.getText().substring(0, 50);
+        }
+
+        PostDto.InternalThumbnail thumbnail = PostDto.InternalThumbnail.builder()
+                .postId(post.getId())
+                .authorId(authorId)
+                .authorNickname(authorNickname)
+                .title(post.getTitle())
+                .text(text)
+                .createdDate(post.getCreatedDate())
+                .modifiedDate(post.getModifiedDate())
+                .imageUrls(post.getImageUrls())
+                .build();
+
+        return setThumbnailForOtherInfo(thumbnail, post);
+    }
+
+
+
+
+    protected abstract PostDto.InternalThumbnail setThumbnailForOtherInfo(PostDto.InternalThumbnail dto, T post);
+
 
     protected abstract <D extends PostDto.Create> T convertCreatePostDtoToPost(D dto);
-    protected abstract PostDto.Thumbnail convertPostToThumbnailDto(T post);
-    protected abstract PostDto.Info convertPostToPostInfoDto(T post, List<GetCommentDto> comments);
 
 }

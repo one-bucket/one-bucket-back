@@ -2,10 +2,9 @@ package com.onebucket.domain.boardManage.service;
 
 import com.onebucket.domain.boardManage.dto.internal.comment.CreateCommentDto;
 import com.onebucket.domain.boardManage.dto.internal.post.*;
-import com.onebucket.domain.boardManage.dto.postDto.GroupTradePostDto;
+import com.onebucket.domain.boardManage.dto.postDto.GroupTradePostTmp;
 import com.onebucket.domain.boardManage.dto.postDto.PostDto;
 import com.onebucket.domain.boardManage.dto.parents.ValueDto;
-import com.onebucket.domain.boardManage.entity.post.GroupTradePost;
 import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,9 +22,9 @@ public interface BasePostService {
     /**
      * 새로운 post를 생성하는 메서드이다. 다만, 해당 객체가
      * {@link com.onebucket.domain.boardManage.entity.post.Post Post} 혹은
-     * {@link GroupTradePost MarketPost} 이고 따라서 생성을 위한
+     * {@link com.onebucket.domain.boardManage.entity.post.GroupTradePost MarketPost} 이고 따라서 생성을 위한
      * 매개 변수가 다르다. 이는 {@link PostDto.Create} 와 이를 상속받는
-     * {@link GroupTradePostDto.Create MarketPostDto.Create}
+     * {@link GroupTradePostTmp.Create MarketPostDto.Create}
      * 으로 구성될 수 있으며, 제네릭을 사용하여 정의하였다.
      * <br>
      * 해당 메서드 내부의 {@code convertCreatePostDtoToPost} 는 {@code protected abstract} 메서드로 정의하였으며
@@ -99,12 +98,12 @@ public interface BasePostService {
      * 엔티티 자체를 넘겨주기 보단, 엔티티를 {@link PostDto.Thumbnail}로 변환하는데 이를 위해
      * {@code convertPostToTHumbnailDto} 를 사용한다. 이는 추상 메서드이며 구현 클래스에서 이를 구현할
      * 의무를 가진다. 실제 {@code marketPost}의 경우 이를 상속받는
-     * {@link GroupTradePostDto.Thumbnail MarketPostDto.Thumnail}
+     * {@link GroupTradePostTmp.Thumbnail MarketPostDto.Thumnail}
      * 에 대한 매핑을 수행하며, 타입 캐스팅을 통해 컨트롤러에서 변환하여 사용한다.
      * @param dto boardId와 Pageable 이 저장되어 있음
      * @return Post를 dto로 변환한 PstDto.Thumbnail에 대한 Page
      */
-    Page<PostDto.Thumbnail> getPostsByBoard(ValueDto.PageablePost dto);
+    Page<PostDto.InternalThumbnail> getPostsByBoard(ValueDto.PageablePost dto);
 
     /**
      * postId에 대하여 해당 게시글에 대한 정보를{@link PostDto.Info} 로 반환한다. 해당 사용자가 해당 게시글에
@@ -125,7 +124,7 @@ public interface BasePostService {
      * @param dto authorId와 pageable 이 저장되어 있다.
      * @return Post.Thumbnail에 대한 page
      */
-    Page<PostDto.Thumbnail> getPostByAuthorId(ValueDto.AuthorPageablePost dto);
+    Page<PostDto.InternalThumbnail> getPostByAuthorId(ValueDto.AuthorPageablePost dto);
 
     /**
      * 어떤 사용자가 게시글을 확인할 때, 이에 대한 view를 증가시키는 메서드. 그러나 post에 대한 모든 get 요청마다
@@ -225,5 +224,5 @@ public interface BasePostService {
      * @param dto keyword와 option이 저장되어 있다.
      * @return 검색 결과에 대한 PostDto.Thumbnail의 Page로 구성되어 있다.
      */
-    Page<PostDto.Thumbnail> getSearchResult(ValueDto.SearchPageablePost dto);
+    Page<PostDto.InternalThumbnail> getSearchResult(ValueDto.SearchPageablePost dto);
 }

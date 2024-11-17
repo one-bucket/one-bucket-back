@@ -30,6 +30,7 @@ import java.util.List;
 public class PostDto {
 
     @Getter
+    @Setter
     @SuperBuilder
     @NoArgsConstructor
     public static class BasePost {
@@ -49,9 +50,9 @@ public class PostDto {
 
     @Getter
     @SuperBuilder
-    public static class Create extends BasePost {
+    @NoArgsConstructor
+    public static class Create extends RequestCreate {
         private Long userId;
-        private Long univId;
     }
 
     @Getter
@@ -66,22 +67,32 @@ public class PostDto {
     @Setter
     @SuperBuilder
     @NoArgsConstructor
-    public static class Thumbnail extends BasePost {
+    public static class InternalThumbnail extends BasePost {
 
         private Long postId;
+
+        private Long authorId;
         private String authorNickname;
         private LocalDateTime createdDate;
         private LocalDateTime modifiedDate;
+        private List<String> imageUrls;
 
+    }
+
+    @Getter
+    @Setter
+    @SuperBuilder
+    @NoArgsConstructor
+    public static class Thumbnail extends InternalThumbnail {
         private Long views;
         private Long likes;
         private Long commentsCount;
-        private List<String> imageUrls;
 
     }
 
 
     @Getter
+    @Setter
     @SuperBuilder
     @NoArgsConstructor
     public static class Info extends Thumbnail {

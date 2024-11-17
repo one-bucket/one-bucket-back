@@ -39,4 +39,7 @@ public class GroupTradePost extends Post {
     @OneToOne(cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
     @JoinColumn(name = "trade_id")
     private GroupTrade groupTrade;
+
+    @Column(name = "trade_id", insertable = false, updatable = false)
+    private Long groupTradeId;
 }

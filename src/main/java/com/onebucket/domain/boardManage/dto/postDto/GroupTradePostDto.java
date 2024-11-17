@@ -1,14 +1,17 @@
 package com.onebucket.domain.boardManage.dto.postDto;
 
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
-import com.onebucket.domain.tradeManage.dto.TradeDto;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import net.minidev.json.annotate.JsonIgnore;
+import org.springframework.data.domain.Pageable;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 /**
- * <br>package name   : com.onebucket.domain.boardManage.dto.parents
- * <br>file name      : MarketPostDto
- * <br>date           : 2024-09-29
+ * <br>package name   : com.onebucket.domain.boardManage.dto.postDto
+ * <br>file name      : GroupTradePostDto
+ * <br>date           : 2024-11-17
  * <pre>
  * <span style="color: white;">[description]</span>
  *
@@ -24,94 +27,42 @@ public class GroupTradePostDto {
     @Getter
     @SuperBuilder
     @NoArgsConstructor
-    public static class BaseMarketPost extends PostDto.BasePost {
+    public static class RequestCreate extends Create {
 
+        @JsonIgnore
+        private Long userId;
     }
 
     @Getter
     @SuperBuilder
     @NoArgsConstructor
-    public static class RequestCreate extends PostDto.RequestCreate {
-        private Long tradeId;
-    }
-
-    @Getter
-    @SuperBuilder
     public static class Create extends PostDto.Create {
         private Long tradeId;
-
-        public static Create of(RequestCreate dto, Long userId, Long univId, Long tradeId) {
-            return Create.builder()
-                    .boardId(dto.getBoardId())
-                    .text(dto.getText())
-                    .title(dto.getTitle())
-                    .userId(userId)
-                    .univId(univId)
-                    .tradeId(tradeId)
-                    .build();
-        }
     }
 
     @Getter
     @SuperBuilder
     @NoArgsConstructor
-    public static class Update extends PostDto.Update {
-
-    }
-
-    @Getter
     @Setter
-    @SuperBuilder
-    @NoArgsConstructor
-    public static class Thumbnail extends PostDto.Thumbnail {
-        private Long tradeId;
+    public static class InternalThumbnail extends PostDto.InternalThumbnail {
 
-        @JsonUnwrapped(prefix = "trade_")
-        private TradeDto.ResponseInfo tradeInfo;
+        private Long trade;
+
+//        @JsonUnwrapped(prefix = "trade_")
+//        private GroupTradeDto.ResponseInfo tradeInfo;
     }
 
     @Getter
     @SuperBuilder
-    @NoArgsConstructor
     public static class Info extends PostDto.Info {
         private Long tradeId;
     }
 
-    @Getter
-    @SuperBuilder
-    public static class ResponseInfo extends PostDto.ResponseInfo {
-        private Long tradeId;
-
-        @JsonUnwrapped(prefix = "trade_")
-        private TradeDto.ResponseInfo tradeInfo;
-
-        public static ResponseInfo of(Info info, TradeDto.ResponseInfo tradeInfo) {
-            return ResponseInfo.builder()
-                    .postId(info.getPostId())
-                    .boardId(info.getBoardId())
-                    .authorNickname(info.getAuthorNickname())
-                    .createdDate(info.getCreatedDate())
-                    .modifiedDate(info.getModifiedDate())
-                    .comments(info.getComments())
-                    .title(info.getTitle())
-                    .text(info.getText())
-                    .likes(info.getLikes())
-                    .views(info.getViews())
-                    .tradeId(info.getTradeId())
-
-                    .tradeInfo(tradeInfo)
-                    .build();
-        }
-
-    }
 
     @Getter
     @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class ResponseCreatePostDto {
-        private Long postId;
-        private String chatRoomId;
+    public static class TradeIdsPageDto {
+        private List<Long> tradeIds;
+        private Pageable pageable;
     }
-
 }
