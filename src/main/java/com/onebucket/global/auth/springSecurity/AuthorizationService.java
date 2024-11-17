@@ -6,14 +6,20 @@ import com.onebucket.domain.boardManage.entity.Board;
 import com.onebucket.domain.boardManage.entity.post.Post;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
+import com.onebucket.domain.tradeManage.dao.pendingTrade.BaseTradeRepository;
+import com.onebucket.domain.tradeManage.dao.pendingTrade.TradeRepository;
+import com.onebucket.domain.tradeManage.entity.BaseTrade;
 import com.onebucket.domain.universityManage.domain.University;
+import com.onebucket.global.exceptionManage.customException.TradeManageException.TradeException;
 import com.onebucket.global.exceptionManage.customException.boardManageException.UserBoardException;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.BoardErrorCode;
+import com.onebucket.global.exceptionManage.errorCode.TradeErrorCode;
 import com.onebucket.global.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * <br>package name   : com.onebucket.global.auth.springSecurity
@@ -32,15 +38,17 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class AuthorizationService {
     private final SecurityUtils securityUtils;
     private final MemberRepository memberRepository;
     private final BoardRepository boardRepository;
     private final PostRepository postRepository;
+    private final BaseTradeRepository baseTradeRepository;
 
     public boolean isUserCanAccessBoard(Long boardId) {
-        String username = securityUtils.getCurrentUsername();
-        Member member = findMember(username);
+        Long userId = securityUtils.getUserId();
+        Member member = findMember(userId);
 
         Board board = boardRepository.findById(boardId).orElseThrow(() ->
                 new UserBoardException(BoardErrorCode.UNKNOWN_BOARD));
@@ -56,8 +64,9 @@ public class AuthorizationService {
     }
 
     public boolean isUserCanAccessPost(Long postId) {
-        String username = securityUtils.getCurrentUsername();
-        Member member = findMember(username);
+        Long userId = securityUtils.getUserId();
+        Member member = findMember(userId);
+
         Post post = findPost(postId);
 
         Board board = post.getBoard();
@@ -72,22 +81,33 @@ public class AuthorizationService {
     }
 
     public boolean isUserOwnerOfPost(Long postId) {
-        String username = securityUtils.getCurrentUsername();
-        Long userId = findMember(username).getId();
+        Long userId = securityUtils.getUserId();
 
         Post post = findPost(postId);
 
         return post.getAuthorId().equals(userId);
     }
 
-    private Member findMember(String username) {
-        return memberRepository.findByUsername(username).orElseThrow(() ->
+    public boolean isUserOwnerOfTrade(Long tradeId) {
+        Long userId = securityUtils.getUserId();
+        Long tradeOwner = findTrade(tradeId).getOwner().getId();
+
+        return userId.equals(tradeOwner);
+    }
+
+    private Member findMember(Long userId) {
+        return memberRepository.findById(userId).orElseThrow(() ->
                 new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
     }
 
     private Post findPost(Long postId) {
         return postRepository.findById(postId).orElseThrow(() ->
                 new UserBoardException(BoardErrorCode.UNKNOWN_POST));
+    }
+
+    private BaseTrade findTrade(Long tradeId) {
+        return baseTradeRepository.findById(tradeId).orElseThrow(() ->
+                new TradeException(TradeErrorCode.UNKNOWN_TRADE));
     }
 
 }

@@ -1,10 +1,7 @@
 package com.onebucket.domain.tradeManage.service;
 
-import com.onebucket.domain.tradeManage.dao.pendingTrade.BaseTradeRepository;
 import com.onebucket.domain.tradeManage.dto.BaseTradeDto;
 import com.onebucket.domain.tradeManage.dto.TradeKeyDto;
-import com.onebucket.domain.tradeManage.entity.BaseTrade;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 

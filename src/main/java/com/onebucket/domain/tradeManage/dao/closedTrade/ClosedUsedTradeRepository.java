@@ -1,6 +1,6 @@
 package com.onebucket.domain.tradeManage.dao.closedTrade;
 
-import com.onebucket.domain.tradeManage.dao.pendingTrade.BaseTradeRepository;
+import com.onebucket.domain.tradeManage.dao.pendingTrade.TradeRepository;
 import com.onebucket.domain.tradeManage.entity.ClosedUsedTrade;
 import org.springframework.stereotype.Repository;
 
@@ -20,5 +20,5 @@ import org.springframework.stereotype.Repository;
  */
 
 @Repository
-public interface ClosedUsedTradeRepository extends BaseTradeRepository<ClosedUsedTrade> {
+public interface ClosedUsedTradeRepository extends TradeRepository<ClosedUsedTrade> {
 }

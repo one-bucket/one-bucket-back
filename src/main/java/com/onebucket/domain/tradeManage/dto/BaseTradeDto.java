@@ -58,6 +58,7 @@ public class BaseTradeDto {
 
         private LocalDateTime createAt;
         private LocalDateTime updateAt;
+        private LocalDateTime liftedAt;
 
         @Getter
         @Builder

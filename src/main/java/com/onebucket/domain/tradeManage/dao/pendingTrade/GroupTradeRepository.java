@@ -1,6 +1,5 @@
 package com.onebucket.domain.tradeManage.dao.pendingTrade;
 
-import com.onebucket.domain.tradeManage.dao.pendingTrade.BaseTradeRepository;
 import com.onebucket.domain.tradeManage.entity.GroupTrade;
 import org.springframework.stereotype.Repository;
 
@@ -20,6 +19,6 @@ import org.springframework.stereotype.Repository;
  */
 
 @Repository
-public interface GroupTradeRepository extends BaseTradeRepository<GroupTrade> {
+public interface GroupTradeRepository extends TradeRepository<GroupTrade> {
 
 }

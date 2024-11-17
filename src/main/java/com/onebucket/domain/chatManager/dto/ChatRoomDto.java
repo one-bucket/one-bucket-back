@@ -1,6 +1,7 @@
 package com.onebucket.domain.chatManager.dto;
 
 import com.onebucket.domain.chatManager.entity.ChatRoomMember;
+import com.onebucket.domain.chatManager.entity.TradeType;
 import com.onebucket.domain.tradeManage.entity.GroupTrade;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -25,7 +26,36 @@ import java.util.List;
  */
 public class ChatRoomDto {
 
+    @Builder
+    @Getter
+    public static class CreateRoom {
+        private String name;
+        private Long memberId;
 
+        private TradeType tradeType;
+        private Long tradeId;
+    }
+
+    @Builder
+    @Getter
+    public static class Info {
+        private String roomId;
+        private String name;
+        private Long ownerId;
+
+        private List<RoomMemberInfo> membersInfo;
+
+        private TradeType tradeType;
+        private Long tradeId;
+        @Builder
+        @Getter
+        public static class RoomMemberInfo {
+            private Long id;
+            private String nickname;
+            private LocalDateTime joinedAt;
+            private String imageUrl;
+        }
+    }
     @Builder
     @Getter
     public static class MemberInfo {
@@ -89,14 +119,6 @@ public class ChatRoomDto {
         private String roomId;
         private LocalDateTime disconnectAt;
         private Long userId;
-    }
-
-    @Builder
-    @Getter
-    public static class CreateRoom {
-        private String name;
-        private Long memberId;
-        private Long tradeId;
     }
 
 

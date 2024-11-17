@@ -1,9 +1,20 @@
 package com.onebucket.domain.tradeManage.api;
 
 import com.onebucket.domain.memberManage.service.MemberService;
+import com.onebucket.domain.tradeManage.dto.TradeKeyDto;
 import com.onebucket.domain.tradeManage.service.TradeService;
 import com.onebucket.global.utils.SecurityUtils;
+import com.onebucket.global.utils.SuccessResponseDto;
+import com.onebucket.global.utils.SuccessResponseWithIdDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
+import java.time.LocalDateTime;
 
 /**
  * <br>package name   : com.onebucket.domain.tradeManage.api
@@ -24,4 +35,36 @@ public abstract class AbstractTradeController<S extends TradeService> {
     protected final S tradeService;
     protected final SecurityUtils securityUtils;
     protected final MemberService memberService;
+
+
+    @PostMapping("/extend-date")
+    @PreAuthorize("@authorizationService.isUserOwnerOfTrade(#dto.tradeId)")
+    public ResponseEntity<SuccessResponseDto> extendDueDate(TradeKeyDto.RequestExtendDate dto) {
+
+        LocalDateTime time = tradeService.extendDueDate(TradeKeyDto.ExtendDate.of(dto));
+
+        return ResponseEntity.ok(new SuccessResponseDto(time.toString()));
+    }
+
+    @PostMapping("/finish")
+    @PreAuthorize("@authorizationService.isUserOwnerOfTrade(#dto.getTradeId)")
+    public ResponseEntity<SuccessResponseDto> makeTradeFinish(@RequestBody TradeKeyDto.RequestFinish dto) {
+        TradeKeyDto.Finish finishDto = TradeKeyDto.Finish.of(dto);
+        tradeService.makeFin(finishDto);
+        return ResponseEntity.ok(new SuccessResponseDto(finishDto.isFin() ? "true" : "false"));
+    }
+
+    @PostMapping("/terminate/{tradeId}")
+    @PreAuthorize("@authorizationService.isUserOwnerOfTrade(#dto.getTradeId)")
+    public ResponseEntity<SuccessResponseDto> terminateTrade(@PathVariable Long tradeId) {
+        TradeKeyDto.FindTrade findTrade = TradeKeyDto.FindTrade.builder()
+                .tradeId(tradeId)
+                .build();
+        tradeService.terminateTrade(findTrade);
+
+        return ResponseEntity.ok(new SuccessResponseDto(("success terminate trade")));
+    }
+
+
+
 }

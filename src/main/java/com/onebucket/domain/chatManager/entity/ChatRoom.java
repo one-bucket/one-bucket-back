@@ -52,10 +52,9 @@ public class ChatRoom {
         this.members.add(chatRoomMember);
     }
 
+    @Enumerated(EnumType.STRING)
+    private TradeType tradeType;
 
-
-
-    @OneToOne(mappedBy = "chatRoom")
-    private GroupTrade groupTrade;
+    private Long tradeId;
 
 }

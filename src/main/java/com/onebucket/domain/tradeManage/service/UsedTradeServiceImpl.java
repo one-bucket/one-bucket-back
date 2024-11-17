@@ -76,6 +76,7 @@ public class UsedTradeServiceImpl extends AbstractTradeService<UsedTrade, UsedTr
         usedTrade.setLocation(update.getLocation());
         usedTrade.setLinkUrl(update.getLinkUrl());
         usedTrade.setTradeTag(update.getTag());
+        usedTrade.setUpdateAt(LocalDateTime.now());
     }
 
     @Override

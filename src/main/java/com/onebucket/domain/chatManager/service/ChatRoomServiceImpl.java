@@ -6,12 +6,13 @@ import com.onebucket.domain.chatManager.dto.ChatRoomDto;
 import com.onebucket.domain.chatManager.entity.ChatRoom;
 import com.onebucket.domain.chatManager.entity.ChatRoomMember;
 import com.onebucket.domain.chatManager.entity.ChatRoomMemberId;
+import com.onebucket.domain.chatManager.entity.TradeType;
 import com.onebucket.domain.chatManager.mongo.ChatMessage;
 import com.onebucket.domain.chatManager.mongo.ChatMessageRepository;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.domain.tradeManage.dao.pendingTrade.GroupTradeRepository;
-import com.onebucket.domain.tradeManage.dto.TradeDto;
+import com.onebucket.domain.tradeManage.entity.BaseTrade;
 import com.onebucket.domain.tradeManage.entity.GroupTrade;
 import com.onebucket.global.exceptionManage.customException.TradeManageException.PendingTradeException;
 import com.onebucket.global.exceptionManage.customException.chatManageException.Exceptions.ChatRoomException;
@@ -53,12 +54,67 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     private final ChatRoomMemberRepository chatRoomMemberRepository;
     private final MemberRepository memberRepository;
     private final ChatMessageRepository chatMessageRepository;
+
+
     private final GroupTradeRepository groupTradeRepository;
 
+
+    @Override
+    public String createRoom(ChatRoomDto.CreateRoom dto) {
+        String chatRoomId = UUID.randomUUID().toString();
+        Member member = findMember(dto.getMemberId());
+
+        ChatRoom chatRoom = ChatRoom.builder()
+                .id(chatRoomId)
+                .ownerId(member.getId())
+                .name(dto.getName())
+
+                .tradeType(dto.getTradeType())
+                .tradeId(dto.getTradeId())
+                .build();
+
+        chatRoom.addMember(member);
+
+        chatRoomRepository.save(chatRoom);
+
+        return chatRoomId;
+    }
+
+    @Transactional(readOnly = true)
+    public ChatRoomDto.Info getRoomInfo(String roomId) {
+        ChatRoom chatRoom = findChatRoom(roomId);
+        List<ChatRoomMember> roomMembers = chatRoom.getMembers();
+
+        List<ChatRoomDto.Info.RoomMemberInfo> roomMembersInfo =
+                convertChatRoomMemberInfoToDtoInternal(roomMembers);
+
+        return ChatRoomDto.Info.builder()
+                .roomId(chatRoom.getId())
+                .name(chatRoom.getName())
+                .ownerId(chatRoom.getOwnerId())
+                .membersInfo(roomMembersInfo)
+                .tradeType(chatRoom.getTradeType())
+                .tradeId(chatRoom.getTradeId())
+                .build();
+
+    }
+
+    private List<ChatRoomDto.Info.RoomMemberInfo> convertChatRoomMemberInfoToDtoInternal(List<ChatRoomMember> members) {
+        return members.stream().map((chatRoomMember) -> {
+            Member member = chatRoomMember.getMember();
+            return ChatRoomDto.Info.RoomMemberInfo.builder()
+                    .id(member.getId())
+                    .nickname(member.getNickname())
+                    .joinedAt(chatRoomMember.getJoinedAt())
+                    .imageUrl(member.getProfile().getImageUrl())
+                    .build();
+        }).toList();
+    }
     @Override
     public boolean existsById(String roomId) {
         return chatRoomRepository.existsById(roomId);
     }
+
 
     @Override
     public boolean isMemberOfChatRoom(ChatRoomDto.ManageMember dto) {
@@ -79,25 +135,6 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                 .map(ChatRoomDto.MemberInfo::of).toList();
     }
 
-    @Override
-    public String createRoom(ChatRoomDto.CreateRoom dto) {
-        String id = UUID.randomUUID().toString();
-        GroupTrade groupTrade = groupTradeRepository.findById(dto.getTradeId())
-                .orElseThrow(() -> new PendingTradeException(TradeErrorCode.UNKNOWN_TRADE));
-        Member member = findMember(dto.getMemberId());
-
-        ChatRoom chatRoom = ChatRoom.builder()
-                .id(id)
-                .ownerId(member.getId())
-                .name(dto.getName())
-                .build();
-
-        chatRoom.addMember(member);
-
-        groupTrade.setChatRoom(chatRoom);
-        groupTradeRepository.save(groupTrade);
-        return id;
-    }
 
     @Override
     public ChatRoomDto.GetTradeInfo getTradeInfo(String roomId) {
@@ -247,4 +284,6 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
     }
+
+
 }

@@ -5,7 +5,7 @@ import com.onebucket.domain.chatManager.dao.ChatRoomRepository;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.domain.tradeManage.dao.TradeTagRepository;
-import com.onebucket.domain.tradeManage.dao.pendingTrade.BaseTradeRepository;
+import com.onebucket.domain.tradeManage.dao.pendingTrade.TradeRepository;
 import com.onebucket.domain.tradeManage.dto.BaseTradeDto;
 import com.onebucket.domain.tradeManage.dto.TradeKeyDto;
 import com.onebucket.domain.tradeManage.entity.BaseTrade;
@@ -14,16 +14,14 @@ import com.onebucket.global.exceptionManage.customException.TradeManageException
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.TradeErrorCode;
-import com.onebucket.global.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 /**
  * <br>package name   : com.onebucket.domain.tradeManage.service
- * <br>file name      : AbstractTradeService
+ * <br>file name      : AbstractTradeServiceImpl
  * <br>date           : 11/13/24
  * <pre>
  * <span style="color: white;">[description]</span>
@@ -37,7 +35,7 @@ import java.util.List;
  */
 
 @RequiredArgsConstructor
-public abstract class AbstractTradeService<T extends BaseTrade, R extends BaseTradeRepository<T>>
+public abstract class AbstractTradeService<T extends BaseTrade, R extends TradeRepository<T>>
         implements TradeService {
     protected final R repository;
     protected final TradeTagRepository tradeTagRepository;
@@ -77,6 +75,7 @@ public abstract class AbstractTradeService<T extends BaseTrade, R extends BaseTr
     }
 
     @Override
+    @Transactional
     public boolean makeFin(TradeKeyDto.Finish dto) {
         T trade = findTrade(dto.getTradeId());
         trade.setFin(dto.isFin());
@@ -85,6 +84,7 @@ public abstract class AbstractTradeService<T extends BaseTrade, R extends BaseTr
     }
 
     @Override
+    @Transactional
     public Long terminateTrade(TradeKeyDto.FindTrade dto) {
         T trade = findTrade(dto.getTradeId());
 
@@ -93,11 +93,15 @@ public abstract class AbstractTradeService<T extends BaseTrade, R extends BaseTr
     }
 
     @Override
+    @Transactional
     public LocalDateTime extendDueDate(TradeKeyDto.ExtendDate dto) {
         T trade = findTrade(dto.getTradeId());
+
         trade.extendDueDate(dto.getDate());
+        trade.setUpdateAt(LocalDateTime.now());
         return repository.save(trade).getDueDate();
     }
+
 
     protected Member findMember(Long userId) {
         return memberRepository.findById(userId).orElseThrow(() ->

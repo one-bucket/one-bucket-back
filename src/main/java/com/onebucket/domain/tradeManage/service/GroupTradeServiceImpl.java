@@ -82,6 +82,7 @@ public class GroupTradeServiceImpl extends AbstractTradeService<GroupTrade, Grou
         groupTrade.setLocation(update.getLocation());
         groupTrade.setLinkUrl(update.getLinkUrl());
         groupTrade.setTradeTag(update.getTag());
+        groupTrade.setUpdateAt(LocalDateTime.now());
 
         groupTrade.setWanted(update.getWanted());
         groupTrade.setCount(update.getCount());
