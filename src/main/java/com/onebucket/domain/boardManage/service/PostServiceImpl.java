@@ -6,7 +6,7 @@ import com.onebucket.domain.boardManage.dao.LikesMapRepository;
 import com.onebucket.domain.boardManage.dao.PostRepository;
 
 import com.onebucket.domain.boardManage.dto.internal.comment.GetCommentDto;
-import com.onebucket.domain.boardManage.dto.parents.PostDto;
+import com.onebucket.domain.boardManage.dto.postDto.PostDto;
 import com.onebucket.domain.boardManage.entity.Board;
 
 import com.onebucket.domain.boardManage.entity.post.Post;

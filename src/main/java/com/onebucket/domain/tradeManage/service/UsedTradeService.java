@@ -20,4 +20,5 @@ public interface UsedTradeService extends TradeService {
 
     void reserve(TradeKeyDto.UserTrade dto);
     void rejectReserve(TradeKeyDto.FindTrade dto);
+    boolean isReserved(TradeKeyDto.FindTrade dto);
 }

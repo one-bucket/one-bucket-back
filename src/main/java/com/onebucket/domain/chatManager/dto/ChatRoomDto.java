@@ -5,6 +5,7 @@ import com.onebucket.domain.chatManager.entity.TradeType;
 import com.onebucket.domain.tradeManage.entity.GroupTrade;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.AnyKeyJavaClass;
 
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -26,14 +27,20 @@ import java.util.List;
  */
 public class ChatRoomDto {
 
-    @Builder
+    @SuperBuilder
     @Getter
     public static class CreateRoom {
         private String name;
-        private Long memberId;
+        private Long ownerId;
 
         private TradeType tradeType;
         private Long tradeId;
+    }
+
+    @SuperBuilder
+    @Getter
+    public static class CreateAndJoinRoom extends CreateRoom{
+        private Long joinerId;
     }
 
     @Builder
@@ -62,14 +69,12 @@ public class ChatRoomDto {
         private Long id;
         private String nickname;
         private LocalDateTime joinedAt;
-        private String role;
 
         public static MemberInfo of(ChatRoomMember entity) {
             return MemberInfo.builder()
                     .id(entity.getMember().getId())
                     .nickname(entity.getMember().getNickname())
                     .joinedAt(entity.getJoinedAt())
-                    .role(entity.getRole())
                     .build();
         }
 

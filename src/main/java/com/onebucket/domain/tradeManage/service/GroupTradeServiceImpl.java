@@ -98,7 +98,6 @@ public class GroupTradeServiceImpl extends AbstractTradeService<GroupTrade, Grou
     }
 
     @Override
-
     public TradeKeyDto.ResponseJoinTrade addMember(TradeKeyDto.UserTrade dto) {
         Long userId = dto.getUserId();
         Long tradeId = dto.getTradeId();

@@ -3,10 +3,12 @@ package com.onebucket.domain.tradeManage.dto;
 import com.onebucket.domain.tradeManage.entity.BaseTrade;
 import com.onebucket.domain.tradeManage.entity.TradeTag;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -54,4 +56,32 @@ public class UsedTradeDto {
             super(base, trade, tag);
         }
     }
+
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class RequestCreateChat {
+        private Long tradeId;
+    }
+
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ResponseCreateChat {
+        private String roomId;
+
+        private String ownerNickname;
+    }
+
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class RequestReserve {
+        private Long tradeId;
+        private Long joinerId;
+    }
+
 }

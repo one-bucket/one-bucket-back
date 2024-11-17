@@ -2,10 +2,7 @@ package com.onebucket.domain.boardManage.entity.post;
 
 
 import com.onebucket.domain.tradeManage.entity.GroupTrade;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -37,8 +34,9 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @NoArgsConstructor
 @SuperBuilder
-public class MarketPost extends Post {
+public class GroupTradePost extends Post {
 
     @OneToOne(cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
+    @JoinColumn(name = "trade_id")
     private GroupTrade groupTrade;
 }

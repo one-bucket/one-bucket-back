@@ -1,6 +1,6 @@
 package com.onebucket.domain.boardManage.service;
 
-import com.onebucket.domain.boardManage.dto.parents.MarketPostDto;
+import com.onebucket.domain.boardManage.dto.postDto.GroupTradePostDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -21,5 +21,5 @@ import java.util.List;
  * } </pre>
  */
 public interface MarketPostService extends BasePostService {
-    Page<MarketPostDto.Thumbnail> getPostByTradeIdList(List<Long> tradeIds, Pageable pageable);
+    Page<GroupTradePostDto.Thumbnail> getPostByTradeIdList(List<Long> tradeIds, Pageable pageable);
 }

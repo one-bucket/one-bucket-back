@@ -3,7 +3,6 @@ package com.onebucket.domain.chatManager.service;
 import com.onebucket.domain.chatManager.dto.ChatRoomDto;
 import com.onebucket.domain.chatManager.entity.ChatRoomMemberId;
 import com.onebucket.domain.chatManager.mongo.ChatMessage;
-import com.onebucket.domain.tradeManage.dto.TradeDto;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -53,16 +52,6 @@ public interface ChatRoomService {
      */
     List<ChatRoomDto.MemberInfo> getMemberList(String roomId);
 
-    /**
-     * 채팅방을 생성하는 메서드. UUID를 이용해 채팅방 아이디를 생성하고, 처음 채팅방을 생성하는 유저의 정보를
-     * 유저 리스트에 포함시킨다. <br>
-     * pending trade 즉, 기본적으로 채팅방은 거래 게시판에서 생성되고, 채팅방에서 해당 거래에 대한 정보를
-     * 조회할 수 있도록 하기 위해 pending trade를 설정하여 준다. 이 역시 매개변수에 포함되어 있다. 다만, 현재
-     * 채팅방 구현을 위해서 테스트 중이므로 해당 부분은 주석처리 되어 있다.
-     * @param dto 채팅방의 이름 및 유저id, 거래id가 포함되어 있다.
-     * @return 생성된 채팅방의 id가 반환된다.
-     */
-    String createRoom(ChatRoomDto.CreateRoom dto);
 
     ChatRoomDto.GetTradeInfo getTradeInfo(String roomId);
 
@@ -82,6 +71,20 @@ public interface ChatRoomService {
 
     LocalDateTime getDisconnectTime(ChatRoomMemberId id);
     List<ChatMessage> getMessageAfterTimestamp(ChatRoomDto.InfoAfterTime dto);
-    TradeDto.Info getTradeInfoOfChatRoom(String chatRoomId);
     void bombRoomByOwner(ChatRoomDto.ManageMember dto);
+
+
+
+    /**
+     * 채팅방을 생성하는 메서드. UUID를 이용해 채팅방 아이디를 생성하고, 처음 채팅방을 생성하는 유저의 정보를
+     * 유저 리스트에 포함시킨다. <br>
+     * pending trade 즉, 기본적으로 채팅방은 거래 게시판에서 생성되고, 채팅방에서 해당 거래에 대한 정보를
+     * 조회할 수 있도록 하기 위해 pending trade를 설정하여 준다. 이 역시 매개변수에 포함되어 있다. 다만, 현재
+     * 채팅방 구현을 위해서 테스트 중이므로 해당 부분은 주석처리 되어 있다.
+     * @param dto 채팅방의 이름 및 유저id, 거래id가 포함되어 있다.
+     * @return 생성된 채팅방의 id가 반환된다.
+     */
+    String createRoom(ChatRoomDto.CreateRoom dto);
+    String createAndJoinRoom(ChatRoomDto.CreateAndJoinRoom dto);
+    ChatRoomDto.Info getRoomInfo(String roomId);
 }

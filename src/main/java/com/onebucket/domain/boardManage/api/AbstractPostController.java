@@ -1,7 +1,7 @@
 package com.onebucket.domain.boardManage.api;
 
 import com.onebucket.domain.boardManage.dto.internal.post.*;
-import com.onebucket.domain.boardManage.dto.parents.PostDto;
+import com.onebucket.domain.boardManage.dto.postDto.PostDto;
 import com.onebucket.domain.boardManage.dto.parents.ValueDto;
 import com.onebucket.domain.boardManage.service.BasePostService;
 import com.onebucket.domain.boardManage.service.BoardService;

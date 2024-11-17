@@ -2,10 +2,10 @@ package com.onebucket.domain.boardManage.service;
 
 import com.onebucket.domain.boardManage.dao.*;
 import com.onebucket.domain.boardManage.dto.internal.comment.GetCommentDto;
-import com.onebucket.domain.boardManage.dto.parents.MarketPostDto;
-import com.onebucket.domain.boardManage.dto.parents.PostDto;
+import com.onebucket.domain.boardManage.dto.postDto.GroupTradePostDto;
+import com.onebucket.domain.boardManage.dto.postDto.PostDto;
 import com.onebucket.domain.boardManage.entity.Board;
-import com.onebucket.domain.boardManage.entity.post.MarketPost;
+import com.onebucket.domain.boardManage.entity.post.GroupTradePost;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
 
@@ -35,7 +35,7 @@ import java.util.List;
  * } </pre>
  */
 @Service
-public class MarketPostServiceImpl extends AbstractPostService<MarketPost, MarketPostRepository> implements MarketPostService {
+public class MarketPostServiceImpl extends AbstractPostService<GroupTradePost, MarketPostRepository> implements MarketPostService {
 
 
     private final GroupTradeRepository groupTradeRepository;
@@ -55,21 +55,21 @@ public class MarketPostServiceImpl extends AbstractPostService<MarketPost, Marke
     }
 
     @Override
-    public Page<MarketPostDto.Thumbnail> getPostByTradeIdList(List<Long> tradeIds, Pageable pageable) {
+    public Page<GroupTradePostDto.Thumbnail> getPostByTradeIdList(List<Long> tradeIds, Pageable pageable) {
         return repository.findByPendingTradeIds(tradeIds, pageable)
                 .map(this::convertPostToThumbnailDto);
     }
 
     @Override
-    protected <D extends PostDto.Create> MarketPost convertCreatePostDtoToPost(D dto) {
+    protected <D extends PostDto.Create> GroupTradePost convertCreatePostDtoToPost(D dto) {
         Member member = findMember(dto.getUserId());
         Board board = findBoard(dto.getBoardId());
 
-        MarketPostDto.Create marketDto = (MarketPostDto.Create) dto;
+        GroupTradePostDto.Create marketDto = (GroupTradePostDto.Create) dto;
 
         GroupTrade groupTrade = groupTradeRepository.getReferenceById(marketDto.getTradeId());
 
-        return MarketPost.builder()
+        return GroupTradePost.builder()
                 .board(board)
                 .author(member)
                 .title(dto.getTitle())
@@ -79,7 +79,7 @@ public class MarketPostServiceImpl extends AbstractPostService<MarketPost, Marke
     }
 
     @Override
-    protected MarketPostDto.Thumbnail convertPostToThumbnailDto(MarketPost post) {
+    protected GroupTradePostDto.Thumbnail convertPostToThumbnailDto(GroupTradePost post) {
 
         String nickname = "(unknown)";
         Member member = post.getAuthor();
@@ -96,7 +96,7 @@ public class MarketPostServiceImpl extends AbstractPostService<MarketPost, Marke
         }
 
 
-        return MarketPostDto.Thumbnail.builder()
+        return GroupTradePostDto.Thumbnail.builder()
                 //value of post
                 .postId(post.getId())
                 .boardId(post.getBoardId())
@@ -113,14 +113,14 @@ public class MarketPostServiceImpl extends AbstractPostService<MarketPost, Marke
     }
 
     @Override
-    protected MarketPostDto.Info convertPostToPostInfoDto(MarketPost post, List<GetCommentDto> comments) {
+    protected GroupTradePostDto.Info convertPostToPostInfoDto(GroupTradePost post, List<GetCommentDto> comments) {
         String nickname = "(unknown)";
         Member member = post.getAuthor();
         if (member != null) {
             nickname = member.getNickname();
         }
 
-        return MarketPostDto.Info.builder()
+        return GroupTradePostDto.Info.builder()
                 .postId(post.getId())
                 .boardId(post.getBoardId())
                 .authorNickname(nickname)

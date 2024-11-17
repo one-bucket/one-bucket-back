@@ -103,6 +103,14 @@ public abstract class AbstractTradeService<T extends BaseTrade, R extends TradeR
     }
 
 
+    @Override
+    @Transactional
+    public Long getOwnerOfTrade(TradeKeyDto.FindTrade dto) {
+        T trade = findTrade(dto.getTradeId());
+        return trade.getOwner().getId();
+    }
+
+
     protected Member findMember(Long userId) {
         return memberRepository.findById(userId).orElseThrow(() ->
                 new AuthenticationException((AuthenticationErrorCode.NON_EXIST_AUTHENTICATION)));

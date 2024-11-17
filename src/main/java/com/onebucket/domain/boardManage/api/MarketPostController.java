@@ -1,7 +1,7 @@
 package com.onebucket.domain.boardManage.api;
 
-import com.onebucket.domain.boardManage.dto.parents.MarketPostDto;
-import com.onebucket.domain.boardManage.dto.parents.PostDto;
+import com.onebucket.domain.boardManage.dto.postDto.GroupTradePostDto;
+import com.onebucket.domain.boardManage.dto.postDto.PostDto;
 import com.onebucket.domain.boardManage.dto.parents.ValueDto;
 import com.onebucket.domain.boardManage.dto.request.RequestCreateMarketPostDto;
 import com.onebucket.domain.boardManage.dto.request.RequestUpdateMarketPostDto;
@@ -58,9 +58,9 @@ public class MarketPostController extends AbstractPostController<MarketPostServi
 
     @PreAuthorize("@authorizationService.isUserCanAccessBoard(#dto.marketPostCreateDto.boardId)")
     @PostMapping("/create")
-    public ResponseEntity<MarketPostDto.ResponseCreatePostDto> createPost(@RequestBody @Valid RequestCreateMarketPostDto dto) {
+    public ResponseEntity<GroupTradePostDto.ResponseCreatePostDto> createPost(@RequestBody @Valid RequestCreateMarketPostDto dto) {
 
-        MarketPostDto.RequestCreate marketPostCreateDto = dto.getMarketPostCreateDto();
+        GroupTradePostDto.RequestCreate marketPostCreateDto = dto.getMarketPostCreateDto();
         TradeDto.RequestCreate tradeCreateDto = dto.getTradeCreateDto();
 
 
@@ -78,7 +78,7 @@ public class MarketPostController extends AbstractPostController<MarketPostServi
 
 
         //MarketPost 저장
-        MarketPostDto.Create internalMarketPostCreateDto = MarketPostDto.Create
+        GroupTradePostDto.Create internalMarketPostCreateDto = GroupTradePostDto.Create
                 .of(marketPostCreateDto, ownerId, univId, tradeId);
 
         Long savedId = postService.createPost(internalMarketPostCreateDto);
@@ -99,7 +99,7 @@ public class MarketPostController extends AbstractPostController<MarketPostServi
                 .build();
         pendingTradeService.setChatRoom(settingChatRoom);
 
-        MarketPostDto.ResponseCreatePostDto response = MarketPostDto.ResponseCreatePostDto.builder()
+        GroupTradePostDto.ResponseCreatePostDto response = GroupTradePostDto.ResponseCreatePostDto.builder()
                 .postId(savedId)
                 .chatRoomId(chatRoomId)
                 .build();
@@ -111,7 +111,7 @@ public class MarketPostController extends AbstractPostController<MarketPostServi
     @PostMapping("/update")
     public ResponseEntity<SuccessResponseWithIdDto> updatePost(@RequestBody @Valid RequestUpdateMarketPostDto dto) {
 
-        MarketPostDto.Update marketPostUpdateDto = dto.getMarketPostUpdateDto();
+        GroupTradePostDto.Update marketPostUpdateDto = dto.getMarketPostUpdateDto();
         TradeDto.Update tradeUpdateDto = dto.getTradeUpdateDto();
 
         //GroupTrade update
@@ -124,7 +124,7 @@ public class MarketPostController extends AbstractPostController<MarketPostServi
     }
 
     @GetMapping("/list/joins")
-    public ResponseEntity<Page<MarketPostDto.Thumbnail>> getJoinsMarketPost(Pageable pageable) {
+    public ResponseEntity<Page<GroupTradePostDto.Thumbnail>> getJoinsMarketPost(Pageable pageable) {
         String username = securityUtils.getCurrentUsername();
         Long userId = memberService.usernameToId(username);
         List<Long> tradeIds = pendingTradeService.getJoinedTradeExceptOwner(userId);
@@ -138,7 +138,7 @@ public class MarketPostController extends AbstractPostController<MarketPostServi
 
         //MarketPost 가져오기
         ValueDto.GetPost getPost = ValueDto.GetPost.of(dto);
-        MarketPostDto.Info marketPostInfoDto = (MarketPostDto.Info) postService.getPost(getPost);
+        GroupTradePostDto.Info marketPostInfoDto = (GroupTradePostDto.Info) postService.getPost(getPost);
 
         //일부 필드 재정의 인자 값 설정
         Long savedInRedisLikes = postService.getLikesInRedis(marketPostInfoDto.getPostId());
@@ -153,7 +153,7 @@ public class MarketPostController extends AbstractPostController<MarketPostServi
         TradeDto.ResponseInfo responseTradeInfo = TradeDto.ResponseInfo.of(tradeInfo);
 
         //response 설정
-        MarketPostDto.ResponseInfo response = MarketPostDto.ResponseInfo.of(marketPostInfoDto, responseTradeInfo);
+        GroupTradePostDto.ResponseInfo response = GroupTradePostDto.ResponseInfo.of(marketPostInfoDto, responseTradeInfo);
         response.setLikes(likes);
         response.setUserAlreadyLikes(isUserAlreadyLikes);
 
@@ -164,8 +164,8 @@ public class MarketPostController extends AbstractPostController<MarketPostServi
 
     @Override
     protected ResponseEntity<Page<? extends PostDto.Thumbnail>> getPostByBoardInternal(ValueDto.PageablePost getBoardDto) {
-        Page<MarketPostDto.Thumbnail> posts = postService.getPostsByBoard(getBoardDto)
-                        .map(post -> (MarketPostDto.Thumbnail) post);
+        Page<GroupTradePostDto.Thumbnail> posts = postService.getPostsByBoard(getBoardDto)
+                        .map(post -> (GroupTradePostDto.Thumbnail) post);
 
         posts.forEach(this::addInfoOnPost);
         return ResponseEntity.ok(posts);
@@ -173,14 +173,14 @@ public class MarketPostController extends AbstractPostController<MarketPostServi
 
     @Override
     protected ResponseEntity<Page<? extends PostDto.Thumbnail>> getPostsBySearchInternal(ValueDto.SearchPageablePost dto) {
-        Page<MarketPostDto.Thumbnail> posts = postService.getSearchResult(dto)
-                        .map(post -> (MarketPostDto.Thumbnail) post);
+        Page<GroupTradePostDto.Thumbnail> posts = postService.getSearchResult(dto)
+                        .map(post -> (GroupTradePostDto.Thumbnail) post);
 
         posts.forEach(this::addInfoOnPost);
         return ResponseEntity.ok(posts);
     }
 
-    private void addInfoOnPost(MarketPostDto.Thumbnail dto) {
+    private void addInfoOnPost(GroupTradePostDto.Thumbnail dto) {
         Long commentCount = (Long) postService.getCommentCount(dto.getPostId());
         dto.setCommentsCount(commentCount);
         dto.setLikes(dto.getLikes() + postService.getLikesInRedis(dto.getPostId()));

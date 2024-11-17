@@ -62,7 +62,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     @Override
     public String createRoom(ChatRoomDto.CreateRoom dto) {
         String chatRoomId = UUID.randomUUID().toString();
-        Member member = findMember(dto.getMemberId());
+        Member member = findMember(dto.getOwnerId());
 
         ChatRoom chatRoom = ChatRoom.builder()
                 .id(chatRoomId)
@@ -74,6 +74,33 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                 .build();
 
         chatRoom.addMember(member);
+
+        chatRoomRepository.save(chatRoom);
+
+        return chatRoomId;
+    }
+
+    @Override
+    public String createAndJoinRoom(ChatRoomDto.CreateAndJoinRoom dto) {
+        String chatRoomId = UUID.randomUUID().toString();
+
+        Member owner = findMember(dto.getOwnerId());
+        Member joiner = findMember(dto.getJoinerId());
+        if(owner.equals(joiner)) {
+            throw new ChatRoomException(ChatErrorCode.USER_NOT_CREATOR, "Creator can't join his chatRoom");
+        }
+
+        ChatRoom chatRoom = ChatRoom.builder()
+                .id(chatRoomId)
+                .ownerId(owner.getId())
+                .name(dto.getName())
+
+                .tradeType(dto.getTradeType())
+                .tradeId(dto.getTradeId())
+                .build();
+
+        chatRoom.addMember(owner);
+        chatRoom.addMember(joiner);
 
         chatRoomRepository.save(chatRoom);
 
@@ -135,23 +162,11 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                 .map(ChatRoomDto.MemberInfo::of).toList();
     }
 
-
     @Override
     public ChatRoomDto.GetTradeInfo getTradeInfo(String roomId) {
-        ChatRoom chatRoom = findChatRoom(roomId);
-
-        GroupTrade groupTrade = chatRoom.getGroupTrade();
-        if(groupTrade == null) {
-            throw new PendingTradeException(TradeErrorCode.UNKNOWN_TRADE);
-        }
-
-        List<ChatRoomDto.MemberInfo> members = chatRoom.getMembers().stream().map(ChatRoomDto.MemberInfo::of).toList();
-
-        ChatRoomDto.GetTradeInfo info =  ChatRoomDto.GetTradeInfo.of(groupTrade);
-        info.setMemberList(members);
-
-        return info;
+        return null;
     }
+
 
     @Override
     public void changeRoomName(ChatRoomDto.ChangeRoomName dto) {
@@ -253,26 +268,15 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         return chatMessageRepository.findMessagesAfterTimestamp(dto.getRoomId(), dto.getTimestamp());
     }
 
-    @Override
-    @Transactional
-    public TradeDto.Info getTradeInfoOfChatRoom(String chatRoomId) {
-        ChatRoom chatRoom = findChatRoom(chatRoomId);
-        GroupTrade groupTrade = chatRoom.getGroupTrade();
-        if(groupTrade != null) {
-            return TradeDto.Info.of(groupTrade);
-        } else {
-            throw new PendingTradeException(TradeErrorCode.UNKNOWN_TRADE);
-        }
-    }
 
     @Transactional
     @Override
     public void bombRoomByOwner(ChatRoomDto.ManageMember dto) {
         ChatRoom chatRoom = findChatRoom(dto.getRoomId());
-        GroupTrade groupTrade = chatRoom.getGroupTrade();
-        if(chatRoom.getOwnerId().equals(dto.getMemberId())) {
-            groupTradeRepository.delete(groupTrade);
-        }
+        //GroupTrade groupTrade = chatRoom.getTradeId();
+//        if(chatRoom.getOwnerId().equals(dto.getMemberId())) {
+//            groupTradeRepository.delete(groupTrade);
+//        }
     }
 
     private ChatRoom findChatRoom(String roomId) {

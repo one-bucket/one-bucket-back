@@ -109,6 +109,13 @@ public class UsedTradeServiceImpl extends AbstractTradeService<UsedTrade, UsedTr
         repository.save(usedTrade);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public boolean isReserved(TradeKeyDto.FindTrade dto) {
+        UsedTrade usedTrade = findTrade(dto.getTradeId());
+        return usedTrade.getJoiner() != null;
+    }
+
 
 
     private UsedTrade makeCreateDtoToUsedTrade(UsedTradeDto.Create dto) {

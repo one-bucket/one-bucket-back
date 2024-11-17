@@ -69,8 +69,8 @@ VALUES (1, 'GUEST'),
 INSERT INTO board_type (id, description, name, type)
 VALUES (1, '자유로운 말을 하는 곳', '자유게시판', 'post'),
        (2, '비밀스런 말을 하는 곳', '비밀게시판', 'post'),
-       (3, '공동 구매를 위한 곳', '공동구매 게시판', 'marketPost'),
-       (4, '중고 거래를 위한 곳', '중고거래 게시판', 'marketPost');
+       (3, '공동 구매를 위한 곳', '공동구매 게시판', 'groupTradePost'),
+       (4, '중고 거래를 위한 곳', '중고거래 게시판', 'groupTradePost');
 
 INSERT INTO board (id, description, name, board_type_id, university_id)
 VALUES (1, 'board', 'hong_free', 1, 2),

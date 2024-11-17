@@ -43,10 +43,13 @@ public class GroupTrade extends BaseTrade {
     public void addMember(Member member) {
         if (!joiners.contains(member)) {
             joiners.add(member);
+            joins++;
         }
     }
     public void deleteMember(Member member) {
-        joiners.remove(member);
+        if(joiners.remove(member)) {
+            joins--;
+        }
     }
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)

@@ -1,25 +1,22 @@
 package com.onebucket.integrationTest.ApiTest;
 
-import com.onebucket.domain.boardManage.dto.parents.PostDto;
+import com.onebucket.domain.boardManage.dto.postDto.PostDto;
 import com.onebucket.global.auth.jwtAuth.domain.JwtToken;
 import com.onebucket.global.utils.SuccessResponseDto;
 import com.onebucket.global.utils.SuccessResponseWithIdDto;
 import com.onebucket.testComponent.testSupport.BoardRestDocsSupport;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.web.socket.server.standard.TomcatRequestUpgradeStrategy;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.onebucket.testComponent.testUtils.JsonFieldResultMatcher.hasKey;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.ClassBasedNavigableIterableAssert.assertThat;
 import static org.springframework.restdocs.http.HttpDocumentation.httpRequest;
 import static org.springframework.restdocs.http.HttpDocumentation.httpResponse;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;

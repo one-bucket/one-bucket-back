@@ -1,6 +1,6 @@
 package com.onebucket.domain.boardManage.dto.request;
 
-import com.onebucket.domain.boardManage.dto.parents.MarketPostDto;
+import com.onebucket.domain.boardManage.dto.postDto.GroupTradePostDto;
 import com.onebucket.domain.tradeManage.dto.TradeDto;
 import jakarta.validation.Valid;
 import lombok.Getter;
@@ -24,7 +24,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class RequestUpdateMarketPostDto {
     @Valid
-    MarketPostDto.Update marketPostUpdateDto;
+    GroupTradePostDto.Update marketPostUpdateDto;
 
     @Valid
     TradeDto.Update tradeUpdateDto;

@@ -1,14 +1,26 @@
 package com.onebucket.domain.chatManager.api;
 
 import com.onebucket.domain.chatManager.dto.ChatRoomDto;
+import com.onebucket.domain.chatManager.dto.ChatRoomInfoDto;
 import com.onebucket.domain.chatManager.entity.ChatRoomMemberId;
+import com.onebucket.domain.chatManager.entity.TradeType;
 import com.onebucket.domain.chatManager.mongo.ChatMessage;
 import com.onebucket.domain.chatManager.service.*;
 import com.onebucket.domain.memberManage.service.MemberService;
+import com.onebucket.domain.tradeManage.dto.BaseTradeDto;
+import com.onebucket.domain.tradeManage.dto.GroupTradeDto;
 import com.onebucket.domain.tradeManage.dto.TradeDto;
+import com.onebucket.domain.tradeManage.dto.UsedTradeDto;
+import com.onebucket.domain.tradeManage.service.BaseTradeServiceImpl;
+import com.onebucket.domain.tradeManage.service.GroupTradeService;
+import com.onebucket.domain.tradeManage.service.GroupTradeServiceImpl;
+import com.onebucket.domain.tradeManage.service.UsedTradeService;
+import com.onebucket.global.exceptionManage.customException.CommonException;
+import com.onebucket.global.exceptionManage.errorCode.CommonErrorCode;
 import com.onebucket.global.utils.SecurityUtils;
 import com.onebucket.global.utils.SuccessResponseDto;
 import com.onebucket.global.utils.SuccessResponseWithIdDto;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +33,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * <br>package name   : com.onebucket.domain.chatManager.controller
@@ -47,47 +60,38 @@ public class ChatRoomController {
     private final MemberService memberService;
     private final SSEChatListService sseChatListService;
 
+    private final UsedTradeService usedTradeService;
+    private final GroupTradeService groupTradeService;
 
-    @PostMapping("/room")
-    public ResponseEntity<SuccessResponseDto> createRoom(@RequestParam String name) {
-        String username = securityUtils.getCurrentUsername();
-        Long userId = memberService.usernameToId(username);
-        ChatRoomDto.CreateRoom dto = ChatRoomDto.CreateRoom.builder()
-                .memberId(userId)
-                .name(name)
-                .build();
-        String id = chatRoomService.createRoom(dto);
 
-        return ResponseEntity.ok(new SuccessResponseDto(id));
+    @GetMapping("/info/{roomId}")
+    public ResponseEntity<ChatRoomInfoDto<? extends BaseTradeDto.Info>> getRoomInfo(@PathVariable String roomId) {
 
-    }
+        ChatRoomDto.Info chatRoom = chatRoomService.getRoomInfo(roomId);
+        BaseTradeDto.Info trade;
 
-    @PostMapping("/join")
-    public ResponseEntity<SuccessResponseWithIdDto> joinRoom(@RequestParam String roomId) {
-        String username = securityUtils.getCurrentUsername();
-        Long userId = memberService.usernameToId(username);
-        ChatRoomDto.ManageMember dto = ChatRoomDto.ManageMember.builder()
-                .roomId(roomId)
-                .memberId(userId)
-                .build();
+        TradeType tradeType = chatRoom.getTradeType();
+        Long tradeId = chatRoom.getTradeId();
 
-        Long count = chatRoomService.addMember(dto);
+        ChatRoomInfoDto<?> chatRoomInfoDto = null;
 
-        return ResponseEntity.ok(new SuccessResponseWithIdDto("success add member", count));
-    }
+        if (Objects.requireNonNull(tradeType) == TradeType.USED) {
+            trade = usedTradeService.getInfo(tradeId);
 
-    @DeleteMapping("/quit")
-    public ResponseEntity<SuccessResponseDto> quitRoom(@RequestParam String roomId) {
-        String username = securityUtils.getCurrentUsername();
-        Long userId = memberService.usernameToId(username);
-        ChatRoomDto.ManageMember dto = ChatRoomDto.ManageMember.builder()
-                .roomId(roomId)
-                .memberId(userId)
-                .build();
+            chatRoomInfoDto = ChatRoomInfoDto.builder()
+                    .trade((UsedTradeDto.Info) trade)
+                    .chatRoom(chatRoom)
+                    .build();
+        } else if (tradeType == TradeType.GROUP) {
+            trade = groupTradeService.getInfo(tradeId);
 
-        chatRoomService.quitMember(dto);
+            chatRoomInfoDto = ChatRoomInfoDto.builder()
+                    .trade((GroupTradeDto.Info) trade)
+                    .chatRoom(chatRoom)
+                    .build();
+        }
 
-        return ResponseEntity.ok(new SuccessResponseDto("success quit member"));
+        return ResponseEntity.ok(chatRoomInfoDto);
     }
 
     @GetMapping("/memberList")
@@ -107,10 +111,6 @@ public class ChatRoomController {
         return ResponseEntity.ok(messages);
     }
 
-    @GetMapping("/trade/{chatRoomId}")
-    public ResponseEntity<TradeDto.ResponseInfo> getTradeInfo(@PathVariable("chatRoomId") String chatRoomId) {
-        return ResponseEntity.ok(TradeDto.ResponseInfo.of(chatRoomService.getTradeInfoOfChatRoom(chatRoomId)));
-    }
 
     @DeleteMapping("/bomb/{chatRoomId}")
     public ResponseEntity<SuccessResponseDto> bombRoom(@PathVariable("chatRoomId") String chatRoomId) {

@@ -7,12 +7,13 @@ import com.onebucket.domain.boardManage.dao.LikesMapRepository;
 import com.onebucket.domain.boardManage.dto.internal.comment.CreateCommentDto;
 import com.onebucket.domain.boardManage.dto.internal.comment.GetCommentDto;
 import com.onebucket.domain.boardManage.dto.internal.post.*;
-import com.onebucket.domain.boardManage.dto.parents.PostDto;
+import com.onebucket.domain.boardManage.dto.postDto.PostDto;
 import com.onebucket.domain.boardManage.dto.parents.ValueDto;
 import com.onebucket.domain.boardManage.entity.Board;
 import com.onebucket.domain.boardManage.entity.Comment;
 import com.onebucket.domain.boardManage.entity.LikesMap;
 import com.onebucket.domain.boardManage.entity.LikesMapId;
+import com.onebucket.domain.boardManage.entity.post.GroupTradePost;
 import com.onebucket.domain.boardManage.entity.post.Post;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
@@ -46,7 +47,7 @@ import java.util.List;
  * <span style="color: white;">[description]</span>
  * PostService에 관련된 추상 클래스이다. 이에 대한 구현 클래스는 {@link PostService} 와 {@link MarketPostService} 이다.
  * 각 메서드는 {@link BasePostService} 에서 정의되어 있으며 이는 유사하나 다른 두 엔티티
- * {@link Post} 와 {@link com.onebucket.domain.boardManage.entity.post.MarketPost MarketPost} 를 사용한다.
+ * {@link Post} 와 {@link GroupTradePost MarketPost} 를 사용한다.
  * 두 엔티티는 각기 다른 DAO를 가지고 있고 따라서 엔티티와 DAO에 관한 제네릭을 사용하여 정의하였다.
  *
  * 메서드가 겹치는 경우, 해당 클래스에서 정의하였고, 칼럼의 차이로 안해 변경이 생기는 경우, 이를 추상 메서드로 선언하거나

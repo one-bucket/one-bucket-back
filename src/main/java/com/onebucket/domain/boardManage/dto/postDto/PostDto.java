@@ -1,4 +1,4 @@
-package com.onebucket.domain.boardManage.dto.parents;
+package com.onebucket.domain.boardManage.dto.postDto;
 
 import com.onebucket.domain.boardManage.dto.internal.comment.GetCommentDto;
 import lombok.AllArgsConstructor;

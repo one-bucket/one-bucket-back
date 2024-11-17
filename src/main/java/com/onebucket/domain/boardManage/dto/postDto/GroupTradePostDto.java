@@ -1,4 +1,4 @@
-package com.onebucket.domain.boardManage.dto.parents;
+package com.onebucket.domain.boardManage.dto.postDto;
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.onebucket.domain.tradeManage.dto.TradeDto;
@@ -19,7 +19,7 @@ import lombok.experimental.SuperBuilder;
  *
  * } </pre>
  */
-public class MarketPostDto {
+public class GroupTradePostDto {
 
     @Getter
     @SuperBuilder
