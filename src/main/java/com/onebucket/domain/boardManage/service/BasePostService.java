@@ -2,8 +2,10 @@ package com.onebucket.domain.boardManage.service;
 
 import com.onebucket.domain.boardManage.dto.internal.comment.CreateCommentDto;
 import com.onebucket.domain.boardManage.dto.internal.post.*;
-import com.onebucket.domain.boardManage.dto.parents.PostDto;
+import com.onebucket.domain.boardManage.dto.postDto.GroupTradePostDto;
+import com.onebucket.domain.boardManage.dto.postDto.PostDto;
 import com.onebucket.domain.boardManage.dto.parents.ValueDto;
+import com.onebucket.domain.boardManage.entity.post.GroupTradePost;
 import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,9 +23,9 @@ public interface BasePostService {
     /**
      * 새로운 post를 생성하는 메서드이다. 다만, 해당 객체가
      * {@link com.onebucket.domain.boardManage.entity.post.Post Post} 혹은
-     * {@link com.onebucket.domain.boardManage.entity.post.MarketPost MarketPost} 이고 따라서 생성을 위한
+     * {@link GroupTradePost MarketPost} 이고 따라서 생성을 위한
      * 매개 변수가 다르다. 이는 {@link PostDto.Create} 와 이를 상속받는
-     * {@link com.onebucket.domain.boardManage.dto.parents.MarketPostDto.Create MarketPostDto.Create}
+     * {@link GroupTradePostDto.Create MarketPostDto.Create}
      * 으로 구성될 수 있으며, 제네릭을 사용하여 정의하였다.
      * <br>
      * 해당 메서드 내부의 {@code convertCreatePostDtoToPost} 는 {@code protected abstract} 메서드로 정의하였으며
@@ -97,7 +99,7 @@ public interface BasePostService {
      * 엔티티 자체를 넘겨주기 보단, 엔티티를 {@link PostDto.Thumbnail}로 변환하는데 이를 위해
      * {@code convertPostToTHumbnailDto} 를 사용한다. 이는 추상 메서드이며 구현 클래스에서 이를 구현할
      * 의무를 가진다. 실제 {@code marketPost}의 경우 이를 상속받는
-     * {@link com.onebucket.domain.boardManage.dto.parents.MarketPostDto.Thumbnail MarketPostDto.Thumnail}
+     * {@link GroupTradePostDto.Thumbnail MarketPostDto.Thumnail}
      * 에 대한 매핑을 수행하며, 타입 캐스팅을 통해 컨트롤러에서 변환하여 사용한다.
      * @param dto boardId와 Pageable 이 저장되어 있음
      * @return Post를 dto로 변환한 PstDto.Thumbnail에 대한 Page

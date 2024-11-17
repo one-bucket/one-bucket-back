@@ -4,7 +4,7 @@ import com.onebucket.domain.boardManage.dto.internal.board.BoardIdsDto;
 import com.onebucket.domain.boardManage.entity.Board;
 import com.onebucket.domain.boardManage.entity.BoardType;
 import com.onebucket.domain.boardManage.entity.Comment;
-import com.onebucket.domain.boardManage.entity.post.MarketPost;
+import com.onebucket.domain.boardManage.entity.post.GroupTradePost;
 import com.onebucket.domain.boardManage.entity.post.Post;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
@@ -119,14 +119,14 @@ class BoardDaoTest {
 
         Post savedPost = postRepository.save(post);
 
-        MarketPost marketPost = MarketPost.builder()
+        GroupTradePost groupTradePost = GroupTradePost.builder()
                 .board(savedBoard)
                 .author(member)
                 .title("market title")
                 .text("market text")
                 .build();
 
-        MarketPost savedMarketPost = marketPostRepository.save(marketPost);
+        GroupTradePost savedGroupTradePost = marketPostRepository.save(groupTradePost);
 
         //순서 4: 해당 post 에 대한 comment 저장
         Comment comment = Comment.builder()
@@ -153,7 +153,7 @@ class BoardDaoTest {
                 .parentComment(null)  //안 적어도 되나 테스트 코드인 만큼 명시
                 .isModified(false)
                 .author(member)
-                .post(savedMarketPost)
+                .post(savedGroupTradePost)
                 .text("market comment text")
                 .build();
 
@@ -164,7 +164,7 @@ class BoardDaoTest {
                 .parentComment(mSavedComment)
                 .isModified(false)
                 .author(member)
-                .post(savedMarketPost)
+                .post(savedGroupTradePost)
                 .text("market reply text")
                 .build();
         commentRepository.save(mReply);
