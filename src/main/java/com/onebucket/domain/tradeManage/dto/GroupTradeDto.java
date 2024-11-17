@@ -1,12 +1,10 @@
 package com.onebucket.domain.tradeManage.dto;
 
-import com.onebucket.domain.tradeManage.entity.GroupTrade;
-import com.onebucket.domain.tradeManage.entity.TradeTag;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import net.minidev.json.annotate.JsonIgnore;
 
 import java.util.List;
 
@@ -58,21 +56,24 @@ public class GroupTradeDto {
     @SuperBuilder
     @Getter
     @NoArgsConstructor
-    public static class ResponseInfo extends Info {
+    public static class ListedInfo extends BaseTradeDto.Info {
 
         @JsonIgnore
         private List<JoinMember> joinMember;
     }
 
     @Getter
+    @SuperBuilder
     public static class UpdateTrade extends BaseTradeDto.UpdateTrade {
         private Long wanted;
         private Long count;
 
-        public UpdateTrade(Base base, GroupTrade trade, TradeTag tag) {
-            super(base, trade, tag);
-            this.wanted = base.getWanted();
-            this.count = base.getCount();
-        }
+    }
+
+    @Getter
+    @SuperBuilder
+    public static class Update extends BaseTradeDto.Update {
+        private Long wanted;
+        private Long count;
     }
 }

@@ -1,8 +1,8 @@
-package com.onebucket.domain.boardManage.service;
+package com.onebucket.domain.boardManage.service.postService;
 
 import com.onebucket.domain.boardManage.dao.BoardRepository;
 import com.onebucket.domain.boardManage.dao.CommentRepository;
-import com.onebucket.domain.boardManage.dao.GroupTradePostRepository;
+import com.onebucket.domain.boardManage.dao.postRepository.GroupTradePostRepository;
 import com.onebucket.domain.boardManage.dao.LikesMapRepository;
 import com.onebucket.domain.boardManage.dto.postDto.GroupTradePostDto;
 import com.onebucket.domain.boardManage.dto.postDto.PostDto;
@@ -82,7 +82,7 @@ implements GroupTradePostService {
 
     @Override
     public Page<GroupTradePostDto.InternalThumbnail> getPostByTradeIdList(GroupTradePostDto.TradeIdsPageDto dto) {
-        return repository.findByPendingTradeIds(dto.getTradeIds(), dto.getPageable())
+        return repository.findByTradeIds(dto.getTradeIds(), dto.getPageable())
                 .map((post) -> (GroupTradePostDto.InternalThumbnail) convertPostToThumbnail(post));
     }
 }

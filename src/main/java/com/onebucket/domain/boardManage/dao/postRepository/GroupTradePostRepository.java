@@ -1,4 +1,4 @@
-package com.onebucket.domain.boardManage.dao;
+package com.onebucket.domain.boardManage.dao.postRepository;
 
 import com.onebucket.domain.boardManage.entity.post.GroupTradePost;
 import org.springframework.data.domain.Page;
@@ -24,6 +24,6 @@ import java.util.List;
  */
 @Repository
 public interface GroupTradePostRepository extends BasePostRepository<GroupTradePost> {
-    @Query("SELECT mp FROM GroupTradePost mp WHERE mp.groupTrade.id IN :pendingTradeIds")
-    Page<GroupTradePost> findByPendingTradeIds(List<Long> pendingTradeIds, Pageable pageable);
+    @Query("SELECT mp FROM GroupTradePost mp WHERE mp.groupTrade.id IN :tradeIds")
+    Page<GroupTradePost> findByTradeIds(List<Long> tradeIds, Pageable pageable);
 }

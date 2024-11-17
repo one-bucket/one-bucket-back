@@ -1,4 +1,4 @@
-package com.onebucket.domain.boardManage.dao;
+package com.onebucket.domain.boardManage.dao.postRepository;
 
 import com.onebucket.domain.boardManage.entity.post.Post;
 

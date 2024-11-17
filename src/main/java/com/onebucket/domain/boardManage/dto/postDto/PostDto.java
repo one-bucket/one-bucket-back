@@ -77,6 +77,9 @@ public class PostDto {
         private LocalDateTime modifiedDate;
         private List<String> imageUrls;
 
+        private Long views;
+        private Long likes;
+
     }
 
     @Getter
@@ -84,10 +87,8 @@ public class PostDto {
     @SuperBuilder
     @NoArgsConstructor
     public static class Thumbnail extends InternalThumbnail {
-        private Long views;
         private Long likes;
         private Long commentsCount;
-
     }
 
 
@@ -106,23 +107,6 @@ public class PostDto {
     @NoArgsConstructor
     public static class ResponseInfo extends Info {
         private boolean isUserAlreadyLikes;
-
-
-        public static ResponseInfo of(Info info) {
-            return ResponseInfo.builder()
-                    .postId(info.getPostId())
-                    .boardId(info.getBoardId())
-                    .authorNickname(info.getAuthorNickname())
-                    .createdDate(info.getCreatedDate())
-                    .modifiedDate(info.getModifiedDate())
-                    .comments(info.getComments())
-                    .title(info.getTitle())
-                    .text(info.getText())
-                    .likes(info.getLikes())
-                    .views(info.getViews())
-                    .imageUrls(info.getImageUrls())
-                    .build();
-        }
     }
 
 

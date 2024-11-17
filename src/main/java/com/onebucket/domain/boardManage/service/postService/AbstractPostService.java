@@ -1,6 +1,6 @@
-package com.onebucket.domain.boardManage.service;
+package com.onebucket.domain.boardManage.service.postService;
 
-import com.onebucket.domain.boardManage.dao.BasePostRepository;
+import com.onebucket.domain.boardManage.dao.postRepository.BasePostRepository;
 import com.onebucket.domain.boardManage.dao.BoardRepository;
 import com.onebucket.domain.boardManage.dao.CommentRepository;
 import com.onebucket.domain.boardManage.dao.LikesMapRepository;
@@ -8,7 +8,7 @@ import com.onebucket.domain.boardManage.dto.internal.comment.CreateCommentDto;
 import com.onebucket.domain.boardManage.dto.internal.comment.GetCommentDto;
 import com.onebucket.domain.boardManage.dto.internal.post.*;
 import com.onebucket.domain.boardManage.dto.postDto.PostDto;
-import com.onebucket.domain.boardManage.dto.parents.ValueDto;
+import com.onebucket.domain.boardManage.dto.postDto.PostKeyDto;
 import com.onebucket.domain.boardManage.entity.Board;
 import com.onebucket.domain.boardManage.entity.Comment;
 import com.onebucket.domain.boardManage.entity.LikesMap;
@@ -45,7 +45,7 @@ import java.util.List;
  * <br>date           : 2024-09-21
  * <pre>
  * <span style="color: white;">[description]</span>
- * PostService에 관련된 추상 클래스이다. 이에 대한 구현 클래스는 {@link PostService} 와 {@link MarketPostService} 이다.
+ * PostService에 관련된 추상 클래스이다. 이에 대한 구현 클래스는 {@link PostService} 와 {@link GroupTradePostService} 이다.
  * 각 메서드는 {@link BasePostService} 에서 정의되어 있으며 이는 유사하나 다른 두 엔티티
  * {@link Post} 와 {@link GroupTradePost MarketPost} 를 사용한다.
  * 두 엔티티는 각기 다른 DAO를 가지고 있고 따라서 엔티티와 DAO에 관한 제네릭을 사용하여 정의하였다.
@@ -96,7 +96,7 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
     //READ
     @Override
     @Transactional(readOnly = true)
-    public Page<PostDto.InternalThumbnail> getPostsByBoard(ValueDto.PageablePost dto) {
+    public Page<PostDto.InternalThumbnail> getPostsByBoard(PostKeyDto.BoardPage dto) {
         return repository.findByBoardId(dto.getBoardId(), dto.getPageable())
                 .map(this::convertPostToThumbnail);
     }
@@ -104,7 +104,7 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
 
     @Override
     @Transactional(readOnly = true)
-    public Page<PostDto.InternalThumbnail> getSearchResult(ValueDto.SearchPageablePost dto) {
+    public Page<PostDto.InternalThumbnail> getSearchResult(PostKeyDto.SearchPage dto) {
         String keyword = dto.getKeyword();
         //1 is for title, 2 is for text, 3 is for title + text.
         Integer option = dto.getOption();
@@ -125,14 +125,14 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
 
     @Override
     @Transactional(readOnly = true)
-    public Page<PostDto.InternalThumbnail> getPostByAuthorId(ValueDto.AuthorPageablePost dto) {
+    public Page<PostDto.InternalThumbnail> getPostByAuthorId(PostKeyDto.AuthorPage dto) {
         return repository.findByAuthorId(dto.getUserId(), dto.getPageable())
                 .map(this::convertPostToThumbnailDtoInternal);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public PostDto.Info getPost(ValueDto.GetPost dto) {
+    public PostDto.Info getPost(PostKeyDto.PostKey dto) {
         T post = findPost(dto.getPostId());
 
         List<GetCommentDto> comments = post.getComments().stream()
@@ -159,7 +159,7 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
 
     @Override
     @Transactional
-    public void increaseViewCount(ValueDto.FindPost dto) {
+    public void increaseViewCount(PostKeyDto.UserPost dto) {
 
         Long userId = dto.getUserId();
         Long postId = dto.getPostId();
@@ -190,7 +190,7 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
     }
 
     @Override
-    public void increaseLikesCount(ValueDto.FindPost dto) {
+    public void increaseLikesCount(PostKeyDto.UserPost dto) {
         Member member = findMember(dto.getUserId());
         Post post = findPost(dto.getPostId());
 
@@ -214,7 +214,7 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
     }
 
     @Override
-    public void decreaseLikesCount(ValueDto.FindPost dto) {
+    public void decreaseLikesCount(PostKeyDto.UserPost dto) {
         LikesMapId likesMapId = LikesMapId.builder()
                 .member(dto.getUserId())
                 .post(dto.getPostId())
@@ -234,23 +234,12 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
     //DELETE
     @Override
     @Transactional
-    public void deletePost(ValueDto.FindPost dto) {
+    public void deletePost(PostKeyDto.PostKey dto) {
         T findPost = findPost(dto.getPostId());
-        Member author = findPost.getAuthor();
-        if (author == null) {
-            throw new UserBoardException(BoardErrorCode.I_AM_AN_APPLE_PIE, "maybe, author is null");
-        }
-        Long authorId = author.getId();
 
-        if(authorId.equals(dto.getUserId())) {
-            repository.delete(findPost);
+        repository.delete(findPost);
 
-            initPostImage(dto.getPostId());
-
-        } else {
-            throw new AuthenticationException(AuthenticationErrorCode.UNAUTHORIZED_ACCESS,
-                    "you are not allowed to edit this post");
-        }
+        initPostImage(dto.getPostId());
     }
 
     @Override
@@ -299,7 +288,7 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
     @Override
     @Transactional
     @CacheEvict(value = "commentCountCache", key = "#dto.postId")
-    public void deleteCommentFromPost(ValueDto.FindComment dto) {
+    public void deleteCommentFromPost(PostKeyDto.CommentKey dto) {
         Comment comment = commentRepository.findById(dto.getCommentId()).orElseThrow(() ->
                 new UserBoardException(BoardErrorCode.UNKNOWN_COMMENT));
         Long commentPostId = comment.getPostId();
@@ -327,7 +316,7 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
     }
 
     @Override
-    public boolean isUserLikesPost(ValueDto.FindPost dto) {
+    public boolean isUserLikesPost(PostKeyDto.UserPost dto) {
         LikesMapId id = LikesMapId.builder()
                 .post(dto.getPostId())
                 .member(dto.getUserId())
@@ -439,17 +428,12 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
                 .createdDate(post.getCreatedDate())
                 .modifiedDate(post.getModifiedDate())
                 .imageUrls(post.getImageUrls())
+                .views(post.getViews())
+                .likes(post.getLikes())
                 .build();
 
         return setThumbnailForOtherInfo(thumbnail, post);
     }
-
-
-
-
     protected abstract PostDto.InternalThumbnail setThumbnailForOtherInfo(PostDto.InternalThumbnail dto, T post);
-
-
     protected abstract <D extends PostDto.Create> T convertCreatePostDtoToPost(D dto);
-
 }

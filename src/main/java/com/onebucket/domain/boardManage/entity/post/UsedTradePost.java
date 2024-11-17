@@ -29,4 +29,7 @@ public class UsedTradePost extends Post {
     @OneToOne(cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
     @JoinColumn(name = "trade_id")
     private UsedTrade usedTrade;
+
+    @Column(name = "trade_id", insertable = false, updatable = false)
+    private Long usedTradeId;
 }

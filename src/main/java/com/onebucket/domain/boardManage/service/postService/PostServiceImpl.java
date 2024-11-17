@@ -1,11 +1,10 @@
-package com.onebucket.domain.boardManage.service;
+package com.onebucket.domain.boardManage.service.postService;
 
 import com.onebucket.domain.boardManage.dao.BoardRepository;
 import com.onebucket.domain.boardManage.dao.CommentRepository;
 import com.onebucket.domain.boardManage.dao.LikesMapRepository;
-import com.onebucket.domain.boardManage.dao.PostRepository;
+import com.onebucket.domain.boardManage.dao.postRepository.PostRepository;
 
-import com.onebucket.domain.boardManage.dto.internal.comment.GetCommentDto;
 import com.onebucket.domain.boardManage.dto.postDto.PostDto;
 import com.onebucket.domain.boardManage.entity.Board;
 
@@ -19,7 +18,6 @@ import com.onebucket.global.utils.SecurityUtils;
 
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 
 
 /**
@@ -71,50 +69,7 @@ public class PostServiceImpl extends AbstractPostService<Post, PostRepository> i
     }
 
     @Override
-    protected PostDto.Thumbnail convertPostToThumbnailDto(Post post) {
-
-        String nickname = "(unknown)";
-        Member member = post.getAuthor();
-        if(member != null) {
-            nickname = member.getNickname();
-        }
-
-        PostDto.Thumbnail val =  PostDto.Thumbnail.builder()
-                .views(post.getViews())
-                .likes(post.getLikes())
-                .title(post.getTitle())
-                .text(post.getText())
-                .boardId(post.getBoardId())
-                .authorNickname(nickname)
-                .createdDate(post.getCreatedDate())
-                .modifiedDate(post.getModifiedDate())
-                .postId(post.getId())
-                .imageUrls(post.getImageUrls())
-                .build();
-
-        return val;
-    }
-
-    @Override
-    protected PostDto.Info convertPostToPostInfoDto(Post post, List<GetCommentDto> comments) {
-        String nickname = "(unknown)";
-        Member member = post.getAuthor();
-        if (member != null) {
-            nickname = member.getNickname();
-        }
-
-        return PostDto.Info.builder()
-                .postId(post.getId())
-                .views(post.getViews())
-                .likes(post.getLikes())
-                .title(post.getTitle())
-                .text(post.getText())
-                .boardId(post.getBoardId())
-                .authorNickname(nickname)
-                .createdDate(post.getCreatedDate())
-                .modifiedDate(post.getModifiedDate())
-                .comments(comments)
-                .imageUrls(post.getImageUrls())
-                .build();
+    protected PostDto.InternalThumbnail setThumbnailForOtherInfo(PostDto.InternalThumbnail dto, Post post) {
+        return dto;
     }
 }

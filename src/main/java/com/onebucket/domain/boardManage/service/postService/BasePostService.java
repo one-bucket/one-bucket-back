@@ -1,10 +1,9 @@
-package com.onebucket.domain.boardManage.service;
+package com.onebucket.domain.boardManage.service.postService;
 
 import com.onebucket.domain.boardManage.dto.internal.comment.CreateCommentDto;
 import com.onebucket.domain.boardManage.dto.internal.post.*;
-import com.onebucket.domain.boardManage.dto.postDto.GroupTradePostTmp;
 import com.onebucket.domain.boardManage.dto.postDto.PostDto;
-import com.onebucket.domain.boardManage.dto.parents.ValueDto;
+import com.onebucket.domain.boardManage.dto.postDto.PostKeyDto;
 import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,7 +23,7 @@ public interface BasePostService {
      * {@link com.onebucket.domain.boardManage.entity.post.Post Post} 혹은
      * {@link com.onebucket.domain.boardManage.entity.post.GroupTradePost MarketPost} 이고 따라서 생성을 위한
      * 매개 변수가 다르다. 이는 {@link PostDto.Create} 와 이를 상속받는
-     * {@link GroupTradePostTmp.Create MarketPostDto.Create}
+     * {@link com.onebucket.domain.boardManage.dto.postDto.GroupTradePostDto.Create MarketPostDto.Create}
      * 으로 구성될 수 있으며, 제네릭을 사용하여 정의하였다.
      * <br>
      * 해당 메서드 내부의 {@code convertCreatePostDtoToPost} 는 {@code protected abstract} 메서드로 정의하였으며
@@ -36,22 +35,103 @@ public interface BasePostService {
      */
     <D extends PostDto.Create> Long createPost(D dto);
 
-    <D extends PostDto.Update> Long updatePost(D dto);
+    /**
+     * 게시팜 id를 기반으로 해당하는 모든 post에 대한 정보를 반환하는 로직. 보통의 경우, 해당 게시판의
+     * 리스트를 생성하고 반환하는데 사용한다. 컨트롤러 레이어로부터 {@code Pageable} 객체를 받아 이를 기반으로
+     * 데이터베이스에서 검색하여 {@code Poge} 로 래핑하여 건내준다.
+     * <br>
+     * 엔티티 자체를 넘겨주기 보단, 엔티티를 {@link PostDto.Thumbnail}로 변환하는데 이를 위해
+     * {@code convertPostToTHumbnailDto} 를 사용한다. 이는 추상 메서드이며 구현 클래스에서 이를 구현할
+     * 의무를 가진다. 실제 {@code marketPost}의 경우 이를 상속받는
+     * {@link com.onebucket.domain.boardManage.dto.postDto.GroupTradePostDto.Thumbnail MarketPostDto.Thumnail}
+     * 에 대한 매핑을 수행하며, 타입 캐스팅을 통해 컨트롤러에서 변환하여 사용한다.
+     * @param dto boardId와 Pageable 이 저장되어 있음
+     * @return Post를 dto로 변환한 PstDto.Thumbnail에 대한 Page
+     */
+    Page<PostDto.InternalThumbnail> getPostsByBoard(PostKeyDto.BoardPage dto);
 
     /**
-     * 기존에 존재하는 post를 삭제한다. {@link ValueDto.FindPost}는 {@code userId}와 {@code postId}
-     * 가 존재하는데, postId를 통해 특정 post를 불러와 매개변수로 받은 userId와 비교한다.
-     * <br>
-     * 이런 권한 문제를 컨트롤러 레이어에서 처리하지 않은 까닭은, 보편적인 데이터에 대한 read 권한이 아닌
-     * 어떤 특정 게시글에 대해 단 하나의 유저만이 이러한 삭제 요청을 수행할 수 있기 때문이다.
-     * @param dto - userId와 postId가 포함된 dto
-     * @throws com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException
-     *          자신의 게시글이 아닌 것에 대한 삭제 요청 시
-     *
-     * @throws com.onebucket.global.exceptionManage.customException.boardManageException.UserBoardException
-     *          사용자가 null인 경우 - 사용자가 탈퇴 후 옳바르지 않은 사용자가 삭제 요청 시
+     * post에 대한 keyword로 검색한다. dto에는 option 필드가 존재하는데 1은 제목, 2는 본문, 3은 제목 + 본문을
+     * 의미한다. 이후 데이터베이스에서 jqpl을 통해 커스터마이징한 repostiory 쿼리문을 통해 검색을 실시한다.
+     * @param dto keyword와 option이 저장되어 있다.
+     * @return 검색 결과에 대한 PostDto.Thumbnail의 Page로 구성되어 있다.
      */
-    void deletePost(ValueDto.FindPost dto);
+    Page<PostDto.InternalThumbnail> getSearchResult(PostKeyDto.SearchPage dto);
+
+    /**
+     * 사용자가 작성한 게시글 들을 반환한다. 해당 메서드는 추상 클래스에 선언되어 있고 따라서 이에 대한 구현 클래스에서
+     * 해당 메서드가 선언되는데, repository는 엔티티 별로 존재하고, 각 구현 클래스마다 별도로 주입되었으므로
+     * marketPost와 post가 분리되어 반환된다.
+     * @param dto authorId와 pageable 이 저장되어 있다.
+     * @return Post.Thumbnail에 대한 page
+     */
+    Page<PostDto.InternalThumbnail> getPostByAuthorId(PostKeyDto.AuthorPage dto);
+
+    /**
+     * postId에 대하여 해당 게시글에 대한 정보를{@link PostDto.Info} 로 반환한다. 해당 사용자가 해당 게시글에
+     * 접근할 수 있는 권한이 있는지에 대한 여부는 컨트롤러 레이어에서 판단해야 하며 해당 메서드는 오직 id에 대한 내용을
+     * 반환하는 로직만 담아야 한다.
+     * <br>
+     * 댓글의 경우, 댓글 전체 내용이 아닌, {@code convertToGetCommentDto} 인 private 메서드를 이용하여
+     * 필요한 정보만 dto로 매핑한다. reply에 대해(대댓글)서도 재귀적으로 호출하여 해결하도록 한다.
+     * @param dto postId만 저장되어 있다.
+     * @return PostDto.Info 로 post에 대한 정보를 담고 있다
+     */
+    PostDto.Info getPost(PostKeyDto.PostKey dto);
+
+    /**
+     * 모든 정보를 덮어씌워서 update 한다.
+     * @param dto post에 대한 정보가 담겨 있음
+     * @return 해당 post의 id
+     */
+    <D extends PostDto.Update> Long updatePost(D dto);
+    /**
+     * 어떤 사용자가 게시글을 확인할 때, 이에 대한 view를 증가시키는 메서드. 그러나 post에 대한 모든 get 요청마다
+     * 단순히 조회수를 1 올릴 경우 한 유저가 조회수를 계속 올릴 수 있는 문제가 발생할 수 있기에,
+     * 쿨타임을 설정하였다. 직접 mysql 에 테이블을 두고 저장하기 보다 redis를 사용하여 사용자의 조회 기록을 관리하고
+     * 최대 크기를 설정하여 메모리의 오버헤드를 줄인다.
+     * <br>
+     * redis의 sortedSet을 사용하여 조회 기록을 관리하였다. 사용자의 id와 조회한 post의 id, 조회할 당시의 시간 기록이다.
+     * 시간 기록의 경우, {@code currentTimeMillis} 에 대하여 밀리초를 떼어내고 이를 6자리로 만들어 저장한다.
+     * 6자리 넘는 초단위의 시간 차이가 나는 두 데이터가 이상하게 작동할 수 있지만 최대 expire hour를 설정함으로서 방지하였다.
+     * 시간을 기준으로 조회 기록을 저장하였고, 메모리의 오버헤드를 줄이기 위해 각 유저 별 저장할 수 있는 최대 조회수({@code MAX_SIZE})
+     * 가 넘으면, 가자 오래된 조회기록을 삭제하고 최신의 기록을 낸다. 만약 {@code EXPIRE_HOUR}을 넘긴 데이터가 존재한다면, 이역시 사라진다.
+     * @param dto userId와 postId가 저장되어 있다.
+     */
+    void increaseViewCount(PostKeyDto.UserPost dto);
+
+    /**
+     * 각 게시글의 좋아요를 추가하는 메서드이다. 개별적인 {@link com.onebucket.domain.boardManage.entity.LikesMap LikesMap}
+     * 을 이용하여 사용자과 게시글 간의 매핑 관게를 정의했으며 해당 테이블에 데이터를 저장/삭제를 통해 데이터를 관리하도록 한다.
+     * 또한 이 값을 redis에서 실시간으로 관리하는데 이는 post에 대한 조회가 발생할 시, 매번 해당 테이블에서 count 쿼리를
+     * 없애기 위해서이다.
+     * <br>
+     * redis에 저장된 값은 postId와 likes 인데, 이는 특정 시간대마다 초기화가 되며, 이때
+     * {@link com.onebucket.domain.boardManage.entity.LikesMap LikesMap}에서 해당 post에 대한 좋아요 수를 집계한다. 이때 집계할
+     * post는 redis에 저장된 key 들에 의해 정의되며 해당 key가 redis에 정의되어 있으면 배치 시스템이 정보를 갱신하여 post에 저장한다.
+     * <br>
+     * redis에 저장된 값은 이후 {@code Post} 나 이에 대한 {@code Thumbnail}이 조회되면, 현재 {@code Post}에 저장된
+     * {@code likes} 값과 redis에 저장된 값을 합쳐 산출하도록 한다.
+     * @param dto userId와 postId 가 저장되어 있다.
+     */
+    void increaseLikesCount(PostKeyDto.UserPost dto);
+
+    /**
+     * 좋아요를 철회/삭제하는 메서드이다. 기본적으로 userId와 postId를 받아
+     * {@link com.onebucket.domain.boardManage.entity.LikesMap LikesMap}에서 삭제를 요청하며
+     * 만약 데이터가 존재하지 않아 삭제가 되지 않는다면 예외를 뱉는다.
+     * 데이터 삭제가 성공한 경우 redis에 저장된 값을 1 줄인다. 다만 이는 음수가 될 수 있다.
+     * @param dto userId와 postId 가 저장되어 있다.
+     * @throws com.onebucket.global.exceptionManage.customException.boardManageException.UserBoardException <br>
+     *          BoardErrorCode.NOT_EXISTING / db에 해당 데이터가 없어 삭제를 진행할 수 없음.
+     */
+    void decreaseLikesCount(PostKeyDto.UserPost dto);
+
+    /**
+     * 삭제에 대한 권한은 컨트롤러에서 검증하고 , 실질적인 삭제만 담당한다.
+     * @param dto - postId만 존재
+     */
+    void deletePost(PostKeyDto.PostKey dto);
 
     void deleteImageOnPost(Long postId);
 
@@ -88,85 +168,8 @@ public interface BasePostService {
      *          BoardErrorCode.UNKOWN_COMMENT / commentId를 기반으로 검색했으나 해당하는 데이터 없음 <br>
      *          BoardErrorCode.UNKNOWN_POST / dto.postId와 comment의 postId가 일치하지 않음 / postId에 해당하는 레코드 없음
      */
-    void deleteCommentFromPost(ValueDto.FindComment dto);
+    void deleteCommentFromPost(PostKeyDto.CommentKey dto);
 
-    /**
-     * 게시팜 id를 기반으로 해당하는 모든 post에 대한 정보를 반환하는 로직. 보통의 경우, 해당 게시판의
-     * 리스트를 생성하고 반환하는데 사용한다. 컨트롤러 레이어로부터 {@code Pageable} 객체를 받아 이를 기반으로
-     * 데이터베이스에서 검색하여 {@code Poge} 로 래핑하여 건내준다.
-     * <br>
-     * 엔티티 자체를 넘겨주기 보단, 엔티티를 {@link PostDto.Thumbnail}로 변환하는데 이를 위해
-     * {@code convertPostToTHumbnailDto} 를 사용한다. 이는 추상 메서드이며 구현 클래스에서 이를 구현할
-     * 의무를 가진다. 실제 {@code marketPost}의 경우 이를 상속받는
-     * {@link GroupTradePostTmp.Thumbnail MarketPostDto.Thumnail}
-     * 에 대한 매핑을 수행하며, 타입 캐스팅을 통해 컨트롤러에서 변환하여 사용한다.
-     * @param dto boardId와 Pageable 이 저장되어 있음
-     * @return Post를 dto로 변환한 PstDto.Thumbnail에 대한 Page
-     */
-    Page<PostDto.InternalThumbnail> getPostsByBoard(ValueDto.PageablePost dto);
-
-    /**
-     * postId에 대하여 해당 게시글에 대한 정보를{@link PostDto.Info} 로 반환한다. 해당 사용자가 해당 게시글에
-     * 접근할 수 있는 권한이 있는지에 대한 여부는 컨트롤러 레이어에서 판단해야 하며 해당 메서드는 오직 id에 대한 내용을
-     * 반환하는 로직만 담아야 한다.
-     * <br>
-     * 댓글의 경우, 댓글 전체 내용이 아닌, {@code convertToGetCommentDto} 인 private 메서드를 이용하여
-     * 필요한 정보만 dto로 매핑한다. reply에 대해(대댓글)서도 재귀적으로 호출하여 해결하도록 한다.
-     * @param dto postId만 저장되어 있다.
-     * @return PostDto.Info 로 post에 대한 정보를 담고 있다
-     */
-    PostDto.Info getPost(ValueDto.GetPost dto);
-
-    /**
-     * 사용자가 작성한 게시글 들을 반환한다. 해당 메서드는 추상 클래스에 선언되어 있고 따라서 이에 대한 구현 클래스에서
-     * 해당 메서드가 선언되는데, repository는 엔티티 별로 존재하고, 각 구현 클래스마다 별도로 주입되었으므로
-     * marketPost와 post가 분리되어 반환된다.
-     * @param dto authorId와 pageable 이 저장되어 있다.
-     * @return Post.Thumbnail에 대한 page
-     */
-    Page<PostDto.InternalThumbnail> getPostByAuthorId(ValueDto.AuthorPageablePost dto);
-
-    /**
-     * 어떤 사용자가 게시글을 확인할 때, 이에 대한 view를 증가시키는 메서드. 그러나 post에 대한 모든 get 요청마다
-     * 단순히 조회수를 1 올릴 경우 한 유저가 조회수를 계속 올릴 수 있는 문제가 발생할 수 있기에,
-     * 쿨타임을 설정하였다. 직접 mysql 에 테이블을 두고 저장하기 보다 redis를 사용하여 사용자의 조회 기록을 관리하고
-     * 최대 크기를 설정하여 메모리의 오버헤드를 줄인다.
-     * <br>
-     * redis의 sortedSet을 사용하여 조회 기록을 관리하였다. 사용자의 id와 조회한 post의 id, 조회할 당시의 시간 기록이다.
-     * 시간 기록의 경우, {@code currentTimeMillis} 에 대하여 밀리초를 떼어내고 이를 6자리로 만들어 저장한다.
-     * 6자리 넘는 초단위의 시간 차이가 나는 두 데이터가 이상하게 작동할 수 있지만 최대 expire hour를 설정함으로서 방지하였다.
-     * 시간을 기준으로 조회 기록을 저장하였고, 메모리의 오버헤드를 줄이기 위해 각 유저 별 저장할 수 있는 최대 조회수({@code MAX_SIZE})
-     * 가 넘으면, 가자 오래된 조회기록을 삭제하고 최신의 기록을 낸다. 만약 {@code EXPIRE_HOUR}을 넘긴 데이터가 존재한다면, 이역시 사라진다.
-     * @param dto userId와 postId가 저장되어 있다.
-     */
-    void increaseViewCount(ValueDto.FindPost dto);
-
-    /**
-     * 각 게시글의 좋아요를 추가하는 메서드이다. 개별적인 {@link com.onebucket.domain.boardManage.entity.LikesMap LikesMap}
-     * 을 이용하여 사용자과 게시글 간의 매핑 관게를 정의했으며 해당 테이블에 데이터를 저장/삭제를 통해 데이터를 관리하도록 한다.
-     * 또한 이 값을 redis에서 실시간으로 관리하는데 이는 post에 대한 조회가 발생할 시, 매번 해당 테이블에서 count 쿼리를
-     * 없애기 위해서이다.
-     * <br>
-     * redis에 저장된 값은 postId와 likes 인데, 이는 특정 시간대마다 초기화가 되며, 이때
-     * {@link com.onebucket.domain.boardManage.entity.LikesMap LikesMap}에서 해당 post에 대한 좋아요 수를 집계한다. 이때 집계할
-     * post는 redis에 저장된 key 들에 의해 정의되며 해당 key가 redis에 정의되어 있으면 배치 시스템이 정보를 갱신하여 post에 저장한다.
-     * <br>
-     * redis에 저장된 값은 이후 {@code Post} 나 이에 대한 {@code Thumbnail}이 조회되면, 현재 {@code Post}에 저장된
-     * {@code likes} 값과 redis에 저장된 값을 합쳐 산출하도록 한다.
-     * @param dto userId와 postId 가 저장되어 있다.
-     */
-    void increaseLikesCount(ValueDto.FindPost dto);
-
-    /**
-     * 좋아요를 철회/삭제하는 메서드이다. 기본적으로 userId와 postId를 받아
-     * {@link com.onebucket.domain.boardManage.entity.LikesMap LikesMap}에서 삭제를 요청하며
-     * 만약 데이터가 존재하지 않아 삭제가 되지 않는다면 예외를 뱉는다.
-     * 데이터 삭제가 성공한 경우 redis에 저장된 값을 1 줄인다. 다만 이는 음수가 될 수 있다.
-     * @param dto userId와 postId 가 저장되어 있다.
-     * @throws com.onebucket.global.exceptionManage.customException.boardManageException.UserBoardException <br>
-     *          BoardErrorCode.NOT_EXISTING / db에 해당 데이터가 없어 삭제를 진행할 수 없음.
-     */
-    void decreaseLikesCount(ValueDto.FindPost dto);
 
     /**
      * 현재 게시글의 댓글 개수를 반환하는 메서드. 레포지토리에서 postId에 대하여 count문을 이용해 값을 센다.
@@ -198,7 +201,7 @@ public interface BasePostService {
      * @param dto postId와 userId가 저장되어 있다.
      * @return 해당 사용자가 해당 post에 좋아요를 눌렀는지(테이블에 값이 저장되어 있는지)에 대해 boolean 반환
      */
-    boolean isUserLikesPost(ValueDto.FindPost dto);
+    boolean isUserLikesPost(PostKeyDto.UserPost dto);
 
 
     /**
@@ -218,11 +221,4 @@ public interface BasePostService {
      */
     void saveImage(MultipartFile multipartFile, SaveImageDto dto);
 
-    /**
-     * post에 대한 keyword로 검색한다. dto에는 option 필드가 존재하는데 1은 제목, 2는 본문, 3은 제목 + 본문을
-     * 의미한다. 이후 데이터베이스에서 jqpl을 통해 커스터마이징한 repostiory 쿼리문을 통해 검색을 실시한다.
-     * @param dto keyword와 option이 저장되어 있다.
-     * @return 검색 결과에 대한 PostDto.Thumbnail의 Page로 구성되어 있다.
-     */
-    Page<PostDto.InternalThumbnail> getSearchResult(ValueDto.SearchPageablePost dto);
 }

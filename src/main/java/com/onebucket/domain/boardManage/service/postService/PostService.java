@@ -1,4 +1,4 @@
-package com.onebucket.domain.boardManage.service;
+package com.onebucket.domain.boardManage.service.postService;
 
 
 /**

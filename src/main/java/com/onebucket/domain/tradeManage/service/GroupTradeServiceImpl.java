@@ -169,6 +169,11 @@ public class GroupTradeServiceImpl extends AbstractTradeService<GroupTrade, Grou
         repository.save(groupTrade);
     }
 
+    @Override
+    public List<Long> getJoinedTrade(Long userId) {
+        return repository.findTradeIdsByMemberId(userId);
+    }
+
     private GroupTrade makeCreateDtoToGroupTrade(GroupTradeDto.Create dto) {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime localDateTimeDueDate = now.plusDays(dto.getDueDate());

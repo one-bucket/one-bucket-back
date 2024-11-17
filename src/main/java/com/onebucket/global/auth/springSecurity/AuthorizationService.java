@@ -1,13 +1,12 @@
 package com.onebucket.global.auth.springSecurity;
 
 import com.onebucket.domain.boardManage.dao.BoardRepository;
-import com.onebucket.domain.boardManage.dao.PostRepository;
+import com.onebucket.domain.boardManage.dao.postRepository.PostRepository;
 import com.onebucket.domain.boardManage.entity.Board;
 import com.onebucket.domain.boardManage.entity.post.Post;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.domain.tradeManage.dao.pendingTrade.BaseTradeRepository;
-import com.onebucket.domain.tradeManage.dao.pendingTrade.TradeRepository;
 import com.onebucket.domain.tradeManage.entity.BaseTrade;
 import com.onebucket.domain.universityManage.domain.University;
 import com.onebucket.global.exceptionManage.customException.TradeManageException.TradeException;
