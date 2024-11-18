@@ -50,7 +50,7 @@ public interface BasePostRepository<T extends Post> extends JpaRepository<T, Lon
             SELECT p FROM Post p
             WHERE p.board.id = :boardId
             AND (
-                :keyword IS NULL OR p.title Like %:keyword% OR p.text LIKE %:keyword$%
+                :keyword IS NULL OR p.title Like %:keyword% OR p.text LIKE %:keyword%
             )
         """)
     Page<T> searchPosts(@Param("keyword") String keyword,

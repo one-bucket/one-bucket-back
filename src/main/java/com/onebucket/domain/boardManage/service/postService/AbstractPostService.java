@@ -108,19 +108,18 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
         String keyword = dto.getKeyword();
         //1 is for title, 2 is for text, 3 is for title + text.
         Integer option = dto.getOption();
-        Page<T> posts;
         if(option == 1) {
-            posts = repository.searchPostsByTitle(keyword, dto.getBoardId(),dto.getPageable());
+            return repository.searchPostsByTitle(keyword, dto.getBoardId(),dto.getPageable())
+                    .map(this::convertPostToThumbnail);
         } else if(option == 2) {
-            posts = repository.searchPostsByText(keyword, dto.getBoardId(), dto.getPageable());
+            return repository.searchPostsByText(keyword, dto.getBoardId(), dto.getPageable())
+                    .map(this::convertPostToThumbnail);
         } else if(option == 3) {
-            posts = repository.searchPosts(keyword, dto.getBoardId(), dto.getPageable());
+            return repository.searchPosts(keyword, dto.getBoardId(), dto.getPageable())
+                    .map(this::convertPostToThumbnail);
         } else {
             throw new UserBoardException(BoardErrorCode.UNKNOWN_SEARCH_OPTION);
         }
-
-        return posts.map(this::convertPostToThumbnailDtoInternal);
-
     }
 
     @Override

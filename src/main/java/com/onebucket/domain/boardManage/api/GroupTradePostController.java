@@ -24,6 +24,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * <br>package name   : com.onebucket.domain.boardManage.api
@@ -169,6 +170,10 @@ public class GroupTradePostController extends AbstractPostController<GroupTradeP
 
     @Override
     protected ResponseEntity<Page<? extends PostDto.Thumbnail>> getPostsBySearchInternal(PostKeyDto.SearchPage dto) {
+
+        if(!Objects.equals(boardService.getType(dto.getBoardId()), "groupTradePost")) {
+            throw new UserBoardException(BoardErrorCode.MISMATCH_POST_AND_BOARD);
+        }
         Page<GroupTradePostDto.Thumbnail> posts = postService.getSearchResult(dto)
                 .map(this::getThumbnailGroupTradeInternal);
 
