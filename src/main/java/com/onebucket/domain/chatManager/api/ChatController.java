@@ -3,12 +3,14 @@ package com.onebucket.domain.chatManager.api;
 import com.onebucket.domain.chatManager.dto.ChatDto;
 
 import com.onebucket.domain.chatManager.dto.ChatRoomDto;
+import com.onebucket.domain.chatManager.entity.TradeType;
 import com.onebucket.domain.chatManager.service.ChatRoomService;
 import com.onebucket.domain.chatManager.service.ChatService;
 import com.onebucket.domain.chatManager.service.SSEChatListService;
 import com.onebucket.domain.memberManage.service.MemberService;
 import com.onebucket.domain.tradeManage.dto.TradeKeyDto;
-import com.onebucket.domain.tradeManage.service.PendingTradeService;
+import com.onebucket.domain.tradeManage.service.GroupTradeService;
+import com.onebucket.domain.tradeManage.service.UsedTradeService;
 import com.onebucket.global.auth.jwtAuth.component.JwtValidator;
 import com.onebucket.global.exceptionManage.customException.chatManageException.ChatManageException;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
@@ -49,11 +51,12 @@ public class ChatController {
     private final ChatRoomService chatRoomService;
     private final SSEChatListService sseChatListService;
     private final MemberService memberService;
-    private final PendingTradeService pendingTradeService;
     private final JwtValidator jwtValidator;
 
     private final ImageUtils imageUtils;
 
+    private final UsedTradeService usedTradeService;
+    private final GroupTradeService groupTradeService;
     @MessageMapping("/message")
     public void message(@Payload ChatDto chat) {
         switch (chat.getType()) {
@@ -105,14 +108,18 @@ public class ChatController {
             chatRoomService.quitMember(dto);
 
             //거래 정보에서도 삭제
-            ChatRoomDto.GetTradeInfo tradeInfo = chatRoomService.getTradeInfo(chat.getRoomId());
-            Long tradeId = tradeInfo.getId();
+            ChatRoomDto.TradeIdentifier tradeIdentifier = chatRoomService.getTradeSimpleInfo(chat.getRoomId());
+            Long tradeId = tradeIdentifier.getTradeId();
+            TradeType tradeType = tradeIdentifier.getTradeType();
+
             TradeKeyDto.UserTrade userTrade = TradeKeyDto.UserTrade.builder()
                     .tradeId(tradeId)
                     .userId(userId)
                     .build();
-            pendingTradeService.quitMember(userTrade);
 
+            if(tradeType.equals(TradeType.GROUP)) {
+                groupTradeService.quitMember(userTrade);
+            }
         }
 
     }

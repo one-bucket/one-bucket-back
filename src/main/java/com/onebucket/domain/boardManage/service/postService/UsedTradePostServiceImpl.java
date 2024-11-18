@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * <br>package name   : com.onebucket.domain.boardManage.service.postService
- * <br>file name      : UsedTradeServiceImpl
+ * <br>file name      : UsedTradePostServiceImpl
  * <br>date           : 2024-11-17
  * <pre>
  * <span style="color: white;">[description]</span>
@@ -33,19 +33,19 @@ import org.springframework.stereotype.Service;
  * } </pre>
  */
 @Service
-public class UsedTradeServiceImpl extends AbstractPostService<UsedTradePost, UsedTradePostRepository>
+public class UsedTradePostServiceImpl extends AbstractPostService<UsedTradePost, UsedTradePostRepository>
 implements UsedTradePostService {
     private final UsedTradeRepository usedTradeRepository;
 
-    public UsedTradeServiceImpl(UsedTradePostRepository repository,
-                                BoardRepository boardRepository,
-                                MemberRepository memberRepository,
-                                SecurityUtils securityUtils,
-                                CommentRepository commentRepository,
-                                RedisRepository redisRepository,
-                                LikesMapRepository likesMapRepository,
-                                MinioRepository minioRepository,
-                                UsedTradeRepository usedTradeRepository) {
+    public UsedTradePostServiceImpl(UsedTradePostRepository repository,
+                                    BoardRepository boardRepository,
+                                    MemberRepository memberRepository,
+                                    SecurityUtils securityUtils,
+                                    CommentRepository commentRepository,
+                                    RedisRepository redisRepository,
+                                    LikesMapRepository likesMapRepository,
+                                    MinioRepository minioRepository,
+                                    UsedTradeRepository usedTradeRepository) {
         super(repository, boardRepository, memberRepository, securityUtils,
                 commentRepository, redisRepository, likesMapRepository, minioRepository);
         this.usedTradeRepository = usedTradeRepository;

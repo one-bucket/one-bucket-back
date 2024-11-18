@@ -9,18 +9,10 @@ import com.onebucket.domain.chatManager.service.*;
 import com.onebucket.domain.memberManage.service.MemberService;
 import com.onebucket.domain.tradeManage.dto.BaseTradeDto;
 import com.onebucket.domain.tradeManage.dto.GroupTradeDto;
-import com.onebucket.domain.tradeManage.dto.TradeDto;
 import com.onebucket.domain.tradeManage.dto.UsedTradeDto;
-import com.onebucket.domain.tradeManage.service.BaseTradeServiceImpl;
 import com.onebucket.domain.tradeManage.service.GroupTradeService;
-import com.onebucket.domain.tradeManage.service.GroupTradeServiceImpl;
 import com.onebucket.domain.tradeManage.service.UsedTradeService;
-import com.onebucket.global.exceptionManage.customException.CommonException;
-import com.onebucket.global.exceptionManage.errorCode.CommonErrorCode;
 import com.onebucket.global.utils.SecurityUtils;
-import com.onebucket.global.utils.SuccessResponseDto;
-import com.onebucket.global.utils.SuccessResponseWithIdDto;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -67,7 +59,7 @@ public class ChatRoomController {
     @GetMapping("/info/{roomId}")
     public ResponseEntity<ChatRoomInfoDto<? extends BaseTradeDto.Info>> getRoomInfo(@PathVariable String roomId) {
 
-        ChatRoomDto.Info chatRoom = chatRoomService.getRoomInfo(roomId);
+        ChatRoomDto.Info chatRoom = chatRoomService.getRoomDetails(roomId);
         BaseTradeDto.Info trade;
 
         TradeType tradeType = chatRoom.getTradeType();
@@ -94,11 +86,6 @@ public class ChatRoomController {
         return ResponseEntity.ok(chatRoomInfoDto);
     }
 
-    @GetMapping("/memberList")
-    public ResponseEntity<List<ChatRoomDto.MemberInfo>> getRoomMember(@RequestParam String roomId) {
-        return ResponseEntity.ok(chatRoomService.getMemberList(roomId));
-    }
-
     @GetMapping("/logs")
     public ResponseEntity<List<ChatMessage>> getLogs(@RequestParam String roomId, @RequestParam String timestamp) {
         Instant instant = Instant.parse(timestamp);
@@ -109,20 +96,6 @@ public class ChatRoomController {
                 .build();
         List<ChatMessage> messages = chatRoomService.getMessageAfterTimestamp(infoAfterTime);
         return ResponseEntity.ok(messages);
-    }
-
-
-    @DeleteMapping("/bomb/{chatRoomId}")
-    public ResponseEntity<SuccessResponseDto> bombRoom(@PathVariable("chatRoomId") String chatRoomId) {
-        String username = securityUtils.getCurrentUsername();
-        Long userId = memberService.usernameToId(username);
-
-        ChatRoomDto.ManageMember dto = ChatRoomDto.ManageMember.builder()
-                .roomId(chatRoomId)
-                .memberId(userId)
-                .build();
-        chatRoomService.bombRoomByOwner(dto);
-        return ResponseEntity.ok(new SuccessResponseDto("success bomb"));
     }
 
     @GetMapping("/sse/chatList")

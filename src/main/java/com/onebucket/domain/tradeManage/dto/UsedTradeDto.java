@@ -7,10 +7,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-
-import java.time.LocalDateTime;
-import java.util.List;
-
 /**
  * <br>package name   : com.onebucket.domain.tradeManage.dto
  * <br>file name      : UsedTradeDto
@@ -29,8 +25,6 @@ public class UsedTradeDto {
 
     @Getter
     @SuperBuilder
-    @NoArgsConstructor
-    @AllArgsConstructor
     public static class Base extends BaseTradeDto.Base {
 
     }

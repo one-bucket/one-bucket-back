@@ -1,11 +1,9 @@
 package com.onebucket.domain.chatManager.service;
 
 import com.onebucket.domain.chatManager.dto.ChatDto;
-import com.onebucket.domain.chatManager.dto.ChatRoomDto;
 import com.onebucket.domain.chatManager.dto.RoomUpdateDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
@@ -51,8 +49,7 @@ public class SSEChatListServiceImpl implements SSEChatListService{
         String recentMessage = chat.getMessage();
         Date recentMessageTime = chat.getTime();
 
-        List<Long> userIds = chatRoomService.getMemberList(roomId)
-                .stream().map(ChatRoomDto.MemberInfo::getId).toList();
+        List<Long> userIds = chatRoomService.getMemberIds(roomId);
 
         for(Long userId : userIds) {
             SseEmitter emitter = sseEmitters.get(userId);

@@ -1,14 +1,11 @@
 package com.onebucket.domain.tradeManage.dto;
 
-import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.domain.tradeManage.entity.BaseTrade;
 import com.onebucket.domain.tradeManage.entity.TradeTag;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import javax.annotation.processing.SupportedOptions;
 import java.time.LocalDateTime;
-import java.util.List;
 
 /**
  * <br>package name   : com.onebucket.domain.tradeManage.dto
@@ -53,7 +50,6 @@ public class BaseTradeDto {
         private Long userId;
         private LocalDateTime dueDate;
         private String tag;
-        private JoinMember joinMember;
         private boolean isFin;
 
         private LocalDateTime createAt;
@@ -77,6 +73,7 @@ public class BaseTradeDto {
     }
 
     @Getter
+    @SuperBuilder
     public static class UpdateTrade extends Base {
 
         private BaseTrade trade;
