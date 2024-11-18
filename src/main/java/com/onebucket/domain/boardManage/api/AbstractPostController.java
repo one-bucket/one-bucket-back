@@ -218,7 +218,7 @@ public abstract class AbstractPostController<S extends BasePostService> {
         Long commentCount = postService.getCommentCount(dto.getPostId());
         Long likes = dto.getLikes() + postService.getLikesInRedis(dto.getPostId());
 
-        PostDto.Thumbnail response = (PostDto.Thumbnail) dto;
+        PostDto.Thumbnail response = PostDto.Thumbnail.of(dto);
         response.setCommentsCount(commentCount);
         response.setLikes(likes);
 
@@ -252,7 +252,7 @@ public abstract class AbstractPostController<S extends BasePostService> {
         boolean isUserAlreadyLikes = postService.isUserLikesPost(dto);
 
         //변환 및 삽입
-        PostDto.ResponseInfo response = (PostDto.ResponseInfo) postInfoDto;
+        PostDto.ResponseInfo response = PostDto.ResponseInfo.of(postInfoDto);
         response.setLikes(likes);
         response.setUserAlreadyLikes(isUserAlreadyLikes);
 

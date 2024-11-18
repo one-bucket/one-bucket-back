@@ -67,7 +67,8 @@ public class GroupTradeServiceImpl extends AbstractTradeService<GroupTrade, Grou
     }
 
     @Override
-    protected BaseTradeDto.Info convertTradeToInfoDto(GroupTrade trade) {
+    @SuppressWarnings("unchecked")
+    protected GroupTradeDto.Info convertTradeToInfoDto(GroupTrade trade) {
         return makeGroupTradeToDto(trade);
     }
 
@@ -219,6 +220,7 @@ public class GroupTradeServiceImpl extends AbstractTradeService<GroupTrade, Grou
                 .joins(groupTrade.getJoins())
                 .count(groupTrade.getCount())
                 .joinMember(joinMembers)
+                .chatRoomId(groupTrade.getChatRoom().getId())
                 .build();
     }
 

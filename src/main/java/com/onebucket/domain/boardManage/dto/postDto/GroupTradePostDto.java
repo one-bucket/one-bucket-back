@@ -6,6 +6,7 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -57,6 +58,24 @@ public class GroupTradePostDto {
     @Setter
     public static class InternalThumbnail extends PostDto.InternalThumbnail {
         private Long trade;
+        private LocalDateTime liftedAt;
+
+        public static InternalThumbnail of(PostDto.InternalThumbnail dto) {
+            return InternalThumbnail.builder()
+                    .boardId(dto.getBoardId())
+                    .title(dto.getTitle())
+                    .text(dto.getText())
+
+                    .postId(dto.getPostId())
+                    .authorId(dto.getAuthorId())
+                    .authorNickname(dto.getAuthorNickname())
+                    .createdDate(dto.getCreatedDate())
+                    .modifiedDate(dto.getModifiedDate())
+                    .imageUrls(dto.getImageUrls())
+                    .views(dto.getViews())
+                    .likes(dto.getLikes())
+                    .build();
+        }
     }
 
     @Getter
@@ -67,12 +86,51 @@ public class GroupTradePostDto {
 
         @JsonUnwrapped(prefix = "trade_")
         private GroupTradeDto.ListedInfo trade;
+
+        private LocalDateTime liftedAt;
+
+        public static Thumbnail of(PostDto.Thumbnail dto) {
+            return Thumbnail.builder()
+                    .boardId(dto.getBoardId())
+                    .title(dto.getTitle())
+                    .text(dto.getText())
+
+                    .postId(dto.getPostId())
+                    .authorId(dto.getAuthorId())
+                    .authorNickname(dto.getAuthorNickname())
+                    .createdDate(dto.getCreatedDate())
+                    .modifiedDate(dto.getModifiedDate())
+                    .imageUrls(dto.getImageUrls())
+                    .views(dto.getViews())
+                    .likes(dto.getLikes())
+
+                    .build();
+        }
     }
 
     @Getter
+    @Setter
     @SuperBuilder
     public static class Info extends PostDto.Info {
         private Long tradeId;
+
+        public static Info of(InternalThumbnail dto) {
+            return Info.builder()
+                    .boardId(dto.getBoardId())
+                    .title(dto.getTitle())
+                    .text(dto.getText())
+
+                    .postId(dto.getPostId())
+                    .authorId(dto.getAuthorId())
+                    .authorNickname(dto.getAuthorNickname())
+                    .createdDate(dto.getCreatedDate())
+                    .modifiedDate(dto.getModifiedDate())
+                    .imageUrls(dto.getImageUrls())
+                    .views(dto.getViews())
+                    .likes(dto.getLikes())
+                    .tradeId(dto.getTrade())
+                    .build();
+        }
     }
 
     @Getter
@@ -82,6 +140,24 @@ public class GroupTradePostDto {
 
         @JsonUnwrapped(prefix = "trade_")
         private GroupTradeDto.Info trade;
+
+        public static ResponseInfo of(PostDto.ResponseInfo dto) {
+            return ResponseInfo.builder()
+
+                    .boardId(dto.getBoardId())
+                    .title(dto.getTitle())
+                    .text(dto.getText())
+
+                    .postId(dto.getPostId())
+                    .authorId(dto.getAuthorId())
+                    .authorNickname(dto.getAuthorNickname())
+                    .createdDate(dto.getCreatedDate())
+                    .modifiedDate(dto.getModifiedDate())
+                    .imageUrls(dto.getImageUrls())
+                    .views(dto.getViews())
+                    .likes(dto.getLikes())
+                    .build();
+        }
     }
     @Getter
     @NoArgsConstructor

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import java.util.List;
@@ -35,6 +36,7 @@ public class GroupTradeDto {
 
     @SuperBuilder
     @Getter
+    @Setter
     @NoArgsConstructor
     public static class Create extends BaseTradeDto.Create {
         private Long wanted;
@@ -50,7 +52,24 @@ public class GroupTradeDto {
         private Long joins;
         private Long count;
 
-        private Long chatRoomId;
+        private String chatRoomId;
+
+        public static Info of(BaseTradeDto.Info dto) {
+            return Info.builder()
+                    .item(dto.getItem())
+                    .price(dto.getPrice())
+                    .location(dto.getLocation())
+                    .linkUrl(dto.getLinkUrl())
+                    .id(dto.getId())
+                    .userId(dto.getUserId())
+                    .dueDate(dto.getDueDate())
+                    .tag(dto.getTag())
+                    .isFin(dto.isFin())
+                    .createAt(dto.getCreateAt())
+                    .updateAt(dto.getUpdateAt())
+                    .build();
+        }
+
     }
 
     @SuperBuilder
@@ -60,6 +79,23 @@ public class GroupTradeDto {
 
         @JsonIgnore
         private List<JoinMember> joinMember;
+
+        public static ListedInfo of(BaseTradeDto.Info dto) {
+            return ListedInfo.builder()
+                    .item(dto.getItem())
+                    .price(dto.getPrice())
+                    .location(dto.getLocation())
+                    .linkUrl(dto.getLinkUrl())
+
+                    .id(dto.getId())
+                    .userId(dto.getUserId())
+                    .dueDate(dto.getDueDate())
+                    .tag(dto.getTag())
+                    .isFin(dto.isFin())
+                    .createAt(dto.getCreateAt())
+                    .updateAt(dto.getUpdateAt())
+                    .build();
+        }
     }
 
     @Getter

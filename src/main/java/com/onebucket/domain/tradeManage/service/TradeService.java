@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
 public interface TradeService {
     <D extends BaseTradeDto.Create> Long createTrade(D dto);
 
-    BaseTradeDto.Info getInfo(Long tradeId);
+    <D extends BaseTradeDto.Info> D getInfo(Long tradeId);
 
     <D extends BaseTradeDto.Update> void update(D dto);
 

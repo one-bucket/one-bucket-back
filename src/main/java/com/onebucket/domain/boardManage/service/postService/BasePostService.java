@@ -77,7 +77,7 @@ public interface BasePostService {
      * @param dto postId만 저장되어 있다.
      * @return PostDto.Info 로 post에 대한 정보를 담고 있다
      */
-    PostDto.Info getPost(PostKeyDto.PostKey dto);
+    <D extends PostDto.Info> D getPost(PostKeyDto.PostKey dto);
 
     /**
      * 모든 정보를 덮어씌워서 update 한다.

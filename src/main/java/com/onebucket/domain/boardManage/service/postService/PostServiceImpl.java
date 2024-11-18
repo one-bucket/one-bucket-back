@@ -5,6 +5,7 @@ import com.onebucket.domain.boardManage.dao.CommentRepository;
 import com.onebucket.domain.boardManage.dao.LikesMapRepository;
 import com.onebucket.domain.boardManage.dao.postRepository.PostRepository;
 
+import com.onebucket.domain.boardManage.dto.internal.comment.GetCommentDto;
 import com.onebucket.domain.boardManage.dto.postDto.PostDto;
 import com.onebucket.domain.boardManage.entity.Board;
 
@@ -18,6 +19,7 @@ import com.onebucket.global.utils.SecurityUtils;
 
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 
 
 /**
@@ -69,7 +71,38 @@ public class PostServiceImpl extends AbstractPostService<Post, PostRepository> i
     }
 
     @Override
-    protected PostDto.InternalThumbnail setThumbnailForOtherInfo(PostDto.InternalThumbnail dto, Post post) {
-        return dto;
+    @SuppressWarnings("unchecked")
+    protected <D extends PostDto.Info> D convertPostToInfo(Post post, List<GetCommentDto> comments) {
+        PostDto.InternalThumbnail internalThumbnail = convertPostToThumbnailDtoInternal(post);
+
+        PostDto.Info response = PostDto.Info.of(internalThumbnail);
+        response.setComments(comments);
+        return (D) response;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    protected PostDto.InternalThumbnail convertPostToThumbnailDtoInternal(Post post) {
+        Long authorId = -1L;
+        String authorNickname = "(unknown)";
+        if (post.getAuthor() != null) {
+            authorId = post.getAuthorId();
+            authorNickname = post.getAuthor().getNickname();
+        }
+        String text = post.getText();
+
+        return PostDto.InternalThumbnail.builder()
+                .boardId(post.getBoardId())
+                .postId(post.getId())
+                .authorId(authorId)
+                .authorNickname(authorNickname)
+                .title(post.getTitle())
+                .text(text)
+                .createdDate(post.getCreatedDate())
+                .modifiedDate(post.getModifiedDate())
+                .imageUrls(post.getImageUrls())
+                .views(post.getViews())
+                .likes(post.getLikes())
+                .build();
     }
 }

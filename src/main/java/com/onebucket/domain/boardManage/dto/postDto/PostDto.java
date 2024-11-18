@@ -89,6 +89,23 @@ public class PostDto {
     public static class Thumbnail extends InternalThumbnail {
         private Long likes;
         private Long commentsCount;
+
+        public static Thumbnail of(InternalThumbnail dto) {
+            return Thumbnail.builder()
+                    .boardId(dto.getBoardId())
+                    .title(dto.getTitle())
+                    .text(dto.getText())
+
+                    .postId(dto.getPostId())
+                    .authorId(dto.getAuthorId())
+                    .authorNickname(dto.getAuthorNickname())
+                    .createdDate(dto.getCreatedDate())
+                    .modifiedDate(dto.getModifiedDate())
+                    .imageUrls(dto.getImageUrls())
+                    .views(dto.getViews())
+                    .likes(dto.getLikes())
+                    .build();
+        }
     }
 
 
@@ -99,6 +116,23 @@ public class PostDto {
     public static class Info extends Thumbnail {
         private List<GetCommentDto> comments;
 
+        public static Info of(InternalThumbnail dto) {
+            return Info.builder()
+                    .boardId(dto.getBoardId())
+                    .title(dto.getTitle())
+                    .text(dto.getText())
+
+                    .postId(dto.getPostId())
+                    .authorId(dto.getAuthorId())
+                    .authorNickname(dto.getAuthorNickname())
+                    .createdDate(dto.getCreatedDate())
+                    .modifiedDate(dto.getModifiedDate())
+                    .imageUrls(dto.getImageUrls())
+                    .views(dto.getViews())
+                    .likes(dto.getLikes())
+                    .build();
+        }
+
     }
 
     @Getter
@@ -107,6 +141,24 @@ public class PostDto {
     @NoArgsConstructor
     public static class ResponseInfo extends Info {
         private boolean isUserAlreadyLikes;
+
+        public static ResponseInfo of(Info dto) {
+            return ResponseInfo.builder()
+
+                    .boardId(dto.getBoardId())
+                    .title(dto.getTitle())
+                    .text(dto.getText())
+
+                    .postId(dto.getPostId())
+                    .authorId(dto.getAuthorId())
+                    .authorNickname(dto.getAuthorNickname())
+                    .createdDate(dto.getCreatedDate())
+                    .modifiedDate(dto.getModifiedDate())
+                    .imageUrls(dto.getImageUrls())
+                    .views(dto.getViews())
+                    .likes(dto.getLikes())
+                    .build();
+        }
     }
 
 

@@ -4,6 +4,7 @@ import com.onebucket.domain.boardManage.dao.BoardRepository;
 import com.onebucket.domain.boardManage.dao.CommentRepository;
 import com.onebucket.domain.boardManage.dao.LikesMapRepository;
 import com.onebucket.domain.boardManage.dao.postRepository.UsedTradePostRepository;
+import com.onebucket.domain.boardManage.dto.internal.comment.GetCommentDto;
 import com.onebucket.domain.boardManage.dto.postDto.PostDto;
 import com.onebucket.domain.boardManage.dto.postDto.UsedTradePostDto;
 import com.onebucket.domain.boardManage.entity.Board;
@@ -17,6 +18,8 @@ import com.onebucket.global.redis.RedisRepository;
 import com.onebucket.global.utils.SecurityUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * <br>package name   : com.onebucket.domain.boardManage.service.postService
@@ -53,11 +56,13 @@ implements UsedTradePostService {
 
 
     @Override
-    protected PostDto.InternalThumbnail setThumbnailForOtherInfo(PostDto.InternalThumbnail dto, UsedTradePost post) {
-        UsedTradePostDto.InternalThumbnail usedTradePostInfo = (UsedTradePostDto.InternalThumbnail) dto;
-        usedTradePostInfo.setTrade(post.getUsedTradeId());
+    protected <D extends PostDto.Info> D convertPostToInfo(UsedTradePost post, List<GetCommentDto> comments) {
+        return null;
+    }
 
-        return usedTradePostInfo;
+    @Override
+    protected <D extends PostDto.InternalThumbnail> D convertPostToThumbnailDtoInternal(UsedTradePost post) {
+        return null;
     }
 
     @Override

@@ -36,6 +36,7 @@ public class BaseTradeDto {
 
     @SuperBuilder
     @Getter
+    @Setter
     @NoArgsConstructor
     public static class Create extends Base {
         private String tag;
@@ -54,7 +55,6 @@ public class BaseTradeDto {
 
         private LocalDateTime createAt;
         private LocalDateTime updateAt;
-        private LocalDateTime liftedAt;
 
         @Getter
         @Builder

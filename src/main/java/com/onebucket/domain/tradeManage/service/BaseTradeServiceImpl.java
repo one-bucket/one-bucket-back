@@ -7,10 +7,8 @@ import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.domain.tradeManage.dao.TradeTagRepository;
 import com.onebucket.domain.tradeManage.dao.pendingTrade.BaseTradeRepository;
 import com.onebucket.domain.tradeManage.dto.BaseTradeDto;
-import com.onebucket.domain.tradeManage.dto.TradeKeyDto;
 import com.onebucket.domain.tradeManage.entity.BaseTrade;
 import com.onebucket.domain.tradeManage.entity.TradeTag;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -52,6 +50,7 @@ public class BaseTradeServiceImpl extends AbstractTradeService<BaseTrade, BaseTr
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     protected BaseTradeDto.Info convertTradeToInfoDto(BaseTrade trade) {
         return makeBaseTradeToDto(trade);
     }

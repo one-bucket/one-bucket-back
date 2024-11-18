@@ -57,7 +57,7 @@ public abstract class AbstractTradeService<T extends BaseTrade, R extends TradeR
 
     @Override
     @Transactional(readOnly = true)
-    public BaseTradeDto.Info getInfo(Long tradeId) {
+    public <D extends BaseTradeDto.Info> D getInfo(Long tradeId) {
         T trade = findTrade(tradeId);
 
         return convertTradeToInfoDto(trade);
@@ -128,7 +128,7 @@ public abstract class AbstractTradeService<T extends BaseTrade, R extends TradeR
 
 
     protected abstract <D extends BaseTradeDto.Create> T convertCreateTradeToBaseTrade(D dto, Member owner, TradeTag tag);
-    protected abstract BaseTradeDto.Info convertTradeToInfoDto(T trade);
+    protected abstract <D extends BaseTradeDto.Info> D convertTradeToInfoDto(T trade);
     protected abstract <D extends BaseTradeDto.UpdateTrade> void updateTrade(D dto);
     protected abstract Long makeTradeClosed(T trade);
 

@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import java.time.LocalDateTime;
+
 /**
  * <br>package name   : com.onebucket.domain.boardManage.entity
  * <br>file name      : MarcketPost
@@ -42,4 +44,6 @@ public class GroupTradePost extends Post {
 
     @Column(name = "trade_id", insertable = false, updatable = false)
     private Long groupTradeId;
+
+    private LocalDateTime liftedAt;
 }

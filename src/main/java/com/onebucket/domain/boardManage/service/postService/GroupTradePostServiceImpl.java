@@ -4,6 +4,7 @@ import com.onebucket.domain.boardManage.dao.BoardRepository;
 import com.onebucket.domain.boardManage.dao.CommentRepository;
 import com.onebucket.domain.boardManage.dao.postRepository.GroupTradePostRepository;
 import com.onebucket.domain.boardManage.dao.LikesMapRepository;
+import com.onebucket.domain.boardManage.dto.internal.comment.GetCommentDto;
 import com.onebucket.domain.boardManage.dto.postDto.GroupTradePostDto;
 import com.onebucket.domain.boardManage.dto.postDto.PostDto;
 import com.onebucket.domain.boardManage.entity.Board;
@@ -17,6 +18,9 @@ import com.onebucket.global.redis.RedisRepository;
 import com.onebucket.global.utils.SecurityUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 
 /**
@@ -53,13 +57,6 @@ implements GroupTradePostService {
         this.groupTradeRepository = groupTradeRepository;
     }
 
-    @Override
-    protected GroupTradePostDto.InternalThumbnail setThumbnailForOtherInfo(PostDto.InternalThumbnail dto, GroupTradePost post) {
-        GroupTradePostDto.InternalThumbnail groupTradePostInfo = (GroupTradePostDto.InternalThumbnail) dto;
-        groupTradePostInfo.setTrade(post.getGroupTradeId());
-
-        return groupTradePostInfo;
-    }
 
     @Override
     protected <D extends PostDto.Create> GroupTradePost convertCreatePostDtoToPost(D dto) {
@@ -77,6 +74,7 @@ implements GroupTradePostService {
                 .title(createDto.getTitle())
                 .text(createDto.getText())
                 .groupTrade(groupTrade)
+                .liftedAt(LocalDateTime.now())
                 .build();
     }
 
@@ -84,5 +82,46 @@ implements GroupTradePostService {
     public Page<GroupTradePostDto.InternalThumbnail> getPostByTradeIdList(GroupTradePostDto.TradeIdsPageDto dto) {
         return repository.findByTradeIds(dto.getTradeIds(), dto.getPageable())
                 .map((post) -> (GroupTradePostDto.InternalThumbnail) convertPostToThumbnail(post));
+    }
+
+
+    @Override
+    @SuppressWarnings("unchecked")
+    protected <D extends PostDto.Info> D convertPostToInfo(GroupTradePost post, List<GetCommentDto> comments) {
+        GroupTradePostDto.InternalThumbnail internalThumbnail = convertPostToThumbnailDtoInternal(post);
+
+        GroupTradePostDto.Info response = GroupTradePostDto.Info.of(internalThumbnail);
+        response.setComments(comments);
+        return (D) response;
+
+    }
+
+
+    @Override
+    @SuppressWarnings("unchecked")
+    protected GroupTradePostDto.InternalThumbnail convertPostToThumbnailDtoInternal(GroupTradePost post) {
+        Long authorId = -1L;
+        String authorNickname = "(unknown)";
+        if (post.getAuthor() != null) {
+            authorId = post.getAuthorId();
+            authorNickname = post.getAuthor().getNickname();
+        }
+        String text = post.getText();
+
+        return GroupTradePostDto.InternalThumbnail.builder()
+                .boardId(post.getBoardId())
+                .postId(post.getId())
+                .authorId(authorId)
+                .authorNickname(authorNickname)
+                .title(post.getTitle())
+                .text(text)
+                .createdDate(post.getCreatedDate())
+                .modifiedDate(post.getModifiedDate())
+                .imageUrls(post.getImageUrls())
+                .views(post.getViews())
+                .likes(post.getLikes())
+                .trade(post.getGroupTradeId())
+                .liftedAt(post.getLiftedAt())
+                .build();
     }
 }

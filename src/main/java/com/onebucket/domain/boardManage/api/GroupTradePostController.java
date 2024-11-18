@@ -73,12 +73,18 @@ public class GroupTradePostController extends AbstractPostController<GroupTradeP
         }
 
         Long ownerId = securityUtils.getUserId();
+        tradeCreateDto.setOwnerId(ownerId);
 
         //GroupTrade 저장
         Long tradeId = groupTradeService.createTrade(tradeCreateDto);
 
-        GroupTradePostDto.Create groupTradePostCreateDto = (GroupTradePostDto.Create) postCreateDto;
-        groupTradePostCreateDto.setTradeId(tradeId);
+        GroupTradePostDto.Create groupTradePostCreateDto = GroupTradePostDto.Create.builder()
+                .boardId(postCreateDto.getBoardId())
+                .title(postCreateDto.getTitle())
+                .text(postCreateDto.getText())
+                .tradeId(tradeId)
+                .userId(ownerId)
+                .build();
 
         Long postId = postService.createPost(groupTradePostCreateDto);
 
@@ -143,21 +149,19 @@ public class GroupTradePostController extends AbstractPostController<GroupTradeP
     @Override
     protected ResponseEntity<? extends PostDto.ResponseInfo> getPostInternal(PostKeyDto.UserPost dto) {
 
-        //타입 캐스팅 -> post를 groupTradePost로
-        PostDto.Info rawInfo = postService.getPost(dto);
-        GroupTradePostDto.Info info = (GroupTradePostDto.Info) rawInfo;
+        GroupTradePostDto.Info info = postService.getPost(dto);
 
         //like 및 comment 담고, responseInfo로 반환
-        PostDto.ResponseInfo rawResponseInfo = convertInfoToResponse(rawInfo, dto);
+        PostDto.ResponseInfo rawResponseInfo = convertInfoToResponse(info, dto);
 
         Long tradeId = info.getTradeId();
 
         //trade 정보 가져오기 및 타입 캐스팅
-        GroupTradeDto.Info tradeInfo = (GroupTradeDto.Info) groupTradeService.getInfo(tradeId);
+        GroupTradeDto.Info tradeInfo = groupTradeService.getInfo(tradeId);
 
 
         //groupTradePost로  타입캐스팅 및 trade 절보 삽입
-        GroupTradePostDto.ResponseInfo response = (GroupTradePostDto.ResponseInfo) rawResponseInfo;
+        GroupTradePostDto.ResponseInfo response = GroupTradePostDto.ResponseInfo.of(rawResponseInfo);
         response.setTrade(tradeInfo);
         return ResponseEntity.ok(response);
     }
@@ -189,12 +193,13 @@ public class GroupTradePostController extends AbstractPostController<GroupTradeP
 
     private GroupTradePostDto.Thumbnail getThumbnailGroupTradeInternal(PostDto.InternalThumbnail internalThumbnail) {
         GroupTradeDto.ListedInfo tradeInfo =
-                (GroupTradeDto.ListedInfo) groupTradeService
+                GroupTradeDto.ListedInfo.of(groupTradeService
                         .getInfo(((GroupTradePostDto.InternalThumbnail) internalThumbnail)
-                        .getTrade());
+                        .getTrade()));
 
         GroupTradePostDto.Thumbnail thumbnail =
-                (GroupTradePostDto.Thumbnail) convertInternalThumbnailToThumbnail(internalThumbnail);
+                GroupTradePostDto.Thumbnail.of(convertInternalThumbnailToThumbnail(internalThumbnail));
+        thumbnail.setLiftedAt(((GroupTradePostDto.InternalThumbnail) internalThumbnail).getLiftedAt());
         thumbnail.setTrade(tradeInfo);
 
         return thumbnail;

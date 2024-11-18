@@ -61,7 +61,8 @@ public class UsedTradeServiceImpl extends AbstractTradeService<UsedTrade, UsedTr
     }
 
     @Override
-    protected BaseTradeDto.Info convertTradeToInfoDto(UsedTrade trade) {
+    @SuppressWarnings("unchecked")
+    protected UsedTradeDto.Info convertTradeToInfoDto(UsedTrade trade) {
         return makeUsedTradeToDto(trade);
     }
 
@@ -134,10 +135,7 @@ public class UsedTradeServiceImpl extends AbstractTradeService<UsedTrade, UsedTr
     }
 
     private UsedTradeDto.Info makeUsedTradeToDto(UsedTrade usedTrade) {
-        boolean isReserved = false;
-        if(usedTrade.getJoiner() != null) {
-            isReserved = true;
-        }
+        boolean isReserved = usedTrade.getJoiner() != null;
 
         return UsedTradeDto.Info.builder()
                 .id(usedTrade.getId())

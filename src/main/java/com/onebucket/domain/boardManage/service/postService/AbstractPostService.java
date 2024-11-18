@@ -132,7 +132,7 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
 
     @Override
     @Transactional(readOnly = true)
-    public PostDto.Info getPost(PostKeyDto.PostKey dto) {
+    public <D extends PostDto.Info> D getPost(PostKeyDto.PostKey dto) {
         T post = findPost(dto.getPostId());
 
         List<GetCommentDto> comments = post.getComments().stream()
@@ -400,40 +400,9 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
         return thumbnail;
     }
 
-    protected PostDto.Info convertPostToInfo(T post, List<GetCommentDto> comments) {
-        PostDto.Info info = (PostDto.Info) convertPostToThumbnailDtoInternal(post);
-        info.setComments(comments);
+    protected abstract <D extends PostDto.Info> D convertPostToInfo(T post, List<GetCommentDto> comments);
 
-        return info;
-    }
+    protected abstract <D extends PostDto.InternalThumbnail> D convertPostToThumbnailDtoInternal(T post);
 
-    protected PostDto.InternalThumbnail convertPostToThumbnailDtoInternal(T post) {
-        Long authorId = -1L;
-        String authorNickname = "(unknown)";
-        if(post.getAuthor() != null) {
-            authorId = post.getAuthorId();
-            authorNickname = post.getAuthor().getNickname();
-        }
-        String text = post.getText();
-        if(text.length() > 50) {
-            text = post.getText().substring(0, 50);
-        }
-
-        PostDto.InternalThumbnail thumbnail = PostDto.InternalThumbnail.builder()
-                .postId(post.getId())
-                .authorId(authorId)
-                .authorNickname(authorNickname)
-                .title(post.getTitle())
-                .text(text)
-                .createdDate(post.getCreatedDate())
-                .modifiedDate(post.getModifiedDate())
-                .imageUrls(post.getImageUrls())
-                .views(post.getViews())
-                .likes(post.getLikes())
-                .build();
-
-        return setThumbnailForOtherInfo(thumbnail, post);
-    }
-    protected abstract PostDto.InternalThumbnail setThumbnailForOtherInfo(PostDto.InternalThumbnail dto, T post);
     protected abstract <D extends PostDto.Create> T convertCreatePostDtoToPost(D dto);
 }
