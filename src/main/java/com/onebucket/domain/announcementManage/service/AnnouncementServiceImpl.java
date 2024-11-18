@@ -10,6 +10,7 @@ import com.onebucket.global.minio.MinioInfoDto;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -80,11 +81,11 @@ public class AnnouncementServiceImpl  implements AnnouncementService {
     }
 
     private List<String> saveImagesInMinio(List<MultipartFile> images) {
-        return saveInMinio(images, "announcement/images");
+        return saveInMinio(images, "announcement/images/");
     }
 
     private List<String> saveFilesInMinio(List<MultipartFile> files) {
-        return saveInMinio(files,"announcement/files");
+        return saveInMinio(files,"announcement/files/");
     }
 
     private List<String> saveInMinio(List<MultipartFile> multipartFiles, String path) {
@@ -94,13 +95,13 @@ public class AnnouncementServiceImpl  implements AnnouncementService {
         ArrayList<String> urls = new ArrayList<>();
         for (MultipartFile image : multipartFiles) {
             String originalFilename = image.getOriginalFilename();
-            MinioInfoDto minioSaveInfoDto = MinioInfoDto.builder()
-                            .fileName(path + "/" + originalFilename.split("\\.")[0])
+            MinioInfoDto minioInfoDto = MinioInfoDto.builder()
+                            .fileName(path + originalFilename.split("\\.")[0] + UUID.randomUUID())
                                     .fileExtension(originalFilename.split("\\.")[1])
                                             .bucketName("one-bucket")
                                                     .build();
             try {
-                String url = minioRepository.uploadFile(image, minioSaveInfoDto);
+                String url = minioRepository.uploadFile(image, minioInfoDto);
                 urls.add(url);
             } catch (Exception e) {
                 throw new RuntimeException(e.getMessage());
