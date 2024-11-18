@@ -32,4 +32,7 @@ public interface MemberRepository extends JpaRepository<Member,Long> {
 
     @Query("SELECT m.nickname FROM Member m WHERE m.id = :id")
     Optional<String> findNicknameById(@Param("id") Long id);
+
+    @Query("SELECT m.username FROM Member m WHERE m.id = :id")
+    Optional<String> findUsernameById(@Param("id") Long id);
 }

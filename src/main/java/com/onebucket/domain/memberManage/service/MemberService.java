@@ -47,5 +47,5 @@ public interface MemberService {
 
     String idToNickname(Long id);
     University usernameToUniversity(String username);
-
+    String idToUsername(Long id);
 }

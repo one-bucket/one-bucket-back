@@ -1,14 +1,23 @@
 package com.onebucket.domain.memberManage.service;
 
+import com.onebucket.domain.memberManage.dao.MemberRepository;
+import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.global.auth.jwtAuth.component.JwtProvider;
 import com.onebucket.global.auth.jwtAuth.component.JwtValidator;
 import com.onebucket.global.auth.jwtAuth.domain.JwtToken;
+import com.onebucket.global.auth.springSecurity.CustomUserDetailsService;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import io.jsonwebtoken.ExpiredJwtException;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 
@@ -50,6 +59,8 @@ public class SignInServiceImpl implements SignInService{
     private final AuthenticationManager authenticationManager;
     private final JwtProvider jwtProvider;
     private final JwtValidator jwtValidator;
+    private final MemberRepository memberRepository;
+
     /**
      * @param username id to sign in
      * @param password password to sign in
@@ -79,7 +90,6 @@ public class SignInServiceImpl implements SignInService{
         } catch(InternalAuthenticationServiceException e) {
             throw new AuthenticationException(AuthenticationErrorCode.INTERNAL_AUTHENTICATION_ERROR);
         }
-
     }
 
     /**

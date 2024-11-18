@@ -2,6 +2,7 @@ package com.onebucket.domain.memberManage.api;
 
 import com.onebucket.domain.memberManage.dto.RefreshTokenDto;
 import com.onebucket.domain.memberManage.dto.SignInRequestDto;
+import com.onebucket.domain.memberManage.service.MemberService;
 import com.onebucket.domain.memberManage.service.SignInService;
 import com.onebucket.global.auth.jwtAuth.component.JwtProvider;
 import com.onebucket.global.auth.jwtAuth.component.JwtValidator;
@@ -15,6 +16,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -48,7 +50,7 @@ public class SignInController {
     private final RefreshTokenService refreshTokenService;
     private final JwtValidator jwtValidator;
     private final JwtProvider jwtProvider;
-
+    private final MemberService memberService;
     /**
      * 로그인을 위한 엔드포인트. username 과 password 를 이용하여 JwtToken 을 반환하는 컨트롤러이다.
      * @param dto username 과 password
@@ -74,35 +76,26 @@ public class SignInController {
      * 유효성  여부를 판단하여 새로운 토큰을 발급해준다. refresh token의 유효 기간은
      * 한 달이며 그 기간 동안 redis 에 저장된다.
      * @param request 헤더에서 access token 을 직접 가져온다.
-     * @param refreshTokenDto refresh token
      * @return 200 code, JwtToken
      * @tested yes
      */
     @PostMapping("/refresh-token")
-    public ResponseEntity<JwtToken> tokenRefresh(HttpServletRequest request,
-                                                 @Valid @RequestBody RefreshTokenDto refreshTokenDto) {
-        String accessToken = request.getHeader("Authorization");
-        String refreshToken = refreshTokenDto.getRefreshToken();
+    public ResponseEntity<JwtToken> tokenRefresh(HttpServletRequest request) {
+        String headerString = request.getHeader("Authorization");
+        String refreshToken = jwtValidator.getRefreshToken(headerString);
+        Long userId = jwtValidator.getUserIdFromToken(refreshToken);
+        String username = memberService.idToUsername(userId);
 
-        //access 토큰 검증 및 예외 처리 로직
-        //access 토큰 존재 여부에 대한 예외(AuthenticationErrorCode.NON_VALID_TOKEN)
-        //access 토큰 검증에 대한 예외(AuthenticationErrorCode.NON_VALID_TOKEN) - JwtExpiredToken 제외.
-       Authentication authentication = signInService.getAuthenticationAndValidHeader(accessToken);
-       String username = authentication.getName();
-
-       RefreshToken token2Validate = new RefreshToken(username, refreshToken);
-
-        if(refreshToken != null &&
-                jwtValidator.isTokenValid(refreshToken) &&
-                refreshTokenService.isTokenExist(token2Validate)) {
-
-            JwtToken newToken = jwtProvider.generateToken(authentication);
-            RefreshToken token2Save = new RefreshToken(username, newToken.getRefreshToken());
-
-            refreshTokenService.saveRefreshToken(token2Save);
-            return ResponseEntity.ok(newToken);
+        if(!refreshTokenService.isTokenExist(new RefreshToken(username, refreshToken))){
+            throw new AuthenticationException(AuthenticationErrorCode.NON_VALID_TOKEN);
         }
-        throw new AuthenticationException(AuthenticationErrorCode.NON_VALID_TOKEN, "error to validate refresh token");
+
+        JwtToken jwtToken = jwtProvider.generateToken(userId);
+
+        RefreshToken newToken = new RefreshToken(username,jwtToken.getRefreshToken());
+        refreshTokenService.saveRefreshToken(newToken);
+
+        return ResponseEntity.ok(jwtToken);
     }
 
 }

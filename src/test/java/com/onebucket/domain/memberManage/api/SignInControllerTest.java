@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.onebucket.domain.memberManage.dto.RefreshTokenDto;
 import com.onebucket.domain.memberManage.dto.SignInRequestDto;
+import com.onebucket.domain.memberManage.service.MemberService;
 import com.onebucket.domain.memberManage.service.SignInService;
 import com.onebucket.global.auth.jwtAuth.component.JwtProvider;
 import com.onebucket.global.auth.jwtAuth.component.JwtValidator;
@@ -77,7 +78,8 @@ class SignInControllerTest {
     JwtValidator jwtValidator;
     @Mock
     JwtProvider jwtProvider;
-
+    @Mock
+    private MemberService memberService;
     @InjectMocks
     private SignInController signInController;
 
@@ -236,15 +238,13 @@ class SignInControllerTest {
         String refreshToken = "refresh token";
         String accessToken = "access token";
         RefreshTokenDto dto = new RefreshTokenDto(refreshToken);
-
         String username = "test user";
         Authentication authentication = new UsernamePasswordAuthenticationToken(username, "password");
         JwtToken newToken =
                 new JwtToken("grantType", "new access token", "new refresh token");
-        when(signInService.getAuthenticationAndValidHeader("Bearer " + accessToken)).thenReturn(authentication);
-        when(jwtValidator.isTokenValid(refreshToken)).thenReturn(true);
+        when(memberService.idToUsername(anyLong())).thenReturn("username");
         when(refreshTokenService.isTokenExist(any(RefreshToken.class))).thenReturn(true);
-        when(jwtProvider.generateToken(authentication)).thenReturn(newToken);
+        when(jwtProvider.generateToken(anyLong())).thenReturn(newToken);
 
         mockMvc.perform(post("/refresh-token")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -268,8 +268,6 @@ class SignInControllerTest {
         RefreshTokenDto dto = new RefreshTokenDto(refreshToken);
 
         AuthenticationErrorCode code = AuthenticationErrorCode.NON_VALID_TOKEN;
-        when(signInService.getAuthenticationAndValidHeader(any())).thenThrow(
-                new AuthenticationException(code));
 
         mockMvc.perform(post("/refresh-token")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -293,11 +291,6 @@ class SignInControllerTest {
         RefreshTokenDto dto = new RefreshTokenDto(refreshToken);
 
         AuthenticationErrorCode code = AuthenticationErrorCode.NON_VALID_TOKEN;
-        String internalMessage = "error to validate refresh token";
-
-        Authentication authentication = new UsernamePasswordAuthenticationToken(username, "password");
-        when(signInService.getAuthenticationAndValidHeader("Bearer " + accessToken)).thenReturn(authentication);
-        when(jwtValidator.isTokenValid(refreshToken)).thenReturn(false);
 
         mockMvc.perform(post("/refresh-token")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -306,7 +299,7 @@ class SignInControllerTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .characterEncoding(StandardCharsets.UTF_8))
                 .andExpect(hasStatus(code))
-                .andExpect(hasKey(code, internalMessage));
+                .andExpect(hasKey(code));
 
         verify(refreshTokenService, never()).saveRefreshToken(
                 any(RefreshToken.class)

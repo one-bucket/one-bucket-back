@@ -67,6 +67,7 @@ public class MemberServiceImpl implements MemberService {
         member.addRoles(Role.GUEST.getRole());
         try {
             Member newMember = memberRepository.save(member);
+            System.out.println(newMember.getRoles());
             return newMember.getId();
         } catch(DataIntegrityViolationException e) {
             throw new AuthenticationException(AuthenticationErrorCode.DUPLICATE_USER,
@@ -158,6 +159,12 @@ public class MemberServiceImpl implements MemberService {
             throw new UniversityException(UniversityErrorCode.NOT_EXIST_UNIVERSITY);
         }
         return university;
+    }
+
+    @Override
+    public String idToUsername(Long id) {
+        return memberRepository.findUsernameById(id).orElseThrow(() ->
+                new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
     }
 
     @Transactional

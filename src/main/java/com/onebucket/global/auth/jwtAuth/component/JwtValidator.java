@@ -77,6 +77,22 @@ public class JwtValidator {
         return true;
     }
 
+    public String getRefreshToken(String jwtToken) {
+        if (jwtToken == null || !jwtToken.startsWith("Bearer ")) {
+            throw new AuthenticationException(AuthenticationErrorCode.NON_VALID_TOKEN,
+                    "can't access access token");
+        }
+        String refreshToken = jwtToken.substring(7);
+        try {
+            isTokenValid(refreshToken);
+        } catch (ExpiredJwtException ignore) {
+        } catch (Exception e) {
+            throw new AuthenticationException(AuthenticationErrorCode.NON_VALID_TOKEN,
+                    "access token form invalid.");
+        }
+        return refreshToken;
+    }
+
     /**
      * Get authentication from jwt. Use private method called {@link JwtValidator parseCalims} method.
      * @param accessToken extract from this token
@@ -100,6 +116,11 @@ public class JwtValidator {
 
         UserDetails principal = new User(claims.getSubject(), "", authorities);
         return new CustomAuthentication(principal, "", authorities, userId, univId);
+    }
+
+    public Long getUserIdFromToken(String token) {
+        Claims claims = parseClaims(token);
+        return claims.get("userId",Long.class);
     }
 
     private Claims parseClaims(String accessToken) {
