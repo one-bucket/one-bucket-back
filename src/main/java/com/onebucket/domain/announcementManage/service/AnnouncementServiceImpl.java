@@ -8,6 +8,7 @@ import com.onebucket.global.exceptionManage.errorCode.CommonErrorCode;
 import com.onebucket.global.minio.MinioRepository;
 import com.onebucket.global.minio.MinioInfoDto;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -79,22 +80,19 @@ public class AnnouncementServiceImpl  implements AnnouncementService {
     }
 
     private List<String> saveImagesInMinio(List<MultipartFile> images) {
-        List<String> urls = new ArrayList<>();
-        saveInMinio(images, urls, "announcement/images");
-        return urls;
+        return saveInMinio(images, "announcement/images");
     }
 
     private List<String> saveFilesInMinio(List<MultipartFile> files) {
-        List<String> urls = new ArrayList<>();
-        saveInMinio(files, urls,"announcement/files");
-        return urls;
+        return saveInMinio(files,"announcement/files");
     }
 
-    private void saveInMinio(List<MultipartFile> images, List<String> urls, String path) {
-        if(images == null || images.isEmpty()) {
-            return;
+    private List<String> saveInMinio(List<MultipartFile> multipartFiles, String path) {
+        if(multipartFiles == null || multipartFiles.isEmpty()) {
+            return Collections.emptyList();
         }
-        for (MultipartFile image : images) {
+        ArrayList<String> urls = new ArrayList<>();
+        for (MultipartFile image : multipartFiles) {
             String originalFilename = image.getOriginalFilename();
             MinioInfoDto minioSaveInfoDto = MinioInfoDto.builder()
                             .fileName(path + "/" + originalFilename.split("\\.")[0])
@@ -108,5 +106,6 @@ public class AnnouncementServiceImpl  implements AnnouncementService {
                 throw new RuntimeException(e.getMessage());
             }
         }
+        return urls;
     }
 }
