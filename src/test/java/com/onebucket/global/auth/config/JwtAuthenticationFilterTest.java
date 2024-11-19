@@ -1,7 +1,7 @@
 package com.onebucket.global.auth.config;
 
 import com.onebucket.domain.memberManage.service.MemberService;
-import com.onebucket.global.auth.jwtAuth.component.JwtValidator;
+import com.onebucket.global.auth.jwtAuth.component.JwtParser;
 import com.onebucket.global.auth.springSecurity.CustomAuthentication;
 import com.onebucket.testComponent.testController.AuthTestController;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -60,7 +60,7 @@ class JwtAuthenticationFilterTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private JwtValidator jwtValidator;
+    private JwtParser jwtParser;
 
     @MockBean
     private MemberService memberService;
@@ -75,8 +75,8 @@ class JwtAuthenticationFilterTest {
         UserDetails userDetails = new User("user", "", Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")));
         CustomAuthentication authentication = new CustomAuthentication(userDetails, "", userDetails.getAuthorities(),1L,1L);
 
-        when(jwtValidator.isTokenValid(anyString())).thenReturn(true);
-        when(jwtValidator.getAuthentication(anyString())).thenReturn(authentication);      //when & then
+        when(jwtParser.isTokenValid(anyString())).thenReturn(true);
+        when(jwtParser.getAuthentication(anyString())).thenReturn(authentication);      //when & then
         mockMvc.perform(get("/security-endpoint")
                 .header("Authorization", "Bearer validToken"))
                 .andExpect(status().isOk());
@@ -86,7 +86,7 @@ class JwtAuthenticationFilterTest {
     @DisplayName("필터 내 비정상적인 토큰 검증")
     void testInvalidToken() throws Exception {
         //given
-        when(jwtValidator.isTokenValid(anyString())).thenThrow(new SignatureException("invalid token"));
+        when(jwtParser.isTokenValid(anyString())).thenThrow(new SignatureException("invalid token"));
         mockMvc.perform(get("/security-endpoint")
                 .header("Authorization", "Bearer invalidToken"))
                 .andExpect(status().isForbidden());
@@ -105,7 +105,7 @@ class JwtAuthenticationFilterTest {
         //given
         Header header = new DefaultHeader();
         DefaultClaims claims = new DefaultClaims();
-        when(jwtValidator.isTokenValid(anyString())).thenThrow(new ExpiredJwtException(header, claims, "Token Expired"));
+        when(jwtParser.isTokenValid(anyString())).thenThrow(new ExpiredJwtException(header, claims, "Token Expired"));
         //when & then
         mockMvc.perform(get("/security-endpoint")
                 .header("Authorization", "Bearer expiredToken"))

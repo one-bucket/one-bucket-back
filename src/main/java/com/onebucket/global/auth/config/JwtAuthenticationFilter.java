@@ -1,6 +1,6 @@
 package com.onebucket.global.auth.config;
 
-import com.onebucket.global.auth.jwtAuth.component.JwtValidator;
+import com.onebucket.global.auth.jwtAuth.component.JwtParser;
 import com.onebucket.global.auth.jwtAuth.exception.NullJwtException;
 import com.onebucket.global.auth.springSecurity.CustomAuthentication;
 import io.jsonwebtoken.ClaimJwtException;
@@ -15,7 +15,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
 
@@ -50,7 +49,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JwtValidator jwtValidator;
+    private final JwtParser jwtParser;
 
     private static final List<String> EXCLUDE_URLS = List.of(
             "/test/url",
@@ -80,8 +79,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             String token = resolveToken(servletRequest);
-            if(token != null && jwtValidator.isTokenValid(token)) {
-                CustomAuthentication authentication = jwtValidator.getAuthentication(token);
+            if(token != null && jwtParser.isTokenValid(token)) {
+                CustomAuthentication authentication = jwtParser.getAuthentication(token);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } else {
                 throw new NullJwtException("no token");

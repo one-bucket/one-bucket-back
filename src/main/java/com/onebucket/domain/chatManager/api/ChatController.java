@@ -9,7 +9,7 @@ import com.onebucket.domain.chatManager.service.SSEChatListService;
 import com.onebucket.domain.memberManage.service.MemberService;
 import com.onebucket.domain.tradeManage.dto.TradeKeyDto;
 import com.onebucket.domain.tradeManage.service.PendingTradeService;
-import com.onebucket.global.auth.jwtAuth.component.JwtValidator;
+import com.onebucket.global.auth.jwtAuth.component.JwtParser;
 import com.onebucket.global.exceptionManage.customException.chatManageException.ChatManageException;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
@@ -50,7 +50,7 @@ public class ChatController {
     private final SSEChatListService sseChatListService;
     private final MemberService memberService;
     private final PendingTradeService pendingTradeService;
-    private final JwtValidator jwtValidator;
+    private final JwtParser jwtParser;
 
     @MessageMapping("/message")
     public void message(@Payload ChatDto chat) {
@@ -88,10 +88,10 @@ public class ChatController {
         template.convertAndSend("/sub/chat/room/" + chat.getRoomId(),chat);
 
         token = tokenResolver(token);
-        if(!jwtValidator.isTokenValid(token)) {
+        if(!jwtParser.isTokenValid(token)) {
             throw new AuthenticationException(AuthenticationErrorCode.NON_VALID_TOKEN);
         }
-        Authentication authentication = jwtValidator.getAuthentication(token);
+        Authentication authentication = jwtParser.getAuthentication(token);
         if(authentication != null) {
             String username = authentication.getName();
             Long userId = memberService.usernameToId(username);

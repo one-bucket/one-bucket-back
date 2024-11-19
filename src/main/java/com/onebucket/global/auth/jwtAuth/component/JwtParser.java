@@ -50,7 +50,7 @@ import java.util.Collection;
  */
 
 @Component
-public class JwtValidator {
+public class JwtParser {
 
     private final Key key;
     private static final String AUTHORITIES_KEY = "auth";
@@ -59,7 +59,7 @@ public class JwtValidator {
      * Get secret Key by parameter, and change to Key type with hmacshakeyfor(keybyte);
      * @param secretKey - which in application.properties
      */
-    public JwtValidator(@Value("${jwt.secret}") String secretKey) {
+    public JwtParser(@Value("${jwt.secret}") String secretKey) {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
@@ -94,7 +94,7 @@ public class JwtValidator {
     }
 
     /**
-     * Get authentication from jwt. Use private method called {@link JwtValidator parseCalims} method.
+     * Get authentication from jwt. Use private method called {@link JwtParser parseCalims} method.
      * @param accessToken extract from this token
      * @return Authentication
      * @throws NullPointerException when claims are empty.

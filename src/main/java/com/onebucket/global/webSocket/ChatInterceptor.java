@@ -3,7 +3,7 @@ package com.onebucket.global.webSocket;
 import com.onebucket.domain.chatManager.dto.ChatRoomDto;
 import com.onebucket.domain.chatManager.service.ChatRoomService;
 import com.onebucket.domain.memberManage.service.MemberService;
-import com.onebucket.global.auth.jwtAuth.component.JwtValidator;
+import com.onebucket.global.auth.jwtAuth.component.JwtParser;
 import com.onebucket.global.exceptionManage.customException.chatManageException.Exceptions.ChatRoomException;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
@@ -39,7 +39,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequiredArgsConstructor
 public class ChatInterceptor implements ChannelInterceptor {
     private final ChatRoomService chatRoomService;
-    private final JwtValidator jwtValidator;
+    private final JwtParser jwtParser;
     private final MemberService memberService;
 
     private final Map<String, String> sessionUserMap = new ConcurrentHashMap<>();
@@ -58,11 +58,11 @@ public class ChatInterceptor implements ChannelInterceptor {
                     throw new AuthenticationException(AuthenticationErrorCode.NON_VALID_TOKEN);
                 }
 
-                if(!jwtValidator.isTokenValid(jwtToken)) {
+                if(!jwtParser.isTokenValid(jwtToken)) {
                     throw new AuthenticationException(AuthenticationErrorCode.NON_VALID_TOKEN);
                 }
 
-                String username = jwtValidator.getAuthentication(jwtToken).getName();
+                String username = jwtParser.getAuthentication(jwtToken).getName();
                 String sessionId = accessor.getSessionId();
 
                 sessionUserMap.put(sessionId, username);

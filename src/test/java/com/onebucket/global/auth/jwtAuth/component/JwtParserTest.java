@@ -30,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * <br>date           : 2024-06-24
  * <pre>
  * <span style="color: white;">[description]</span>
- * Test {@link JwtValidator}.
+ * Test {@link JwtParser}.
  * </pre>
  * <pre>
  * <span style="color: white;">usage:</span>
@@ -46,9 +46,9 @@ import static org.junit.jupiter.api.Assertions.*;
  * </pre>
  */
 @SpringJUnitConfig
-class JwtValidatorTest {
+class JwtParserTest {
 
-    private JwtValidator jwtValidator;
+    private JwtParser jwtParser;
     private final String secretKey = "bXlzZWNyZXRrZXlteXNlY3JldGtleW15c2VjcmV0a2V5bXlzZWNyZXRrZXk=";
 
 
@@ -65,7 +65,7 @@ class JwtValidatorTest {
 
     @BeforeEach
     void setUp() {
-        jwtValidator = new JwtValidator(secretKey);
+        jwtParser = new JwtParser(secretKey);
     }
 
     @Test
@@ -75,7 +75,7 @@ class JwtValidatorTest {
         String token = createToken(10000, Arrays.asList("ROLE_USER", "ROLE_ADMIN"), secretKey);
 
         //then
-        assertDoesNotThrow(() -> jwtValidator.isTokenValid(token));
+        assertDoesNotThrow(() -> jwtParser.isTokenValid(token));
     }
 
     @Test
@@ -85,7 +85,7 @@ class JwtValidatorTest {
         String token = createToken(0, Arrays.asList("ROLE_USER", "ROLE_ADMIN"),secretKey);
 
         //then
-        assertThrows(ExpiredJwtException.class, ()-> jwtValidator.isTokenValid(token));
+        assertThrows(ExpiredJwtException.class, ()-> jwtParser.isTokenValid(token));
     }
 
     @Test
@@ -96,7 +96,7 @@ class JwtValidatorTest {
         String token = createToken(10000, Arrays.asList("ROLE_USER", "ROLE_ADMIN"), wrongKey);
 
         //then
-        assertThrows(SignatureException.class, ()-> jwtValidator.isTokenValid(token));
+        assertThrows(SignatureException.class, ()-> jwtParser.isTokenValid(token));
     }
 
     @Test
@@ -105,7 +105,7 @@ class JwtValidatorTest {
         //when
         String token = createToken(10000, Arrays.asList("ROLE_USER", "ROLE_ADMIN"), secretKey).replace(".", "|");
         //then
-        assertThrows(MalformedJwtException.class, ()-> jwtValidator.isTokenValid(token));
+        assertThrows(MalformedJwtException.class, ()-> jwtParser.isTokenValid(token));
     }
 
     @Test
@@ -113,7 +113,7 @@ class JwtValidatorTest {
     void testGetAuthentication() {
         String token = createToken(10000, Arrays.asList("ROLE_USER", "ROLE_ADMIN"), secretKey);
         UsernamePasswordAuthenticationToken authentication =
-                (UsernamePasswordAuthenticationToken) jwtValidator.getAuthentication(token);
+                (UsernamePasswordAuthenticationToken) jwtParser.getAuthentication(token);
 
         assertNotNull(authentication);
         assertEquals("testuser",((UserDetails) authentication.getPrincipal()).getUsername());
@@ -130,7 +130,7 @@ class JwtValidatorTest {
                 .compact();
 
         //when & then
-        assertThrows(AuthenticationException.class, () -> jwtValidator.getAuthentication(token));
+        assertThrows(AuthenticationException.class, () -> jwtParser.getAuthentication(token));
     }
 
 
