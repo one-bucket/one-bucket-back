@@ -56,13 +56,40 @@ implements UsedTradePostService {
 
 
     @Override
+    @SuppressWarnings("unchecked")
     protected <D extends PostDto.Info> D convertPostToInfo(UsedTradePost post, List<GetCommentDto> comments) {
-        return null;
+        UsedTradePostDto.InternalThumbnail internalThumbnail = convertPostToThumbnailDtoInternal(post);
+
+        UsedTradePostDto.Info response = UsedTradePostDto.Info.of(internalThumbnail);
+        response.setComments(comments);
+        return (D) response;
     }
 
     @Override
-    protected <D extends PostDto.InternalThumbnail> D convertPostToThumbnailDtoInternal(UsedTradePost post) {
-        return null;
+    @SuppressWarnings("unchecked")
+    protected UsedTradePostDto.InternalThumbnail convertPostToThumbnailDtoInternal(UsedTradePost post) {
+        Long authorId = -1L;
+        String authorNickname = "(unknown)";
+        if (post.getAuthor() != null) {
+            authorId = post.getAuthorId();
+            authorNickname = post.getAuthor().getNickname();
+        }
+        String text = post.getText();
+        return UsedTradePostDto.InternalThumbnail.builder()
+                .boardId(post.getBoardId())
+                .postId(post.getId())
+                .authorId(authorId)
+                .authorNickname(authorNickname)
+                .title(post.getTitle())
+                .text(text)
+                .createdDate(post.getCreatedDate())
+                .modifiedDate(post.getModifiedDate())
+                .imageUrls(post.getImageUrls())
+                .views(post.getViews())
+                .likes(post.getLikes())
+                .trade(post.getUsedTradeId())
+                .liftedAt(post.getLiftedAt())
+                .build();
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.onebucket.domain.tradeManage.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.onebucket.domain.tradeManage.entity.BaseTrade;
 import com.onebucket.domain.tradeManage.entity.TradeTag;
 import lombok.AllArgsConstructor;
@@ -7,6 +8,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+
+import java.util.List;
+
 /**
  * <br>package name   : com.onebucket.domain.tradeManage.dto
  * <br>file name      : UsedTradeDto
@@ -41,14 +45,58 @@ public class UsedTradeDto {
     @NoArgsConstructor
     public static class Info extends BaseTradeDto.Info {
         private boolean isReserve;
+
+        public static Info of(BaseTradeDto.Info dto) {
+            return Info.builder()
+                    .item(dto.getItem())
+                    .price(dto.getPrice())
+                    .location(dto.getLocation())
+                    .linkUrl(dto.getLinkUrl())
+                    .id(dto.getId())
+                    .userId(dto.getUserId())
+                    .dueDate(dto.getDueDate())
+                    .tag(dto.getTag())
+                    .isFin(dto.isFin())
+                    .createAt(dto.getCreateAt())
+                    .updateAt(dto.getUpdateAt())
+                    .build();
+        }
+    }
+
+    @SuperBuilder
+    @Getter
+    @NoArgsConstructor
+    public static class ListedInfo extends BaseTradeDto.Info {
+
+        public static ListedInfo of(BaseTradeDto.Info dto) {
+            return ListedInfo.builder()
+                    .item(dto.getItem())
+                    .price(dto.getPrice())
+                    .location(dto.getLocation())
+                    .linkUrl(dto.getLinkUrl())
+
+                    .id(dto.getId())
+                    .userId(dto.getUserId())
+                    .dueDate(dto.getDueDate())
+                    .tag(dto.getTag())
+                    .isFin(dto.isFin())
+                    .createAt(dto.getCreateAt())
+                    .updateAt(dto.getUpdateAt())
+                    .build();
+        }
     }
 
     @Getter
     public static class UpdateTrade extends BaseTradeDto.UpdateTrade {
 
-        public UpdateTrade(BaseTradeDto.Base base, BaseTrade trade, TradeTag tag) {
-            super(base, trade, tag);
-        }
+
+    }
+
+    @Getter
+    @SuperBuilder
+    @NoArgsConstructor
+    public static class Update extends BaseTradeDto.Update {
+
     }
 
     @Getter

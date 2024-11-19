@@ -1,5 +1,8 @@
 package com.onebucket.domain.boardManage.dto.postDto;
 
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import com.onebucket.domain.tradeManage.dto.GroupTradeDto;
+import com.onebucket.domain.tradeManage.dto.UsedTradeDto;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,6 +11,7 @@ import lombok.experimental.SuperBuilder;
 import net.minidev.json.annotate.JsonIgnore;
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -49,15 +53,78 @@ public class UsedTradePostDto {
     public static class InternalThumbnail extends PostDto.InternalThumbnail {
 
         private Long trade;
+        private LocalDateTime liftedAt;
 
-//        @JsonUnwrapped(prefix = "trade_")
-//        private GroupTradeDto.ResponseInfo tradeInfo;
+        public static InternalThumbnail of(PostDto.InternalThumbnail dto) {
+            return InternalThumbnail.builder()
+                    .boardId(dto.getBoardId())
+                    .title(dto.getTitle())
+                    .text(dto.getText())
+
+                    .postId(dto.getPostId())
+                    .authorId(dto.getAuthorId())
+                    .authorNickname(dto.getAuthorNickname())
+                    .createdDate(dto.getCreatedDate())
+                    .modifiedDate(dto.getModifiedDate())
+                    .imageUrls(dto.getImageUrls())
+                    .views(dto.getViews())
+                    .likes(dto.getLikes())
+                    .build();
+        }
+    }
+
+    @Getter
+    @Setter
+    @SuperBuilder
+    @NoArgsConstructor
+    public static class Thumbnail extends PostDto.Thumbnail {
+
+        @JsonUnwrapped(prefix = "trade_")
+        private UsedTradeDto.Info trade;
+
+        private LocalDateTime liftedAt;
+
+        public static Thumbnail of(PostDto.Thumbnail dto) {
+            return Thumbnail.builder()
+                    .boardId(dto.getBoardId())
+                    .title(dto.getTitle())
+                    .text(dto.getText())
+
+                    .postId(dto.getPostId())
+                    .authorId(dto.getAuthorId())
+                    .authorNickname(dto.getAuthorNickname())
+                    .createdDate(dto.getCreatedDate())
+                    .modifiedDate(dto.getModifiedDate())
+                    .imageUrls(dto.getImageUrls())
+                    .views(dto.getViews())
+                    .likes(dto.getLikes())
+
+                    .build();
+        }
     }
 
     @Getter
     @SuperBuilder
     public static class Info extends PostDto.Info {
         private Long tradeId;
+
+        public static Info of(InternalThumbnail dto) {
+            return Info.builder()
+                    .boardId(dto.getBoardId())
+                    .title(dto.getTitle())
+                    .text(dto.getText())
+
+                    .postId(dto.getPostId())
+                    .authorId(dto.getAuthorId())
+                    .authorNickname(dto.getAuthorNickname())
+                    .createdDate(dto.getCreatedDate())
+                    .modifiedDate(dto.getModifiedDate())
+                    .imageUrls(dto.getImageUrls())
+                    .views(dto.getViews())
+                    .likes(dto.getLikes())
+                    .tradeId(dto.getTrade())
+                    .build();
+        }
     }
 
 

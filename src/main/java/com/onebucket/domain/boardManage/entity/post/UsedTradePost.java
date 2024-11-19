@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import java.time.LocalDateTime;
+
 /**
  * <br>package name   : com.onebucket.domain.boardManage.entity.post
  * <br>file name      : UsedTradePost
@@ -32,4 +34,6 @@ public class UsedTradePost extends Post {
 
     @Column(name = "trade_id", insertable = false, updatable = false)
     private Long usedTradeId;
+
+    private LocalDateTime liftedAt;
 }
