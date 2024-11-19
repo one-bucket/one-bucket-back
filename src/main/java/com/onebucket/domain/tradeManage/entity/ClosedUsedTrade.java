@@ -1,10 +1,10 @@
 package com.onebucket.domain.tradeManage.entity;
 
-import com.fasterxml.jackson.databind.ser.Serializers;
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
+import com.onebucket.domain.memberManage.domain.Member;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 /**
@@ -23,8 +23,12 @@ import lombok.experimental.SuperBuilder;
  */
 @Entity
 @Getter
+@Setter
 @NoArgsConstructor
 @SuperBuilder
 @DiscriminatorValue("ClosedUsedTrade")
-public class ClosedUsedTrade extends UsedTrade {
+public class ClosedUsedTrade extends BaseTrade {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "joiner_id", nullable = true)
+    private Member joiner;
 }

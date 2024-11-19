@@ -1,16 +1,12 @@
 package com.onebucket.domain.tradeManage.api;
 
-import com.onebucket.domain.chatManager.service.ChatRoomService;
 import com.onebucket.domain.memberManage.service.MemberService;
 import com.onebucket.domain.tradeManage.dto.TradeKeyDto;
 import com.onebucket.domain.tradeManage.service.GroupTradeService;
 import com.onebucket.global.utils.SecurityUtils;
 import com.onebucket.global.utils.SuccessResponseDto;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * <br>package name   : com.onebucket.domain.tradeManage.api
@@ -37,14 +33,26 @@ public class GroupTradeController extends AbstractTradeController<GroupTradeServ
         super(tradeService, securityUtils, memberService);
     }
 
-    @PostMapping("/join")
-    public ResponseEntity<TradeKeyDto.ResponseJoinTrade> joinTrade(@RequestParam TradeKeyDto.UserTrade dto) {
+    @PostMapping("/join/{tradeId}")
+    public ResponseEntity<TradeKeyDto.ResponseJoinTrade> joinTrade(@PathVariable Long tradeId) {
+        Long userId = securityUtils.getUserId();
+
+        TradeKeyDto.UserTrade dto = TradeKeyDto.UserTrade.builder()
+                .tradeId(tradeId)
+                .userId(userId)
+                .build();
         TradeKeyDto.ResponseJoinTrade response = tradeService.addMember(dto);
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/quit")
-    public ResponseEntity<SuccessResponseDto> quitTrade(@RequestParam TradeKeyDto.UserTrade dto) {
+    @PostMapping("/quit/{tradeId}")
+    public ResponseEntity<SuccessResponseDto> quitTrade(@PathVariable Long tradeId) {
+        Long userId = securityUtils.getUserId();
+
+        TradeKeyDto.UserTrade dto = TradeKeyDto.UserTrade.builder()
+                .tradeId(tradeId)
+                .userId(userId)
+                .build();
         tradeService.quitMember(dto);
         return ResponseEntity.ok(new SuccessResponseDto("success quit trade"));
     }

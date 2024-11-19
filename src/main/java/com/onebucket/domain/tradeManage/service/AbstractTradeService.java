@@ -83,14 +83,6 @@ public abstract class AbstractTradeService<T extends BaseTrade, R extends TradeR
         return repository.save(trade).isFin();
     }
 
-    @Override
-    @Transactional
-    public Long terminateTrade(TradeKeyDto.FindTrade dto) {
-        T trade = findTrade(dto.getTradeId());
-
-        //turn trade to closed trade
-        return makeTradeClosed(trade);
-    }
 
     @Override
     @Transactional

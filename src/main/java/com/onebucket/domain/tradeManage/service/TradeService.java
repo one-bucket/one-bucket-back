@@ -28,8 +28,6 @@ public interface TradeService {
 
     boolean makeFin(TradeKeyDto.Finish dto);
 
-    Long terminateTrade(TradeKeyDto.FindTrade dto);
-
     LocalDateTime extendDueDate(TradeKeyDto.ExtendDate dto);
     Long getOwnerOfTrade(TradeKeyDto.FindTrade dto);
 }

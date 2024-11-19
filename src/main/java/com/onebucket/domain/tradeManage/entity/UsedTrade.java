@@ -1,6 +1,5 @@
 package com.onebucket.domain.tradeManage.entity;
 
-import com.onebucket.domain.memberManage.domain.Member;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -26,9 +25,6 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @SuperBuilder
 @DiscriminatorValue("UsedTrade")
-public class UsedTrade extends BaseTrade {
+public class UsedTrade extends ClosedUsedTrade {
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "joiner_id", nullable = true)
-    private Member joiner;
 }

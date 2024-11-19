@@ -207,7 +207,6 @@ public class GroupTradeServiceImpl extends AbstractTradeService<GroupTrade, Grou
                 .toList();
 
         return GroupTradeDto.Info.builder()
-                .id(groupTrade.getId())
                 .userId(groupTrade.getOwner().getId())
                 .tag(groupTrade.getTradeTag().getName())
                 .item(groupTrade.getItem())
@@ -231,4 +230,5 @@ public class GroupTradeServiceImpl extends AbstractTradeService<GroupTrade, Grou
         return chatRoomRepository.findById(chatRoomId).orElseThrow(() ->
                 new ChatRoomException(ChatErrorCode.NOT_EXIST_ROOM));
     }
+
 }

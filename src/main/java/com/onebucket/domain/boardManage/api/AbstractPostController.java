@@ -86,7 +86,7 @@ public abstract class AbstractPostController<S extends BasePostService> {
         return getPostsBySearchInternal(searchPage);
     }
 
-    @GetMapping("/my/{boardId}")
+    @GetMapping("/list/my/{boardId}")
     public ResponseEntity<Page<? extends PostDto.Thumbnail>> getAuthorsPost(@PathVariable Long boardId,
                                                                             Pageable pageable) {
         Long userId = securityUtils.getUserId();

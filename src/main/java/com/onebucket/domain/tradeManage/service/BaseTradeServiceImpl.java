@@ -89,7 +89,6 @@ public class BaseTradeServiceImpl extends AbstractTradeService<BaseTrade, BaseTr
 
     private BaseTradeDto.Info makeBaseTradeToDto(BaseTrade baseTrade) {
         return BaseTradeDto.Info.builder()
-                .id(baseTrade.getId())
                 .userId(baseTrade.getOwner().getId())
                 .tag(baseTrade.getTradeTag().getName())
                 .item(baseTrade.getItem())
