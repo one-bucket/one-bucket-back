@@ -37,7 +37,7 @@ import org.springframework.data.redis.core.RedisHash;
 @Setter
 public class RefreshToken {
     @Id
-    private String username;
+    private Long id;
 
     private String refreshToken;
 }

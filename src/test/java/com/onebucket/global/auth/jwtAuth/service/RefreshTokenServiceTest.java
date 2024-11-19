@@ -1,5 +1,6 @@
 package com.onebucket.global.auth.jwtAuth.service;
 
+import com.onebucket.global.auth.jwtAuth.component.JwtParser;
 import com.onebucket.global.auth.jwtAuth.domain.RefreshToken;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.redis.RedisRepository;
@@ -50,6 +51,9 @@ class RefreshTokenServiceTest {
     @Mock
     private RedisSaveRequestBuilder redisSaveRequestBuilder;
 
+    @Mock
+    private JwtParser jwtParser;
+
     @InjectMocks
     private RefreshTokenServiceImpl refreshTokenService;
 
@@ -60,21 +64,20 @@ class RefreshTokenServiceTest {
     @DisplayName("saveRefreshToken 메서드 성공")
     void testSaveRefreshToken_success() {
         //given
-        String username = "test user";
+        Long id = -1L;
         String refreshToken = "refresh token";
-        RefreshToken token = new RefreshToken(username, refreshToken);
         //when
         when(redisRepository.save()).thenReturn(redisSaveRequestBuilder);
         when(redisSaveRequestBuilder.key(anyString())).thenReturn(redisSaveRequestBuilder);
         when(redisSaveRequestBuilder.value(anyString())).thenReturn(redisSaveRequestBuilder);
         when(redisSaveRequestBuilder.timeout(anyLong())).thenReturn(redisSaveRequestBuilder);
         when(redisSaveRequestBuilder.timeUnit(TimeUnit.MILLISECONDS)).thenReturn(redisSaveRequestBuilder);
-
-        refreshTokenService.saveRefreshToken(token);
+        when(jwtParser.getUserIdFromToken(refreshToken)).thenReturn(id);
+        refreshTokenService.saveRefreshToken(refreshToken);
 
         // then
         verify(redisRepository, times(1)).save();
-        verify(redisSaveRequestBuilder).key("refreshToken:" + username);
+        verify(redisSaveRequestBuilder).key("refreshToken:" + id);
         verify(redisSaveRequestBuilder).value(refreshToken);
         verify(redisSaveRequestBuilder).timeout(timeOut);
         verify(redisSaveRequestBuilder).timeUnit(TimeUnit.MILLISECONDS);
@@ -83,14 +86,26 @@ class RefreshTokenServiceTest {
 
 
     @Test
-    @DisplayName("saveRefreshToken 메서드 실패 - 공백 입력")
+    @DisplayName("saveRefreshToken 메서드 실패 - Id 가 없음")
     @MockMember
-    void testSaveRefreshToken_fail_nullValue() {
+    void testSaveRefreshToken_fail_nullId() {
         //given
-        String username = "";
-        String token = "valid token";
-        RefreshToken refreshToken = new RefreshToken(username, token);
+        Long id = null;
+        String refreshToken = "valid token";
+        when(jwtParser.getUserIdFromToken(refreshToken)).thenReturn(id);
+        //when & then
+        assertThrows(AuthenticationException.class, () ->
+                refreshTokenService.saveRefreshToken(refreshToken));
+    }
 
+    @Test
+    @DisplayName("saveRefreshToken 메서드 실패 - refreshToken 없음")
+    @MockMember
+    void testSaveRefreshToken_fail_nullToken() {
+        //given
+        Long id = -1L;
+        String refreshToken = "";
+        when(jwtParser.getUserIdFromToken(refreshToken)).thenReturn(id);
         //when & then
         assertThrows(AuthenticationException.class, () ->
                 refreshTokenService.saveRefreshToken(refreshToken));
@@ -100,12 +115,12 @@ class RefreshTokenServiceTest {
     @Test
     @DisplayName("getRefreshToken 메서드 성공")
     void testGetRefreshToken_success() {
-        String username = "test user";
+        Long id = -1L;
         String token = "token";
 
-        when(redisRepository.get("refreshToken:" + username)).thenReturn(token);
+        when(redisRepository.get("refreshToken:" + id)).thenReturn(token);
 
-        RefreshToken result = refreshTokenService.getRefreshToken(username);
+        RefreshToken result = refreshTokenService.getRefreshToken(id);
 
         assertEquals(token, result.getRefreshToken());
     }
@@ -113,12 +128,12 @@ class RefreshTokenServiceTest {
     @Test
     @DisplayName("getRefreshToken 메서드 실패 - 찾을 수 없는 값")
     void testGetRefreshToken_fail_unknownValue() {
-        String username = "test user";
+        Long id = -1L;
 
         when(redisRepository.get(anyString())).thenReturn(null);
 
         assertThrows(AuthenticationException.class, () ->
-                refreshTokenService.getRefreshToken(username));
+                refreshTokenService.getRefreshToken(id));
     }
 
 }
