@@ -3,6 +3,8 @@ package com.onebucket.global.auth.jwtAuth.component;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.global.auth.jwtAuth.domain.JwtToken;
+import com.onebucket.global.auth.jwtAuth.domain.RefreshToken;
+import com.onebucket.global.auth.jwtAuth.service.RefreshTokenService;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import io.jsonwebtoken.Jwts;
@@ -55,9 +57,9 @@ public class JwtProvider {
     private final Key key;
     private final long expireDateAccessToken;
     private final long expireDateRefreshToken;
-
+    private final JwtParser jwtParser;
     private final MemberRepository memberRepository;
-
+    private final RefreshTokenService refreshTokenService;
     /**
      * Constructor of JwtProvider class.  Parameters of constructor are from {@code application.properties}.
      * Make secret key to key byte with Base64 Decoder and Sha algorithm.
@@ -68,14 +70,16 @@ public class JwtProvider {
     @Autowired
     public JwtProvider(@Value("${jwt.secret}") String secretKey,
                        @Value("${jwt.expireDate.accessToken}") long expireDateAccessToken,
-                       @Value("${jwt.expireDate.refreshToken}") long expireDateRefreshToken,
-                       MemberRepository memberRepository) {
+                       @Value("${jwt.expireDate.refreshToken}") long expireDateRefreshToken, JwtParser jwtParser,
+                       MemberRepository memberRepository, RefreshTokenService refreshTokenService) {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         this.key = Keys.hmacShaKeyFor(keyBytes);
 
         this.expireDateAccessToken = expireDateAccessToken;
         this.expireDateRefreshToken = expireDateRefreshToken;
         this.memberRepository = memberRepository;
+        this.jwtParser = jwtParser;
+        this.refreshTokenService = refreshTokenService;
     }
 
     /**
@@ -106,8 +110,20 @@ public class JwtProvider {
                 .build();
     }
 
-    public JwtToken generateToken(Long id) {
-        Member member = findMember(id);
+    /**
+     * access token 만료되어 refreshToken 을 재발급 받는 경우
+     * @param id 재발급을 신청한 유저의 id
+     * @return
+     */
+    public JwtToken generateToken(String headerString) {
+        String oldRefreshToken = jwtParser.getRefreshToken(headerString);
+        Long userId = jwtParser.getUserIdFromToken(oldRefreshToken);
+
+        if(!refreshTokenService.isTokenExist(new RefreshToken(userId, oldRefreshToken))){
+            throw new AuthenticationException(AuthenticationErrorCode.NON_VALID_TOKEN);
+        }
+
+        Member member = findMember(userId);
         long nowDate = (new Date()).getTime();
         String accessToken = generateAccessToken(member, nowDate);
         String refreshToken = generateRefreshToken(member,nowDate);
