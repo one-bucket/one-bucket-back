@@ -48,6 +48,7 @@ public class AnnouncementDto {
     public static class Thumbnail extends Base {
         private static final Integer MAX_LENGTH_THUMBNAIL_CONTENT = 50;
         private String imageUrl;
+        private NoticeType noticeType;
 
         // 썸네일 이므로 제목은 첨가하고 내용은 일부분만 첨가하자
         public static Thumbnail of(Announcement entity) {
@@ -57,6 +58,7 @@ public class AnnouncementDto {
                     .title(entity.getTitle())
                     .content(getThumbnailContent(entity.getContent()))
                     .imageUrl(getThumbnailImage(entity.getImages()))
+                    .noticeType(entity.getNoticeType())
                     .createAt(entity.getCreateAt())
                     .updateAt(entity.getUpdateAt())
                     .build();
