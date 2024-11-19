@@ -80,7 +80,7 @@ public class JwtParser {
     public String getRefreshToken(String jwtToken) {
         if (jwtToken == null || !jwtToken.startsWith("Bearer ")) {
             throw new AuthenticationException(AuthenticationErrorCode.NON_VALID_TOKEN,
-                    "can't access access token");
+                    "can't access token");
         }
         String refreshToken = jwtToken.substring(7);
         try {
@@ -88,7 +88,7 @@ public class JwtParser {
         } catch (ExpiredJwtException ignore) {
         } catch (Exception e) {
             throw new AuthenticationException(AuthenticationErrorCode.NON_VALID_TOKEN,
-                    "access token form invalid.");
+                    "token form invalid.");
         }
         return refreshToken;
     }

@@ -2,7 +2,6 @@ package com.onebucket.domain.memberManage.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.onebucket.domain.memberManage.dto.RefreshTokenDto;
 import com.onebucket.domain.memberManage.dto.SignInRequestDto;
 import com.onebucket.domain.memberManage.service.MemberService;
 import com.onebucket.domain.memberManage.service.SignInService;
@@ -18,6 +17,7 @@ import com.onebucket.global.exceptionManage.errorCode.CommonErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.ValidateErrorCode;
 import com.onebucket.global.exceptionManage.exceptionHandler.BaseExceptionHandler;
 import com.onebucket.global.exceptionManage.exceptionHandler.DataExceptionHandler;
+import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,8 +27,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -236,20 +234,13 @@ class SignInControllerTest {
     void testTokenRefresh_success() throws Exception {
 
         String refreshToken = "refresh token";
-        String accessToken = "access token";
-        RefreshTokenDto dto = new RefreshTokenDto(refreshToken);
-        String username = "test user";
-        Authentication authentication = new UsernamePasswordAuthenticationToken(username, "password");
         JwtToken newToken =
                 new JwtToken("grantType", "new access token", "new refresh token");
-        when(memberService.idToUsername(anyLong())).thenReturn("username");
-        when(refreshTokenService.isTokenExist(any(RefreshToken.class))).thenReturn(true);
         when(jwtProvider.generateToken(anyString())).thenReturn(newToken);
 
         mockMvc.perform(post("/refresh-token")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(dto))
-                .header("Authorization", "Bearer " + accessToken)
+                .header("Authorization", "Bearer " + refreshToken)
                 .accept(MediaType.APPLICATION_JSON)
                 .characterEncoding(StandardCharsets.UTF_8))
                 .andDo(print())
@@ -262,16 +253,15 @@ class SignInControllerTest {
     }
 
     @Test
-    @DisplayName("tokenRefresh - fail / access token null")
+    @DisplayName("tokenRefresh - fail / refresh token null")
     void testTokenRefresh_fail_cannotFindAccessToken() throws Exception {
-        String refreshToken = "refresh token";
-        RefreshTokenDto dto = new RefreshTokenDto(refreshToken);
-
         AuthenticationErrorCode code = AuthenticationErrorCode.NON_VALID_TOKEN;
+        AuthenticationException authenticationException = new AuthenticationException(code,"can't access token");
+        doThrow(authenticationException).when(jwtProvider).generateToken("Bearer " + null);
 
         mockMvc.perform(post("/refresh-token")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(new ObjectMapper().writeValueAsString(dto))
+                .header("Authorization", "Bearer " + null)
                 .accept(MediaType.APPLICATION_JSON)
                 .characterEncoding(StandardCharsets.UTF_8))
                 .andDo(print())
@@ -284,18 +274,13 @@ class SignInControllerTest {
     @Test
     @DisplayName("tokenRefresh - fail / token invalid")
     void testTokenRefresh_fail_refreshTokenInvalid() throws Exception {
-
-        String refreshToken = "refresh token";
-        String accessToken = "access token";
-        String username = "test user";
-        RefreshTokenDto dto = new RefreshTokenDto(refreshToken);
-
+        String refreshToken = "invalid refresh token";
         AuthenticationErrorCode code = AuthenticationErrorCode.NON_VALID_TOKEN;
-
+        AuthenticationException authenticationException = new AuthenticationException(code,"can't access token");
+        doThrow(authenticationException).when(jwtProvider).generateToken("Bearer " + refreshToken);
         mockMvc.perform(post("/refresh-token")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(new ObjectMapper().writeValueAsString(dto))
-                .header("Authorization", "Bearer " + accessToken)
+                .header("Authorization", "Bearer " + refreshToken)
                 .accept(MediaType.APPLICATION_JSON)
                 .characterEncoding(StandardCharsets.UTF_8))
                 .andExpect(hasStatus(code))
