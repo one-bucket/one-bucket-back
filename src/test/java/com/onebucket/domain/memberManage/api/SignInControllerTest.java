@@ -7,7 +7,7 @@ import com.onebucket.domain.memberManage.dto.SignInRequestDto;
 import com.onebucket.domain.memberManage.service.MemberService;
 import com.onebucket.domain.memberManage.service.SignInService;
 import com.onebucket.global.auth.jwtAuth.component.JwtProvider;
-import com.onebucket.global.auth.jwtAuth.component.JwtValidator;
+import com.onebucket.global.auth.jwtAuth.component.JwtParser;
 import com.onebucket.global.auth.jwtAuth.domain.JwtToken;
 import com.onebucket.global.auth.jwtAuth.domain.RefreshToken;
 import com.onebucket.global.auth.jwtAuth.service.RefreshTokenService;
@@ -75,7 +75,7 @@ class SignInControllerTest {
     @Mock
     private RefreshTokenService refreshTokenService;
     @Mock
-    JwtValidator jwtValidator;
+    JwtParser jwtParser;
     @Mock
     JwtProvider jwtProvider;
     @Mock
@@ -119,7 +119,7 @@ class SignInControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(hasKey(token));
 
-        verify(refreshTokenService, times(1)).saveRefreshToken(any(RefreshToken.class));
+        verify(refreshTokenService, times(1)).saveRefreshToken(anyString());
     }
 
     @Test
@@ -143,7 +143,7 @@ class SignInControllerTest {
                 .andExpect(content().string(containsString("username: username must not be empty")))
                 .andExpect(content().string(containsString("password: password must not be empty")));
 
-        verify(refreshTokenService, never()).saveRefreshToken(any(RefreshToken.class));
+        verify(refreshTokenService, never()).saveRefreshToken(anyString());
     }
 
 
@@ -172,7 +172,7 @@ class SignInControllerTest {
                 .andExpect(hasStatus(code))
                 .andExpect(hasKey(code));
 
-        verify(refreshTokenService, never()).saveRefreshToken(any(RefreshToken.class));
+        verify(refreshTokenService, never()).saveRefreshToken(anyString());
     }
 
     @Test
@@ -190,7 +190,7 @@ class SignInControllerTest {
         AuthenticationException exception = new AuthenticationException(code, internalMessage);
 
         when(signInService.signInByUsernameAndPassword(username, password)).thenReturn(token);
-        doThrow(exception).when(refreshTokenService).saveRefreshToken(any(RefreshToken.class));
+        doThrow(exception).when(refreshTokenService).saveRefreshToken(anyString());
 
         mockMvc.perform(post("/sign-in")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -217,7 +217,7 @@ class SignInControllerTest {
         CommonException exception = new CommonException(code, internalMessage);
 
         when(signInService.signInByUsernameAndPassword(username, password)).thenReturn(token);
-        doThrow(exception).when(refreshTokenService).saveRefreshToken(any(RefreshToken.class));
+        doThrow(exception).when(refreshTokenService).saveRefreshToken(anyString());
 
         mockMvc.perform(post("/sign-in")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -244,7 +244,7 @@ class SignInControllerTest {
                 new JwtToken("grantType", "new access token", "new refresh token");
         when(memberService.idToUsername(anyLong())).thenReturn("username");
         when(refreshTokenService.isTokenExist(any(RefreshToken.class))).thenReturn(true);
-        when(jwtProvider.generateToken(anyLong())).thenReturn(newToken);
+        when(jwtProvider.generateToken(anyString())).thenReturn(newToken);
 
         mockMvc.perform(post("/refresh-token")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -256,7 +256,7 @@ class SignInControllerTest {
                 .andExpect(hasKey(newToken));
 
         verify(refreshTokenService, times(1)).saveRefreshToken(
-                any(RefreshToken.class)
+                anyString()
         );
 
     }
@@ -278,7 +278,7 @@ class SignInControllerTest {
                 .andExpect(hasStatus(code))
                 .andExpect(hasKey(code));
 
-        verify(jwtValidator, never()).isTokenValid(anyString());
+        verify(jwtParser, never()).isTokenValid(anyString());
     }
 
     @Test
@@ -302,7 +302,7 @@ class SignInControllerTest {
                 .andExpect(hasKey(code));
 
         verify(refreshTokenService, never()).saveRefreshToken(
-                any(RefreshToken.class)
+                anyString()
         );
 
     }

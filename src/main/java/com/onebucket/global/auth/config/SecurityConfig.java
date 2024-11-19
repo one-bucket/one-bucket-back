@@ -1,6 +1,6 @@
 package com.onebucket.global.auth.config;
 
-import com.onebucket.global.auth.jwtAuth.component.JwtValidator;
+import com.onebucket.global.auth.jwtAuth.component.JwtParser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -45,7 +45,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 @EnableMethodSecurity
 public class SecurityConfig {
-    private final JwtValidator jwtValidator;
+    private final JwtParser jwtParser;
     private final GuestOnlyAuthorizationManager guestOnlyAuthorizationManager;
 
     @Bean
@@ -70,7 +70,7 @@ public class SecurityConfig {
                                 .requestMatchers("/dev/**").permitAll()
        //                         .anyRequest().access(guestOnlyAuthorizationManager))
                                 .anyRequest().authenticated())
-                .addFilterBefore(new JwtAuthenticationFilter(jwtValidator),
+                .addFilterBefore(new JwtAuthenticationFilter(jwtParser),
                         UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

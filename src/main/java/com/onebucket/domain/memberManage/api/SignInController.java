@@ -1,22 +1,14 @@
 package com.onebucket.domain.memberManage.api;
 
-import com.onebucket.domain.memberManage.dto.RefreshTokenDto;
 import com.onebucket.domain.memberManage.dto.SignInRequestDto;
-import com.onebucket.domain.memberManage.service.MemberService;
 import com.onebucket.domain.memberManage.service.SignInService;
 import com.onebucket.global.auth.jwtAuth.component.JwtProvider;
-import com.onebucket.global.auth.jwtAuth.component.JwtValidator;
 import com.onebucket.global.auth.jwtAuth.domain.JwtToken;
-import com.onebucket.global.auth.jwtAuth.domain.RefreshToken;
 import com.onebucket.global.auth.jwtAuth.service.RefreshTokenService;
-import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
-import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -48,9 +40,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class SignInController {
     private final SignInService signInService;
     private final RefreshTokenService refreshTokenService;
-    private final JwtValidator jwtValidator;
     private final JwtProvider jwtProvider;
-    private final MemberService memberService;
     /**
      * 로그인을 위한 엔드포인트. username 과 password 를 이용하여 JwtToken 을 반환하는 컨트롤러이다.
      * @param dto username 과 password
@@ -64,8 +54,7 @@ public class SignInController {
 
         JwtToken jwtToken = signInService.signInByUsernameAndPassword(username, password);
 
-        RefreshToken token = new RefreshToken(username, jwtToken.getRefreshToken());
-        refreshTokenService.saveRefreshToken(token);
+        refreshTokenService.saveRefreshToken(jwtToken.getRefreshToken());
 
         return ResponseEntity.ok(jwtToken);
     }
@@ -82,18 +71,10 @@ public class SignInController {
     @PostMapping("/refresh-token")
     public ResponseEntity<JwtToken> tokenRefresh(HttpServletRequest request) {
         String headerString = request.getHeader("Authorization");
-        String refreshToken = jwtValidator.getRefreshToken(headerString);
-        Long userId = jwtValidator.getUserIdFromToken(refreshToken);
-        String username = memberService.idToUsername(userId);
 
-        if(!refreshTokenService.isTokenExist(new RefreshToken(username, refreshToken))){
-            throw new AuthenticationException(AuthenticationErrorCode.NON_VALID_TOKEN);
-        }
+        JwtToken jwtToken = jwtProvider.generateToken(headerString);
 
-        JwtToken jwtToken = jwtProvider.generateToken(userId);
-
-        RefreshToken newToken = new RefreshToken(username,jwtToken.getRefreshToken());
-        refreshTokenService.saveRefreshToken(newToken);
+        refreshTokenService.saveRefreshToken(jwtToken.getRefreshToken());
 
         return ResponseEntity.ok(jwtToken);
     }

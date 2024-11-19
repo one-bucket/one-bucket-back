@@ -1,23 +1,14 @@
 package com.onebucket.domain.memberManage.service;
 
 import com.onebucket.domain.memberManage.dao.MemberRepository;
-import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.global.auth.jwtAuth.component.JwtProvider;
-import com.onebucket.global.auth.jwtAuth.component.JwtValidator;
+import com.onebucket.global.auth.jwtAuth.component.JwtParser;
 import com.onebucket.global.auth.jwtAuth.domain.JwtToken;
-import com.onebucket.global.auth.springSecurity.CustomUserDetailsService;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
-import io.jsonwebtoken.ExpiredJwtException;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 
@@ -58,7 +49,7 @@ public class SignInServiceImpl implements SignInService{
 
     private final AuthenticationManager authenticationManager;
     private final JwtProvider jwtProvider;
-    private final JwtValidator jwtValidator;
+    private final JwtParser jwtParser;
     private final MemberRepository memberRepository;
 
     /**
@@ -90,31 +81,5 @@ public class SignInServiceImpl implements SignInService{
         } catch(InternalAuthenticationServiceException e) {
             throw new AuthenticationException(AuthenticationErrorCode.INTERNAL_AUTHENTICATION_ERROR);
         }
-    }
-
-    /**
-     * Authorities 의 값을 넘겨받아 토큰의 유효성을 검증하고, authentication 을 추출하여 반환한다.
-     *
-     * @param headerString http 메시지의 헤더 값
-     * @return 헤더에서 추출한 authentication
-     * @tested true
-     */
-    @Override
-    public Authentication getAuthenticationAndValidHeader(String headerString) {
-        if (headerString == null || !headerString.startsWith("Bearer ")) {
-            throw new AuthenticationException(AuthenticationErrorCode.NON_VALID_TOKEN,
-                    "can't access access token");
-        }
-        String accessToken = headerString.substring(7);
-        try {
-            jwtValidator.isTokenValid(accessToken);
-        } catch (ExpiredJwtException ignore) {
-        } catch (Exception e) {
-            throw new AuthenticationException(AuthenticationErrorCode.NON_VALID_TOKEN,
-                    "access token form invalid.");
-        }
-
-
-        return jwtValidator.getAuthentication(accessToken);
     }
 }
