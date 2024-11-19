@@ -18,6 +18,7 @@ import com.onebucket.global.redis.RedisRepository;
 import com.onebucket.global.utils.SecurityUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -123,5 +124,12 @@ implements GroupTradePostService {
                 .trade(post.getGroupTradeId())
                 .liftedAt(post.getLiftedAt())
                 .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Long getTradeId(Long postId) {
+        GroupTradePost groupTradePost = findPost(postId);
+        return groupTradePost.getGroupTradeId();
     }
 }

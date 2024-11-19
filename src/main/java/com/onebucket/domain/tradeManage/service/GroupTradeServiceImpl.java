@@ -73,20 +73,19 @@ public class GroupTradeServiceImpl extends AbstractTradeService<GroupTrade, Grou
     }
 
     @Override
-    protected <D extends BaseTradeDto.UpdateTrade> void updateTrade(D dto) {
-        GroupTrade groupTrade = (GroupTrade) dto.getTrade();
-        GroupTradeDto.UpdateTrade update = (GroupTradeDto.UpdateTrade) dto;
+    protected <D extends BaseTradeDto.Update> void updateTrade(D dto, GroupTrade trade, TradeTag tag) {
 
+        GroupTradeDto.Update updateDto = (GroupTradeDto.Update) dto;
 
-        groupTrade.setItem(update.getItem());
-        groupTrade.setPrice(update.getPrice());
-        groupTrade.setLocation(update.getLocation());
-        groupTrade.setLinkUrl(update.getLinkUrl());
-        groupTrade.setTradeTag(update.getTag());
-        groupTrade.setUpdateAt(LocalDateTime.now());
+        trade.setItem(updateDto.getItem());
+        trade.setPrice(updateDto.getPrice());
+        trade.setLocation(updateDto.getLocation());
+        trade.setLinkUrl(updateDto.getLinkUrl());
+        trade.setTradeTag(tag);
+        trade.setUpdateAt(LocalDateTime.now());
 
-        groupTrade.setWanted(update.getWanted());
-        groupTrade.setCount(update.getCount());
+        trade.setWanted(updateDto.getWanted());
+        trade.setCount(updateDto.getCount());
     }
 
     @Override
@@ -99,6 +98,7 @@ public class GroupTradeServiceImpl extends AbstractTradeService<GroupTrade, Grou
     }
 
     @Override
+    @Transactional
     public TradeKeyDto.ResponseJoinTrade addMember(TradeKeyDto.UserTrade dto) {
         Long userId = dto.getUserId();
         Long tradeId = dto.getTradeId();
@@ -162,6 +162,7 @@ public class GroupTradeServiceImpl extends AbstractTradeService<GroupTrade, Grou
     }
 
     @Override
+    @Transactional
     public void setChatRoom(TradeKeyDto.SettingChatRoom dto) {
         GroupTrade groupTrade = findTrade(dto.getTradeId());
         ChatRoom chatRoom = findChatRoom(dto.getChatRoomId());
@@ -171,9 +172,11 @@ public class GroupTradeServiceImpl extends AbstractTradeService<GroupTrade, Grou
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Long> getJoinedTrade(Long userId) {
         return repository.findTradeIdsByMemberId(userId);
     }
+
 
     private GroupTrade makeCreateDtoToGroupTrade(GroupTradeDto.Create dto) {
         LocalDateTime now = LocalDateTime.now();

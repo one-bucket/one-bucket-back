@@ -67,17 +67,15 @@ public class UsedTradeServiceImpl extends AbstractTradeService<UsedTrade, UsedTr
     }
 
     @Override
-    protected <D extends BaseTradeDto.UpdateTrade> void updateTrade(D dto) {
-        UsedTrade usedTrade = (UsedTrade) dto.getTrade();
-        UsedTradeDto.UpdateTrade update = (UsedTradeDto.UpdateTrade) dto;
+    protected <D extends BaseTradeDto.Update> void updateTrade(D dto, UsedTrade trade, TradeTag tag) {
 
 
-        usedTrade.setItem(update.getItem());
-        usedTrade.setPrice(update.getPrice());
-        usedTrade.setLocation(update.getLocation());
-        usedTrade.setLinkUrl(update.getLinkUrl());
-        usedTrade.setTradeTag(update.getTag());
-        usedTrade.setUpdateAt(LocalDateTime.now());
+        trade.setItem(dto.getItem());
+        trade.setPrice(dto.getPrice());
+        trade.setLocation(dto.getLocation());
+        trade.setLinkUrl(dto.getLinkUrl());
+        trade.setTradeTag(tag);
+        trade.setUpdateAt(LocalDateTime.now());
     }
 
     @Override

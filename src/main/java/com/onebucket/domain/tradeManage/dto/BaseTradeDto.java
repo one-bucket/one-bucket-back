@@ -66,7 +66,9 @@ public class BaseTradeDto {
     }
 
     @Getter
+    @Setter
     @SuperBuilder
+    @NoArgsConstructor
     public static class Update extends Base {
         private String tag;
         private Long tradeId;
@@ -74,6 +76,7 @@ public class BaseTradeDto {
 
     @Getter
     @SuperBuilder
+    @NoArgsConstructor
     public static class UpdateTrade extends Base {
 
         private BaseTrade trade;

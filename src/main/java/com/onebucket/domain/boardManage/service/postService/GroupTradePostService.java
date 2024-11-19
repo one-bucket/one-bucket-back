@@ -2,6 +2,7 @@ package com.onebucket.domain.boardManage.service.postService;
 
 import com.onebucket.domain.boardManage.dto.postDto.GroupTradePostDto;
 import org.springframework.data.domain.Page;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * <br>package name   : com.onebucket.domain.boardManage.service
@@ -19,4 +20,7 @@ import org.springframework.data.domain.Page;
  */
 public interface GroupTradePostService extends BasePostService {
     Page<GroupTradePostDto.InternalThumbnail> getPostByTradeIdList(GroupTradePostDto.TradeIdsPageDto dto);
+
+    @Transactional(readOnly = true)
+    Long getTradeId(Long postId);
 }

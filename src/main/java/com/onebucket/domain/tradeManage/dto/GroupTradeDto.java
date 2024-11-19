@@ -100,14 +100,18 @@ public class GroupTradeDto {
 
     @Getter
     @SuperBuilder
+    @NoArgsConstructor
     public static class UpdateTrade extends BaseTradeDto.UpdateTrade {
         private Long wanted;
         private Long count;
+
+
 
     }
 
     @Getter
     @SuperBuilder
+    @NoArgsConstructor
     public static class Update extends BaseTradeDto.Update {
         private Long wanted;
         private Long count;

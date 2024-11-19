@@ -121,6 +121,9 @@ public class GroupTradePostController extends AbstractPostController<GroupTradeP
         PostDto.Update updatePostDto = dto.getPost();
         GroupTradeDto.Update updateTradeDto = dto.getTrade();
 
+        Long tradeId = postService.getTradeId(updatePostDto.getPostId());
+        updateTradeDto.setTradeId(tradeId);
+
         //GroupTrade update
         groupTradeService.update(updateTradeDto);
 

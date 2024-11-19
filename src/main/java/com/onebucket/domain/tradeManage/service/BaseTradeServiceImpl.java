@@ -56,16 +56,14 @@ public class BaseTradeServiceImpl extends AbstractTradeService<BaseTrade, BaseTr
     }
 
     @Override
-    protected <D extends BaseTradeDto.UpdateTrade> void updateTrade(D dto) {
+    protected <D extends BaseTradeDto.Update> void updateTrade(D dto, BaseTrade trade, TradeTag tag) {
 
-        BaseTrade baseTrade = dto.getTrade();
-
-        baseTrade.setPrice(dto.getPrice());
-        baseTrade.setItem(dto.getItem());
-        baseTrade.setLocation(dto.getLocation());
-        baseTrade.setLinkUrl(dto.getLinkUrl());
-        baseTrade.setTradeTag(dto.getTag());
-        baseTrade.setUpdateAt(LocalDateTime.now());
+        trade.setPrice(dto.getPrice());
+        trade.setItem(dto.getItem());
+        trade.setLocation(dto.getLocation());
+        trade.setLinkUrl(dto.getLinkUrl());
+        trade.setTradeTag(tag);
+        trade.setUpdateAt(LocalDateTime.now());
     }
 
     @Override

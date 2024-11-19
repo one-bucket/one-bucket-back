@@ -69,7 +69,7 @@ public abstract class AbstractTradeService<T extends BaseTrade, R extends TradeR
         T trade = findTrade(dto.getTradeId());
         TradeTag tag = findTag(dto.getTag());
 
-        updateTrade(new BaseTradeDto.UpdateTrade((BaseTradeDto.Base) dto, trade, tag));
+        updateTrade(dto, trade, tag);
 
         repository.save(trade);
     }
@@ -129,7 +129,7 @@ public abstract class AbstractTradeService<T extends BaseTrade, R extends TradeR
 
     protected abstract <D extends BaseTradeDto.Create> T convertCreateTradeToBaseTrade(D dto, Member owner, TradeTag tag);
     protected abstract <D extends BaseTradeDto.Info> D convertTradeToInfoDto(T trade);
-    protected abstract <D extends BaseTradeDto.UpdateTrade> void updateTrade(D dto);
+    protected abstract <D extends BaseTradeDto.Update> void updateTrade(D dto, T trade, TradeTag tag);
     protected abstract Long makeTradeClosed(T trade);
 
 
