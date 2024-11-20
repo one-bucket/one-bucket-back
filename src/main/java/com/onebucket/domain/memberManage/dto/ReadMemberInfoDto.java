@@ -31,6 +31,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ReadMemberInfoDto {
+    private Long userId;
     private String username;
     private String nickname;
     private String university;

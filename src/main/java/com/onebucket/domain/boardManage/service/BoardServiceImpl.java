@@ -19,6 +19,8 @@ import com.onebucket.global.exceptionManage.errorCode.BoardErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.UniversityErrorCode;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
@@ -160,12 +162,14 @@ public class BoardServiceImpl implements BoardService {
 
     }
     @Override
+    @Cacheable(value = "boardTypeCache")
     public String getType(Long boardId) {
         return boardRepository.findById(boardId).orElseThrow(() -> new UserBoardException(BoardErrorCode.UNKNOWN_BOARD))
                 .getBoardType().getType();
     }
 
     @Override
+    @CacheEvict(value = "boardTypeCache")
     public void createBoardType(CreateBoardTypeDto dto) {
         BoardType boardType = BoardType.builder()
                 .name(dto.getName())

@@ -1,7 +1,7 @@
 package com.onebucket.domain.chatManager.dto;
 
-import com.onebucket.domain.chatManager.entity.ChatRoomMember;
-import com.onebucket.domain.tradeManage.entity.PendingTrade;
+import com.onebucket.domain.chatManager.entity.TradeType;
+import com.onebucket.domain.tradeManage.entity.GroupTrade;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -25,24 +25,46 @@ import java.util.List;
  */
 public class ChatRoomDto {
 
+    @SuperBuilder
+    @Getter
+    public static class CreateRoom {
+        private String name;
+        private Long ownerId;
 
+        private TradeType tradeType;
+        private Long tradeId;
+    }
+
+    @SuperBuilder
+    @Getter
+    public static class CreateAndJoinRoom extends CreateRoom{
+        private Long joinerId;
+    }
+
+    @Builder
+    @Getter
+    public static class Info {
+        private String roomId;
+        private String name;
+        private Long ownerId;
+
+        private List<RoomMemberInfo> membersInfo;
+
+        private TradeType tradeType;
+        private Long tradeId;
+        @Builder
+        @Getter
+        public static class RoomMemberInfo {
+            private Long id;
+            private String nickname;
+            private LocalDateTime joinedAt;
+            private String imageUrl;
+        }
+    }
     @Builder
     @Getter
     public static class MemberInfo {
         private Long id;
-        private String nickname;
-        private LocalDateTime joinedAt;
-        private String role;
-
-        public static MemberInfo of(ChatRoomMember entity) {
-            return MemberInfo.builder()
-                    .id(entity.getMember().getId())
-                    .nickname(entity.getMember().getNickname())
-                    .joinedAt(entity.getJoinedAt())
-                    .role(entity.getRole())
-                    .build();
-        }
-
     }
 
     @Builder
@@ -91,14 +113,6 @@ public class ChatRoomDto {
         private Long userId;
     }
 
-    @Builder
-    @Getter
-    public static class CreateRoom {
-        private String name;
-        private Long memberId;
-        private Long tradeId;
-    }
-
 
     @Builder
     @Getter
@@ -128,16 +142,23 @@ public class ChatRoomDto {
 
         private List<MemberInfo> memberList;
 
-        public static GetTradeInfo of(PendingTrade pendingTrade) {
+        public static GetTradeInfo of(GroupTrade groupTrade) {
             return GetTradeInfo.builder()
-                    .id(pendingTrade.getId())
-                    .authorNickname(pendingTrade.getOwner().getNickname())
-                    .item(pendingTrade.getItem())
-                    .price(pendingTrade.getPrice())
-                    .tag(pendingTrade.getTradeTag().getName())
-                    .count(pendingTrade.getCount())
+                    .id(groupTrade.getId())
+                    .authorNickname(groupTrade.getOwner().getNickname())
+                    .item(groupTrade.getItem())
+                    .price(groupTrade.getPrice())
+                    .tag(groupTrade.getTradeTag().getName())
+                    .count(groupTrade.getCount())
                     .build();
         }
+    }
+
+    @Getter
+    @Builder
+    public static class TradeIdentifier {
+        private TradeType tradeType;
+        private Long tradeId;
     }
 
     @Builder
@@ -145,6 +166,21 @@ public class ChatRoomDto {
     public static class SaveImage {
         private String name;
         private String format;
+        private String roomId;
+    }
+
+    @SuperBuilder
+    @Getter
+    @NoArgsConstructor
+    public static class SearchMapper {
+        private Long userId;
+        private Long tradeId;
+    }
+
+    @SuperBuilder
+    @Getter
+    @NoArgsConstructor
+    public static class SaveMapper extends SearchMapper {
         private String roomId;
     }
 }

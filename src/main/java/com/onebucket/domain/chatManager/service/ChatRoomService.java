@@ -3,7 +3,6 @@ package com.onebucket.domain.chatManager.service;
 import com.onebucket.domain.chatManager.dto.ChatRoomDto;
 import com.onebucket.domain.chatManager.entity.ChatRoomMemberId;
 import com.onebucket.domain.chatManager.mongo.ChatMessage;
-import com.onebucket.domain.tradeManage.dto.TradeDto;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -27,15 +26,6 @@ public interface ChatRoomService {
 
 
     /**
-     * {@code roomId}를 받아, 해당 아이디가 이미 존재하는지 여부를 반환하는 메서드.
-     * 데이터베이스에서 직접 조회하여 반환한다. 일반적으로 유저가 해당 채팅방을 구독하기 위해 소켓 명령어를 전송할 때
-     * 해당 채팅방이 존재하는지에 대한 여부를 파악한다.
-     * @param roomId 해당 아이디가 데이터베이스에 존재하는지 확인한다.
-     * @return 존재하면 true, 아니면 false를 반환한다.
-     */
-    boolean existsById(String roomId);
-
-    /**
      * 유저의 정보화 채팅방 아이디를 받아, 해당 유저가 해당 채팅방에 속해있는지에 대한 인가를 위해
      * 존재하는 서비스 레이어 메서드이다. 매개변수로 유저와 채팅방 아이디를 받아 데이터베이스에서 검색한다.
      * TODO : 어쩌면 캐싱을 해야 할지도? 고민 필요
@@ -51,7 +41,24 @@ public interface ChatRoomService {
      * @param roomId 채팅방의 id
      * @return 유저의 닉네임, 가입 일시 및 role이 포함되어 있다.
      */
-    List<ChatRoomDto.MemberInfo> getMemberList(String roomId);
+    List<Long> getMemberIds(String roomId);
+
+    void changeRoomName(ChatRoomDto.ChangeRoomName dto);
+
+    void deleteRoom(String roomId);
+
+    ChatRoomDto.ChatRoomInfo getRoomInfo(ChatRoomDto.InfoAfterTime dto);
+    ChatRoomDto.Info getRoomDetails(String roomId);
+    List<String> getRoomIds(Long userId);
+
+    void setDisconnectTime(ChatRoomDto.SetDisconnectTime dto);
+
+    Long addMember(ChatRoomDto.ManageMember dto);
+
+    void quitMember(ChatRoomDto.ManageMember dto);
+
+    LocalDateTime getDisconnectTime(ChatRoomMemberId id);
+    List<ChatMessage> getMessageAfterTimestamp(ChatRoomDto.InfoAfterTime dto);
 
     /**
      * 채팅방을 생성하는 메서드. UUID를 이용해 채팅방 아이디를 생성하고, 처음 채팅방을 생성하는 유저의 정보를
@@ -63,25 +70,6 @@ public interface ChatRoomService {
      * @return 생성된 채팅방의 id가 반환된다.
      */
     String createRoom(ChatRoomDto.CreateRoom dto);
-
-    ChatRoomDto.GetTradeInfo getTradeInfo(String roomId);
-
-    void changeRoomName(ChatRoomDto.ChangeRoomName dto);
-
-    void deleteRoom(String roomId);
-
-    ChatRoomDto.ChatRoomInfo getRoomInfo(ChatRoomDto.InfoAfterTime dto);
-
-    List<String> getRoomIds(Long userId);
-
-    void setDisconnectTime(ChatRoomDto.SetDisconnectTime dto);
-
-    Long addMember(ChatRoomDto.ManageMember dto);
-
-    void quitMember(ChatRoomDto.ManageMember dto);
-
-    LocalDateTime getDisconnectTime(ChatRoomMemberId id);
-    List<ChatMessage> getMessageAfterTimestamp(ChatRoomDto.InfoAfterTime dto);
-    TradeDto.Info getTradeInfoOfChatRoom(String chatRoomId);
-    void bombRoomByOwner(ChatRoomDto.ManageMember dto);
+    String createAndJoinRoom(ChatRoomDto.CreateAndJoinRoom dto);
+    ChatRoomDto.TradeIdentifier getTradeSimpleInfo(String chatRoomId);
 }

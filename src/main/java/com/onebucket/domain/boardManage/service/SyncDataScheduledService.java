@@ -1,6 +1,6 @@
 package com.onebucket.domain.boardManage.service;
 
-import com.onebucket.domain.boardManage.dao.PostRepository;
+import com.onebucket.domain.boardManage.dao.postRepository.PostRepository;
 import com.onebucket.global.redis.LuaScriptLoader;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

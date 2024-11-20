@@ -1,5 +1,7 @@
 package com.onebucket.domain.tradeManage.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -80,6 +82,15 @@ public class TradeKeyDto {
     @NoArgsConstructor
     public static class RequestExtendDate extends ExtendDate {
 
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ResponseJoinTrade {
+        private Long tradeId;
+        private String chatRoomId;
     }
 
 
