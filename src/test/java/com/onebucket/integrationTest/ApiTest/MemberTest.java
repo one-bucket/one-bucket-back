@@ -147,7 +147,8 @@ public class MemberTest extends UserRestDocsSupportTest {
                         responseFields(
                                 fieldWithPath("username").description("username of account"),
                                 fieldWithPath("nickname").description("nickname of account"),
-                                fieldWithPath("university").description("university of account")
+                                fieldWithPath("university").description("university of account"),
+                                fieldWithPath("userId").description("userId of account")
                         )));
 
     }
