@@ -168,4 +168,19 @@ public class ChatRoomDto {
         private String format;
         private String roomId;
     }
+
+    @SuperBuilder
+    @Getter
+    @NoArgsConstructor
+    public static class SearchMapper {
+        private Long userId;
+        private Long tradeId;
+    }
+
+    @SuperBuilder
+    @Getter
+    @NoArgsConstructor
+    public static class SaveMapper extends SearchMapper {
+        private String roomId;
+    }
 }

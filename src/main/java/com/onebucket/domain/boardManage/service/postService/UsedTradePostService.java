@@ -3,6 +3,9 @@ package com.onebucket.domain.boardManage.service.postService;
 import com.onebucket.domain.boardManage.dto.postDto.UsedTradePostDto;
 import org.springframework.data.domain.Page;
 
+import java.time.LocalDateTime;
+import java.util.Optional;
+
 /**
  * <br>package name   : com.onebucket.domain.boardManage.service.postService
  * <br>file name      : UsedTradeService
@@ -17,6 +20,10 @@ import org.springframework.data.domain.Page;
  *
  * } </pre>
  */
-public interface UsedTradePostService {
+public interface UsedTradePostService extends BasePostService {
     Page<UsedTradePostDto.InternalThumbnail> getPostByTradeIdList(UsedTradePostDto.TradeIdsPageDto dto);
+
+    Long getTradeId(Long postId);
+
+    Optional<LocalDateTime> liftPost(Long postId);
 }

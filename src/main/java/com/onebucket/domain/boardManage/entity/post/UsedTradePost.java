@@ -4,6 +4,7 @@ import com.onebucket.domain.tradeManage.entity.UsedTrade;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
@@ -24,6 +25,7 @@ import java.time.LocalDateTime;
  */
 @Entity
 @Getter
+@Setter
 @NoArgsConstructor
 @SuperBuilder
 public class UsedTradePost extends Post {

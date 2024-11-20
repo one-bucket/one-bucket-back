@@ -23,8 +23,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+
 
 /**
  * <br>package name   : com.onebucket.domain.boardManage.api
@@ -99,7 +102,6 @@ public class GroupTradePostController extends AbstractPostController<GroupTradeP
 
         String chatRoomId = chatRoomService.createRoom(createRoomDto);
 
-        //pendingTrade에 저장
         TradeKeyDto.SettingChatRoom settingChatRoom = TradeKeyDto.SettingChatRoom.builder()
                 .chatRoomId(chatRoomId)
                 .tradeId(tradeId)
@@ -114,7 +116,7 @@ public class GroupTradePostController extends AbstractPostController<GroupTradeP
         return ResponseEntity.ok(response);
     }
 
-    @PreAuthorize("@authorizationService.isUserCanAccessPost(#dto.post.postId)")
+    @PreAuthorize("@authorizationService.isUserOwnerOfPost(#dto.post.postId)")
     @PostMapping("/update")
     public ResponseEntity<SuccessResponseWithIdDto> updatePost(@RequestBody @Valid GroupTradePostDto.RequestUpdate dto) {
 
@@ -149,6 +151,15 @@ public class GroupTradePostController extends AbstractPostController<GroupTradeP
         return ResponseEntity.ok(response);
 
     }
+
+    @PreAuthorize("@authorizationService.isUserOwnerOfPost(#postId)")
+    @PostMapping("/lift/{postId}")
+    public ResponseEntity<SuccessResponseWithIdDto> liftPost(@PathVariable Long postId) {
+        Optional<LocalDateTime> liftTime = postService.liftPost(postId);
+        return liftTime.map(localDateTime -> ResponseEntity.ok(new SuccessResponseWithIdDto(localDateTime.toString(), postId)))
+                .orElseGet(() -> ResponseEntity.ok(new SuccessResponseWithIdDto("false", -1L)));
+    }
+
 
     @Override
     protected ResponseEntity<? extends PostDto.ResponseInfo> getPostInternal(PostKeyDto.UserPost dto) {

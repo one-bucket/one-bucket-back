@@ -3,6 +3,7 @@ package com.onebucket.domain.tradeManage.api;
 import com.onebucket.domain.chatManager.dto.ChatRoomDto;
 import com.onebucket.domain.chatManager.entity.TradeType;
 import com.onebucket.domain.chatManager.service.ChatRoomService;
+import com.onebucket.domain.chatManager.service.MappingMemberAndChatroomService;
 import com.onebucket.domain.memberManage.service.MemberService;
 import com.onebucket.domain.tradeManage.dto.TradeKeyDto;
 import com.onebucket.domain.tradeManage.dto.UsedTradeDto;
@@ -13,10 +14,7 @@ import com.onebucket.global.utils.SecurityUtils;
 import com.onebucket.global.utils.SuccessResponseDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * <br>package name   : com.onebucket.domain.tradeManage.api
@@ -38,29 +36,45 @@ import org.springframework.web.bind.annotation.RestController;
 public class UsedTradeController extends AbstractTradeController<UsedTradeService> {
 
     private final ChatRoomService chatRoomService;
+    private final MappingMemberAndChatroomService mappingMemberAndChatroomService;
 
     public UsedTradeController(UsedTradeService tradeService,
                                SecurityUtils securityUtils,
                                MemberService memberService,
-                               ChatRoomService chatRoomService) {
+                               ChatRoomService chatRoomService,
+                               MappingMemberAndChatroomService mappingMemberAndChatroomService) {
         super(tradeService, securityUtils, memberService);
         this.chatRoomService = chatRoomService;
+        this.mappingMemberAndChatroomService = mappingMemberAndChatroomService;
     }
 
-    @PostMapping("/chat")
-    public ResponseEntity<UsedTradeDto.ResponseCreateChat> createNewChatRoom(@RequestParam TradeKeyDto.FindTrade dto) {
-        Long tradeId = dto.getTradeId();
+    @PostMapping("/chat/{tradeId}")
+    public ResponseEntity<UsedTradeDto.ResponseCreateChat> createNewChatRoom(@PathVariable Long tradeId) {
         TradeKeyDto.FindTrade findTrade = TradeKeyDto.FindTrade.builder()
                 .tradeId(tradeId)
                 .build();
         if(tradeService.isReserved(findTrade)) {
             throw new TradeException(TradeErrorCode.ALREADY_JOIN, "already reserved trade");
         }
-        Long ownerId = tradeService.getOwnerOfTrade(dto);
-        Long joinerId = securityUtils.getUserId();
 
+        Long ownerId = tradeService.getOwnerOfTrade(findTrade);
+        Long joinerId = securityUtils.getUserId();
         String ownerNickname = memberService.idToNickname(ownerId);
 
+        ChatRoomDto.SearchMapper searchMapper = ChatRoomDto.SearchMapper.builder()
+                .tradeId(tradeId)
+                .userId(joinerId)
+                .build();
+
+        String roomId = mappingMemberAndChatroomService.getExistChatroom(searchMapper);
+        if(roomId != null) {
+            UsedTradeDto.ResponseCreateChat response = UsedTradeDto.ResponseCreateChat.builder()
+                    .ownerNickname(ownerNickname)
+                    .roomId(roomId)
+                    .build();
+
+            return ResponseEntity.ok(response);
+        }
         ChatRoomDto.CreateAndJoinRoom createRoomDto = ChatRoomDto.CreateAndJoinRoom.builder()
                 .name(ownerNickname + "와의 채팅")
                 .tradeType(TradeType.USED)
@@ -70,6 +84,12 @@ public class UsedTradeController extends AbstractTradeController<UsedTradeServic
                 .build();
         String chatRoomId = chatRoomService.createAndJoinRoom(createRoomDto);
 
+        ChatRoomDto.SaveMapper saveMapper = ChatRoomDto.SaveMapper.builder()
+                .tradeId(tradeId)
+                .userId(joinerId)
+                .roomId(chatRoomId)
+                .build();
+        mappingMemberAndChatroomService.saveChatRoomMapping(saveMapper);
         UsedTradeDto.ResponseCreateChat response = UsedTradeDto.ResponseCreateChat.builder()
                 .roomId(chatRoomId)
                 .ownerNickname(ownerNickname)
@@ -79,8 +99,8 @@ public class UsedTradeController extends AbstractTradeController<UsedTradeServic
     }
 
     @PostMapping("/reserve")
-    @PreAuthorize("@authorizationService.isUserOwnerOfTrade(#dto.tradeId)")
-    public ResponseEntity<SuccessResponseDto> reserveTradeWithJoiner(TradeKeyDto.UserTrade dto) {
+    @PreAuthorize(value = "@authorizationService.isUserOwnerOfTrade(#dto.tradeId)")
+    public ResponseEntity<SuccessResponseDto> reserveTradeWithJoiner(@RequestBody TradeKeyDto.UserTrade dto) {
         tradeService.reserve(dto);
 
         return ResponseEntity.ok(new SuccessResponseDto("Success reserve"));
@@ -88,7 +108,7 @@ public class UsedTradeController extends AbstractTradeController<UsedTradeServic
 
     //need to refresh
     @PostMapping("/reserve/quit")
-    public ResponseEntity<SuccessResponseDto> dismissReserve(TradeKeyDto.FindTrade dto) {
+    public ResponseEntity<SuccessResponseDto> dismissReserve(@RequestBody TradeKeyDto.FindTrade dto) {
         tradeService.rejectReserve(dto);
 
         return ResponseEntity.ok(new SuccessResponseDto("Success quit reserve"));

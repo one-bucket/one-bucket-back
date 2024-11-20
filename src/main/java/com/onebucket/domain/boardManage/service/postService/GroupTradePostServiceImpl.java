@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 
 /**
@@ -131,5 +132,25 @@ implements GroupTradePostService {
     public Long getTradeId(Long postId) {
         GroupTradePost groupTradePost = findPost(postId);
         return groupTradePost.getGroupTradeId();
+    }
+
+
+    @Override
+    public Optional<LocalDateTime> liftPost(Long postId) {
+        String prefix = "liftPost:";
+        GroupTradePost groupTradePost = findPost(postId);
+
+        LocalDateTime now = LocalDateTime.now();
+
+        String key = prefix + postId;
+
+        if(!redisRepository.isTokenExists(key)) {
+            redisRepository.save(prefix + postId, now.toString());
+            redisRepository.setExpire(prefix + postId, 6);
+            groupTradePost.setLiftedAt(now);
+            return Optional.of(now);
+        }
+
+        return Optional.empty();
     }
 }

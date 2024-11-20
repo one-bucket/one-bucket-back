@@ -1,15 +1,11 @@
 package com.onebucket.domain.tradeManage.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.onebucket.domain.tradeManage.entity.BaseTrade;
-import com.onebucket.domain.tradeManage.entity.TradeTag;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
-import java.util.List;
 
 /**
  * <br>package name   : com.onebucket.domain.tradeManage.dto
@@ -68,7 +64,9 @@ public class UsedTradeDto {
     @NoArgsConstructor
     public static class ListedInfo extends BaseTradeDto.Info {
 
-        public static ListedInfo of(BaseTradeDto.Info dto) {
+        private boolean isReserved;
+
+        public static ListedInfo of(UsedTradeDto.Info dto) {
             return ListedInfo.builder()
                     .item(dto.getItem())
                     .price(dto.getPrice())
@@ -82,6 +80,7 @@ public class UsedTradeDto {
                     .isFin(dto.isFin())
                     .createAt(dto.getCreateAt())
                     .updateAt(dto.getUpdateAt())
+                    .isReserved(dto.isReserve())
                     .build();
         }
     }

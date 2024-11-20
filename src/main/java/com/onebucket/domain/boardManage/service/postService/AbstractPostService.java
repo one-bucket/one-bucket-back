@@ -392,6 +392,9 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
     protected PostDto.InternalThumbnail convertPostToThumbnail(T post) {
         PostDto.InternalThumbnail thumbnail = convertPostToThumbnailDtoInternal(post);
         String text = thumbnail.getText();
+        if(text == null) {
+            text = "(NULL TEXT)";
+        }
         if(text.length() > 50) {
             text = text.substring(0, 50);
         }

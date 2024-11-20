@@ -19,7 +19,9 @@ import com.onebucket.global.utils.SecurityUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * <br>package name   : com.onebucket.domain.boardManage.service.postService
@@ -107,6 +109,7 @@ implements UsedTradePostService {
                 .title(createDto.getTitle())
                 .text(createDto.getText())
                 .usedTrade(usedTrade)
+                .liftedAt(LocalDateTime.now())
                 .build();
     }
 
@@ -114,5 +117,30 @@ implements UsedTradePostService {
     public Page<UsedTradePostDto.InternalThumbnail> getPostByTradeIdList(UsedTradePostDto.TradeIdsPageDto dto) {
         return repository.findByTradeIds(dto.getTradeIds(), dto.getPageable())
                 .map((post) -> (UsedTradePostDto.InternalThumbnail) convertPostToThumbnail(post));
+    }
+
+    @Override
+    public Long getTradeId(Long postId) {
+        UsedTradePost usedTradePost = findPost(postId);
+        return usedTradePost.getUsedTradeId();
+    }
+
+    @Override
+    public Optional<LocalDateTime> liftPost(Long postId) {
+        String prefix = "liftPost:";
+        UsedTradePost usedTradePost = findPost(postId);
+
+        LocalDateTime now = LocalDateTime.now();
+
+        String key = prefix + postId;
+
+        if(!redisRepository.isTokenExists(key)) {
+            redisRepository.save(prefix + postId, now.toString());
+            redisRepository.setExpire(prefix + postId, 6);
+            usedTradePost.setLiftedAt(now);
+            return Optional.of(now);
+        }
+
+        return Optional.empty();
     }
 }

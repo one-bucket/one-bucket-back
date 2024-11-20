@@ -80,6 +80,8 @@ public class ChatRoomServiceImpl implements ChatRoomService {
             throw new ChatRoomException(ChatErrorCode.USER_NOT_CREATOR, "Creator can't join his chatRoom");
         }
 
+
+
         ChatRoom chatRoom = ChatRoom.builder()
                 .id(chatRoomId)
                 .ownerId(owner.getId())
