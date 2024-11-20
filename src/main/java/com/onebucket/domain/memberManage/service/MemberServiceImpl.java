@@ -80,7 +80,13 @@ public class MemberServiceImpl implements MemberService {
         String universityName = Optional.ofNullable(member.getUniversity())
                 .map(University::getName)
                 .orElse("null");
-        return new ReadMemberInfoDto(username, member.getNickname(), universityName);
+
+        return ReadMemberInfoDto.builder()
+                .userId(member.getId())
+                .university(universityName)
+                .nickname(member.getNickname())
+                .username(username)
+                .build();
     }
 
     @Override

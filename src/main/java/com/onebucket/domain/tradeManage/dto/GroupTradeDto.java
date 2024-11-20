@@ -102,7 +102,7 @@ public class GroupTradeDto {
 
                     .wanted(dto.getWanted())
                     .joins(dto.getJoins())
-                    .count(dto.getJoins())
+                    .count(dto.getCount())
                     .build();
         }
     }
