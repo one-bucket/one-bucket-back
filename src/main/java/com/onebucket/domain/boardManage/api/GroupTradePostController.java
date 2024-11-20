@@ -216,8 +216,11 @@ public class GroupTradePostController extends AbstractPostController<GroupTradeP
                         .getInfo(((GroupTradePostDto.InternalThumbnail) internalThumbnail)
                         .getTrade()));
 
+
+
         GroupTradePostDto.Thumbnail thumbnail =
                 GroupTradePostDto.Thumbnail.of(convertInternalThumbnailToThumbnail(internalThumbnail));
+
         thumbnail.setLiftedAt(((GroupTradePostDto.InternalThumbnail) internalThumbnail).getLiftedAt());
         thumbnail.setTrade(tradeInfo);
 

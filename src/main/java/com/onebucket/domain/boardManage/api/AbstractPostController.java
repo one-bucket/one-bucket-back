@@ -244,15 +244,14 @@ public abstract class AbstractPostController<S extends BasePostService> {
     }
 
     protected PostDto.ResponseInfo convertInfoToResponse(PostDto.Info info, PostKeyDto.UserPost dto) {
-        PostDto.Info postInfoDto = postService.getPost(dto);
 
         //likes 정보 불러오기
-        Long savedInRedisLikes = postService.getLikesInRedis(postInfoDto.getPostId());
-        Long likes = postInfoDto.getLikes() + savedInRedisLikes;
+        Long savedInRedisLikes = postService.getLikesInRedis(info.getPostId());
+        Long likes = info.getLikes() + savedInRedisLikes;
         boolean isUserAlreadyLikes = postService.isUserLikesPost(dto);
 
         //변환 및 삽입
-        PostDto.ResponseInfo response = PostDto.ResponseInfo.of(postInfoDto);
+        PostDto.ResponseInfo response = PostDto.ResponseInfo.of(info);
         response.setLikes(likes);
         response.setUserAlreadyLikes(isUserAlreadyLikes);
 

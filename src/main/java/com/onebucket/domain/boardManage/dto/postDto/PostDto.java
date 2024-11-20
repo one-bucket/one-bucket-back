@@ -157,6 +157,8 @@ public class PostDto {
                     .imageUrls(dto.getImageUrls())
                     .views(dto.getViews())
                     .likes(dto.getLikes())
+                    .comments(dto.getComments())
+                    .commentsCount(dto.getCommentsCount())
                     .build();
         }
     }

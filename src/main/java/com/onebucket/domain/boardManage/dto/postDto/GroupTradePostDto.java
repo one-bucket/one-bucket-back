@@ -103,6 +103,7 @@ public class GroupTradePostDto {
                     .imageUrls(dto.getImageUrls())
                     .views(dto.getViews())
                     .likes(dto.getLikes())
+                    .commentsCount(dto.getCommentsCount())
 
                     .build();
         }
@@ -156,6 +157,9 @@ public class GroupTradePostDto {
                     .imageUrls(dto.getImageUrls())
                     .views(dto.getViews())
                     .likes(dto.getLikes())
+
+                    .comments(dto.getComments())
+                    .commentsCount(dto.getCommentsCount())
                     .build();
         }
     }

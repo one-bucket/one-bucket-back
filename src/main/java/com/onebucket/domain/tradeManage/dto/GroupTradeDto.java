@@ -60,6 +60,7 @@ public class GroupTradeDto {
                     .price(dto.getPrice())
                     .location(dto.getLocation())
                     .linkUrl(dto.getLinkUrl())
+
                     .id(dto.getId())
                     .userId(dto.getUserId())
                     .dueDate(dto.getDueDate())
@@ -80,7 +81,11 @@ public class GroupTradeDto {
         @JsonIgnore
         private List<JoinMember> joinMember;
 
-        public static ListedInfo of(BaseTradeDto.Info dto) {
+        private Long wanted;
+        private Long joins;
+        private Long count;
+
+        public static ListedInfo of(GroupTradeDto.Info dto) {
             return ListedInfo.builder()
                     .item(dto.getItem())
                     .price(dto.getPrice())
@@ -94,6 +99,10 @@ public class GroupTradeDto {
                     .isFin(dto.isFin())
                     .createAt(dto.getCreateAt())
                     .updateAt(dto.getUpdateAt())
+
+                    .wanted(dto.getWanted())
+                    .joins(dto.getJoins())
+                    .count(dto.getJoins())
                     .build();
         }
     }

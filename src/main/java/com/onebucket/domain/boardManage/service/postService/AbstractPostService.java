@@ -301,7 +301,11 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
     @Override
     @Cacheable(value = "commentCountCache", key = "#postId")
     public Long getCommentCount(Long postId) {
-        return commentRepository.countAllByPostId(postId);
+        Long response = commentRepository.countAllByPostId(postId);
+        if(response == null) {
+            return 0L;
+        }
+        return response;
     }
     @Override
     public Long getLikesInRedis(Long postId) {

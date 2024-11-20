@@ -46,6 +46,7 @@ public class PostController extends AbstractPostController<PostService>{
     @Override
     protected ResponseEntity<? extends PostDto.ResponseInfo> getPostInternal(PostKeyDto.UserPost dto) {
         PostDto.Info info = postService.getPost(dto);
+
         PostDto.ResponseInfo response = convertInfoToResponse(info, dto);
         return ResponseEntity.ok(response);
     }
