@@ -48,58 +48,54 @@ public class ChatInterceptor implements ChannelInterceptor {
     @Override
     public Message<?> preSend(@NotNull Message<?> message, @NotNull MessageChannel channel) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
-        try {
 
-            if(StompCommand.CONNECT.equals(accessor.getCommand())) {
-                String jwtToken = accessor.getFirstNativeHeader("Authorization");
-                if(jwtToken != null && jwtToken.startsWith("Bearer ")) {
-                    jwtToken = jwtToken.substring(7);
-                } else {
-                    throw new AuthenticationException(AuthenticationErrorCode.NON_VALID_TOKEN);
-                }
-
-                if(!jwtParser.isTokenValid(jwtToken)) {
-                    throw new AuthenticationException(AuthenticationErrorCode.NON_VALID_TOKEN);
-                }
-
-                String username = jwtParser.getAuthentication(jwtToken).getName();
-                String sessionId = accessor.getSessionId();
-
-                sessionUserMap.put(sessionId, username);
+        if(StompCommand.CONNECT.equals(accessor.getCommand())) {
+            String jwtToken = accessor.getFirstNativeHeader("Authorization");
+            if(jwtToken != null && jwtToken.startsWith("Bearer ")) {
+                jwtToken = jwtToken.substring(7);
+            } else {
+                throw new AuthenticationException(AuthenticationErrorCode.NON_VALID_TOKEN);
             }
 
-            if (StompCommand.SUBSCRIBE.equals(accessor.getCommand())) {
-
-                // 구독하려는 채팅방 ID 추출
-                String destination = accessor.getDestination();
-                assert destination != null;
-                String roomId = extractRoomIdFromDestination(destination);
-
-                // 세션 ID를 통해 사용자 ID 가져오기
-                String sessionId = accessor.getSessionId();
-                String username = getUserIdBySessionId(sessionId);  // CONNECT 시 저장된 사용자 정보 활용
-
-                if (username == null) {
-                    throw new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER, "CON before SUB");
-                }
-                sessionRoomMap.put(sessionId, roomId);
-
-                Long userId = memberService.usernameToId(username);
-                ChatRoomDto.ManageMember findMember = ChatRoomDto.ManageMember.builder()
-                        .memberId(userId)
-                        .roomId(roomId)
-                        .build();
-                // 사용자가 해당 채팅방의 멤버인지 확인
-                if (!chatRoomService.isMemberOfChatRoom(findMember)) {
-                    throw new ChatRoomException(ChatErrorCode.USER_NOT_IN_ROOM);
-                }
-
+            if(!jwtParser.isTokenValid(jwtToken)) {
+                throw new AuthenticationException(AuthenticationErrorCode.NON_VALID_TOKEN);
             }
 
-        } catch (Exception e) {
-            System.out.println("Fail to pre - processing when sending message");
-            return null;
+            String username = jwtParser.getAuthentication(jwtToken).getName();
+            String sessionId = accessor.getSessionId();
+
+            sessionUserMap.put(sessionId, username);
         }
+
+        if (StompCommand.SUBSCRIBE.equals(accessor.getCommand())) {
+
+            // 구독하려는 채팅방 ID 추출
+            String destination = accessor.getDestination();
+            assert destination != null;
+            String roomId = extractRoomIdFromDestination(destination);
+
+            // 세션 ID를 통해 사용자 ID 가져오기
+            String sessionId = accessor.getSessionId();
+            String username = getUserIdBySessionId(sessionId);  // CONNECT 시 저장된 사용자 정보 활용
+
+            if (username == null) {
+                throw new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER, "CON before SUB");
+            }
+            sessionRoomMap.put(sessionId, roomId);
+
+            Long userId = memberService.usernameToId(username);
+            ChatRoomDto.ManageMember findMember = ChatRoomDto.ManageMember.builder()
+                    .memberId(userId)
+                    .roomId(roomId)
+                    .build();
+            // 사용자가 해당 채팅방의 멤버인지 확인
+            if (!chatRoomService.isMemberOfChatRoom(findMember)) {
+                throw new ChatRoomException(ChatErrorCode.USER_NOT_IN_ROOM);
+            }
+
+        }
+
+
 
         return message;
     }
