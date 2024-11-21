@@ -110,27 +110,21 @@ public class JwtProvider {
                 .build();
     }
 
-    /**
-     * access token 만료되어 refreshToken 을 재발급 받는 경우
-     * @param id 재발급을 신청한 유저의 id
-     * @return
-     */
-    public JwtToken generateToken(String headerString) {
-        String oldRefreshToken = jwtParser.getRefreshToken(headerString);
-        Long userId = jwtParser.getUserIdFromToken(oldRefreshToken);
+    public JwtToken generateToken(String refreshToken) {
+        Long userId = jwtParser.getUserIdFromToken(refreshToken);
 
-        if(!refreshTokenService.isTokenExist(new RefreshToken(userId, oldRefreshToken))){
+        if(!refreshTokenService.isTokenExist(new RefreshToken(userId, refreshToken))){
             throw new AuthenticationException(AuthenticationErrorCode.NON_VALID_TOKEN);
         }
 
         Member member = findMember(userId);
         long nowDate = (new Date()).getTime();
         String accessToken = generateAccessToken(member, nowDate);
-        String refreshToken = generateRefreshToken(member,nowDate);
+        String newRefreshToken = generateRefreshToken(member,nowDate);
         return JwtToken.builder()
                 .grantType(TOKEN_TYPE)
                 .accessToken(accessToken)
-                .refreshToken(refreshToken)
+                .refreshToken(newRefreshToken)
                 .build();
     }
 
