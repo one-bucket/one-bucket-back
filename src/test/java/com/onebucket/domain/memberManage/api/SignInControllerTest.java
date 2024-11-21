@@ -8,7 +8,6 @@ import com.onebucket.domain.memberManage.service.SignInService;
 import com.onebucket.global.auth.jwtAuth.component.JwtProvider;
 import com.onebucket.global.auth.jwtAuth.component.JwtParser;
 import com.onebucket.global.auth.jwtAuth.domain.JwtToken;
-import com.onebucket.global.auth.jwtAuth.domain.RefreshToken;
 import com.onebucket.global.auth.jwtAuth.service.RefreshTokenService;
 import com.onebucket.global.exceptionManage.customException.CommonException;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
@@ -17,7 +16,6 @@ import com.onebucket.global.exceptionManage.errorCode.CommonErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.ValidateErrorCode;
 import com.onebucket.global.exceptionManage.exceptionHandler.BaseExceptionHandler;
 import com.onebucket.global.exceptionManage.exceptionHandler.DataExceptionHandler;
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -36,7 +34,6 @@ import java.nio.charset.StandardCharsets;
 import static com.onebucket.testComponent.testUtils.JsonFieldResultMatcher.hasKey;
 import static com.onebucket.testComponent.testUtils.JsonFieldResultMatcher.hasStatus;
 import static org.hamcrest.Matchers.containsString;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -240,9 +237,9 @@ class SignInControllerTest {
 
         mockMvc.perform(post("/refresh-token")
                 .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + refreshToken)
                 .accept(MediaType.APPLICATION_JSON)
-                .characterEncoding(StandardCharsets.UTF_8))
+                .characterEncoding(StandardCharsets.UTF_8)
+                .content(objectMapper.writeValueAsString(newToken)))
                 .andDo(print())
                 .andExpect(hasKey(newToken));
 
@@ -258,12 +255,16 @@ class SignInControllerTest {
         AuthenticationErrorCode code = AuthenticationErrorCode.NON_VALID_TOKEN;
         AuthenticationException authenticationException = new AuthenticationException(code,"can't access token");
         doThrow(authenticationException).when(jwtProvider).generateToken("Bearer " + null);
+        JwtToken newToken =
+                new JwtToken("grantType", "new access token", "new refresh token");
+
 
         mockMvc.perform(post("/refresh-token")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + null)
                 .accept(MediaType.APPLICATION_JSON)
-                .characterEncoding(StandardCharsets.UTF_8))
+                .characterEncoding(StandardCharsets.UTF_8)
+                .content(objectMapper.writeValueAsString(newToken)))
                 .andDo(print())
                 .andExpect(hasStatus(code))
                 .andExpect(hasKey(code));
@@ -274,15 +275,21 @@ class SignInControllerTest {
     @Test
     @DisplayName("tokenRefresh - fail / token invalid")
     void testTokenRefresh_fail_refreshTokenInvalid() throws Exception {
+
         String refreshToken = "invalid refresh token";
+        JwtToken newToken =
+                new JwtToken("grantType", "new access token", refreshToken);
+
         AuthenticationErrorCode code = AuthenticationErrorCode.NON_VALID_TOKEN;
         AuthenticationException authenticationException = new AuthenticationException(code,"can't access token");
-        doThrow(authenticationException).when(jwtProvider).generateToken("Bearer " + refreshToken);
+
+
+        when(jwtProvider.generateToken(refreshToken)).thenThrow(authenticationException);
         mockMvc.perform(post("/refresh-token")
                 .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + refreshToken)
                 .accept(MediaType.APPLICATION_JSON)
-                .characterEncoding(StandardCharsets.UTF_8))
+                .characterEncoding(StandardCharsets.UTF_8)
+                .content(objectMapper.writeValueAsString(newToken)))
                 .andExpect(hasStatus(code))
                 .andExpect(hasKey(code));
 
