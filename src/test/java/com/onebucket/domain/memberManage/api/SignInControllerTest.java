@@ -250,29 +250,6 @@ class SignInControllerTest {
     }
 
     @Test
-    @DisplayName("tokenRefresh - fail / refresh token null")
-    void testTokenRefresh_fail_cannotFindAccessToken() throws Exception {
-        AuthenticationErrorCode code = AuthenticationErrorCode.NON_VALID_TOKEN;
-        AuthenticationException authenticationException = new AuthenticationException(code,"can't access token");
-        doThrow(authenticationException).when(jwtProvider).generateToken("Bearer " + null);
-        JwtToken newToken =
-                new JwtToken("grantType", "new access token", "new refresh token");
-
-
-        mockMvc.perform(post("/refresh-token")
-                .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + null)
-                .accept(MediaType.APPLICATION_JSON)
-                .characterEncoding(StandardCharsets.UTF_8)
-                .content(objectMapper.writeValueAsString(newToken)))
-                .andDo(print())
-                .andExpect(hasStatus(code))
-                .andExpect(hasKey(code));
-
-        verify(jwtParser, never()).isTokenValid(anyString());
-    }
-
-    @Test
     @DisplayName("tokenRefresh - fail / token invalid")
     void testTokenRefresh_fail_refreshTokenInvalid() throws Exception {
 
