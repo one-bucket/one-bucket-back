@@ -78,6 +78,7 @@ public class JwtParser {
     }
 
     public String getRefreshToken(String jwtToken) {
+        System.out.println(jwtToken);
         if (jwtToken == null || !jwtToken.startsWith("Bearer ")) {
             throw new AuthenticationException(AuthenticationErrorCode.NON_VALID_TOKEN,
                     "can't access token");

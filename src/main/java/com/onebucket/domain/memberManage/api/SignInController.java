@@ -2,10 +2,13 @@ package com.onebucket.domain.memberManage.api;
 
 import com.onebucket.domain.memberManage.dto.SignInRequestDto;
 import com.onebucket.domain.memberManage.service.SignInService;
+import com.onebucket.global.auth.jwtAuth.component.JwtParser;
 import com.onebucket.global.auth.jwtAuth.component.JwtProvider;
 import com.onebucket.global.auth.jwtAuth.domain.JwtToken;
 import com.onebucket.global.auth.jwtAuth.service.RefreshTokenService;
-import jakarta.servlet.http.HttpServletRequest;
+import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
+import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -40,6 +43,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class SignInController {
     private final SignInService signInService;
     private final RefreshTokenService refreshTokenService;
+    private final JwtParser jwtParser;
     private final JwtProvider jwtProvider;
     /**
      * 로그인을 위한 엔드포인트. username 과 password 를 이용하여 JwtToken 을 반환하는 컨트롤러이다.
@@ -59,24 +63,23 @@ public class SignInController {
         return ResponseEntity.ok(jwtToken);
     }
 
-
-    /**
-     * 토큰 재발급을 위한 엔드포인트이며 refresh token 을 받아 redis 에서 존재 여부 및 토큰
-     * 유효성  여부를 판단하여 새로운 토큰을 발급해준다. refresh token의 유효 기간은
-     * 한 달이며 그 기간 동안 redis 에 저장된다.
-     * @param request 헤더에서 access token 을 직접 가져온다.
-     * @return 200 code, JwtToken
-     * @tested yes
-     */
     @PostMapping("/refresh-token")
-    public ResponseEntity<JwtToken> tokenRefresh(HttpServletRequest request) {
-        String headerString = request.getHeader("Authorization");
+    public ResponseEntity<JwtToken> tokenRefresh(@RequestBody JwtToken jwtToken) {
 
-        JwtToken jwtToken = jwtProvider.generateToken(headerString);
+        String accessToken = jwtToken.getAccessToken();
+        try {
+            jwtParser.isTokenValid(accessToken);
+        } catch (ExpiredJwtException ignore) {
+        } catch (Exception e) {
+            throw new AuthenticationException(AuthenticationErrorCode.NON_VALID_TOKEN,
+                    "token form invalid.");
+        }
 
-        refreshTokenService.saveRefreshToken(jwtToken.getRefreshToken());
+        JwtToken newJwtToken = jwtProvider.generateToken(jwtToken.getRefreshToken());
 
-        return ResponseEntity.ok(jwtToken);
+        refreshTokenService.saveRefreshToken(newJwtToken.getRefreshToken());
+
+        return ResponseEntity.ok(newJwtToken);
     }
 
 }
