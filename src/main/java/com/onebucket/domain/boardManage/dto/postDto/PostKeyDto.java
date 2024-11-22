@@ -48,6 +48,13 @@ public class PostKeyDto {
 
     @Getter
     @SuperBuilder
+    public static class UserPage {
+        private Pageable pageable;
+        private Long userId;
+    }
+
+    @Getter
+    @SuperBuilder
     public static class AuthorPage extends BoardPage {
         private Long userId;
     }

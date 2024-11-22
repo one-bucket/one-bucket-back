@@ -5,6 +5,7 @@ import com.onebucket.domain.memberManage.domain.Member;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
@@ -28,6 +29,7 @@ import lombok.NoArgsConstructor;
  */
 
 @Entity
+@Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
