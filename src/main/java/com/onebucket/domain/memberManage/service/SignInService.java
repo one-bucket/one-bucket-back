@@ -36,6 +36,4 @@ public interface SignInService {
 
     JwtToken signInByUsernameAndPassword(String username, String password)
             throws AuthenticationException;
-
-    Authentication getAuthenticationAndValidHeader(String headerString);
 }

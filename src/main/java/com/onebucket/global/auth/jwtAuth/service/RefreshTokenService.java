@@ -26,8 +26,8 @@ import com.onebucket.global.auth.jwtAuth.domain.RefreshToken;
  * </pre>
  */
 public interface RefreshTokenService {
-    void saveRefreshToken(RefreshToken token);
-    RefreshToken getRefreshToken(String username);
+    void saveRefreshToken(String refreshToken);
+    RefreshToken getRefreshToken(Long id);
     void deleteRefreshToken(String username);
 
     boolean isTokenExist(RefreshToken refreshToken);

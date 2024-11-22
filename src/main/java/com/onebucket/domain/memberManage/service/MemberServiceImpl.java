@@ -9,6 +9,7 @@ import com.onebucket.domain.memberManage.dto.internal.SetPasswordDto;
 import com.onebucket.domain.memberManage.dto.internal.SetUniversityDto;
 import com.onebucket.domain.universityManage.dao.UniversityRepository;
 import com.onebucket.domain.universityManage.domain.University;
+import com.onebucket.global.auth.springSecurity.Role;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.customException.universityManageException.UniversityException;
 import com.onebucket.global.exceptionManage.customException.verificationException.VerificationException;
@@ -24,8 +25,6 @@ import org.springframework.stereotype.Service;
 
 
 import java.util.Optional;
-
-import static com.onebucket.global.auth.springSecurity.Role.*;
 
 
 /**
@@ -65,9 +64,10 @@ public class MemberServiceImpl implements MemberService {
                 .nickname(createMemberRequestDto.getNickname())
                 .university(saveNullUniv())
                 .build();
-        member.addRoles(GUEST.getRole());
+        member.addRoles(Role.GUEST.getRole());
         try {
             Member newMember = memberRepository.save(member);
+            System.out.println(newMember.getRoles());
             return newMember.getId();
         } catch(DataIntegrityViolationException e) {
             throw new AuthenticationException(AuthenticationErrorCode.DUPLICATE_USER,
@@ -81,7 +81,13 @@ public class MemberServiceImpl implements MemberService {
         String universityName = Optional.ofNullable(member.getUniversity())
                 .map(University::getName)
                 .orElse("null");
-        return new ReadMemberInfoDto(username, member.getNickname(), universityName);
+
+        return ReadMemberInfoDto.builder()
+                .userId(member.getId())
+                .university(universityName)
+                .nickname(member.getNickname())
+                .username(username)
+                .build();
     }
 
     @Override
@@ -159,6 +165,12 @@ public class MemberServiceImpl implements MemberService {
             throw new UniversityException(UniversityErrorCode.NOT_EXIST_UNIVERSITY);
         }
         return university;
+    }
+
+    @Override
+    public String idToUsername(Long id) {
+        return memberRepository.findUsernameById(id).orElseThrow(() ->
+                new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
     }
 
     @Transactional

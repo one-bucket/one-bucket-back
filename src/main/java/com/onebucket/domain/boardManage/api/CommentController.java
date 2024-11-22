@@ -2,7 +2,7 @@ package com.onebucket.domain.boardManage.api;
 
 import com.onebucket.domain.boardManage.dto.internal.comment.CreateCommentDto;
 import com.onebucket.domain.boardManage.dto.request.RequestCreateCommentDto;
-import com.onebucket.domain.boardManage.service.PostService;
+import com.onebucket.domain.boardManage.service.postService.PostService;
 import com.onebucket.global.utils.SecurityUtils;
 import com.onebucket.global.utils.SuccessResponseDto;
 import jakarta.validation.Valid;
@@ -46,7 +46,6 @@ public class CommentController {
     @PostMapping
     public ResponseEntity<SuccessResponseDto> createComment(@RequestBody @Valid RequestCreateCommentDto dto) {
         String username = securityUtils.getCurrentUsername();
-        Long univId = securityUtils.getUnivId(username);
 
         CreateCommentDto createCommentDto = CreateCommentDto.builder()
                 .postId(dto.getPostId())

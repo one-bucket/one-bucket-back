@@ -1,5 +1,6 @@
 package com.onebucket.global.auth.jwtAuth.service;
 
+import com.onebucket.global.auth.jwtAuth.component.JwtParser;
 import com.onebucket.global.auth.jwtAuth.domain.RefreshToken;
 import com.onebucket.global.exceptionManage.customException.CommonException;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
@@ -44,6 +45,7 @@ import java.util.concurrent.TimeUnit;
 public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     private final RedisRepository redisRepository;
+    private final JwtParser jwtParser;
 
     @Value("${jwt.expireDate.refreshToken}")
     private long timeOutMillis;
@@ -51,14 +53,15 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     private final String HEADEDLY = "refreshToken:";
 
     @Override
-    public void saveRefreshToken(RefreshToken token) {
-        if(!StringUtils.hasText(token.getUsername()) || !StringUtils.hasText(token.getRefreshToken())) {
-            throw new AuthenticationException(AuthenticationErrorCode.NON_VALID_TOKEN, "username or refresh token is null");
+    public void saveRefreshToken(String refreshToken) {
+        Long userId = jwtParser.getUserIdFromToken(refreshToken);
+        if(userId == null || !StringUtils.hasText(refreshToken)) {
+            throw new AuthenticationException(AuthenticationErrorCode.NON_VALID_TOKEN, "userId or refresh token is null");
         }
         try {
             redisRepository.save()
-                    .key(HEADEDLY + token.getUsername())
-                    .value(token.getRefreshToken())
+                    .key(HEADEDLY + userId)
+                    .value(refreshToken)
                     .timeout(timeOutMillis)
                     .timeUnit(TimeUnit.MILLISECONDS)
                     .save();
@@ -69,18 +72,16 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         } catch (IllegalArgumentException e) {
             throw new CommonException(CommonErrorCode.ILLEGAL_ARGUMENT, "invalid data");
         }
-
     }
 
     @Override
-    public RefreshToken getRefreshToken(String username) {
-        String token = redisRepository.get(HEADEDLY + username);
+    public RefreshToken getRefreshToken(Long id) {
+        String token = redisRepository.get(HEADEDLY + id);
         if(token != null) {
-            return new RefreshToken(username, token);
+            return new RefreshToken(id, token);
         } else {
             throw new AuthenticationException(AuthenticationErrorCode.NON_VALID_TOKEN);
         }
-
     }
 
     @Override
@@ -92,13 +93,14 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     // TODO: test case 작성
     @Override
     public boolean isTokenExist(RefreshToken refreshToken) {
-        String username = refreshToken.getUsername();
+        Long userId = refreshToken.getId();
         String token = refreshToken.getRefreshToken();
 
-        if(redisRepository.isTokenExists(HEADEDLY + username)) {
-            String savedToken = redisRepository.get(HEADEDLY + username);
+        if(redisRepository.isTokenExists(HEADEDLY + userId)) {
+            String savedToken = redisRepository.get(HEADEDLY + userId);
             return savedToken.equals(token);
         }
         return false;
     }
+
 }

@@ -4,7 +4,7 @@ import com.onebucket.domain.memberManage.domain.Profile;
 import com.onebucket.domain.memberManage.dto.*;
 import com.onebucket.domain.memberManage.dto.request.RequestInitPasswordDto;
 import com.onebucket.global.auth.jwtAuth.domain.JwtToken;
-import com.onebucket.global.minio.MinioSaveInfoDto;
+import com.onebucket.global.minio.MinioInfoDto;
 import com.onebucket.global.utils.SuccessResponseDto;
 import com.onebucket.testComponent.testSupport.UserRestDocsSupportTest;
 import org.junit.jupiter.api.*;
@@ -147,7 +147,8 @@ public class MemberTest extends UserRestDocsSupportTest {
                         responseFields(
                                 fieldWithPath("username").description("username of account"),
                                 fieldWithPath("nickname").description("nickname of account"),
-                                fieldWithPath("university").description("university of account")
+                                fieldWithPath("university").description("university of account"),
+                                fieldWithPath("userId").description("userId of account")
                         )));
 
     }
@@ -355,7 +356,7 @@ public class MemberTest extends UserRestDocsSupportTest {
                 .description("hello")
                 .build();
 
-        mockMvc.perform(post("/profile/update")
+        mockMvc.perform(post("/guest/profile/update")
                 .header("Authorization", getAuthHeader(token))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto))
@@ -428,7 +429,7 @@ public class MemberTest extends UserRestDocsSupportTest {
                                 fieldWithPath("message").description("success update image")
                         )));
 
-        MinioSaveInfoDto saveInfoDto = MinioSaveInfoDto.builder()
+        MinioInfoDto saveInfoDto = MinioInfoDto.builder()
                 .fileExtension("png")
                 .fileName("/profile/" + userId + "/profile_image")
                 .bucketName(bucketName)
@@ -455,7 +456,7 @@ public class MemberTest extends UserRestDocsSupportTest {
                  "Test Image Content".getBytes()
          );
 
-         MinioSaveInfoDto saveInfoDto = MinioSaveInfoDto.builder()
+         MinioInfoDto saveInfoDto = MinioInfoDto.builder()
                  .fileExtension("png")
                  .fileName("/profile/" + userId + "/profile_image")
                  .bucketName(bucketName)

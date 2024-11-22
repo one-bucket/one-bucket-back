@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>카테고리 입력</title>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            background-color: white;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 800px;
+            margin: 50px auto;
+            display: flex;
+        }
+
+        .input-section {
+            flex: 1;
+            background-color: #f9f9f9; /* 연한 음영 */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 30px;
+            border-radius: 5px;
+        }
+
+        .input-form {
+            display: flex;
+            align-items: center;
+        }
+
+        .input-form input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px; /* 약간 둥근 모서리 */
+            font-size: 16px;
+        }
+
+        .input-form button.submit-btn {
+            padding: 10px 20px;
+            background-color: #007bff; /* 파란색 */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .input-form button.submit-btn:hover {
+            background-color: #0056b3; /* 호버 시 진한 파란색 */
+        }
+
+        .message {
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .list-section {
+            width: 300px;
+            margin-left: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .list-section h2 {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .input-list {
+            list-style-type: none;
+            padding: 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            flex: 1;
+            overflow-y: auto; /* 리스트에 대한 스크롤 적용 */
+            max-height: 400px; /* 최대 높이 설정 */
+        }
+
+        .input-list li {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .input-list li:last-child {
+            border-bottom: none;
+        }
+
+        .input-list .success {
+            color: #007bff; /* 파란색 */
+        }
+
+        .input-list .failure {
+            color: red;
+        }
+
+        .delete-btn {
+            background-color: transparent;
+            border: none;
+            color: red;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .delete-btn:hover {
+            color: darkred;
+        }
+
+        .list-btn {
+            width: 100%;
+            padding: 10px;
+            margin-top: 20px;
+            background-color: #007bff; /* 파란색 */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .list-btn:hover {
+            background-color: #0056b3; /* 호버 시 진한 파란색 */
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <div class="input-section">
+        <form id="categoryForm" class="input-form">
+            <input type="text" name="name" id="name" required placeholder="카테고리를 입력하세요">
+            <button type="submit" class="submit-btn">입력</button>
+        </form>
+        <div id="message" class="message"></div>
+        <button onclick="window.location.href='/dev/category/list'" class="list-btn">리스트 보기</button>
+    </div>
+
+    <div class="list-section">
+        <h2>입력한 데이터</h2>
+        <ul id="inputList" class="input-list">
+            <!-- 입력된 데이터가 여기 표시됩니다 -->
+        </ul>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        var inputHistory = [];
+
+        function updateInputList() {
+            var $inputList = $('#inputList');
+            $inputList.empty();
+
+            inputHistory.forEach(function(item, index) {
+                var listItem = $('<li></li>');
+
+                var textSpan = $('<span></span>').text(item.name + ' (' + item.time + ')');
+                if (item.success) {
+                    textSpan.addClass('success');
+                } else {
+                    textSpan.addClass('failure');
+                }
+
+                listItem.append(textSpan);
+
+                // 성공한 입력에만 삭제 버튼 추가
+                if (item.success) {
+                    var deleteBtn = $('<button class="delete-btn">X</button>');
+                    deleteBtn.on('click', function() {
+                        // 서버에 삭제 요청 보내기
+                        $.ajax({
+                            type: 'POST',
+                            url: '/dev/category/delete/name/' + encodeURIComponent(item.cleanedName),
+                            success: function() {
+                                // 리스트에서 항목 제거
+                                inputHistory.splice(index, 1);
+                                updateInputList();
+                            },
+                            error: function() {
+                                alert('삭제하는 데 실패했습니다.');
+                            }
+                        });
+                    });
+                    listItem.append(deleteBtn);
+                }
+
+                $inputList.append(listItem);
+            });
+        }
+
+        $('#categoryForm').on('submit', function(event) {
+            event.preventDefault();
+            var name = $('#name').val();
+            // 클라이언트 측에서 공백 및 특수문자 제거
+            var cleanedName = name.replace(/[\s\p{P}]/gu, '');
+
+            var currentTime = new Date().toLocaleTimeString();
+
+            if (cleanedName.length === 0) {
+                $('#message').css('color', 'red').text('유효하지 않은 입력입니다.');
+                // 입력 실패 기록 추가
+                inputHistory.push({
+                    name: name,
+                    cleanedName: cleanedName,
+                    time: currentTime,
+                    success: false
+                });
+                updateInputList();
+                // 입력창 비우기
+                $('#name').val('');
+                return;
+            }
+
+            $.ajax({
+                type: 'POST',
+                url: '/dev/category/add',
+                data: {name: cleanedName},
+                success: function() {
+                    $('#message').css('color', 'green').text('카테고리가 추가되었습니다.');
+                    // 입력 성공 기록 추가
+                    inputHistory.push({
+                        name: name,
+                        cleanedName: cleanedName,
+                        time: currentTime,
+                        success: true
+                    });
+                    updateInputList();
+                },
+                error: function(xhr) {
+                    if (xhr.status == 409) {
+                        $('#message').css('color', 'red').text('중복된 값이 있습니다.');
+                    } else if (xhr.status == 400) {
+                        $('#message').css('color', 'red').text('유효하지 않은 입력입니다.');
+                    } else {
+                        $('#message').css('color', 'red').text('오류가 발생했습니다.');
+                    }
+                    // 입력 실패 기록 추가
+                    inputHistory.push({
+                        name: name,
+                        cleanedName: cleanedName,
+                        time: currentTime,
+                        success: false
+                    });
+                    updateInputList();
+                },
+                complete: function() {
+                    // 입력창 비우기
+                    $('#name').val('');
+                }
+            });
+        });
+    });
+</script>
+
+</body>
+</html>

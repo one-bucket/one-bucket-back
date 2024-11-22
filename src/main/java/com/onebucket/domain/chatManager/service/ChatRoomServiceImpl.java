@@ -6,18 +6,15 @@ import com.onebucket.domain.chatManager.dto.ChatRoomDto;
 import com.onebucket.domain.chatManager.entity.ChatRoom;
 import com.onebucket.domain.chatManager.entity.ChatRoomMember;
 import com.onebucket.domain.chatManager.entity.ChatRoomMemberId;
+import com.onebucket.domain.chatManager.entity.TradeType;
 import com.onebucket.domain.chatManager.mongo.ChatMessage;
 import com.onebucket.domain.chatManager.mongo.ChatMessageRepository;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
-import com.onebucket.domain.tradeManage.dao.PendingTradeRepository;
-import com.onebucket.domain.tradeManage.entity.PendingTrade;
-import com.onebucket.global.exceptionManage.customException.TradeManageException.PendingTradeException;
 import com.onebucket.global.exceptionManage.customException.chatManageException.Exceptions.ChatRoomException;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.ChatErrorCode;
-import com.onebucket.global.exceptionManage.errorCode.TradeErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,20 +42,97 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ChatRoomServiceImpl implements ChatRoomService {
 
     private final ChatRoomRepository chatRoomRepository;
     private final ChatRoomMemberRepository chatRoomMemberRepository;
     private final MemberRepository memberRepository;
     private final ChatMessageRepository chatMessageRepository;
-    private final PendingTradeRepository pendingTradeRepository;
-
     @Override
-    public boolean existsById(String roomId) {
-        return chatRoomRepository.existsById(roomId);
+    public String createRoom(ChatRoomDto.CreateRoom dto) {
+        String chatRoomId = UUID.randomUUID().toString();
+        Member member = findMember(dto.getOwnerId());
+
+        ChatRoom chatRoom = ChatRoom.builder()
+                .id(chatRoomId)
+                .ownerId(member.getId())
+                .name(dto.getName())
+
+                .tradeType(dto.getTradeType())
+                .tradeId(dto.getTradeId())
+                .build();
+
+        chatRoom.addMember(member);
+
+        chatRoomRepository.save(chatRoom);
+
+        return chatRoomId;
     }
 
     @Override
+    public String createAndJoinRoom(ChatRoomDto.CreateAndJoinRoom dto) {
+        String chatRoomId = UUID.randomUUID().toString();
+
+        Member owner = findMember(dto.getOwnerId());
+        Member joiner = findMember(dto.getJoinerId());
+        if(owner.equals(joiner)) {
+            throw new ChatRoomException(ChatErrorCode.USER_NOT_CREATOR, "Creator can't join his chatRoom");
+        }
+
+
+
+        ChatRoom chatRoom = ChatRoom.builder()
+                .id(chatRoomId)
+                .ownerId(owner.getId())
+                .name(dto.getName())
+
+                .tradeType(dto.getTradeType())
+                .tradeId(dto.getTradeId())
+                .build();
+
+        chatRoom.addMember(owner);
+        chatRoom.addMember(joiner);
+
+        chatRoomRepository.save(chatRoom);
+
+        return chatRoomId;
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public ChatRoomDto.Info getRoomDetails(String roomId) {
+        ChatRoom chatRoom = findChatRoom(roomId);
+        List<ChatRoomMember> roomMembers = chatRoom.getMembers();
+
+        List<ChatRoomDto.Info.RoomMemberInfo> roomMembersInfo =
+                convertChatRoomMemberInfoToDtoInternal(roomMembers);
+
+        return ChatRoomDto.Info.builder()
+                .roomId(chatRoom.getId())
+                .name(chatRoom.getName())
+                .ownerId(chatRoom.getOwnerId())
+                .membersInfo(roomMembersInfo)
+                .tradeType(chatRoom.getTradeType())
+                .tradeId(chatRoom.getTradeId())
+                .build();
+
+    }
+
+    private List<ChatRoomDto.Info.RoomMemberInfo> convertChatRoomMemberInfoToDtoInternal(List<ChatRoomMember> members) {
+        return members.stream().map((chatRoomMember) -> {
+            Member member = chatRoomMember.getMember();
+            return ChatRoomDto.Info.RoomMemberInfo.builder()
+                    .id(member.getId())
+                    .nickname(member.getNickname())
+                    .joinedAt(chatRoomMember.getJoinedAt())
+                    .imageUrl(member.getProfile().getImageUrl())
+                    .build();
+        }).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public boolean isMemberOfChatRoom(ChatRoomDto.ManageMember dto) {
         ChatRoomMemberId chatRoomMemberId = ChatRoomMemberId.builder()
                 .chatRoom(dto.getRoomId())
@@ -69,51 +143,15 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
-    public List<ChatRoomDto.MemberInfo> getMemberList(String roomId) {
+    @Transactional(readOnly = true)
+    public List<Long> getMemberIds(String roomId) {
         ChatRoom chatRoom = findChatRoom(roomId);
         List<ChatRoomMember> members = chatRoom.getMembers();
 
         return members.stream()
-                .map(ChatRoomDto.MemberInfo::of).toList();
+                .map((chatRoomMember) -> chatRoomMember.getMember().getId())
+                .toList();
     }
-
-    @Override
-    @Transactional
-    public String createRoom(ChatRoomDto.CreateRoom dto) {
-        String id = UUID.randomUUID().toString();
-        PendingTrade pendingTrade = pendingTradeRepository.findById(dto.getTradeId())
-                .orElseThrow(() -> new PendingTradeException(TradeErrorCode.UNKNOWN_TRADE));
-        Member member = findMember(dto.getMemberId());
-
-        ChatRoom chatRoom = ChatRoom.builder()
-                .id(id)
-                .name(dto.getName())
-                .build();
-
-        chatRoom.addMember(member);
-
-        pendingTrade.setChatRoom(chatRoom);
-        pendingTradeRepository.save(pendingTrade);
-        return id;
-    }
-
-    @Override
-    public ChatRoomDto.GetTradeInfo getTradeInfo(String roomId) {
-        ChatRoom chatRoom = findChatRoom(roomId);
-
-        PendingTrade pendingTrade = chatRoom.getPendingTrade();
-        if(pendingTrade == null) {
-            throw new PendingTradeException(TradeErrorCode.UNKNOWN_TRADE);
-        }
-
-        List<ChatRoomDto.MemberInfo> members = chatRoom.getMembers().stream().map(ChatRoomDto.MemberInfo::of).toList();
-
-        ChatRoomDto.GetTradeInfo info =  ChatRoomDto.GetTradeInfo.of(pendingTrade);
-        info.setMemberList(members);
-
-        return info;
-    }
-
     @Override
     public void changeRoomName(ChatRoomDto.ChangeRoomName dto) {
         ChatRoom chatRoom = findChatRoom(dto.getRoomId());
@@ -127,6 +165,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
+    @Transactional
     public Long addMember(ChatRoomDto.ManageMember dto) {
         Member member = findMember(dto.getMemberId());
         ChatRoom chatRoom = findChatRoom(dto.getRoomId());
@@ -138,24 +177,24 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
-    public Long quitMember(ChatRoomDto.ManageMember dto) {
-        Member member = findMember(dto.getMemberId());
-        ChatRoom chatRoom = findChatRoom(dto.getRoomId());
+    @Transactional
+    public void quitMember(ChatRoomDto.ManageMember dto) {
+        ChatRoomMemberId chatRoomMemberId = ChatRoomMemberId.builder()
+                .chatRoom(dto.getRoomId())
+                .member(dto.getMemberId())
+                .build();
 
-        chatRoom.quitMember(member);
-        ChatRoom savedChatRoom = chatRoomRepository.save(chatRoom);
-        int memberCount = savedChatRoom.getMembers().size();
-        return (long) memberCount;
+        chatRoomMemberRepository.deleteById(chatRoomMemberId);
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public ChatRoomDto.ChatRoomInfo getRoomInfo(ChatRoomDto.InfoAfterTime dto) {
         ChatRoom room = findChatRoom(dto.getRoomId());
         String roomName = room.getName();
         Long memberCount = (long) room.getMembers().size();
         Long stackMessage = chatMessageRepository.countMessagesAfterTimestamp(dto.getRoomId(), dto.getTimestamp());
-
+        Long ownerId = room.getOwnerId();
         ChatMessage recentMessage = chatMessageRepository.findTopByRoomIdOrderByTimestampDesc(dto.getRoomId());
         if(recentMessage == null) {
             recentMessage = ChatMessage.builder()
@@ -175,6 +214,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                 .stackMessage(stackMessage)
                 .recentMessage(recentMessageText)
                 .recentMessageTime(recentMessageTime)
+                .ownerId(ownerId)
                 .build();
     }
 
@@ -193,6 +233,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public LocalDateTime getDisconnectTime(ChatRoomMemberId id) {
         LocalDateTime time =  chatRoomMemberRepository.findById(id).orElseThrow(() -> new ChatRoomException(ChatErrorCode.NOT_EXIST_ROOM))
                 .getDisconnectAt();
@@ -200,13 +241,28 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<String> getRoomIds(Long userId) {
         return chatRoomMemberRepository.findChatRoomIdByMemberId(userId);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ChatMessage> getMessageAfterTimestamp(ChatRoomDto.InfoAfterTime dto) {
         return chatMessageRepository.findMessagesAfterTimestamp(dto.getRoomId(), dto.getTimestamp());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ChatRoomDto.TradeIdentifier getTradeSimpleInfo(String chatRoomId) {
+        ChatRoom chatRoom = findChatRoom(chatRoomId);
+        TradeType tradeType = chatRoom.getTradeType();
+        Long tradeId = chatRoom.getTradeId();
+
+        return ChatRoomDto.TradeIdentifier.builder()
+                .tradeId(tradeId)
+                .tradeType(tradeType)
+                .build();
     }
 
     private ChatRoom findChatRoom(String roomId) {
@@ -218,4 +274,6 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
     }
+
+
 }

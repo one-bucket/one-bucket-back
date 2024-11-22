@@ -3,6 +3,8 @@ package com.onebucket.global.auth.jwtAuth.component;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.global.auth.jwtAuth.domain.JwtToken;
+import com.onebucket.global.auth.jwtAuth.domain.RefreshToken;
+import com.onebucket.global.auth.jwtAuth.service.RefreshTokenService;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import io.jsonwebtoken.Jwts;
@@ -51,12 +53,13 @@ import java.util.stream.Collectors;
 @Component
 public class JwtProvider {
 
+    private static final String TOKEN_TYPE = "Bearer";
     private final Key key;
     private final long expireDateAccessToken;
     private final long expireDateRefreshToken;
-
+    private final JwtParser jwtParser;
     private final MemberRepository memberRepository;
-
+    private final RefreshTokenService refreshTokenService;
     /**
      * Constructor of JwtProvider class.  Parameters of constructor are from {@code application.properties}.
      * Make secret key to key byte with Base64 Decoder and Sha algorithm.
@@ -67,14 +70,16 @@ public class JwtProvider {
     @Autowired
     public JwtProvider(@Value("${jwt.secret}") String secretKey,
                        @Value("${jwt.expireDate.accessToken}") long expireDateAccessToken,
-                       @Value("${jwt.expireDate.refreshToken}") long expireDateRefreshToken,
-                       MemberRepository memberRepository) {
+                       @Value("${jwt.expireDate.refreshToken}") long expireDateRefreshToken, JwtParser jwtParser,
+                       MemberRepository memberRepository, RefreshTokenService refreshTokenService) {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         this.key = Keys.hmacShaKeyFor(keyBytes);
 
         this.expireDateAccessToken = expireDateAccessToken;
         this.expireDateRefreshToken = expireDateRefreshToken;
         this.memberRepository = memberRepository;
+        this.jwtParser = jwtParser;
+        this.refreshTokenService = refreshTokenService;
     }
 
     /**
@@ -96,15 +101,32 @@ public class JwtProvider {
         }
         long nowDate = (new Date()).getTime();
         String accessToken = generateAccessToken(authentication, nowDate);
-        String refreshToken = generateRefreshToken(nowDate);
+        String refreshToken = generateRefreshToken(authentication, nowDate);
         //implement this
         return JwtToken.builder()
-                .grantType("Bearer")
+                .grantType(TOKEN_TYPE)
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
     }
 
+    public JwtToken generateToken(String refreshToken) {
+        Long userId = jwtParser.getUserIdFromToken(refreshToken);
+
+        if(!refreshTokenService.isTokenExist(new RefreshToken(userId, refreshToken))){
+            throw new AuthenticationException(AuthenticationErrorCode.NON_VALID_TOKEN);
+        }
+
+        Member member = findMember(userId);
+        long nowDate = (new Date()).getTime();
+        String accessToken = generateAccessToken(member, nowDate);
+        String newRefreshToken = generateRefreshToken(member,nowDate);
+        return JwtToken.builder()
+                .grantType(TOKEN_TYPE)
+                .accessToken(accessToken)
+                .refreshToken(newRefreshToken)
+                .build();
+    }
 
     /**
      * <p>
@@ -120,12 +142,14 @@ public class JwtProvider {
         Date tokenExpiration = new Date(date + expireDateAccessToken);
         String authorities = getAuthoritiesFromAuthentication(authentication);
         Long univId = getUnivId(authentication);
+        Long userId = getUserId(authentication);
         return Jwts.builder()
                 .setSubject(authentication.getName())
                 .setIssuedAt(Calendar.getInstance().getTime())
                 .setExpiration(tokenExpiration)
                 .claim("auth", authorities)
                 .claim("univId",univId)
+                .claim("userId",userId)
                 .signWith(key, SignatureAlgorithm.HS256).compact();
     }
 
@@ -135,6 +159,15 @@ public class JwtProvider {
         return member.getUniversity().getId();
     }
 
+    private Long getUserId(Authentication authentication) {
+        String username = authentication.getName();
+        return memberRepository.findIdByUsername(username).orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
+    }
+
+    private Member findMember(Long id) {
+        return memberRepository.findById(id).orElseThrow(() ->
+                new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
+    }
     /**
      * <p>
      *     Generate refresh Token by given now date. Sign with given key in {@code application.properties} with HS256.
@@ -142,12 +175,13 @@ public class JwtProvider {
      * @param date String with java Date format
      * @return jwt string contain expire, sign key
      */
-    private String generateRefreshToken(long date) {
+    private String generateRefreshToken(Authentication authentication, long date) {
         Date tokenExpiration = new Date(date + expireDateRefreshToken);
-
+        Long userId = getUserId(authentication);
         return Jwts.builder()
                 .setIssuedAt(Calendar.getInstance().getTime())
                 .setExpiration(tokenExpiration)
+                .claim("userId",userId)
                 .signWith(key, SignatureAlgorithm.HS256).compact();
     }
 
@@ -162,5 +196,30 @@ public class JwtProvider {
         return authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining("."));
+    }
+
+    private String generateAccessToken(Member member, long date) {
+        Date tokenExpiration = new Date(date + expireDateAccessToken);
+        String authorities = String.join(".", member.getRoles());
+        Long univId = member.getUniversity().getId();
+        Long userId = member.getId();
+        return Jwts.builder()
+                .setSubject(member.getUsername())
+                .setIssuedAt(Calendar.getInstance().getTime())
+                .setExpiration(tokenExpiration)
+                .claim("auth", authorities)
+                .claim("univId",univId)
+                .claim("userId",userId)
+                .signWith(key, SignatureAlgorithm.HS256).compact();
+    }
+
+    private String generateRefreshToken(Member member, long date) {
+        Date tokenExpiration = new Date(date + expireDateRefreshToken);
+        Long userId = member.getId();
+        return Jwts.builder()
+                .setIssuedAt(Calendar.getInstance().getTime())
+                .setExpiration(tokenExpiration)
+                .claim("userId",userId)
+                .signWith(key, SignatureAlgorithm.HS256).compact();
     }
 }

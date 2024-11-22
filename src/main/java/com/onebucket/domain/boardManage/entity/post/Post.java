@@ -117,6 +117,9 @@ public class Post {
     public void deleteImage(String url) {
         imageUrls.remove(url);
     }
+    public void initImage() {
+        imageUrls.clear();
+    }
 
 
     @CreatedDate

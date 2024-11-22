@@ -47,6 +47,4 @@ public class ChatRoomMember {
     private LocalDateTime joinedAt;
 
     private LocalDateTime disconnectAt;
-
-    private String role;
 }

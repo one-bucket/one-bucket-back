@@ -1,7 +1,8 @@
 package com.onebucket.global.auth.config;
 
-import com.onebucket.global.auth.jwtAuth.component.JwtValidator;
+import com.onebucket.global.auth.jwtAuth.component.JwtParser;
 import com.onebucket.global.auth.jwtAuth.exception.NullJwtException;
+import com.onebucket.global.auth.springSecurity.CustomAuthentication;
 import io.jsonwebtoken.ClaimJwtException;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -9,19 +10,17 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
-import org.springframework.web.filter.GenericFilterBean;
 
 import java.io.IOException;
 import java.util.List;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
  * <br>package name   : com.onebucket.global.auth.config
@@ -48,9 +47,9 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @Slf4j
-public class JwtAuthenticationFilter extends GenericFilterBean {
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JwtValidator jwtValidator;
+    private final JwtParser jwtParser;
 
     private static final List<String> EXCLUDE_URLS = List.of(
             "/test/url",
@@ -58,22 +57,20 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
             "/register",
             "/refresh-token",
             "/member/password/reset",
-            "/refresh-token",
             "/ws"
     );
 
     private static final List<String> EXCLUDE_URL_PREFIXES = List.of(
             "/test/",
-            "/docs/"
+            "/docs/",
+            "/dev/"
     );
 
     @Override
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
-            throws IOException, ServletException {
+    protected void doFilterInternal(@NotNull HttpServletRequest servletRequest, @NotNull HttpServletResponse servletResponse, @NotNull FilterChain filterChain)
+            throws ServletException, IOException {
 
-        HttpServletResponse httpResponse = (HttpServletResponse) servletResponse;
-
-        String url = ((HttpServletRequest) servletRequest).getRequestURI();
+        String url = servletRequest.getRequestURI();
 
         if(isExcluded(url)) {
             filterChain.doFilter(servletRequest, servletResponse);
@@ -81,9 +78,9 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
         }
 
         try {
-            String token = resolveToken((HttpServletRequest) servletRequest);
-            if(token != null && jwtValidator.isTokenValid(token)) {
-                Authentication authentication = jwtValidator.getAuthentication(token);
+            String token = resolveToken(servletRequest);
+            if(token != null && jwtParser.isTokenValid(token)) {
+                CustomAuthentication authentication = jwtParser.getAuthentication(token);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } else {
                 throw new NullJwtException("no token");
@@ -91,13 +88,13 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
 
             filterChain.doFilter(servletRequest, servletResponse);
         }  catch(JwtException e) {
-            handleException(httpResponse, e);
+            handleException(servletResponse, e);
         }
     }
 
     private String resolveToken(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
-        if(StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer")) {
+        if(StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
         }
         return null;

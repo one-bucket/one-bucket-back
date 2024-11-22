@@ -58,7 +58,6 @@ public class MemberController {
     private final MailService mailService;
     /**
      * 사용자가 비밀번호를 잊었을 때, 임시 비밀번호를 설정한다.
-     * TODO: 권한 문제
      * @return 200 code
      * @tested yes
      */
@@ -149,7 +148,7 @@ public class MemberController {
      * @return 성공 시 "success update profile" 과 200 code 를 반환한다.
      * @tested yes
      */
-    @PostMapping("/profile/update")
+    @PostMapping("/guest/profile/update")
     public ResponseEntity<SuccessResponseDto> updateProfile(@Valid @RequestBody UpdateProfileDto dto) {
         String username = securityUtils.getCurrentUsername();
         Long id = memberService.usernameToId(username);
