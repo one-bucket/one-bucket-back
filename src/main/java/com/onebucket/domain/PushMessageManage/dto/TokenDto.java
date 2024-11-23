@@ -1,5 +1,6 @@
 package com.onebucket.domain.PushMessageManage.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,6 +26,14 @@ public class TokenDto {
     @Getter
     public static class Info {
         private Long userId;
+        private String token;
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class Token {
         private String token;
     }
 }
