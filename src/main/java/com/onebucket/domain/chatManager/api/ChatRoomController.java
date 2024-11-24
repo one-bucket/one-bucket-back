@@ -13,6 +13,7 @@ import com.onebucket.domain.tradeManage.dto.UsedTradeDto;
 import com.onebucket.domain.tradeManage.service.GroupTradeService;
 import com.onebucket.domain.tradeManage.service.UsedTradeService;
 import com.onebucket.global.utils.SecurityUtils;
+import com.onebucket.global.utils.SuccessResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -96,6 +97,13 @@ public class ChatRoomController {
                 .build();
         List<ChatMessage> messages = chatRoomService.getMessageAfterTimestamp(infoAfterTime);
         return ResponseEntity.ok(messages);
+    }
+
+    @DeleteMapping("/push/un-register/{chatRoomId}")
+    public ResponseEntity<SuccessResponseDto> unRegisterPushMessage(@PathVariable String chatRoomId) {
+        Long userId = securityUtils.getUserId();
+        chatRoomService.unRegisterChatToken(chatRoomId, userId);
+        return ResponseEntity.ok(new SuccessResponseDto("unregister to send push message"));
     }
 
     @GetMapping("/sse/chatList")

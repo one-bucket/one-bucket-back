@@ -38,7 +38,7 @@ public class DeviceToken {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     private Member member;
 
     private String deviceToken;

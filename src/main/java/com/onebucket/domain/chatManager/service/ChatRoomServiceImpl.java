@@ -1,5 +1,7 @@
 package com.onebucket.domain.chatManager.service;
 
+import com.onebucket.domain.PushMessageManage.Entity.DeviceToken;
+import com.onebucket.domain.PushMessageManage.JpaDao.DeviceTokenRepository;
 import com.onebucket.domain.chatManager.dao.ChatRoomMemberRepository;
 import com.onebucket.domain.chatManager.dao.ChatRoomRepository;
 import com.onebucket.domain.chatManager.dto.ChatRoomDto;
@@ -16,6 +18,8 @@ import com.onebucket.global.exceptionManage.customException.memberManageExceptoi
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.ChatErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,10 +53,14 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     private final ChatRoomMemberRepository chatRoomMemberRepository;
     private final MemberRepository memberRepository;
     private final ChatMessageRepository chatMessageRepository;
+    private final DeviceTokenRepository deviceTokenRepository;
+
+
     @Override
     public String createRoom(ChatRoomDto.CreateRoom dto) {
         String chatRoomId = UUID.randomUUID().toString();
         Member member = findMember(dto.getOwnerId());
+        DeviceToken deviceToken = findToken(member);
 
         ChatRoom chatRoom = ChatRoom.builder()
                 .id(chatRoomId)
@@ -64,6 +72,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                 .build();
 
         chatRoom.addMember(member);
+        chatRoom.addDeviceToken(deviceToken);
 
         chatRoomRepository.save(chatRoom);
 
@@ -76,6 +85,9 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
         Member owner = findMember(dto.getOwnerId());
         Member joiner = findMember(dto.getJoinerId());
+
+        DeviceToken ownerDeviceToken = findToken(owner);
+        DeviceToken joinerDeviceToken = findToken(joiner);
         if(owner.equals(joiner)) {
             throw new ChatRoomException(ChatErrorCode.USER_NOT_CREATOR, "Creator can't join his chatRoom");
         }
@@ -93,6 +105,8 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
         chatRoom.addMember(owner);
         chatRoom.addMember(joiner);
+        chatRoom.addDeviceToken(ownerDeviceToken);
+        chatRoom.addDeviceToken(joinerDeviceToken);
 
         chatRoomRepository.save(chatRoom);
 
@@ -166,11 +180,14 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "chatTokenCache")
     public Long addMember(ChatRoomDto.ManageMember dto) {
         Member member = findMember(dto.getMemberId());
+        DeviceToken deviceToken = findToken(member);
         ChatRoom chatRoom = findChatRoom(dto.getRoomId());
 
         chatRoom.addMember(member);
+        chatRoom.addDeviceToken(deviceToken);
         ChatRoom savedChatRoom = chatRoomRepository.save(chatRoom);
         int memberCount = savedChatRoom.getMembers().size();
         return (long) memberCount;
@@ -265,6 +282,39 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                 .build();
     }
 
+    /*=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+*/
+
+    @Cacheable(value = "chatTokenCache")
+    @Transactional(readOnly = true)
+    @Override
+    public List<String> getChatRoomDeviceToken(String chatRoomId) {
+        return findChatRoom(chatRoomId).getDeviceTokens()
+                .stream().map(DeviceToken::getDeviceToken)
+                .toList();
+
+    }
+
+
+    @CacheEvict(value = "chatTokenCache")
+    @Transactional
+    @Override
+    public void unRegisterChatToken(String chatRoomId, Long userId) {
+        DeviceToken deviceToken = findChatRoom(chatRoomId).getDeviceTokens().stream()
+                .filter(token -> !token.getMember().getId().equals(userId))
+                .findFirst().orElseThrow(() ->
+                        new ChatRoomException(ChatErrorCode.DEVICE_TOKEN_NULL));
+
+        findChatRoom(chatRoomId).removeDeviceToken(deviceToken);
+
+    }
+
+    @Cacheable(value = "chatNameCache")
+    @Transactional(readOnly = true)
+    @Override
+    public String getChatRoomName(String chatRoomId) {
+        return findChatRoom(chatRoomId).getName();
+    }
+
     private ChatRoom findChatRoom(String roomId) {
         return chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new ChatRoomException(ChatErrorCode.NOT_EXIST_ROOM));
@@ -274,6 +324,12 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
     }
+
+    private DeviceToken findToken(Member member) {
+        return deviceTokenRepository.findByMember(member)
+                .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
+    }
+
 
 
 }

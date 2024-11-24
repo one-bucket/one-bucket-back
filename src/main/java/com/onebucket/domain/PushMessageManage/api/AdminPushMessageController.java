@@ -1,6 +1,7 @@
 package com.onebucket.domain.PushMessageManage.api;
 
 import com.onebucket.domain.PushMessageManage.dto.PushMessageRequestDto;
+import com.onebucket.domain.PushMessageManage.dto.TopicMessageRequestDto;
 import com.onebucket.domain.PushMessageManage.service.FirebaseCloudMessageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -33,14 +34,21 @@ public class AdminPushMessageController {
 
 
     @PostMapping("/test/push/send")
-    public ResponseEntity<?> pushMessage(@RequestBody PushMessageRequestDto requestDTO) throws IOException {
-        System.out.println(requestDTO.getTargetToken() + " "
-                +requestDTO.getTitle() + " " + requestDTO.getBody());
+    public ResponseEntity<?> pushMessage(@RequestBody PushMessageRequestDto dto) throws IOException {
 
         firebaseCloudMessageService.sendMessageToToken(
-                requestDTO.getTargetToken(),
-                requestDTO.getTitle(),
-                requestDTO.getBody());
+                dto.getTargetToken(),
+                dto.getTitle(),
+                dto.getBody());
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/test/push/all")
+    public ResponseEntity<?> topicMessage(@RequestBody TopicMessageRequestDto dto) throws IOException {
+        firebaseCloudMessageService.sendMessageToTopic("ALL_USER",
+                dto.getTitle(),
+                dto.getBody());
+
         return ResponseEntity.ok().build();
     }
 }

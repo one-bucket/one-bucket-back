@@ -1,14 +1,13 @@
 package com.onebucket.domain.PushMessageManage.dto;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
  * <br>package name   : com.onebucket.domain.PushMessageManage.dto
- * <br>file name      : PushMessageRequestDto
- * <br>date           : 2024-11-03
+ * <br>file name      : TopicMessageRequestDto
+ * <br>date           : 2024-11-23
  * <pre>
  * <span style="color: white;">[description]</span>
  *
@@ -19,12 +18,11 @@ import lombok.NoArgsConstructor;
  *
  * } </pre>
  */
+
 @Getter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PushMessageRequestDto {
-    private String targetToken;
+public class TopicMessageRequestDto {
     private String title;
     private String body;
 }

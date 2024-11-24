@@ -2,13 +2,14 @@ package com.onebucket.domain.PushMessageManage.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.auth.oauth2.GoogleCredentials;
+import com.google.firebase.messaging.BatchResponse;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.MulticastMessage;
 import com.onebucket.domain.PushMessageManage.dto.FcmMessage;
 import lombok.RequiredArgsConstructor;
 import okhttp3.*;
 import org.bson.json.JsonParseException;
-import org.springframework.boot.autoconfigure.web.embedded.TomcatVirtualThreadsWebServerFactoryCustomizer;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
@@ -37,15 +38,36 @@ public class FirebaseCloudMessageService {
                                    "one-bucket/messages:send";
     private final ObjectMapper objectMapper;
 
-    public void sendMessageToToken(String targetToken, String title, String body) throws IOException {
-        String message = makeMessageToToken(targetToken, title, body);
+    public void sendMessageToToken(String targetToken, String title, String body) {
+        try {
+            String message = makeMessageToToken(targetToken, title, body);
 
-        Request request = makeRequest(message);
+            Request request = makeRequest(message);
 
-        OkHttpClient client = new OkHttpClient();
-        Response response = client.newCall(request).execute();
+            OkHttpClient client = new OkHttpClient();
 
-        System.out.println(response.body().string());
+            client.newCall(request).execute();
+        } catch (Exception e) {
+            throw new IllegalArgumentException();
+        }
+
+
+    }
+
+    public void sendMessageToToken(List<String> targetTokens, String title, String body) {
+        MulticastMessage message = MulticastMessage.builder()
+                .putData("title", title)
+                .putData("body", body)
+                .addAllTokens(targetTokens)
+                .build();
+
+        try {
+            BatchResponse response = FirebaseMessaging.getInstance().sendMulticast(message);
+            System.out.println("success message count" + response.getSuccessCount());
+            System.out.println("failure message count" + response.getFailureCount());
+        } catch (Exception e) {
+            e.getMessage();
+        }
     }
 
     public void sendMessageToTopic(String topic, String title, String body) throws IOException {
@@ -73,11 +95,11 @@ public class FirebaseCloudMessageService {
                 .build();
     }
 
-    private String makeMessageToToken(String targetToken, String title, String body)
+    private String makeMessageToToken(String targetTokens, String title, String body)
             throws JsonParseException, JsonProcessingException {
         FcmMessage fcmMessage = FcmMessage.builder()
                 .message((FcmMessage.Message.builder()
-                        .token(targetToken)
+                        .token(targetTokens)
                         .notification(FcmMessage.Notification.builder()
                                 .title(title)
                                 .body(body)
