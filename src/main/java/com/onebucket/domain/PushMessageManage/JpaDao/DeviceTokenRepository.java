@@ -24,4 +24,5 @@ import java.util.Optional;
 @Repository
 public interface DeviceTokenRepository extends JpaRepository<DeviceToken, String> {
     Optional<DeviceToken> findByMember(Member member);
+    Optional<DeviceToken> findByMemberId(Long id);
 }

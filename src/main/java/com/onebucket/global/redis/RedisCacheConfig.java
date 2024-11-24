@@ -76,6 +76,7 @@ public class RedisCacheConfig {
         cacheConfigurations.put("boardTypeCache", redisCacheConfiguration.entryTtl(Duration.ofDays(7L)));
         cacheConfigurations.put("chatTokenCache", redisCacheConfiguration.entryTtl(Duration.ofDays(7L)));
         cacheConfigurations.put("chatNameCache", redisCacheConfiguration.entryTtl(Duration.ofDays(7L)));
+        cacheConfigurations.put("userTokenCache", redisCacheConfiguration.entryTtl(Duration.ofDays(7L)));
 
         return RedisCacheManager.RedisCacheManagerBuilder.fromConnectionFactory(cf)
                 .cacheDefaults(redisCacheConfiguration)

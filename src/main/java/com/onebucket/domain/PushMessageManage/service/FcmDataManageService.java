@@ -3,6 +3,7 @@ package com.onebucket.domain.PushMessageManage.service;
 import com.onebucket.domain.PushMessageManage.dto.MessageLogDto;
 import com.onebucket.domain.PushMessageManage.dto.TokenDto;
 
+
 /**
  * <br>package name   : com.onebucket.domain.PushMessageManage.service
  * <br>file name      : FcmDataManageService
@@ -20,4 +21,6 @@ import com.onebucket.domain.PushMessageManage.dto.TokenDto;
 public interface FcmDataManageService {
     void updateDeviceToken(TokenDto.Info dto);
     void saveMessageLog(MessageLogDto.Info dto);
+
+    String getTokensByUserId(Long userId);
 }

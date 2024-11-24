@@ -11,6 +11,8 @@ import com.onebucket.domain.memberManage.domain.Member;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,6 +44,7 @@ public class FcmDataManageServiceImpl implements FcmDataManageService {
 
     @Transactional
     @Override
+    @CacheEvict(value = "userTokenCache", key = "#dto.userId")
     public void updateDeviceToken(TokenDto.Info dto) {
         String token = dto.getToken();
         Member member = findMember(dto.getUserId());
@@ -82,8 +85,17 @@ public class FcmDataManageServiceImpl implements FcmDataManageService {
         pushMessageLogRepository.save(pushMessageLog);
     }
 
+    @Transactional(readOnly = true)
+    @Override
+    @Cacheable(value = "userTokenCache")
+    public String getTokensByUserId(Long userId) {
+        return deviceTokenRepository.findByMemberId(userId).orElseThrow(() ->
+                new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER)).getDeviceToken();
+    }
+
     private Member findMember(Long userId) {
         return memberRepository.findById(userId).orElseThrow(() ->
                 new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
     }
+
 }

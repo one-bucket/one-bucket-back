@@ -39,7 +39,11 @@ public class DeviceToken {
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
     private Member member;
+
+    @Column(name = "member_Id", insertable = false, updatable = false)
+    private Long memberId;
 
     private String deviceToken;
 
