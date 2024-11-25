@@ -159,7 +159,6 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<Long> getMemberIds(String roomId) {
         ChatRoom chatRoom = findChatRoom(roomId);
         List<ChatRoomMember> members = chatRoom.getMembers();
