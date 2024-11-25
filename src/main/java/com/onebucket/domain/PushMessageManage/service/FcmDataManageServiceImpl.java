@@ -89,8 +89,12 @@ public class FcmDataManageServiceImpl implements FcmDataManageService {
     @Override
     @Cacheable(value = "userTokenCache")
     public String getTokensByUserId(Long userId) {
-        return deviceTokenRepository.findByMemberId(userId).orElseThrow(() ->
-                new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER)).getDeviceToken();
+        DeviceToken deviceToken = deviceTokenRepository.findByMemberId(userId).orElse(null);
+        if(deviceToken != null) {
+            return deviceToken.getDeviceToken();
+        }
+        return null;
+
     }
 
     private Member findMember(Long userId) {

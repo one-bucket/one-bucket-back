@@ -82,7 +82,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-amqp'
 
     //firebase
-    implementation 'com.google.firebase:firebase-admin:6.8.1'
+    implementation 'com.google.firebase:firebase-admin:9.3.0'
     implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.2.2'
 
 }

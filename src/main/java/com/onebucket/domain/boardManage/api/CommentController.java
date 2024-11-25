@@ -64,7 +64,10 @@ public class CommentController {
         List<Long> alarmIds = postService.addCommentToPost(createCommentDto);
         List<String> tokens = new ArrayList<>();
         for(Long alarmId : alarmIds) {
-            tokens.add(fcmDataManageService.getTokensByUserId(alarmId));
+            String token;
+            if((token = fcmDataManageService.getTokensByUserId(alarmId)) != null) {
+                tokens.add(token);
+            }
         }
 
         if(dto.getText() != null && dto.getText().length() > 20) {
