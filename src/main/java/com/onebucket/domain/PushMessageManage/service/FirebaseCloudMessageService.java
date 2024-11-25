@@ -46,6 +46,7 @@ public class FirebaseCloudMessageService {
 
     public void sendMessageToToken(List<String> targetTokens, String title, String body) {
         if(targetTokens.isEmpty()) {
+            System.out.println("emtpy token");
             return;
         }
         MulticastMessage message = MulticastMessage.builder()
@@ -56,6 +57,7 @@ public class FirebaseCloudMessageService {
 
         try {
             BatchResponse response = FirebaseMessaging.getInstance().sendEachForMulticast(message);
+            System.out.println("success count is " + response.getSuccessCount());
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }

@@ -4,6 +4,9 @@ import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
 
 import java.io.FileInputStream;
@@ -25,11 +28,17 @@ import java.io.IOException;
  */
 @Component
 public class FirebaseInitializer {
+    private final ResourceLoader resourceLoader;
+
+    public FirebaseInitializer(@Qualifier("webApplicationContext") ResourceLoader resourceLoader) {
+        this.resourceLoader = resourceLoader;
+    }
 
     @PostConstruct
     public void initialize() {
         try {
-            FileInputStream serviceAccount = new FileInputStream("./src/main/resources/firebase/firebase_service_key.json");
+            Resource resource = resourceLoader.getResource("classpath:firebase/firebase_service_key.json");
+            FileInputStream serviceAccount = new FileInputStream(resource.getFile());
 
             FirebaseOptions options = FirebaseOptions.builder()
                     .setCredentials(GoogleCredentials.fromStream(serviceAccount))
