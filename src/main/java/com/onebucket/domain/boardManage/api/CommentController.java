@@ -66,15 +66,17 @@ public class CommentController {
         for(Long alarmId : alarmIds) {
             String token;
             if((token = fcmDataManageService.getTokensByUserId(alarmId)) != null) {
+                System.out.println("token exist");
                 tokens.add(token);
             }
         }
 
+        String shortenText = dto.getText();
         if(dto.getText() != null && dto.getText().length() > 20) {
-            String shortenText = dto.getText().substring(0, 20) + "...";
-            firebaseCloudMessageService.sendMessageToToken(tokens, "새로운 댓글", shortenText);
+            shortenText = dto.getText().substring(0, 20) + "...";
         }
 
+        firebaseCloudMessageService.sendMessageToToken(tokens, "새로운 댓글", shortenText);
         return ResponseEntity.ok(new SuccessResponseDto("success create comment"));
 
     }

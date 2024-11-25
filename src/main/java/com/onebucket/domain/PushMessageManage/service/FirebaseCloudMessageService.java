@@ -46,7 +46,7 @@ public class FirebaseCloudMessageService {
 
     public void sendMessageToToken(List<String> targetTokens, String title, String body) {
         if(targetTokens.isEmpty()) {
-            System.out.println("emtpy token");
+            System.out.println("empty token");
             return;
         }
         MulticastMessage message = MulticastMessage.builder()
