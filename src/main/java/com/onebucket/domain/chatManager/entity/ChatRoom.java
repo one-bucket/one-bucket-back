@@ -58,7 +58,7 @@ public class ChatRoom {
     private Long tradeId;
 
 
-    @OneToMany
+    @ManyToMany
     @JoinTable(
             name = "chat_room_device_token",
             joinColumns = @JoinColumn(name = "chat_room_id"),

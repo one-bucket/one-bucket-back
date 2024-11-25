@@ -1,5 +1,7 @@
 package com.onebucket.domain.tradeManage.api;
 
+import com.onebucket.domain.chatManager.dto.ChatRoomDto;
+import com.onebucket.domain.chatManager.service.ChatRoomService;
 import com.onebucket.domain.memberManage.service.MemberService;
 import com.onebucket.domain.tradeManage.dto.TradeKeyDto;
 import com.onebucket.domain.tradeManage.service.GroupTradeService;
@@ -25,12 +27,15 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/group-trade")
 public class GroupTradeController extends AbstractTradeController<GroupTradeService> {
+    private final ChatRoomService chatRoomService;
 
 
     public GroupTradeController(GroupTradeService tradeService,
                                 SecurityUtils securityUtils,
-                                MemberService memberService) {
+                                MemberService memberService,
+                                ChatRoomService chatRoomService) {
         super(tradeService, securityUtils, memberService);
+        this.chatRoomService = chatRoomService;
     }
 
     @PostMapping("/join/{tradeId}")
@@ -42,6 +47,12 @@ public class GroupTradeController extends AbstractTradeController<GroupTradeServ
                 .userId(userId)
                 .build();
         TradeKeyDto.ResponseJoinTrade response = tradeService.addMember(dto);
+
+        ChatRoomDto.ManageMember createDto = ChatRoomDto.ManageMember.builder()
+                .roomId(response.getChatRoomId())
+                .memberId(userId)
+                .build();
+        chatRoomService.addMember(createDto);
         return ResponseEntity.ok(response);
     }
 

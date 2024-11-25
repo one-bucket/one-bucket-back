@@ -119,6 +119,11 @@ public class ChatRoomDto {
     public static class ManageMember {
         private String roomId;
         private Long memberId;
+
+        @Override
+        public String toString() {
+            return "ManageMember{roomId=" + roomId + ", memberId='" + memberId + "'}";
+        }
     }
 
 

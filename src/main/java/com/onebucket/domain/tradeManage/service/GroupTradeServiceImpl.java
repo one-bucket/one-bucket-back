@@ -1,5 +1,7 @@
 package com.onebucket.domain.tradeManage.service;
 
+import com.onebucket.domain.PushMessageManage.Entity.DeviceToken;
+import com.onebucket.domain.PushMessageManage.JpaDao.DeviceTokenRepository;
 import com.onebucket.domain.chatManager.dao.ChatRoomMemberRepository;
 import com.onebucket.domain.chatManager.dao.ChatRoomRepository;
 import com.onebucket.domain.chatManager.entity.ChatRoom;
@@ -45,16 +47,19 @@ public class GroupTradeServiceImpl extends AbstractTradeService<GroupTrade, Grou
         implements GroupTradeService {
 
     private final ClosedGroupTradeRepository closedGroupTradeRepository;
+    private final DeviceTokenRepository deviceTokenRepository;
 
     public GroupTradeServiceImpl(GroupTradeRepository repository,
                                  TradeTagRepository tradeTagRepository,
                                  MemberRepository memberRepository,
                                  ChatRoomRepository chatRoomRepository,
                                  ChatRoomMemberRepository chatRoomMemberRepository,
-                                 ClosedGroupTradeRepository closedGroupTradeRepository, GroupTradeRepository groupTradeRepository) {
+                                 ClosedGroupTradeRepository closedGroupTradeRepository, GroupTradeRepository groupTradeRepository,
+                                 DeviceTokenRepository deviceTokenRepository) {
         super(repository, tradeTagRepository, memberRepository, chatRoomRepository, chatRoomMemberRepository);
 
         this.closedGroupTradeRepository = closedGroupTradeRepository;
+        this.deviceTokenRepository = deviceTokenRepository;
     }
 
     @Override
@@ -125,16 +130,12 @@ public class GroupTradeServiceImpl extends AbstractTradeService<GroupTrade, Grou
         }
 
         groupTrade.addMember(member);
-        ChatRoom chatRoom = groupTrade.getChatRoom();
-        if(chatRoom == null) {
-            throw new ChatRoomException(ChatErrorCode.NOT_EXIST_ROOM);
-        }
-        chatRoom.addMember(member);
+
         repository.save(groupTrade);
 
         return TradeKeyDto.ResponseJoinTrade.builder()
                 .tradeId(tradeId)
-                .chatRoomId(chatRoom.getId())
+                .chatRoomId(groupTrade.getChatRoom().getId())
                 .build();
     }
 
@@ -230,6 +231,10 @@ public class GroupTradeServiceImpl extends AbstractTradeService<GroupTrade, Grou
     private ChatRoom findChatRoom(String chatRoomId) {
         return chatRoomRepository.findById(chatRoomId).orElseThrow(() ->
                 new ChatRoomException(ChatErrorCode.NOT_EXIST_ROOM));
+    }
+    private DeviceToken findToken(Member member) {
+        return deviceTokenRepository.findByMember(member)
+                .orElse(null);
     }
 
 }

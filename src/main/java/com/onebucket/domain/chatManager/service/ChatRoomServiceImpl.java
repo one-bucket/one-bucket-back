@@ -188,6 +188,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         ChatRoom chatRoom = findChatRoom(dto.getRoomId());
 
         chatRoom.addMember(member);
+        System.out.println("saved device token is " + deviceToken);
         chatRoom.addDeviceToken(deviceToken);
         ChatRoom savedChatRoom = chatRoomRepository.save(chatRoom);
         int memberCount = savedChatRoom.getMembers().size();

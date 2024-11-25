@@ -6,6 +6,7 @@ import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.MulticastMessage;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import java.util.List;
 
@@ -27,6 +28,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FirebaseCloudMessageService {
 
+    @Async
     public void sendMessageToToken(String targetToken, String title, String body) {
         if(targetToken.isEmpty()) {
             return;
@@ -44,6 +46,7 @@ public class FirebaseCloudMessageService {
         }
     }
 
+    @Async
     public void sendMessageToToken(List<String> targetTokens, String title, String body) {
         if(targetTokens.isEmpty()) {
             System.out.println("empty token");
@@ -63,6 +66,7 @@ public class FirebaseCloudMessageService {
         }
     }
 
+    @Async
     public void sendMessageToTopic(String topic, String title, String body) {
         if (topic.isEmpty()) {
             return;
