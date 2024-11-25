@@ -32,7 +32,10 @@ import java.util.List;
 @SuperBuilder
 public class GetCommentDto extends CommentDto {
     private Long commentId;
+    private Long authorId;
     private String authorNickname;
+    private String imageUrl;
+
     private LocalDateTime modifiedDate;
 
     private List<GetCommentDto> replies;

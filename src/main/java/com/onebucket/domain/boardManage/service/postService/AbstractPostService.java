@@ -387,11 +387,14 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
         List<GetCommentDto> replies = comment.getReplies().stream()
                 .map(this::convertToGetCommentDto)
                 .toList();
+        Member author = comment.getAuthor();
 
         return GetCommentDto.builder()
                 .commentId(comment.getId())
                 .postId(comment.getPost().getId())
-                .authorNickname(comment.getAuthor().getNickname())
+                .authorId(author.getId())
+                .authorNickname(author.getNickname())
+                .imageUrl(author.getProfile().getImageUrl())
                 .text(comment.getText())
                 .modifiedDate(comment.getModifiedDate())
                 .replies(replies)

@@ -69,7 +69,7 @@ public class CommentController {
 
         if(dto.getText() != null && dto.getText().length() > 20) {
             String shortenText = dto.getText().substring(0, 20) + "...";
-            firebaseCloudMessageService.sendMessageToToken(tokens, "새로운 댓글 추가", shortenText);
+            firebaseCloudMessageService.sendMessageToToken(tokens, "새로운 댓글", shortenText);
         }
 
         return ResponseEntity.ok(new SuccessResponseDto("success create comment"));
