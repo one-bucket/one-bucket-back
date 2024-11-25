@@ -72,7 +72,9 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                 .build();
 
         chatRoom.addMember(member);
-        chatRoom.addDeviceToken(deviceToken);
+        if(deviceToken != null) {
+            chatRoom.addDeviceToken(deviceToken);
+        }
 
         chatRoomRepository.save(chatRoom);
 
@@ -327,7 +329,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     private DeviceToken findToken(Member member) {
         return deviceTokenRepository.findByMember(member)
-                .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
+                .orElse(null);
     }
 
 
