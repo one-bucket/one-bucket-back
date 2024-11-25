@@ -7,6 +7,8 @@ import com.onebucket.domain.boardManage.dto.postDto.PostKeyDto;
 import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 /**
  * <br>package name   : com.onebucket.domain.boardManage.service
  * <br>file name      : BasePostService
@@ -156,7 +158,7 @@ public interface BasePostService {
      *          {@code BoardErrorCode.UNKNOWN_COMMENT} / 부모 댓글의 id를 찾아봤지만 존재하지 않을 때 <br>
      *          {@code BoardErrorCode.COMMENT_LAYER_OVERHEAD} / 대대댓글 혹은 그 이상을 요청한 경우
      */
-    void addCommentToPost(CreateCommentDto dto);
+    List<Long> addCommentToPost(CreateCommentDto dto);
 
     /**
      * 댓글을 지우는 로직. dto로부터 {@code commentId}를 받아 엔티티를 검색한 다음, 해당 comment에 저장된

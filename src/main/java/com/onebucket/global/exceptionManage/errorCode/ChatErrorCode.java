@@ -38,6 +38,8 @@ public enum ChatErrorCode implements ErrorCode {
     USER_NOT_CREATOR("3006", HttpStatus.BAD_REQUEST, "User is not creator"),
     USER_NOT_IN_ROOM("3007", HttpStatus.BAD_REQUEST, "User is not in room"),
 
+    DEVICE_TOKEN_NULL("3008", HttpStatus.BAD_REQUEST, "already remove or not match with"),
+
 
     INTERNAL_ERROR("3099", HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error"),
 

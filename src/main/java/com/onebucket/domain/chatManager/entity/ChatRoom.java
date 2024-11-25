@@ -1,7 +1,7 @@
 package com.onebucket.domain.chatManager.entity;
 
+import com.onebucket.domain.PushMessageManage.Entity.DeviceToken;
 import com.onebucket.domain.memberManage.domain.Member;
-import com.onebucket.domain.tradeManage.entity.GroupTrade;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -57,4 +57,21 @@ public class ChatRoom {
 
     private Long tradeId;
 
+
+    @OneToMany
+    @JoinTable(
+            name = "chat_room_device_token",
+            joinColumns = @JoinColumn(name = "chat_room_id"),
+            inverseJoinColumns = @JoinColumn(name = "device_token_id")
+    )
+    @Builder.Default
+    private List<DeviceToken> deviceTokens = new ArrayList<>();
+
+    public void addDeviceToken(DeviceToken deviceToken) {
+        this.deviceTokens.add(deviceToken);
+    }
+
+    public void removeDeviceToken(DeviceToken deviceToken) {
+        this.deviceTokens.remove(deviceToken);
+    }
 }

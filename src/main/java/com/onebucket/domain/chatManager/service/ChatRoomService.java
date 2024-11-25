@@ -72,4 +72,11 @@ public interface ChatRoomService {
     String createRoom(ChatRoomDto.CreateRoom dto);
     String createAndJoinRoom(ChatRoomDto.CreateAndJoinRoom dto);
     ChatRoomDto.TradeIdentifier getTradeSimpleInfo(String chatRoomId);
+
+
+    List<String> getChatRoomDeviceToken(String chatRoomId);
+
+    void unRegisterChatToken(String chatRoomId, Long userId);
+
+    String getChatRoomName(String chatRoomId);
 }

@@ -1,5 +1,6 @@
 package com.onebucket.domain.chatManager.api;
 
+import com.onebucket.domain.PushMessageManage.service.FirebaseCloudMessageService;
 import com.onebucket.domain.chatManager.dto.ChatDto;
 
 import com.onebucket.domain.chatManager.dto.ChatRoomDto;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
 import java.util.Date;
+import java.util.List;
 
 /**
  * <br>package name   : com.onebucket.domain.chatManager.controller
@@ -51,6 +53,7 @@ public class ChatController {
     private final SSEChatListService sseChatListService;
     private final MemberService memberService;
     private final JwtParser jwtParser;
+    private final FirebaseCloudMessageService firebaseCloudMessageService;
 
     private final GroupTradeService groupTradeService;
     @MessageMapping("/message")
@@ -78,6 +81,10 @@ public class ChatController {
         chat.setTime(Date.from(Instant.now()));
         chatService.saveMessage(chat);
         template.convertAndSend("/sub/chat/room/" + chat.getRoomId(), chat);
+
+        String chatRoomName = chatRoomService.getChatRoomName(chat.getRoomId());
+        List<String> tokens = chatRoomService.getChatRoomDeviceToken(chat.getRoomId());
+        firebaseCloudMessageService.sendMessageToToken(tokens,chatRoomName, chat.getMessage());
         sseChatListService.notifyRoomUpdate(chat);
     }
 

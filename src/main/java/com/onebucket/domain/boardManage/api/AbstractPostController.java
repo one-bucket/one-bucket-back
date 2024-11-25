@@ -56,6 +56,7 @@ public abstract class AbstractPostController<S extends BasePostService> {
         return getPostByBoardInternal(boardPage);
     }
 
+
     @GetMapping("/{postId}")
     @PreAuthorize("@authorizationService.isUserCanAccessPost(#postId)")
     public ResponseEntity<? extends PostDto.ResponseInfo> getPostById(@PathVariable Long postId) {

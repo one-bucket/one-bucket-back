@@ -11,12 +11,10 @@ import com.onebucket.global.utils.SecurityUtils;
 import com.onebucket.global.utils.SuccessResponseWithIdDto;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * <br>package name   : com.onebucket.domain.boardManage.api
@@ -102,5 +100,17 @@ public class PostController extends AbstractPostController<PostService>{
         postService.updatePost(dto);
 
         return ResponseEntity.ok(new SuccessResponseWithIdDto("success update post", dto.getPostId()));
+    }
+
+    @GetMapping("/list/likes")
+    public ResponseEntity<Page<PostDto.Thumbnail>> getLikesPost(Pageable pageable) {
+        Long userId = securityUtils.getUserId();
+        PostKeyDto.UserPage userPage = PostKeyDto.UserPage.builder()
+                .userId(userId)
+                .pageable(pageable)
+                .build();
+        Page<PostDto.Thumbnail> response = postService.getLikePost(userPage).map(this::convertInternalThumbnailToThumbnail);
+
+        return ResponseEntity.ok(response);
     }
 }

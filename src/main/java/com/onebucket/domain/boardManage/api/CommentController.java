@@ -1,5 +1,7 @@
 package com.onebucket.domain.boardManage.api;
 
+import com.onebucket.domain.PushMessageManage.service.FcmDataManageService;
+import com.onebucket.domain.PushMessageManage.service.FirebaseCloudMessageService;
 import com.onebucket.domain.boardManage.dto.internal.comment.CreateCommentDto;
 import com.onebucket.domain.boardManage.dto.request.RequestCreateCommentDto;
 import com.onebucket.domain.boardManage.service.postService.PostService;
@@ -12,6 +14,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <br>package name   : com.onebucket.domain.boardManage.api
@@ -42,6 +47,8 @@ public class CommentController {
 
     private final SecurityUtils securityUtils;
     private final PostService postService;
+    private final FirebaseCloudMessageService firebaseCloudMessageService;
+    private final FcmDataManageService fcmDataManageService;
 
     @PostMapping
     public ResponseEntity<SuccessResponseDto> createComment(@RequestBody @Valid RequestCreateCommentDto dto) {
@@ -54,7 +61,19 @@ public class CommentController {
                 .username(username)
                 .build();
 
-        postService.addCommentToPost(createCommentDto);
+        List<Long> alarmIds = postService.addCommentToPost(createCommentDto);
+        List<String> tokens = new ArrayList<>();
+        for(Long alarmId : alarmIds) {
+            String token;
+            if((token = fcmDataManageService.getTokensByUserId(alarmId)) != null) {
+                tokens.add(token);
+            }
+        }
+
+        if(dto.getText() != null && dto.getText().length() > 20) {
+            String shortenText = dto.getText().substring(0, 20) + "...";
+            firebaseCloudMessageService.sendMessageToToken(tokens, "새로운 댓글", shortenText);
+        }
 
         return ResponseEntity.ok(new SuccessResponseDto("success create comment"));
 

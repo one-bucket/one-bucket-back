@@ -37,6 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -254,8 +255,10 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
     @Override
     @Transactional
     @CacheEvict(value = "commentCountCache", key = "#dto.postId")
-    public void addCommentToPost(CreateCommentDto dto) {
+    public List<Long> addCommentToPost(CreateCommentDto dto) {
+        List<Long> alarmId = new ArrayList<>();
         T post = findPost(dto.getPostId());
+        alarmId.add(post.getAuthorId());
         Member member = findMember(dto.getUsername());
 
         Comment comment = Comment.builder()
@@ -279,10 +282,12 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
             parentComment.addReply(comment);
             commentRepository.save(parentComment); // Save the parent with the new reply
 
+            alarmId.add(parentComment.getAuthor().getId());
         } else {
             post.addComment(comment);
             repository.save(post);
         }
+        return alarmId;
     }
     @Override
     @Transactional
@@ -382,11 +387,14 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
         List<GetCommentDto> replies = comment.getReplies().stream()
                 .map(this::convertToGetCommentDto)
                 .toList();
+        Member author = comment.getAuthor();
 
         return GetCommentDto.builder()
                 .commentId(comment.getId())
                 .postId(comment.getPost().getId())
-                .authorNickname(comment.getAuthor().getNickname())
+                .authorId(author.getId())
+                .authorNickname(author.getNickname())
+                .imageUrl(author.getProfile().getImageUrl())
                 .text(comment.getText())
                 .modifiedDate(comment.getModifiedDate())
                 .replies(replies)

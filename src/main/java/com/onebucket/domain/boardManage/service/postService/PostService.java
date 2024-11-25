@@ -1,6 +1,10 @@
 package com.onebucket.domain.boardManage.service.postService;
 
 
+import com.onebucket.domain.boardManage.dto.postDto.PostDto;
+import com.onebucket.domain.boardManage.dto.postDto.PostKeyDto;
+import org.springframework.data.domain.Page;
+
 /**
  * <br>package name   : com.onebucket.domain.boardManage.service
  * <br>file name      : PostService
@@ -24,4 +28,5 @@ package com.onebucket.domain.boardManage.service.postService;
  */
 public interface PostService extends BasePostService{
 
+    Page<PostDto.InternalThumbnail> getLikePost(PostKeyDto.UserPage dto);
 }
