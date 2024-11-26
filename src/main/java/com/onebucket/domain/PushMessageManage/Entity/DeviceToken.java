@@ -49,6 +49,10 @@ public class DeviceToken {
 
     private LocalDateTime updateAt;
 
+    @Builder.Default
+    private boolean chatAlarm = true;
+    private boolean boardAlarm = true;
+
     public void dateUpdate() {
         this.updateAt = LocalDateTime.now();
     }

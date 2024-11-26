@@ -106,6 +106,14 @@ public class ChatRoomController {
         return ResponseEntity.ok(new SuccessResponseDto("unregister to send push message"));
     }
 
+    @PostMapping("/push/re-register/{chatRoomId}")
+    public ResponseEntity<SuccessResponseDto> reRegisterPushMessage(@PathVariable String chatRoomId) {
+        Long userId = securityUtils.getUserId();
+        chatRoomService.reRegisterChatToken(chatRoomId, userId);
+        return ResponseEntity.ok(new SuccessResponseDto("success re-register push message"));
+
+    }
+
     @GetMapping("/sse/chatList")
     public SseEmitter subscribe() {
         String username = securityUtils.getCurrentUsername();

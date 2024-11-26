@@ -1,5 +1,9 @@
 package com.onebucket.domain.boardManage.api;
 
+import com.onebucket.domain.PushMessageManage.dto.PushMessageDto;
+import com.onebucket.domain.PushMessageManage.dto.PushMessageType;
+import com.onebucket.domain.PushMessageManage.service.FcmDataManageService;
+import com.onebucket.domain.PushMessageManage.service.FirebaseCloudMessageService;
 import com.onebucket.domain.boardManage.dto.postDto.GroupTradePostDto;
 import com.onebucket.domain.boardManage.dto.postDto.PostDto;
 import com.onebucket.domain.boardManage.dto.postDto.PostKeyDto;
@@ -50,16 +54,22 @@ public class GroupTradePostController extends AbstractPostController<GroupTradeP
     private final GroupTradeService groupTradeService;
 
     private final ChatRoomService chatRoomService;
+    private final FcmDataManageService fcmDataManageService;
+    private final FirebaseCloudMessageService firebaseCloudMessageService;
 
     public GroupTradePostController(GroupTradePostService postService,
                                     SecurityUtils securityUtils,
                                     MemberService memberService,
                                     BoardService boardService,
                                     GroupTradeService groupTradeService,
-                                    ChatRoomService chatRoomService) {
+                                    ChatRoomService chatRoomService,
+                                    FcmDataManageService fcmDataManageService,
+                                    FirebaseCloudMessageService firebaseCloudMessageService) {
         super(postService, securityUtils, memberService, boardService);
         this.groupTradeService = groupTradeService;
         this.chatRoomService = chatRoomService;
+        this.fcmDataManageService = fcmDataManageService;
+        this.firebaseCloudMessageService = firebaseCloudMessageService;
     }
 
 
@@ -132,6 +142,18 @@ public class GroupTradePostController extends AbstractPostController<GroupTradeP
         //MarketPost update
         postService.updatePost(updatePostDto);
 
+        //send push message to joiners
+
+        List<Long> userIds = groupTradeService.getJoinedMemberExceptOwner(tradeId);
+        List<String> tokens = userIds.stream().map(fcmDataManageService::getTokensByUserId).toList();
+        PushMessageDto.Tokens sendDto = PushMessageDto.Tokens.builder()
+                .tokens(tokens)
+                .title("거래 정보 변경 알림")
+                .body("참여하신 거래 " + dto.getPost().getTitle() + " 의 정보가 변경되었습니다.")
+                .id(dto.getPost().getPostId().toString())
+                .type(PushMessageType.TRADE)
+                .build();
+        firebaseCloudMessageService.sendMessageToToken(sendDto);
         return ResponseEntity.ok(new SuccessResponseWithIdDto("success update post", updatePostDto.getPostId()));
     }
 

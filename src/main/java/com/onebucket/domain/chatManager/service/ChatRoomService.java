@@ -78,5 +78,7 @@ public interface ChatRoomService {
 
     void unRegisterChatToken(String chatRoomId, Long userId);
 
+    void reRegisterChatToken(String chatRoomId, Long userId);
+
     String getChatRoomName(String chatRoomId);
 }

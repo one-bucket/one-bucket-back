@@ -24,7 +24,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PushMessageRequestDto {
-    private String targetToken;
+    private Long userId;
     private String title;
     private String body;
 }

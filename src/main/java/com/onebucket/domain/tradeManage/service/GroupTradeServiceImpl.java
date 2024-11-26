@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * <br>package name   : com.onebucket.domain.tradeManage.service
@@ -176,6 +177,16 @@ public class GroupTradeServiceImpl extends AbstractTradeService<GroupTrade, Grou
     @Transactional(readOnly = true)
     public List<Long> getJoinedTrade(Long userId) {
         return repository.findTradeIdsByMemberId(userId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Long> getJoinedMemberExceptOwner(Long tradeId) {
+        GroupTrade trade = findTrade(tradeId);
+        return trade.getJoiners()
+                .stream().map(Member::getId)
+                .filter((id) -> !Objects.equals(id, trade.getOwner().getId()))
+                .toList();
     }
 
 

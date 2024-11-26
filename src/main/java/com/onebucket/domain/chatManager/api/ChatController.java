@@ -1,5 +1,7 @@
 package com.onebucket.domain.chatManager.api;
 
+import com.onebucket.domain.PushMessageManage.dto.PushMessageDto;
+import com.onebucket.domain.PushMessageManage.dto.PushMessageType;
 import com.onebucket.domain.PushMessageManage.service.FirebaseCloudMessageService;
 import com.onebucket.domain.chatManager.dto.ChatDto;
 
@@ -84,7 +86,14 @@ public class ChatController {
 
         String chatRoomName = chatRoomService.getChatRoomName(chat.getRoomId());
         List<String> tokens = chatRoomService.getChatRoomDeviceToken(chat.getRoomId());
-        firebaseCloudMessageService.sendMessageToToken(tokens,chatRoomName, chat.getMessage());
+        PushMessageDto.Tokens tokenDto = PushMessageDto.Tokens.builder()
+                .title(chatRoomName)
+                .body(chat.getMessage())
+                .type(PushMessageType.CHAT)
+                .id(chat.getRoomId())
+                .tokens(tokens)
+                .build();
+        firebaseCloudMessageService.sendMessageToToken(tokenDto);
         sseChatListService.notifyRoomUpdate(chat);
     }
 

@@ -23,4 +23,6 @@ public interface GroupTradeService extends TradeService {
     void quitMember(TradeKeyDto.UserTrade dto);
     void setChatRoom(TradeKeyDto.SettingChatRoom dto);
     List<Long> getJoinedTrade(Long userId);
+
+    List<Long> getJoinedMemberExceptOwner(Long tradeId);
 }

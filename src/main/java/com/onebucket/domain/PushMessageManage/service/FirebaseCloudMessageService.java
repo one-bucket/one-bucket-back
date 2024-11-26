@@ -4,11 +4,11 @@ import com.google.firebase.messaging.BatchResponse;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.MulticastMessage;
+import com.onebucket.domain.PushMessageManage.dto.PushMessageDto;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import java.util.List;
 
 /**
  * <br>package name   : com.onebucket.domain.PushMessageManage.service
@@ -29,15 +29,18 @@ import java.util.List;
 public class FirebaseCloudMessageService {
 
     @Async
-    public void sendMessageToToken(String targetToken, String title, String body) {
-        if(targetToken.isEmpty()) {
+    public void sendMessageToToken(PushMessageDto.Token dto) {
+        if(dto.getToken().isEmpty()) {
             return;
         }
 
         Message message = Message.builder()
-                .putData("title", title)
-                .putData("body", body)
-                .setToken(targetToken)
+                .putData("title", dto.getTitle())
+                .putData("body", dto.getBody())
+                .putData("type" , dto.getType().name())
+                .putData("id", dto.getId())
+                .setToken(dto.getToken())
+
                 .build();
         try {
             FirebaseMessaging.getInstance().send(message);
@@ -47,15 +50,18 @@ public class FirebaseCloudMessageService {
     }
 
     @Async
-    public void sendMessageToToken(List<String> targetTokens, String title, String body) {
-        if(targetTokens.isEmpty()) {
+    public void sendMessageToToken(PushMessageDto.Tokens dto) {
+        if(dto.getTokens().isEmpty()) {
             System.out.println("empty token");
             return;
         }
         MulticastMessage message = MulticastMessage.builder()
-                .putData("title", title)
-                .putData("body", body)
-                .addAllTokens(targetTokens)
+                .putData("title", dto.getTitle())
+                .putData("body", dto.getBody())
+                .putData("type" , dto.getType().name())
+                .putData("id", dto.getId())
+                .addAllTokens(dto.getTokens())
+
                 .build();
 
         try {
@@ -67,15 +73,17 @@ public class FirebaseCloudMessageService {
     }
 
     @Async
-    public void sendMessageToTopic(String topic, String title, String body) {
-        if (topic.isEmpty()) {
+    public void sendMessageToTopic(PushMessageDto.Topic dto) {
+        if (dto.getTopic().isEmpty()) {
             return;
         }
 
         Message message = Message.builder()
-                .putData("title", title)
-                .putData("body", body)
-                .setTopic(topic)
+                .putData("title", dto.getTitle())
+                .putData("body", dto.getBody())
+                .putData("type" , dto.getType().name())
+                .putData("id", dto.getId())
+                .setTopic(dto.getTopic())
                 .build();
 
         try {

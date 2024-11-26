@@ -1,7 +1,10 @@
 package com.onebucket.domain.PushMessageManage.api;
 
+import com.onebucket.domain.PushMessageManage.dto.PushMessageDto;
 import com.onebucket.domain.PushMessageManage.dto.PushMessageRequestDto;
+import com.onebucket.domain.PushMessageManage.dto.PushMessageType;
 import com.onebucket.domain.PushMessageManage.dto.TopicMessageRequestDto;
+import com.onebucket.domain.PushMessageManage.service.FcmDataManageService;
 import com.onebucket.domain.PushMessageManage.service.FirebaseCloudMessageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -10,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.IOException;
 
 /**
  * <br>package name   : com.onebucket.domain.PushMessageManage.api
@@ -31,23 +33,33 @@ import java.io.IOException;
 @RequestMapping("/admin")
 public class AdminPushMessageController {
     private final FirebaseCloudMessageService firebaseCloudMessageService;
+    private final FcmDataManageService fcmDataManageService;
 
 
-    @PostMapping("/test/push/send")
-    public ResponseEntity<?> pushMessage(@RequestBody PushMessageRequestDto dto) throws IOException {
+    @PostMapping("/push/send")
+    public ResponseEntity<?> pushMessage(@RequestBody PushMessageRequestDto dto) {
 
-        firebaseCloudMessageService.sendMessageToToken(
-                dto.getTargetToken(),
-                dto.getTitle(),
-                dto.getBody());
+        String token = fcmDataManageService.getTokensByUserId(dto.getUserId());
+        PushMessageDto.Token sendDto = PushMessageDto.Token.builder()
+                .title(dto.getTitle())
+                .body(dto.getBody())
+                .type(PushMessageType.WARNING)
+                .token(token)
+                .build();
+
+        firebaseCloudMessageService.sendMessageToToken(sendDto);
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/test/push/all")
-    public ResponseEntity<?> topicMessage(@RequestBody TopicMessageRequestDto dto) throws IOException {
-        firebaseCloudMessageService.sendMessageToTopic("ALL_USER",
-                dto.getTitle(),
-                dto.getBody());
+    @PostMapping("/push/all")
+    public ResponseEntity<?> topicMessage(@RequestBody TopicMessageRequestDto dto) {
+        PushMessageDto.Topic sendDto = PushMessageDto.Topic.builder()
+                .title(dto.getTitle())
+                .body(dto.getBody())
+                .type(PushMessageType.ALL)
+                .topic("ALL_USER")
+                .build();
+        firebaseCloudMessageService.sendMessageToTopic(sendDto);
 
         return ResponseEntity.ok().build();
     }

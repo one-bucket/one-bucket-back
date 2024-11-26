@@ -307,7 +307,17 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                         new ChatRoomException(ChatErrorCode.DEVICE_TOKEN_NULL));
 
         findChatRoom(chatRoomId).removeDeviceToken(deviceToken);
+    }
 
+    @CacheEvict(value = "chatTokenCache")
+    @Transactional
+    @Override
+    public void reRegisterChatToken(String chatRoomId, Long userId) {
+        DeviceToken deviceToken = findToken(userId);
+        ChatRoom chatRoom = findChatRoom(chatRoomId);
+        if(deviceToken != null) {
+            chatRoom.addDeviceToken(deviceToken);
+        }
     }
 
     @Cacheable(value = "chatNameCache")
@@ -329,6 +339,10 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     private DeviceToken findToken(Member member) {
         return deviceTokenRepository.findByMember(member)
+                .orElse(null);
+    }
+    private DeviceToken findToken(Long memberId) {
+        return deviceTokenRepository.findByMemberId(memberId)
                 .orElse(null);
     }
 

@@ -1,8 +1,11 @@
 package com.onebucket.domain.boardManage.api;
 
+import com.onebucket.domain.PushMessageManage.dto.PushMessageDto;
+import com.onebucket.domain.PushMessageManage.dto.PushMessageType;
 import com.onebucket.domain.PushMessageManage.service.FcmDataManageService;
 import com.onebucket.domain.PushMessageManage.service.FirebaseCloudMessageService;
 import com.onebucket.domain.boardManage.dto.internal.comment.CreateCommentDto;
+import com.onebucket.domain.boardManage.dto.postDto.PostKeyDto;
 import com.onebucket.domain.boardManage.dto.request.RequestCreateCommentDto;
 import com.onebucket.domain.boardManage.service.postService.PostService;
 import com.onebucket.global.utils.SecurityUtils;
@@ -71,12 +74,27 @@ public class CommentController {
             }
         }
 
+        PostKeyDto.PostKey findPost = PostKeyDto.PostKey.builder()
+                .postId(dto.getPostId())
+                .build();
+        String postTitle = postService.getPost(findPost).getTitle();
+
         String shortenText = dto.getText();
         if(dto.getText() != null && dto.getText().length() > 20) {
             shortenText = dto.getText().substring(0, 20) + "...";
         }
+        if(postTitle != null && postTitle.length() > 20) {
+            postTitle = postTitle.substring(0,10) + "...";
+        }
+        PushMessageDto.Tokens pushMessageDto = PushMessageDto.Tokens.builder()
+                .body(shortenText)
+                .title(postTitle + "에 댓글이 달렸습니다.")
+                .type(PushMessageType.COMMENT)
+                .id(dto.getPostId().toString())
+                .tokens(tokens)
+                .build();
 
-        firebaseCloudMessageService.sendMessageToToken(tokens, "새로운 댓글", shortenText);
+        firebaseCloudMessageService.sendMessageToToken(pushMessageDto);
         return ResponseEntity.ok(new SuccessResponseDto("success create comment"));
 
     }
