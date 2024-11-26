@@ -160,6 +160,7 @@ public class GroupTradePostDto {
 
                     .comments(dto.getComments())
                     .commentsCount(dto.getCommentsCount())
+                    .isUserAlreadyLikes(dto.isUserAlreadyLikes())
                     .build();
         }
     }

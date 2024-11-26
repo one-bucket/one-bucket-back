@@ -158,6 +158,7 @@ public class UsedTradePostDto {
                     .likes(dto.getLikes())
                     .comments(dto.getComments())
                     .commentsCount(dto.getCommentsCount())
+                    .isUserAlreadyLikes(dto.isUserAlreadyLikes())
                     .build();
         }
     }
