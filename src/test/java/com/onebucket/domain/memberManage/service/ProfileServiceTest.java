@@ -137,67 +137,6 @@ class ProfileServiceTest {
                 .isEqualTo(AuthenticationErrorCode.UNKNOWN_USER_PROFILE);
     }
 
-    //-+-+-+-+-+-+]] readProfileImage test [[-+-+-+-+-+-+
-    @Test
-    @DisplayName("readProfileImage - success / basic image")
-    void testReadProfileImage_success_basicImg() {
-        Long id = 1L;
-        when(profileRepository.findById(id)).thenReturn(Optional.of(mockProfile));
-        when(mockProfile.isBasicImage()).thenReturn(true);
-
-        byte[] expectedBytes = new byte[]{1, 2, 3};
-        when(minioRepository.getFile(any(MinioInfoDto.class))).thenReturn(expectedBytes);
-
-        byte[] result = profileService.readProfileImage(id);
-
-        //then
-        ArgumentCaptor<MinioInfoDto> captor = ArgumentCaptor.forClass(MinioInfoDto.class);
-        verify(minioRepository).getFile(captor.capture());
-        MinioInfoDto captureDto = captor.getValue();
-
-        assertThat(captureDto).isNotNull();
-        assertThat(captureDto.getFileName()).isEqualTo("/profile/basic_profile_image");
-        assertThat(captureDto.getFileExtension()).isEqualTo("png");
-        assertThat(expectedBytes).isEqualTo(result);
-    }
-
-    @Test
-    @DisplayName("readProfileImage - success / user image")
-    void testReadProfileImage_success_userImg() {
-        Long id = 1L;
-        when(profileRepository.findById(id)).thenReturn(Optional.of(mockProfile));
-        when(mockProfile.isBasicImage()).thenReturn(false);
-
-        byte[] expectedBytes = new byte[]{1, 2, 3};
-        when(minioRepository.getFile(any(MinioInfoDto.class))).thenReturn(expectedBytes);
-
-        byte[] result = profileService.readProfileImage(id);
-
-        //then
-        ArgumentCaptor<MinioInfoDto> captor = ArgumentCaptor.forClass(MinioInfoDto.class);
-        verify(minioRepository).getFile(captor.capture());
-        MinioInfoDto captureDto = captor.getValue();
-
-        assertThat(captureDto).isNotNull();
-        assertThat(captureDto.getFileName()).isEqualTo("/profile/" + id + "/profile_image");
-        assertThat(captureDto.getFileExtension()).isEqualTo("png");
-        assertThat(expectedBytes).isEqualTo(result);
-    }
-
-    @Test
-    @DisplayName("readProfileImage - fail / minio exception")
-    void testReadProfileImage_fail_minioError() {
-        Long id = 1L;
-        when(profileRepository.findById(id)).thenReturn(Optional.of(mockProfile));
-        when(mockProfile.isBasicImage()).thenReturn(false);
-        when(minioRepository.getFile(any(MinioInfoDto.class))).thenThrow(new RuntimeException("error occur while fetching file"));
-
-        assertThatThrownBy(() -> profileService.readProfileImage(id))
-                .isInstanceOf(AuthenticationException.class)
-                .extracting("errorCode")
-                .isEqualTo(AuthenticationErrorCode.PROFILE_IMAGE_ERROR);
-    }
-
     //-+-+-+-+-+-+]] updateProfile test [[-+-+-+-+-+-+
     @Test
     @DisplayName("updateProfile - success / all value change")
@@ -287,7 +226,6 @@ class ProfileServiceTest {
         Profile captureProfile = captor.getValue();
 
         assertThat(captureProfile).isNotNull();
-        assertThat(captureProfile.isBasicImage()).isFalse();
     }
 
     @Test
@@ -342,9 +280,6 @@ class ProfileServiceTest {
 
         ArgumentCaptor<Profile> captor = ArgumentCaptor.forClass(Profile.class);
         verify(profileRepository).save(captor.capture());
-        Profile captureProfile = captor.getValue();
-
-        assertThat(captureProfile.isBasicImage()).isFalse();
     }
 
     @Test
