@@ -47,6 +47,8 @@ public class ReadProfileDto {
     private int age;
     private String description;
     private String email;
+    // 이미지 전송 필요
+    private String imageUrl;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate birth;
 
