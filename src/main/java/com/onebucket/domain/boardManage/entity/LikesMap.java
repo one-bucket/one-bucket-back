@@ -5,6 +5,7 @@ import com.onebucket.domain.memberManage.domain.Member;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
@@ -32,6 +33,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @IdClass(LikesMapId.class)
+@Getter
 @Table(
         name = "likes_map",
         indexes = {
@@ -44,6 +46,9 @@ public class LikesMap {
     @ManyToOne
     @JoinColumn(name = "member_id", referencedColumnName = "id")
     private Member member;
+
+    @Column(name = "member_id", updatable = false, insertable = false)
+    private Long memberId;
 
     @Id
     @ManyToOne

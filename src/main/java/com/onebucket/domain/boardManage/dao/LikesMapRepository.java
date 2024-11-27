@@ -3,6 +3,8 @@ package com.onebucket.domain.boardManage.dao;
 import com.onebucket.domain.boardManage.entity.LikesMapId;
 import com.onebucket.domain.boardManage.entity.LikesMap;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -24,7 +26,7 @@ import java.util.List;
  */
 @Repository
 public interface LikesMapRepository extends JpaRepository<LikesMap, LikesMapId> {
-    List<LikesMap> findByMemberId(Long memberId);
+    Page<LikesMap> findByMemberId(Pageable pageable, Long memberId);
 
     long countByPostId(Long postId);
 

@@ -11,6 +11,7 @@ import com.onebucket.global.exceptionManage.errorCode.CommonErrorCode;
 import com.onebucket.global.utils.SecurityUtils;
 import com.onebucket.global.utils.SuccessResponseDto;
 import com.onebucket.global.utils.SuccessResponseWithIdDto;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -97,6 +98,20 @@ public abstract class AbstractPostController<S extends BasePostService> {
                 .build();
 
         return getPostByAuthorInternal(authorPage);
+    }
+
+
+    @GetMapping("/list/likes")
+    public ResponseEntity<Page<? extends PostDto.Thumbnail>> getLikesPost(Pageable pageable) {
+        Long userId = securityUtils.getUserId();
+        PostKeyDto.AuthorPage authorPage = PostKeyDto.AuthorPage.builder()
+                .userId(userId)
+                .pageable(pageable)
+                .build();
+        Page<PostDto.Thumbnail> response = postService.getPostByLikes(authorPage)
+                .map(this::convertInternalThumbnailToThumbnail);
+
+        return ResponseEntity.ok(response);
     }
 
 
@@ -191,6 +206,7 @@ public abstract class AbstractPostController<S extends BasePostService> {
 
         return ResponseEntity.ok(new SuccessResponseWithIdDto("success save images", index));
     }
+
 
     private void initImageData(Long postId) {
         postService.deleteImageOnPost(postId);

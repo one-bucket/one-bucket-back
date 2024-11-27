@@ -5,6 +5,7 @@ import com.onebucket.domain.boardManage.dto.internal.post.*;
 import com.onebucket.domain.boardManage.dto.postDto.PostDto;
 import com.onebucket.domain.boardManage.dto.postDto.PostKeyDto;
 import org.springframework.data.domain.Page;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -66,6 +67,9 @@ public interface BasePostService {
      * @return Post.Thumbnail에 대한 page
      */
     Page<PostDto.InternalThumbnail> getPostByAuthorId(PostKeyDto.AuthorPage dto);
+
+
+    Page<PostDto.InternalThumbnail> getPostByLikes(PostKeyDto.AuthorPage dto);
 
     /**
      * postId에 대하여 해당 게시글에 대한 정보를{@link PostDto.Info} 로 반환한다. 해당 사용자가 해당 게시글에
