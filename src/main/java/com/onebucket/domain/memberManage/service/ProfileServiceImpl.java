@@ -67,7 +67,6 @@ public class ProfileServiceImpl implements ProfileService {
 
         Profile profile = Profile.builder()
                 .id(id)
-                .isBasicImage(true)
                 .createAt(now)
                 .updateAt(now)
                 .build();
@@ -93,35 +92,10 @@ public class ProfileServiceImpl implements ProfileService {
                 .age(profile.getAge())
                 .gender(profile.getGender())
                 .email(profile.getEmail())
+                .imageUrl(profile.getImageUrl())
                 .createAt(profile.getCreateAt())
                 .updateAt(profile.getUpdateAt())
                 .build();
-
-
-    }
-
-    @Override
-    public byte[] readProfileImage(Long id) {
-
-        Profile profile = getprofile(id);
-
-        String fileName;
-        if(profile.isBasicImage()) {
-            fileName ="/profile/basic_profile_image";
-        } else {
-            fileName = "/profile/" + id + "/profile_image";
-        }
-        MinioInfoDto dto = MinioInfoDto.builder()
-                .bucketName(bucketName)
-                .fileName(fileName)
-                .fileExtension("png")
-                .build();
-
-        try {
-            return minioRepository.getFile(dto);
-        } catch(Exception e) {
-            throw new AuthenticationException(AuthenticationErrorCode.PROFILE_IMAGE_ERROR, e.getMessage());
-        }
     }
 
     @Override
@@ -149,7 +123,6 @@ public class ProfileServiceImpl implements ProfileService {
 
         try {
             minioRepository.uploadFile(file, minioDto);
-            profile.setBasicImage(false);
             profile.setUpdateAt(LocalDateTime.now());
             profileRepository.save(profile);
         } catch(Exception e) {
@@ -161,7 +134,6 @@ public class ProfileServiceImpl implements ProfileService {
     public void updateImageToBasic(Long id) {
         Profile profile = getprofile(id);
 
-        profile.setBasicImage(true);
         profile.setUpdateAt(LocalDateTime.now());
         profileRepository.save(profile);
     }

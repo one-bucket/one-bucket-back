@@ -49,7 +49,6 @@ public class Profile {
     private LocalDate birth;
     private LocalDateTime createAt;
     private LocalDateTime updateAt;
-    private boolean isBasicImage;
 
     private String imageUrl;
 }
