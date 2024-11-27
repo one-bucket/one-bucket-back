@@ -25,7 +25,6 @@ public interface MemberRepository extends JpaRepository<Member,Long> {
     Optional<Member> findByUsername(String username);
     boolean existsByNickname(String nickname);
     boolean existsByUsername(String username);
-    void deleteByUsername(String username);
 
     @Query("SELECT m.id FROM Member m WHERE m.username = :username")
     Optional<Long> findIdByUsername(@Param("username") String username);

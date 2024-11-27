@@ -49,8 +49,6 @@ public class SignInServiceImpl implements SignInService{
 
     private final AuthenticationManager authenticationManager;
     private final JwtProvider jwtProvider;
-    private final JwtParser jwtParser;
-    private final MemberRepository memberRepository;
 
     /**
      * @param username id to sign in
