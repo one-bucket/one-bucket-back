@@ -51,7 +51,7 @@ public class SignInController {
      * @return 200 code, JwtToken
      * @tested yes
      */
-    @PostMapping(path = "/sign-in")
+    @PostMapping("/sign-in")
     public ResponseEntity<JwtToken> signIn (@Valid @RequestBody SignInRequestDto dto) {
         String username = dto.getUsername();
         String password = dto.getPassword();
