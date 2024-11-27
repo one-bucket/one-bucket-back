@@ -6,6 +6,7 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -80,6 +81,8 @@ public class ChatRoomDto {
         private Date recentMessageTime;
 
         private Long ownerId;
+        @Builder.Default
+        private List<String> imageUrl = new ArrayList<>();
     }
 
     @SuperBuilder

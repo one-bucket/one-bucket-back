@@ -26,7 +26,7 @@ import java.util.List;
  */
 @Repository
 public interface LikesMapRepository extends JpaRepository<LikesMap, LikesMapId> {
-    Page<LikesMap> findByMemberId(Long memberId, Pageable pageable);
+    Page<LikesMap> findByMemberId(Pageable pageable, Long memberId);
 
     long countByPostId(Long postId);
 

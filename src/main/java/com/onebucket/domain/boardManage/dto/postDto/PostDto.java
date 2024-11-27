@@ -1,10 +1,7 @@
 package com.onebucket.domain.boardManage.dto.postDto;
 
 import com.onebucket.domain.boardManage.dto.internal.comment.GetCommentDto;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
@@ -81,6 +78,7 @@ public class PostDto {
         private Long likes;
 
     }
+
 
     @Getter
     @Setter

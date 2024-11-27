@@ -125,10 +125,20 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
 
     @Override
     @Transactional(readOnly = true)
+    @SuppressWarnings("unchecked")
     public Page<PostDto.InternalThumbnail> getPostByAuthorId(PostKeyDto.AuthorPage dto) {
         return repository.findByAuthorId(dto.getUserId(), dto.getPageable())
                 .map(this::convertPostToThumbnailDtoInternal);
     }
+    @Override
+    @Transactional(readOnly = true)
+    public Page<PostDto.InternalThumbnail> getPostByLikes(PostKeyDto.AuthorPage dto) {
+        return likesMapRepository.findByMemberId(dto.getPageable(), dto.getUserId())
+                .map(LikesMap::getPost)
+                .map(post -> (T) post)
+                .map(this::convertPostToThumbnailDtoInternal);
+    }
+
 
     @Override
     @Transactional(readOnly = true)
@@ -354,6 +364,7 @@ public abstract class AbstractPostService<T extends Post, R extends BasePostRepo
         }
 
     }
+
 
     private void initPostImage(Long postId) {
         MinioInfoDto deleteDto = MinioInfoDto.builder()

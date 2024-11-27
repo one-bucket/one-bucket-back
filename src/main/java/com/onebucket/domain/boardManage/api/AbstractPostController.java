@@ -101,6 +101,20 @@ public abstract class AbstractPostController<S extends BasePostService> {
     }
 
 
+    @GetMapping("/list/likes")
+    public ResponseEntity<Page<? extends PostDto.Thumbnail>> getLikesPost(Pageable pageable) {
+        Long userId = securityUtils.getUserId();
+        PostKeyDto.AuthorPage authorPage = PostKeyDto.AuthorPage.builder()
+                .userId(userId)
+                .pageable(pageable)
+                .build();
+        Page<PostDto.Thumbnail> response = postService.getPostByLikes(authorPage)
+                .map(this::convertInternalThumbnailToThumbnail);
+
+        return ResponseEntity.ok(response);
+    }
+
+
 
     @DeleteMapping("/{postId}")
     @PreAuthorize("@authorizationService.isUserOwnerOfPost(#postId)")
@@ -192,6 +206,7 @@ public abstract class AbstractPostController<S extends BasePostService> {
 
         return ResponseEntity.ok(new SuccessResponseWithIdDto("success save images", index));
     }
+
 
     private void initImageData(Long postId) {
         postService.deleteImageOnPost(postId);

@@ -2,6 +2,8 @@ package com.onebucket.domain.chatManager.service;
 
 import com.onebucket.domain.PushMessageManage.Entity.DeviceToken;
 import com.onebucket.domain.PushMessageManage.JpaDao.DeviceTokenRepository;
+import com.onebucket.domain.boardManage.dao.postRepository.PostRepository;
+import com.onebucket.domain.boardManage.entity.post.Post;
 import com.onebucket.domain.chatManager.dao.ChatRoomMemberRepository;
 import com.onebucket.domain.chatManager.dao.ChatRoomRepository;
 import com.onebucket.domain.chatManager.dto.ChatRoomDto;
@@ -13,10 +15,12 @@ import com.onebucket.domain.chatManager.mongo.ChatMessage;
 import com.onebucket.domain.chatManager.mongo.ChatMessageRepository;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
+import com.onebucket.global.exceptionManage.customException.TradeManageException.PendingTradeException;
 import com.onebucket.global.exceptionManage.customException.chatManageException.Exceptions.ChatRoomException;
 import com.onebucket.global.exceptionManage.customException.memberManageExceptoin.AuthenticationException;
 import com.onebucket.global.exceptionManage.errorCode.AuthenticationErrorCode;
 import com.onebucket.global.exceptionManage.errorCode.ChatErrorCode;
+import com.onebucket.global.exceptionManage.errorCode.TradeErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -56,6 +60,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     private final DeviceTokenRepository deviceTokenRepository;
 
 
+    private final PostRepository postRepository;
     @Override
     public String createRoom(ChatRoomDto.CreateRoom dto) {
         String chatRoomId = UUID.randomUUID().toString();
@@ -188,7 +193,6 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         ChatRoom chatRoom = findChatRoom(dto.getRoomId());
 
         chatRoom.addMember(member);
-        System.out.println("saved device token is " + deviceToken);
         chatRoom.addDeviceToken(deviceToken);
         ChatRoom savedChatRoom = chatRoomRepository.save(chatRoom);
         int memberCount = savedChatRoom.getMembers().size();
@@ -210,6 +214,8 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     @Transactional(readOnly = true)
     public ChatRoomDto.ChatRoomInfo getRoomInfo(ChatRoomDto.InfoAfterTime dto) {
         ChatRoom room = findChatRoom(dto.getRoomId());
+        Post post = findPost(room.getTradeId());
+        List<String> images = post.getImageUrls();
         String roomName = room.getName();
         Long memberCount = (long) room.getMembers().size();
         Long stackMessage = chatMessageRepository.countMessagesAfterTimestamp(dto.getRoomId(), dto.getTimestamp());
@@ -234,6 +240,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                 .recentMessage(recentMessageText)
                 .recentMessageTime(recentMessageTime)
                 .ownerId(ownerId)
+                .imageUrl(images)
                 .build();
     }
 
@@ -335,6 +342,11 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     private Member findMember(Long memberId) {
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
+    }
+
+    private Post findPost(Long postId) {
+        return postRepository.findById(postId)
+                .orElseThrow(() -> new PendingTradeException(TradeErrorCode.UNKNOWN_TRADE));
     }
 
     private DeviceToken findToken(Member member) {
