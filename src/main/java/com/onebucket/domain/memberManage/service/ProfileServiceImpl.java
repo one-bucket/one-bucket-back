@@ -43,7 +43,6 @@ import java.time.LocalDateTime;
  * 2024-07-03        jack8              init create
  * </pre>
  *
- * @tested  true
  */
 
 @Service
@@ -114,7 +113,7 @@ public class ProfileServiceImpl implements ProfileService {
     @Override
     public void updateImage(Long id, MultipartFile file) {
         Profile profile = getprofile(id);
-        String url = "profile/" + id + "/" + "profile_image.png";
+        String url = "profile/" + id + "/" + "profile_image";
 
         MinioInfoDto minioDto = MinioInfoDto.builder()
                 .bucketName(bucketName)
