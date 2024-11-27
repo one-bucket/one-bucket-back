@@ -36,6 +36,6 @@ public interface ProfileService {
     void updateImageToBasic(Long id);
     void updateProfileEmail(String username, String email);
 
-    String getImageUrl(Long id);
+    String getProfileImageUrl(Long id);
 
 }

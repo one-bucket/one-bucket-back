@@ -203,7 +203,7 @@ public class MemberController {
     public ResponseEntity<SuccessResponseDto> getImageUrl() {
         String username = securityUtils.getCurrentUsername();
         Long id = memberService.usernameToId(username);
-        String url = profileService.getImageUrl(id);
+        String url = profileService.getProfileImageUrl(id);
 
         return ResponseEntity.ok(new SuccessResponseDto(url));
     }

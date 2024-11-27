@@ -114,16 +114,18 @@ public class ProfileServiceImpl implements ProfileService {
     @Override
     public void updateImage(Long id, MultipartFile file) {
         Profile profile = getprofile(id);
+        String url = "profile/" + id + "/" + "profile_image.png";
 
         MinioInfoDto minioDto = MinioInfoDto.builder()
                 .bucketName(bucketName)
-                .fileName("profile/" + id + "/" + "profile_image")
+                .fileName(url)
                 .fileExtension("png")
                 .build();
 
         try {
             minioRepository.uploadFile(file, minioDto);
             profile.setUpdateAt(LocalDateTime.now());
+            profile.setImageUrl(url);
             profileRepository.save(profile);
         } catch(Exception e) {
             throw new AuthenticationException(AuthenticationErrorCode.PROFILE_IMAGE_ERROR, e.getMessage());
@@ -135,6 +137,7 @@ public class ProfileServiceImpl implements ProfileService {
         Profile profile = getprofile(id);
 
         profile.setUpdateAt(LocalDateTime.now());
+        profile.setImageUrl(null);
         profileRepository.save(profile);
     }
 
@@ -148,15 +151,8 @@ public class ProfileServiceImpl implements ProfileService {
         profileRepository.save(profile);
     }
 
-    private Profile getprofile(Long id) {
-        return profileRepository.findById(id).orElseThrow(
-                () -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER_PROFILE)
-        );
-    }
-
     //TODO: don't test yet... also need to delete other image process logic.
-    @Override
-    public String getImageUrl(Long id) {
+    public String getProfileImageUrl(Long id) {
 
         MinioInfoDto minioDto = MinioInfoDto.builder()
                 .bucketName(bucketName)
@@ -170,5 +166,11 @@ public class ProfileServiceImpl implements ProfileService {
             throw new CommonException(CommonErrorCode.DATA_ACCESS_ERROR);
         }
 
+    }
+
+    private Profile getprofile(Long id) {
+        return profileRepository.findById(id).orElseThrow(
+                () -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER_PROFILE)
+        );
     }
 }
