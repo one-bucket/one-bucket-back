@@ -89,17 +89,6 @@ public class MemberRepositoryTest {
         assertThat(isNotExists).isFalse();
     }
 
-    //-+-+-+-+-+-+]] deleteByUsername test [[-+-+-+-+-+-+
-    @Test
-    @DisplayName("deleteByUsername - success")
-    void testDeleteByUsername_success() {
-
-        memberRepository.deleteByUsername(username);
-
-        boolean exists = memberRepository.existsByUsername(username);
-        assertThat(exists).isFalse();
-    }
-
     //-+-+-+-+-+-+]] save test [[-+-+-+-+-+-+
     @Test
     @DisplayName("save -fail / data duplicate")

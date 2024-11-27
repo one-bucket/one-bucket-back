@@ -67,7 +67,6 @@ public class MemberServiceImpl implements MemberService {
         member.addRoles(Role.GUEST.getRole());
         try {
             Member newMember = memberRepository.save(member);
-            System.out.println(newMember.getRoles());
             return newMember.getId();
         } catch(DataIntegrityViolationException e) {
             throw new AuthenticationException(AuthenticationErrorCode.DUPLICATE_USER,
@@ -105,11 +104,10 @@ public class MemberServiceImpl implements MemberService {
     @Override
     @Transactional
     public void quitMember(String username) {
-//        Member member = memberRepository.findByUsername(username)
-//                .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
-        memberRepository.deleteByUsername(username);
-//        member.setEnable(false);
-//        memberRepository.save(member);
+        Member member = memberRepository.findByUsername(username)
+                .orElseThrow(() -> new AuthenticationException(AuthenticationErrorCode.UNKNOWN_USER));
+        member.setEnable(false);
+        memberRepository.save(member);
     }
 
     /**
