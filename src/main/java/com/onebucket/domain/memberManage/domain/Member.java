@@ -68,10 +68,6 @@ public class Member {
         this.roles.add(auth);
     }
 
-    public void deleteRoles(String auth) {
-        this.roles.remove(auth);
-    }
-
     @OneToOne(fetch =FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @PrimaryKeyJoinColumn
     private Profile profile;

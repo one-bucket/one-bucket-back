@@ -29,7 +29,7 @@ public interface ProfileService {
     void createInitProfile(Long id);
 
     ReadProfileDto readProfile(Long id);
-    byte[] readProfileImage(Long id);
+//    byte[] readProfileImage(Long id);
 
     void updateProfile(Long id, UpdateProfileDto dto);
     void updateImage(Long id, MultipartFile file);

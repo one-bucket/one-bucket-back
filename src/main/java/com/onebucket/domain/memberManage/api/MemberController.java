@@ -186,23 +186,23 @@ public class MemberController {
         return ResponseEntity.ok(new SuccessResponseDto("success update basic image"));
     }
 
-    /**
-     * 저장된 이미지를 불러와 반환한다. 반환 타입은 byte[] 이며 http 메시지의 헤더를 MediaType.IMAGE_PNG 로 설정한다.
-     * @return byte 로 구성된 이미지와 헤더, 200 code 를 반환한다.
-     * @tested yes
-     */
-    @GetMapping("/profile/image")
-    public ResponseEntity<byte[]> getImage() {
-        String username = securityUtils.getCurrentUsername();
-        Long id = memberService.usernameToId(username);
-
-        byte[] imageBytes = profileService.readProfileImage(id);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.IMAGE_PNG);
-
-        return new ResponseEntity<>(imageBytes, headers, HttpStatus.OK);
-    }
+//    /**
+//     * 저장된 이미지를 불러와 반환한다. 반환 타입은 byte[] 이며 http 메시지의 헤더를 MediaType.IMAGE_PNG 로 설정한다.
+//     * @return byte 로 구성된 이미지와 헤더, 200 code 를 반환한다.
+//     * @tested yes
+//     */
+//    @GetMapping("/profile/image")
+//    public ResponseEntity<byte[]> getImage() {
+//        String username = securityUtils.getCurrentUsername();
+//        Long id = memberService.usernameToId(username);
+//
+//        byte[] imageBytes = profileService.readProfileImage(id);
+//
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.setContentType(MediaType.IMAGE_PNG);
+//
+//        return new ResponseEntity<>(imageBytes, headers, HttpStatus.OK);
+//    }
 
     /**
      * Get 요청이며, 사용자의 프로필 정보를 불러온다. 단, 이미지의 경우 개별적인 엔드포인트를 통해 가져온다.
@@ -217,7 +217,6 @@ public class MemberController {
         return ResponseEntity.ok(profileService.readProfile(id));
     }
 
-    //TODO : not test yet.
     @GetMapping("/profile/image/url")
     public ResponseEntity<SuccessResponseDto> getImageUrl() {
         String username = securityUtils.getCurrentUsername();
