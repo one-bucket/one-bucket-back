@@ -85,9 +85,11 @@ public class PostServiceImpl extends AbstractPostService<Post, PostRepository> i
     protected PostDto.InternalThumbnail convertPostToThumbnailDtoInternal(Post post) {
         Long authorId = -1L;
         String authorNickname = "(unknown)";
+        String authorImage = null;
         if (post.getAuthor() != null) {
             authorId = post.getAuthorId();
             authorNickname = post.getAuthor().getNickname();
+            authorImage = post.getAuthor().getProfile().getImageUrl();
         }
         String text = post.getText();
 
@@ -103,6 +105,7 @@ public class PostServiceImpl extends AbstractPostService<Post, PostRepository> i
                 .imageUrls(post.getImageUrls())
                 .views(post.getViews())
                 .likes(post.getLikes())
+                .authorImage(authorImage)
                 .build();
     }
 

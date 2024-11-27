@@ -72,9 +72,11 @@ implements UsedTradePostService {
     protected UsedTradePostDto.InternalThumbnail convertPostToThumbnailDtoInternal(UsedTradePost post) {
         Long authorId = -1L;
         String authorNickname = "(unknown)";
+        String authorImageUrl = null;
         if (post.getAuthor() != null) {
             authorId = post.getAuthorId();
             authorNickname = post.getAuthor().getNickname();
+            authorImageUrl = post.getAuthor().getProfile().getImageUrl();
         }
         String text = post.getText();
         return UsedTradePostDto.InternalThumbnail.builder()
@@ -91,6 +93,7 @@ implements UsedTradePostService {
                 .likes(post.getLikes())
                 .trade(post.getUsedTradeId())
                 .liftedAt(post.getLiftedAt())
+                .authorImage(authorImageUrl)
                 .build();
     }
 

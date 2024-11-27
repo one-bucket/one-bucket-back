@@ -104,9 +104,11 @@ implements GroupTradePostService {
     protected GroupTradePostDto.InternalThumbnail convertPostToThumbnailDtoInternal(GroupTradePost post) {
         Long authorId = -1L;
         String authorNickname = "(unknown)";
+        String authorImage = null;
         if (post.getAuthor() != null) {
             authorId = post.getAuthorId();
             authorNickname = post.getAuthor().getNickname();
+            authorImage = post.getAuthor().getProfile().getImageUrl();
         }
         String text = post.getText();
 
@@ -124,6 +126,7 @@ implements GroupTradePostService {
                 .likes(post.getLikes())
                 .trade(post.getGroupTradeId())
                 .liftedAt(post.getLiftedAt())
+                .authorImage(authorImage)
                 .build();
     }
 

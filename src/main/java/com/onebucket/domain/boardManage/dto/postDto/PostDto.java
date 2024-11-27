@@ -70,6 +70,7 @@ public class PostDto {
 
         private Long authorId;
         private String authorNickname;
+        private String authorImage;
         private LocalDateTime createdDate;
         private LocalDateTime modifiedDate;
         private List<String> imageUrls;
@@ -102,6 +103,7 @@ public class PostDto {
                     .imageUrls(dto.getImageUrls())
                     .views(dto.getViews())
                     .likes(dto.getLikes())
+                    .authorImage(dto.getAuthorImage())
                     .build();
         }
     }
@@ -128,6 +130,7 @@ public class PostDto {
                     .imageUrls(dto.getImageUrls())
                     .views(dto.getViews())
                     .likes(dto.getLikes())
+                    .authorImage(dto.getAuthorImage())
                     .build();
         }
 
@@ -157,6 +160,7 @@ public class PostDto {
                     .likes(dto.getLikes())
                     .comments(dto.getComments())
                     .commentsCount(dto.getCommentsCount())
+                    .authorImage(dto.getAuthorImage())
                     .build();
         }
     }

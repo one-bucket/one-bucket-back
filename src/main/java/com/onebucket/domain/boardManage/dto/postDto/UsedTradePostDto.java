@@ -75,6 +75,7 @@ public class UsedTradePostDto {
                     .imageUrls(dto.getImageUrls())
                     .views(dto.getViews())
                     .likes(dto.getLikes())
+                    .authorImage(dto.getAuthorImage())
                     .build();
         }
     }
@@ -105,6 +106,7 @@ public class UsedTradePostDto {
                     .views(dto.getViews())
                     .likes(dto.getLikes())
                     .commentsCount(dto.getCommentsCount())
+                    .authorImage(dto.getAuthorImage())
                     .build();
         }
     }
@@ -129,6 +131,7 @@ public class UsedTradePostDto {
                     .views(dto.getViews())
                     .likes(dto.getLikes())
                     .tradeId(dto.getTrade())
+                    .authorImage(dto.getAuthorImage())
                     .build();
         }
     }
@@ -159,6 +162,7 @@ public class UsedTradePostDto {
                     .comments(dto.getComments())
                     .commentsCount(dto.getCommentsCount())
                     .isUserAlreadyLikes(dto.isUserAlreadyLikes())
+                    .authorImage(dto.getAuthorImage())
                     .build();
         }
     }
