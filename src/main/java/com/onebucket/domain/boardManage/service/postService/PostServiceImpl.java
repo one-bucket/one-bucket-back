@@ -7,10 +7,8 @@ import com.onebucket.domain.boardManage.dao.postRepository.PostRepository;
 
 import com.onebucket.domain.boardManage.dto.internal.comment.GetCommentDto;
 import com.onebucket.domain.boardManage.dto.postDto.PostDto;
-import com.onebucket.domain.boardManage.dto.postDto.PostKeyDto;
 import com.onebucket.domain.boardManage.entity.Board;
 
-import com.onebucket.domain.boardManage.entity.LikesMap;
 import com.onebucket.domain.boardManage.entity.post.Post;
 import com.onebucket.domain.memberManage.dao.MemberRepository;
 import com.onebucket.domain.memberManage.domain.Member;
@@ -19,7 +17,6 @@ import com.onebucket.global.minio.MinioRepository;
 import com.onebucket.global.redis.RedisRepository;
 import com.onebucket.global.utils.SecurityUtils;
 
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -109,10 +106,4 @@ public class PostServiceImpl extends AbstractPostService<Post, PostRepository> i
                 .build();
     }
 
-    @Override
-    public Page<PostDto.InternalThumbnail> getLikePost(PostKeyDto.UserPage dto) {
-       return likesMapRepository.findByMemberId(dto.getUserId(), dto.getPageable())
-               .map(LikesMap::getPost)
-               .map(this::convertPostToThumbnailDtoInternal);
-    }
 }
